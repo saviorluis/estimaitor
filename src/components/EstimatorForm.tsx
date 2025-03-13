@@ -8,25 +8,37 @@ import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/consta
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
-  initialFormData?: FormData | null;
 }
 
-export default function EstimatorForm({ onEstimateCalculated, initialFormData }: EstimatorFormProps) {
-  const [stayingOvernight, setStayingOvernight] = useState(initialFormData?.stayingOvernight || false);
-  const [recommendedCleaners, setRecommendedCleaners] = useState(3);
-  const [urgencyLevel, setUrgencyLevel] = useState(initialFormData?.urgencyLevel || 1);
-  const [needsPressureWashing, setNeedsPressureWashing] = useState(initialFormData?.needsPressureWashing || false);
-  const [needsWindowCleaning, setNeedsWindowCleaning] = useState(initialFormData?.needsWindowCleaning || false);
+// Storage key for saving form data
+const STORAGE_KEY = 'estimaitor_form_data';
 
-  // Get default values from initialFormData if available
-  const getDefaultValues = (): Partial<FormData> => {
-    if (initialFormData) {
-      return initialFormData;
-    }
+export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
+  const [stayingOvernight, setStayingOvernight] = useState(false);
+  const [recommendedCleaners, setRecommendedCleaners] = useState(3);
+  const [urgencyLevel, setUrgencyLevel] = useState(1);
+  const [needsPressureWashing, setNeedsPressureWashing] = useState(false);
+  const [needsWindowCleaning, setNeedsWindowCleaning] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Get saved form data from localStorage
+  const getSavedFormData = (): Partial<FormData> => {
+    if (typeof window === 'undefined') return {};
     
-    return {
-      projectType: 'office' as ProjectType,
-      cleaningType: 'final' as CleaningType,
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      return savedData ? JSON.parse(savedData) : {};
+    } catch (error) {
+      console.error('Error loading saved form data:', error);
+      return {};
+    }
+  };
+
+  // Initialize form with saved data or defaults
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
+    defaultValues: {
+      projectType: 'office',
+      cleaningType: 'final',
       squareFootage: 5000,
       hasVCT: false,
       distanceFromOffice: 20,
@@ -43,12 +55,23 @@ export default function EstimatorForm({ onEstimateCalculated, initialFormData }:
       numberOfLargeWindows: 0,
       numberOfHighAccessWindows: 0,
       numberOfDisplayCases: 0
-    };
-  };
-
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    defaultValues: getDefaultValues()
+    }
   });
+
+  // Load saved form data on component mount
+  useEffect(() => {
+    const savedData = getSavedFormData();
+    if (Object.keys(savedData).length > 0) {
+      reset(savedData as FormData);
+      
+      // Update UI state based on saved data
+      if (savedData.stayingOvernight) setStayingOvernight(savedData.stayingOvernight);
+      if (savedData.urgencyLevel) setUrgencyLevel(savedData.urgencyLevel);
+      if (savedData.needsPressureWashing) setNeedsPressureWashing(savedData.needsPressureWashing);
+      if (savedData.needsWindowCleaning) setNeedsWindowCleaning(savedData.needsWindowCleaning);
+    }
+    setIsLoaded(true);
+  }, [reset]);
 
   // Watch for changes in square footage, project type, and staying overnight
   const squareFootage = watch('squareFootage');
@@ -56,6 +79,18 @@ export default function EstimatorForm({ onEstimateCalculated, initialFormData }:
   const urgencyLevelWatch = watch('urgencyLevel');
   const needsPressureWashingWatch = watch('needsPressureWashing');
   const needsWindowCleaningWatch = watch('needsWindowCleaning');
+  const formValues = watch();
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+    } catch (error) {
+      console.error('Error saving form data:', error);
+    }
+  }, [formValues, isLoaded]);
 
   // Update recommended cleaners when square footage changes
   useEffect(() => {

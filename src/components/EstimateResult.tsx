@@ -8,13 +8,28 @@ import QuoteTemplate from './QuoteTemplate';
 interface EstimateResultProps {
   estimateData: EstimateData;
   formData: FormData;
-  onShowQuote?: () => void;
 }
 
-export default function EstimateResult({ estimateData, formData, onShowQuote }: EstimateResultProps) {
+// Storage keys for saving estimate data
+const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
+const FORM_STORAGE_KEY = 'estimaitor_saved_form_data';
+
+export default function EstimateResult({ estimateData, formData }: EstimateResultProps) {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
+
+  // Save estimate and form data when they change
+  useEffect(() => {
+    if (estimateData && Object.keys(estimateData).length > 0) {
+      try {
+        localStorage.setItem(ESTIMATE_STORAGE_KEY, JSON.stringify(estimateData));
+        localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
+      } catch (error) {
+        console.error('Error saving estimate data:', error);
+      }
+    }
+  }, [estimateData, formData]);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -75,14 +90,6 @@ export default function EstimateResult({ estimateData, formData, onShowQuote }: 
   // Format percentage
   const formatPercentage = (value: number) => {
     return `${(value * 100).toFixed(0)}%`;
-  };
-
-  const handleShowQuote = () => {
-    if (onShowQuote) {
-      onShowQuote();
-    } else {
-      setShowQuote(true);
-    }
   };
 
   return (
@@ -240,7 +247,7 @@ export default function EstimateResult({ estimateData, formData, onShowQuote }: 
 
           <div className="mt-8 flex justify-center">
             <button 
-              onClick={handleShowQuote}
+              onClick={() => setShowQuote(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium text-lg transition shadow-md hover:shadow-lg"
             >
               Generate Professional Quote

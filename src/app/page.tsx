@@ -5,53 +5,49 @@ import EstimatorForm from '@/components/EstimatorForm';
 import EstimateResult from '@/components/EstimateResult';
 import AIRecommendations from '@/components/AIRecommendations';
 import { EstimateData, FormData } from '@/lib/types';
-import QuoteTemplate from '@/components/QuoteTemplate';
+
+// Storage keys for saved data
+const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
+const FORM_STORAGE_KEY = 'estimaitor_saved_form_data';
 
 export default function Home() {
   const [estimateData, setEstimateData] = useState<EstimateData | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
-  const [showQuote, setShowQuote] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load saved data from localStorage when the component mounts
+  // Load saved data on initial render
   useEffect(() => {
-    const savedEstimateData = localStorage.getItem('estimateData');
-    const savedFormData = localStorage.getItem('formData');
-    
-    if (savedEstimateData) {
-      setEstimateData(JSON.parse(savedEstimateData));
+    // Only run in browser environment
+    if (typeof window === 'undefined') return;
+
+    try {
+      const savedEstimate = localStorage.getItem(ESTIMATE_STORAGE_KEY);
+      const savedForm = localStorage.getItem(FORM_STORAGE_KEY);
+      
+      if (savedEstimate && savedForm) {
+        setEstimateData(JSON.parse(savedEstimate));
+        setFormData(JSON.parse(savedForm));
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
     }
     
-    if (savedFormData) {
-      setFormData(JSON.parse(savedFormData));
-    }
+    setIsLoaded(true);
   }, []);
 
   const handleEstimateCalculated = (data: EstimateData, formValues: FormData) => {
     setEstimateData(data);
     setFormData(formValues);
-    
-    // Save to localStorage
-    localStorage.setItem('estimateData', JSON.stringify(data));
-    localStorage.setItem('formData', JSON.stringify(formValues));
-    
-    // Hide quote template when new estimate is calculated
-    setShowQuote(false);
   };
 
-  const handleShowQuote = () => {
-    setShowQuote(true);
-  };
-
-  const handleBackToEstimate = () => {
-    setShowQuote(false);
-  };
-
+  // Function to clear saved data
   const handleClearSavedData = () => {
-    localStorage.removeItem('estimateData');
-    localStorage.removeItem('formData');
+    localStorage.removeItem(ESTIMATE_STORAGE_KEY);
+    localStorage.removeItem(FORM_STORAGE_KEY);
+    localStorage.removeItem('estimaitor_form_data');
     setEstimateData(null);
     setFormData(null);
-    setShowQuote(false);
+    window.location.reload();
   };
 
   return (
@@ -63,45 +59,22 @@ export default function Home() {
             Commercial Post-Construction Cleanup Estimator
           </p>
           {(estimateData || formData) && (
-            <button 
+            <button
               onClick={handleClearSavedData}
-              className="mt-2 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+              className="mt-4 text-sm text-red-600 hover:text-red-800 underline"
             >
               Clear Saved Data
             </button>
           )}
         </header>
 
-        {!showQuote ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <EstimatorForm 
-              onEstimateCalculated={handleEstimateCalculated} 
-              initialFormData={formData}
-            />
-            
-            {estimateData && formData && (
-              <div>
-                <EstimateResult 
-                  estimateData={estimateData} 
-                  formData={formData} 
-                  onShowQuote={handleShowQuote}
-                />
-              </div>
-            )}
-          </div>
-        ) : (
-          estimateData && formData && (
-            <div>
-              <button 
-                onClick={handleBackToEstimate}
-                className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-              >
-                ← Back to Estimate
-              </button>
-              <QuoteTemplate estimateData={estimateData} formData={formData} />
-            </div>
-          )
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+          
+          {estimateData && formData && (
+            <EstimateResult estimateData={estimateData} formData={formData} />
+          )}
+        </div>
 
         <footer className="mt-12 text-center text-sm text-gray-500">
           <p>© 2023 EstimAItor - Commercial Cleaning Estimation Tool</p>
