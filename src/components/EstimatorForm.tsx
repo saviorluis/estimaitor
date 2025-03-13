@@ -8,19 +8,25 @@ import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/consta
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
+  initialFormData?: FormData | null;
 }
 
-export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
-  const [stayingOvernight, setStayingOvernight] = useState(false);
+export default function EstimatorForm({ onEstimateCalculated, initialFormData }: EstimatorFormProps) {
+  const [stayingOvernight, setStayingOvernight] = useState(initialFormData?.stayingOvernight || false);
   const [recommendedCleaners, setRecommendedCleaners] = useState(3);
-  const [urgencyLevel, setUrgencyLevel] = useState(1);
-  const [needsPressureWashing, setNeedsPressureWashing] = useState(false);
-  const [needsWindowCleaning, setNeedsWindowCleaning] = useState(false);
+  const [urgencyLevel, setUrgencyLevel] = useState(initialFormData?.urgencyLevel || 1);
+  const [needsPressureWashing, setNeedsPressureWashing] = useState(initialFormData?.needsPressureWashing || false);
+  const [needsWindowCleaning, setNeedsWindowCleaning] = useState(initialFormData?.needsWindowCleaning || false);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    defaultValues: {
-      projectType: 'office',
-      cleaningType: 'final',
+  // Get default values from initialFormData if available
+  const getDefaultValues = (): Partial<FormData> => {
+    if (initialFormData) {
+      return initialFormData;
+    }
+    
+    return {
+      projectType: 'office' as ProjectType,
+      cleaningType: 'final' as CleaningType,
       squareFootage: 5000,
       hasVCT: false,
       distanceFromOffice: 20,
@@ -35,8 +41,13 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       needsWindowCleaning: false,
       numberOfWindows: 0,
       numberOfLargeWindows: 0,
-      numberOfHighAccessWindows: 0
-    }
+      numberOfHighAccessWindows: 0,
+      numberOfDisplayCases: 0
+    };
+  };
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+    defaultValues: getDefaultValues()
   });
 
   // Watch for changes in square footage, project type, and staying overnight

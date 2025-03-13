@@ -8,9 +8,10 @@ import QuoteTemplate from './QuoteTemplate';
 interface EstimateResultProps {
   estimateData: EstimateData;
   formData: FormData;
+  onShowQuote?: () => void;
 }
 
-export default function EstimateResult({ estimateData, formData }: EstimateResultProps) {
+export default function EstimateResult({ estimateData, formData, onShowQuote }: EstimateResultProps) {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
@@ -74,6 +75,14 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
   // Format percentage
   const formatPercentage = (value: number) => {
     return `${(value * 100).toFixed(0)}%`;
+  };
+
+  const handleShowQuote = () => {
+    if (onShowQuote) {
+      onShowQuote();
+    } else {
+      setShowQuote(true);
+    }
   };
 
   return (
@@ -231,7 +240,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
 
           <div className="mt-8 flex justify-center">
             <button 
-              onClick={() => setShowQuote(true)}
+              onClick={handleShowQuote}
               className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium text-lg transition shadow-md hover:shadow-lg"
             >
               Generate Professional Quote
