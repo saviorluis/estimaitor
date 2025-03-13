@@ -231,7 +231,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 <p><span className="font-semibold">Square Footage:</span> {formData.squareFootage.toLocaleString()} sq ft</p>
                 <p><span className="font-semibold">VCT Flooring:</span> {formData.hasVCT ? 'Yes' : 'No'}</p>
                 <p><span className="font-semibold">Distance from Office:</span> {formData.distanceFromOffice} miles</p>
-                <p><span className="font-semibold">Gas Price:</span> ${formData.gasPrice.toFixed(2)}/gallon</p>
+                <p><span className="font-semibold">Gas Price:</span> ${typeof formData.gasPrice === 'number' ? formData.gasPrice.toFixed(2) : Number(formData.gasPrice).toFixed(2)}/gallon</p>
               </div>
               <div>
                 <p><span className="font-semibold">Overnight Stay:</span> {formData.stayingOvernight ? `Yes (${formData.numberOfNights} night(s))` : 'No'}</p>

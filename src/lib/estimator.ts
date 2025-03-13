@@ -28,7 +28,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     squareFootage,
     hasVCT,
     distanceFromOffice,
-    gasPrice,
+    gasPrice: rawGasPrice,
     applyMarkup,
     stayingOvernight,
     numberOfNights,
@@ -42,6 +42,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     numberOfHighAccessWindows,
     numberOfDisplayCases
   } = formData;
+
+  // Ensure gasPrice is a number
+  const gasPrice = typeof rawGasPrice === 'string' ? parseFloat(rawGasPrice) : (rawGasPrice || 3.50);
 
   // Calculate base price
   const basePrice = squareFootage * BASE_RATE_PER_SQFT;

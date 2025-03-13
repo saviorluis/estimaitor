@@ -86,7 +86,12 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     if (!isLoaded) return;
     
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+      // Ensure gasPrice is stored as a number
+      const formDataToSave = {
+        ...formValues,
+        gasPrice: typeof formValues.gasPrice === 'string' ? parseFloat(formValues.gasPrice) : formValues.gasPrice
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formDataToSave));
     } catch (error) {
       console.error('Error saving form data:', error);
     }
@@ -121,9 +126,16 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     setNeedsWindowCleaning(needsWindowCleaningWatch);
   }, [needsWindowCleaningWatch]);
 
+  // Handle form submission
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    const estimate = calculateEstimate(data);
-    onEstimateCalculated(estimate, data);
+    // Ensure gasPrice is a number
+    const formData = {
+      ...data,
+      gasPrice: typeof data.gasPrice === 'string' ? parseFloat(data.gasPrice) : data.gasPrice
+    };
+    
+    const estimate = calculateEstimate(formData);
+    onEstimateCalculated(estimate, formData);
   };
 
   // Helper function to get urgency description
