@@ -12,7 +12,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://api.openai.com;"
+            value: "default-src * 'self' data: blob: 'unsafe-inline' 'unsafe-eval';"
           }
         ],
       }
