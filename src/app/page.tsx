@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
 import EstimateResult from '@/components/EstimateResult';
-import AIRecommendations from '@/components/AIRecommendations';
 import { EstimateData, FormData } from '@/lib/types';
 
 // Storage keys for saved data
@@ -51,32 +50,52 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">EstimAItor</h1>
-          <p className="text-gray-600">
+    <main className="flex flex-col min-h-screen">
+      <header className="py-8 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-xl shadow-lg mb-8">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">EstimAItor</h1>
+          <p className="text-xl text-indigo-100">
             Commercial Post-Construction Cleanup Estimator
           </p>
           {(estimateData || formData) && (
             <button
               onClick={handleClearSavedData}
-              className="mt-4 text-sm text-red-600 hover:text-red-800 underline"
+              className="mt-4 text-sm text-indigo-200 hover:text-white underline"
             >
               Clear Saved Data
             </button>
           )}
-        </header>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="card h-full">
+            <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+          </div>
           
-          {estimateData && formData && (
-            <EstimateResult estimateData={estimateData} formData={formData} />
+          {estimateData && formData ? (
+            <div className="card h-full">
+              <EstimateResult estimateData={estimateData} formData={formData} />
+            </div>
+          ) : (
+            <div className="card h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
+              <div className="text-center p-8">
+                <h2 className="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">No Estimate Yet</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  Fill out the form to generate a detailed estimate for your commercial cleaning project.
+                </p>
+                <div className="p-4 bg-indigo-50 dark:bg-slate-700 rounded-lg">
+                  <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                    Your estimates are automatically saved and will be available when you return.
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        <footer className="mt-12 text-center text-sm text-gray-500">
+        <footer className="mt-12 text-center text-sm text-gray-500 py-6 border-t border-gray-200 dark:border-gray-700">
           <p>© 2023 EstimAItor - Commercial Cleaning Estimation Tool</p>
           <p className="mt-1">Prices based on East Coast rates (VA, NC, SC, GA)</p>
         </footer>

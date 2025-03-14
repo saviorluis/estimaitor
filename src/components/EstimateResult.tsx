@@ -65,9 +65,9 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
       } catch (error) {
         console.error('Error fetching recommendations:', error);
         setRecommendations([
-          'Ensure you have enough cleaning supplies for the entire project',
-          'Consider the specific needs of this project type',
-          'Plan for adequate staffing based on the square footage'
+          'Ensure all team members are briefed on the project scope.',
+          'Bring appropriate cleaning supplies for the project type.',
+          'Schedule a final walkthrough with the client.',
         ]);
       } finally {
         setIsLoading(false);
@@ -77,184 +77,180 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
     fetchRecommendations();
   }, [estimateData, formData]);
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+      maximumFractionDigits: 2,
+    });
   };
 
-  // Format percentage
-  const formatPercentage = (value: number) => {
-    return `${(value * 100).toFixed(0)}%`;
+  const toggleQuote = () => {
+    setShowQuote(!showQuote);
   };
+
+  if (showQuote) {
+    return (
+      <div>
+        <button 
+          onClick={toggleQuote}
+          className="mb-4 flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Back to Estimate
+        </button>
+        <QuoteTemplate estimateData={estimateData} formData={formData} />
+      </div>
+    );
+  }
 
   return (
-    <>
-      {showQuote ? (
-        <div>
-          <button 
-            onClick={() => setShowQuote(false)}
-            className="mb-4 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded transition"
-          >
-            ← Back to Estimate
-          </button>
-          <QuoteTemplate estimateData={estimateData} formData={formData} />
-        </div>
-      ) : (
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Estimate Results</h2>
-          
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Summary</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Total Price</p>
-                <p className="text-2xl font-bold text-blue-700">{formatCurrency(estimateData.totalPrice)}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Price Per Square Foot</p>
-                <p className="text-2xl font-bold text-green-700">{formatCurrency(estimateData.pricePerSquareFoot)}</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Estimated Hours</p>
-                <p className="text-2xl font-bold text-purple-700">{estimateData.estimatedHours} hours</p>
-              </div>
-              <div className="bg-amber-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Hours Per Cleaner</p>
-                <p className="text-2xl font-bold text-amber-700">
-                  {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours
-                </p>
-              </div>
+    <div>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white border-b pb-2">Estimate Results</h2>
+      
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-lg shadow-lg p-6 text-white">
+          <h3 className="text-xl font-semibold mb-2">Total Estimate</h3>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-4xl font-bold">{formatCurrency(estimateData.totalPrice)}</p>
+              <p className="text-sm opacity-80">
+                {formatCurrency(estimateData.pricePerSquareFoot)} per sq ft
+              </p>
             </div>
+            <button 
+              onClick={toggleQuote} 
+              className="bg-white text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
+            >
+              Generate Quote
+            </button>
           </div>
+        </div>
+      </div>
 
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Cost Breakdown</h3>
-            <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+          <h3 className="text-lg font-medium mb-3 text-gray-800 dark:text-white">Cost Breakdown</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Base Price:</span>
+              <span className="font-medium">{formatCurrency(estimateData.basePrice)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Project Type Multiplier:</span>
+              <span className="font-medium">{estimateData.projectTypeMultiplier.toFixed(2)}x</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Cleaning Type Multiplier:</span>
+              <span className="font-medium">{estimateData.cleaningTypeMultiplier.toFixed(2)}x</span>
+            </div>
+            {estimateData.vctCost > 0 && (
               <div className="flex justify-between">
-                <span>Base Price ({formData.squareFootage.toLocaleString()} sq ft)</span>
-                <span>{formatCurrency(estimateData.basePrice)}</span>
+                <span className="text-gray-600 dark:text-gray-300">VCT Flooring Cost:</span>
+                <span className="font-medium">{formatCurrency(estimateData.vctCost)}</span>
               </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Travel Cost:</span>
+              <span className="font-medium">{formatCurrency(estimateData.travelCost)}</span>
+            </div>
+            {estimateData.overnightCost > 0 && (
               <div className="flex justify-between">
-                <span>Project Type Multiplier ({formatPercentage(estimateData.projectTypeMultiplier - 1)} increase)</span>
-                <span>x{estimateData.projectTypeMultiplier.toFixed(2)}</span>
+                <span className="text-gray-600 dark:text-gray-300">Overnight Cost:</span>
+                <span className="font-medium">{formatCurrency(estimateData.overnightCost)}</span>
               </div>
+            )}
+            {estimateData.pressureWashingCost > 0 && (
               <div className="flex justify-between">
-                <span>Cleaning Type Multiplier ({formatPercentage(estimateData.cleaningTypeMultiplier - 1)} {estimateData.cleaningTypeMultiplier < 1 ? 'decrease' : 'increase'})</span>
-                <span>x{estimateData.cleaningTypeMultiplier.toFixed(2)}</span>
+                <span className="text-gray-600 dark:text-gray-300">Pressure Washing Cost:</span>
+                <span className="font-medium">{formatCurrency(estimateData.pressureWashingCost)}</span>
               </div>
-              
-              {formData.hasVCT && (
-                <div className="flex justify-between">
-                  <span>VCT Flooring Cost</span>
-                  <span>{formatCurrency(estimateData.vctCost)}</span>
-                </div>
-              )}
-              
+            )}
+            {estimateData.windowCleaningCost > 0 && (
               <div className="flex justify-between">
-                <span>Travel Cost ({formData.distanceFromOffice} miles)</span>
-                <span>{formatCurrency(estimateData.travelCost)}</span>
+                <span className="text-gray-600 dark:text-gray-300">Window Cleaning Cost:</span>
+                <span className="font-medium">{formatCurrency(estimateData.windowCleaningCost)}</span>
               </div>
-              
-              {formData.stayingOvernight && (
-                <div className="flex justify-between">
-                  <span>Overnight Accommodations ({formData.numberOfNights} night(s))</span>
-                  <span>{formatCurrency(estimateData.overnightCost)}</span>
-                </div>
-              )}
-              
-              {formData.needsPressureWashing && estimateData.pressureWashingCost > 0 && (
-                <div className="flex justify-between">
-                  <span>Pressure Washing ({formData.pressureWashingArea.toLocaleString()} sq ft)</span>
-                  <span>{formatCurrency(estimateData.pressureWashingCost)}</span>
-                </div>
-              )}
-              
-              {formData.needsWindowCleaning && estimateData.windowCleaningCost > 0 && (
-                <div className="flex justify-between">
-                  <span>Window Cleaning ({formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} windows)</span>
-                  <span>{formatCurrency(estimateData.windowCleaningCost)}</span>
-                </div>
-              )}
-              
-              {estimateData.urgencyMultiplier > 1 && (
-                <div className="flex justify-between">
-                  <span>Urgency Adjustment (Level {formData.urgencyLevel}/10)</span>
-                  <span>+{formatPercentage(estimateData.urgencyMultiplier - 1)}</span>
-                </div>
-              )}
-              
-              <div className="border-t border-gray-300 pt-2 flex justify-between font-semibold">
-                <span>Subtotal</span>
+            )}
+            {estimateData.displayCaseCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-300">Display Case Cleaning Cost:</span>
+                <span className="font-medium">{formatCurrency(estimateData.displayCaseCost)}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Urgency Multiplier:</span>
+              <span className="font-medium">{estimateData.urgencyMultiplier.toFixed(2)}x</span>
+            </div>
+            <div className="border-t pt-2 mt-2">
+              <div className="flex justify-between font-medium">
+                <span className="text-gray-700 dark:text-gray-200">Subtotal:</span>
                 <span>{formatCurrency(estimateData.totalBeforeMarkup)}</span>
               </div>
-              
-              {formData.applyMarkup && (
-                <div className="flex justify-between">
-                  <span>Service Fee (50%)</span>
-                  <span>{formatCurrency(estimateData.markup)}</span>
-                </div>
-              )}
-              
-              <div className="border-t border-gray-300 pt-2 flex justify-between font-bold">
-                <span>Total</span>
+            </div>
+            {estimateData.markup > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-300">Markup (50%):</span>
+                <span className="font-medium">{formatCurrency(estimateData.markup)}</span>
+              </div>
+            )}
+            <div className="border-t pt-2 mt-2">
+              <div className="flex justify-between text-lg font-bold">
+                <span className="text-gray-800 dark:text-white">Total:</span>
                 <span>{formatCurrency(estimateData.totalPrice)}</span>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">AI Recommendations</h3>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
-              </div>
-            ) : (
-              <ul className="list-disc pl-5 space-y-2">
-                {recommendations.map((recommendation, index) => (
-                  <li key={index} className="text-gray-700">{recommendation}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Project Details</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p><span className="font-semibold">Project Type:</span> {formData.projectType.charAt(0).toUpperCase() + formData.projectType.slice(1).replace('_', ' ')}</p>
-                <p><span className="font-semibold">Cleaning Type:</span> {formData.cleaningType.charAt(0).toUpperCase() + formData.cleaningType.slice(1).replace('_', ' ')}</p>
-                <p><span className="font-semibold">Square Footage:</span> {formData.squareFootage.toLocaleString()} sq ft</p>
-                <p><span className="font-semibold">VCT Flooring:</span> {formData.hasVCT ? 'Yes' : 'No'}</p>
-                <p><span className="font-semibold">Distance from Office:</span> {formData.distanceFromOffice} miles</p>
-                <p><span className="font-semibold">Gas Price:</span> ${typeof formData.gasPrice === 'number' ? formData.gasPrice.toFixed(2) : Number(formData.gasPrice).toFixed(2)}/gallon</p>
-              </div>
-              <div>
-                <p><span className="font-semibold">Overnight Stay:</span> {formData.stayingOvernight ? `Yes (${formData.numberOfNights} night(s))` : 'No'}</p>
-                <p><span className="font-semibold">Number of Cleaners:</span> {formData.numberOfCleaners}</p>
-                <p><span className="font-semibold">Urgency Level:</span> {formData.urgencyLevel}/10</p>
-                <p><span className="font-semibold">Apply Markup:</span> {formData.applyMarkup ? 'Yes (50%)' : 'No'}</p>
-                <p><span className="font-semibold">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${formData.pressureWashingArea.toLocaleString()} sq ft)` : 'No'}</p>
-                <p><span className="font-semibold">Window Cleaning:</span> {formData.needsWindowCleaning ? 
-                  `Yes (${formData.numberOfWindows} standard, ${formData.numberOfLargeWindows} large, ${formData.numberOfHighAccessWindows} high-access)` : 'No'}</p>
-              </div>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+          <h3 className="text-lg font-medium mb-3 text-gray-800 dark:text-white">Project Details</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Project Type:</span> {formData.projectType.charAt(0).toUpperCase() + formData.projectType.slice(1).replace('_', ' ')}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Cleaning Type:</span> {formData.cleaningType.charAt(0).toUpperCase() + formData.cleaningType.slice(1).replace('_', ' ')}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Square Footage:</span> {formData.squareFootage.toLocaleString()} sq ft</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">VCT Flooring:</span> {formData.hasVCT ? 'Yes' : 'No'}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Distance from Office:</span> {formData.distanceFromOffice} miles</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Gas Price:</span> ${typeof formData.gasPrice === 'number' ? formData.gasPrice.toFixed(2) : Number(formData.gasPrice).toFixed(2)}/gallon</p>
+            </div>
+            <div>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Overnight Stay:</span> {formData.stayingOvernight ? `Yes (${formData.numberOfNights} night(s))` : 'No'}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Number of Cleaners:</span> {formData.numberOfCleaners}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Urgency Level:</span> {formData.urgencyLevel}/10</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Apply Markup:</span> {formData.applyMarkup ? 'Yes (50%)' : 'No'}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${formData.pressureWashingArea.toLocaleString()} sq ft)` : 'No'}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Window Cleaning:</span> {formData.needsWindowCleaning ? 
+                `Yes (${formData.numberOfWindows} standard, ${formData.numberOfLargeWindows} large, ${formData.numberOfHighAccessWindows} high-access)` : 'No'}</p>
             </div>
           </div>
-
-          <div className="mt-8 flex justify-center">
-            <button 
-              onClick={() => setShowQuote(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium text-lg transition shadow-md hover:shadow-lg"
-            >
-              Generate Professional Quote
-            </button>
+          
+          <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated Hours: {estimateData.estimatedHours.toFixed(2)} hours</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              With {formData.numberOfCleaners} cleaners, this project will take approximately {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours to complete.
+            </p>
           </div>
         </div>
-      )}
-    </>
+      </div>
+
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 mb-4">
+        <h3 className="text-lg font-medium mb-3 text-gray-800 dark:text-white">AI Recommendations</h3>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        ) : (
+          <ul className="list-disc pl-5 space-y-1">
+            {recommendations.map((recommendation, index) => (
+              <li key={index} className="text-gray-700 dark:text-gray-300 text-sm">{recommendation}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }

@@ -147,11 +147,11 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
   };
 
   return (
-    <div className="card">
-      <h2 className="text-xl font-semibold mb-4">Project Details</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+    <div>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white border-b pb-2">Project Details</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Project Type
           </label>
           <select
@@ -172,8 +172,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Cleaning Type
           </label>
           <select
@@ -185,80 +185,80 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="powder_puff">Powder Puff Clean (Third Stage - 130% of standard rate)</option>
             <option value="complete">Complete Package (All Three Stages - 200% of standard rate)</option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {CLEANING_TYPE_DESCRIPTIONS[watch('cleaningType') as CleaningType]}
           </p>
           {errors.cleaningType && (
-            <p className="text-red-500 text-sm mt-1">{errors.cleaningType.message}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.cleaningType.message}</p>
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Square Footage
-          </label>
-          <input
-            type="number"
-            {...register('squareFootage', { 
-              required: 'Square footage is required',
-              min: { value: 500, message: 'Minimum 500 sq ft' },
-              max: { value: 100000, message: 'Maximum 100,000 sq ft' }
-            })}
-            className="input-field"
-          />
-          {errors.squareFootage && (
-            <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Number of Cleaners
-          </label>
-          <select
-            {...register('numberOfCleaners', { required: 'Number of cleaners is required' })}
-            className="input-field"
-          >
-            {[...Array(20)].map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1} {i + 1 === recommendedCleaners ? '(Recommended)' : ''}
-              </option>
-            ))}
-          </select>
-          {errors.numberOfCleaners && (
-            <p className="text-red-500 text-sm mt-1">{errors.numberOfCleaners.message}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="flex items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Square Footage
+            </label>
             <input
-              type="checkbox"
-              {...register('hasVCT')}
-              className="mr-2 h-4 w-4"
+              type="number"
+              {...register('squareFootage', { 
+                required: 'Square footage is required',
+                min: { value: 500, message: 'Minimum 500 sq ft' },
+                max: { value: 100000, message: 'Maximum 100,000 sq ft' }
+              })}
+              className="input-field"
             />
-            <span className="text-sm font-medium text-gray-700">
-              VCT Flooring (Vinyl Composition Tile)
-            </span>
+            {errors.squareFootage && (
+              <p className="text-red-500 text-xs mt-1">{errors.squareFootage.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Number of Cleaners
+            </label>
+            <select
+              {...register('numberOfCleaners', { required: 'Number of cleaners is required' })}
+              className="input-field"
+            >
+              {[...Array(20)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1} {i + 1 === recommendedCleaners ? '(Recommended)' : ''}
+                </option>
+              ))}
+            </select>
+            {errors.numberOfCleaners && (
+              <p className="text-red-500 text-xs mt-1">{errors.numberOfCleaners.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            {...register('hasVCT')}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+          <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            VCT Flooring (Vinyl Composition Tile)
           </label>
         </div>
 
-        <div className="mb-4 border-t pt-4">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="flex items-center mb-2">
             <input
               type="checkbox"
               id="needsPressureWashing"
               {...register('needsPressureWashing')}
-              className="h-4 w-4 text-blue-600 rounded"
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
-            <label htmlFor="needsPressureWashing" className="ml-2 block text-sm font-medium text-gray-700">
+            <label htmlFor="needsPressureWashing" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Pressure Washing Required
             </label>
           </div>
           
           {needsPressureWashing && (
-            <div className="ml-6 mt-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-md">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Area to Pressure Wash (sq ft)
               </label>
               <input
@@ -279,7 +279,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               {errors.pressureWashingArea && (
                 <p className="text-red-500 text-xs mt-1">{errors.pressureWashingArea.message}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Includes concrete, driveways, walkways, and exterior surfaces.
                 Cost: $0.35/sq ft plus equipment rental.
               </p>
@@ -287,23 +287,23 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        <div className="mb-4 border-t pt-4">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="flex items-center mb-2">
             <input
               type="checkbox"
               id="needsWindowCleaning"
               {...register('needsWindowCleaning')}
-              className="h-4 w-4 text-blue-600 rounded"
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
-            <label htmlFor="needsWindowCleaning" className="ml-2 block text-sm font-medium text-gray-700">
+            <label htmlFor="needsWindowCleaning" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Window Cleaning Required
             </label>
           </div>
           
           {needsWindowCleaning && (
-            <div className="ml-6 mt-2 space-y-3">
+            <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-md space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Number of Standard Windows
                 </label>
                 <input
@@ -320,13 +320,13 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 {errors.numberOfWindows && (
                   <p className="text-red-500 text-xs mt-1">{errors.numberOfWindows.message}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Standard windows (up to 3ft x 5ft). Cost: $15 per window.
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Number of Large Windows
                 </label>
                 <input
@@ -342,13 +342,13 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 {errors.numberOfLargeWindows && (
                   <p className="text-red-500 text-xs mt-1">{errors.numberOfLargeWindows.message}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Large windows (over 3ft x 5ft). Cost: $22.50 per window.
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Number of High-Access Windows
                 </label>
                 <input
@@ -364,7 +364,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 {errors.numberOfHighAccessWindows && (
                   <p className="text-red-500 text-xs mt-1">{errors.numberOfHighAccessWindows.message}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Windows requiring ladders or lifts (above 12ft). Cost: $30 per window.
                 </p>
               </div>
@@ -372,45 +372,47 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Distance from Office (miles)
-          </label>
-          <input
-            type="number"
-            {...register('distanceFromOffice', { 
-              required: 'Distance is required',
-              min: { value: 0, message: 'Minimum 0 miles' },
-              max: { value: 500, message: 'Maximum 500 miles' }
-            })}
-            className="input-field"
-          />
-          {errors.distanceFromOffice && (
-            <p className="text-red-500 text-sm mt-1">{errors.distanceFromOffice.message}</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Distance from Office (miles)
+            </label>
+            <input
+              type="number"
+              {...register('distanceFromOffice', { 
+                required: 'Distance is required',
+                min: { value: 0, message: 'Minimum 0 miles' },
+                max: { value: 500, message: 'Maximum 500 miles' }
+              })}
+              className="input-field"
+            />
+            {errors.distanceFromOffice && (
+              <p className="text-red-500 text-xs mt-1">{errors.distanceFromOffice.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Current Gas Price ($/gallon)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              {...register('gasPrice', { 
+                required: 'Gas price is required',
+                min: { value: 1, message: 'Minimum $1.00' },
+                max: { value: 10, message: 'Maximum $10.00' }
+              })}
+              className="input-field"
+            />
+            {errors.gasPrice && (
+              <p className="text-red-500 text-xs mt-1">{errors.gasPrice.message}</p>
+            )}
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Current Gas Price ($/gallon)
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            {...register('gasPrice', { 
-              required: 'Gas price is required',
-              min: { value: 1, message: 'Minimum $1.00' },
-              max: { value: 10, message: 'Maximum $10.00' }
-            })}
-            className="input-field"
-          />
-          {errors.gasPrice && (
-            <p className="text-red-500 text-sm mt-1">{errors.gasPrice.message}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Urgency Level (1-10)
           </label>
           <div className="flex items-center">
@@ -424,49 +426,45 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 min: 1,
                 max: 10
               })}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
             />
-            <span className="ml-2 text-sm font-medium">
+            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
               {urgencyLevel} - {getUrgencyDescription(urgencyLevel)}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Higher urgency may increase costs by up to 30%
           </p>
           {errors.urgencyLevel && (
-            <p className="text-red-500 text-sm mt-1">{errors.urgencyLevel.message}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.urgencyLevel.message}</p>
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              {...register('applyMarkup')}
-              className="mr-2 h-4 w-4"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Apply 1.5x Markup (50% profit margin)
-            </span>
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            {...register('applyMarkup')}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+          <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            Apply 1.5x Markup (50% profit margin)
           </label>
         </div>
 
-        <div className="mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              {...register('stayingOvernight')}
-              className="mr-2 h-4 w-4"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Staying Overnight
-            </span>
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            {...register('stayingOvernight')}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          />
+          <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            Staying Overnight
           </label>
         </div>
 
         {stayingOvernight && (
-          <div className="mb-4 pl-6 border-l-2 border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="ml-6 pl-4 border-l-2 border-indigo-200 dark:border-indigo-800">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Number of Nights
             </label>
             <input
@@ -479,15 +477,15 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               className="input-field"
             />
             {errors.numberOfNights && (
-              <p className="text-red-500 text-sm mt-1">{errors.numberOfNights.message}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.numberOfNights.message}</p>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Includes per diem ($75/person/day) and hotel costs ($150/room/night, 2 people per room)
             </p>
           </div>
         )}
 
-        <button type="submit" className="btn-primary w-full">
+        <button type="submit" className="btn-primary w-full py-3 text-lg">
           Calculate Estimate
         </button>
       </form>
