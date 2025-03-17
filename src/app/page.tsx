@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
 import EstimateResult from '@/components/EstimateResult';
+import NearbyProjects from '@/components/NearbyProjects';
+import ContactForm from '@/components/ContactForm';
 import { EstimateData, FormData } from '@/lib/types';
 
 // Storage keys for saved data
@@ -55,7 +57,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">EstimAItor</h1>
           <p className="text-xl text-indigo-100">
-            Commercial Post-Construction Cleanup Estimator
+            AI Commercial Cleaning Estimator for Construction Projects
           </p>
           {(estimateData || formData) && (
             <button
@@ -69,7 +71,7 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <div className="card h-full">
             <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
           </div>
@@ -95,9 +97,29 @@ export default function Home() {
           )}
         </div>
 
+        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">
+          Our <span className="text-indigo-600 dark:text-indigo-400">Services</span>
+        </h2>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <NearbyProjects />
+          <ContactForm />
+        </div>
+
         <footer className="mt-12 text-center text-sm text-gray-500 py-6 border-t border-gray-200 dark:border-gray-700">
           <p>© 2023 EstimAItor - Commercial Cleaning Estimation Tool</p>
           <p className="mt-1">Prices based on East Coast rates (VA, NC, SC, GA)</p>
+          <div className="mt-4 flex justify-center space-x-4">
+            <a href="#" className="text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Terms of Service
+            </a>
+            <a href="#" className="text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Contact Us
+            </a>
+          </div>
         </footer>
       </div>
     </main>

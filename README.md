@@ -21,6 +21,8 @@ An AI-powered web application for estimating commercial post-construction cleanu
 - **AI-Powered Recommendations**: Get project-specific cleaning recommendations, equipment suggestions, and efficiency tips
 - **Mobile-Friendly Design**: Use the app on any device with a responsive, modern UI
 - **Data Persistence**: Estimates are saved automatically for future reference
+- **Nearby Projects Showcase**: View completed projects in your area with an interactive map
+- **Contact Form**: Easy way for potential clients to reach out for quotes or questions
 
 ## Pricing Information
 
@@ -127,6 +129,30 @@ Quotes include:
 - Terms and conditions
 - Signature areas for approval
 
+## Nearby Projects
+
+The Nearby Projects feature allows you to:
+
+1. View completed cleaning projects in your geographic area
+2. See project details including type, address, and completion date
+3. Browse through project photos
+4. Filter projects by type or distance
+5. Contact for references or similar services
+
+This feature helps potential clients see your company's experience with similar projects in their area.
+
+## Contact Form
+
+The integrated contact form allows potential clients to:
+
+1. Submit inquiries directly through the application
+2. Specify project details for more accurate responses
+3. Request quotes for specific cleaning needs
+4. Schedule consultations or site visits
+5. Receive prompt responses to their inquiries
+
+The form includes validation and sends notifications to your team when new inquiries are received.
+
 ## Technologies Used
 
 - Next.js
@@ -137,6 +163,8 @@ Quotes include:
 - OpenAI API
 - PDF generation
 - Word document generation
+- Geolocation API
+- Form validation
 
 ## License
 
