@@ -1,20 +1,26 @@
-# EstimAItor - Commercial Post-Construction Cleanup Estimator
+# EstimAItor - AI Commercial Cleaning Estimator for Construction Projects
 
 An AI-powered web application for estimating commercial post-construction cleanup projects. This tool helps cleaning companies quickly generate accurate estimates based on project type, square footage, and other factors.
 
 ## Features
 
-- **Project Type Selection**: Different rates for restaurants, medical facilities, offices, retail spaces, industrial spaces, and educational facilities
-- **Cleaning Type Options**: Choose between Rough Clean (basic), Final Clean (standard), or Powder Puff Clean (detailed)
+- **Project Type Selection**: Different rates for restaurants, medical facilities, offices, retail spaces, industrial spaces, educational facilities, hotels, and jewelry stores
+- **Cleaning Type Options**: Choose between Rough Clean (basic), Final Clean (standard), Powder Puff Clean (detailed), or Complete Package (all three stages)
 - **VCT Flooring Calculation**: Additional costs for vinyl composition tile flooring
-- **Travel Cost Estimation**: Calculates travel costs based on distance and current gas prices
+- **Travel Cost Estimation**: Calculates round-trip travel costs based on distance and current gas prices
 - **Staffing Recommendations**: Suggests the optimal number of cleaners based on project size
 - **Time Estimation**: Calculates estimated completion time based on project parameters
 - **Adjustable Staffing**: Allows adjustment of cleaner count to see impact on project duration
 - **Urgency Pricing**: Scale from 1-10 with surcharges up to 30% for urgent projects
 - **Profit Markup**: Option to apply a 1.5x markup (50% profit margin) to the total cost
 - **Overnight Stay Calculation**: Includes per diem and hotel costs for multi-day projects
+- **Pressure Washing**: Calculate costs for pressure washing concrete, driveways, and exterior surfaces
+- **Window Cleaning**: Estimate costs for standard, large, and high-access windows
+- **Display Case Cleaning**: Special pricing for jewelry store display cases with detailed cleaning
+- **Professional Quote Generation**: Create and download professional quotes in PDF or Word format
 - **AI-Powered Recommendations**: Get project-specific cleaning recommendations, equipment suggestions, and efficiency tips
+- **Mobile-Friendly Design**: Use the app on any device with a responsive, modern UI
+- **Data Persistence**: Estimates are saved automatically for future reference
 
 ## Pricing Information
 
@@ -26,12 +32,15 @@ The estimator uses average commercial cleaning rates for the East Coast region (
 - Retail Spaces: $0.40/sq ft
 - Industrial Spaces: $0.30/sq ft
 - Educational Facilities: $0.38/sq ft
+- Hotels: $0.42/sq ft
+- Jewelry Stores: $0.48/sq ft
 
 ### Cleaning Type Multipliers
 
 - Rough Clean: 80% of standard rate (basic cleaning)
 - Final Clean: Standard rate (thorough cleaning)
 - Powder Puff Clean: 130% of standard rate (detailed, premium cleaning)
+- Complete Package: 200% of standard rate (all three stages)
 
 ### Additional Costs
 
@@ -40,6 +49,12 @@ The estimator uses average commercial cleaning rates for the East Coast region (
 - **Markup**: Optional 50% markup (1.5x multiplier) on the total cost
 - **Per Diem**: $75 per person per day for overnight stays
 - **Hotel**: $150 per room per night (assumes 2 people per room) with a 50% markup
+- **Pressure Washing**: $0.35/sq ft plus equipment rental
+- **Window Cleaning**:
+  - Standard windows: $15 each
+  - Large windows: $22.50 each
+  - High-access windows: $30 each
+- **Display Case Cleaning**: $25 per display case (includes interior and exterior cleaning)
 
 ## Getting Started
 
@@ -54,7 +69,7 @@ The estimator uses average commercial cleaning rates for the East Coast region (
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/estimaitor.git
+git clone https://github.com/saviorluis/estimaitor.git
 cd estimaitor
 ```
 
@@ -95,6 +110,23 @@ After calculating an estimate, you can get AI-powered recommendations specific t
 6. Overnight stay recommendations (if applicable)
 7. Strategies for meeting urgent deadlines (for high urgency projects)
 
+## Quote Generation
+
+The application allows you to generate professional quotes that can be:
+
+1. Viewed directly in the browser
+2. Downloaded as PDF documents
+3. Downloaded as Word documents compatible with Google Docs
+4. Printed for client meetings
+
+Quotes include:
+
+- Company and client information
+- Project details and scope of work
+- Itemized pricing
+- Terms and conditions
+- Signature areas for approval
+
 ## Technologies Used
 
 - Next.js
@@ -103,6 +135,8 @@ After calculating an estimate, you can get AI-powered recommendations specific t
 - Tailwind CSS
 - React Hook Form
 - OpenAI API
+- PDF generation
+- Word document generation
 
 ## License
 
