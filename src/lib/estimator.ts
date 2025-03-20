@@ -192,7 +192,42 @@ function calculateEstimatedHours(
   cleaningType: string
 ): number {
   // Base calculation: 1 hour per 1000 square feet
-  let baseHours = squareFootage / 1000;
+  // For larger projects, we apply a scaling factor to account for efficiency gains
+  let baseHours;
+  
+  if (squareFootage <= 10000) {
+    // Standard calculation for smaller projects
+    baseHours = squareFootage / 1000;
+  } else {
+    // For larger projects, apply diminishing returns for additional square footage
+    // First 10,000 sq ft at normal rate
+    const initialHours = 10000 / 1000;
+    
+    // Remaining square footage at reduced rate (more efficient as scale increases)
+    let remainingSqFt = squareFootage - 10000;
+    let additionalHours = 0;
+    
+    // 10,001-25,000 at 85% of normal rate
+    if (remainingSqFt > 0) {
+      const tier1SqFt = Math.min(remainingSqFt, 15000);
+      additionalHours += (tier1SqFt / 1000) * 0.85;
+      remainingSqFt -= tier1SqFt;
+    }
+    
+    // 25,001-50,000 at 75% of normal rate
+    if (remainingSqFt > 0) {
+      const tier2SqFt = Math.min(remainingSqFt, 25000);
+      additionalHours += (tier2SqFt / 1000) * 0.75;
+      remainingSqFt -= tier2SqFt;
+    }
+    
+    // 50,001+ at 65% of normal rate (economies of scale)
+    if (remainingSqFt > 0) {
+      additionalHours += (remainingSqFt / 1000) * 0.65;
+    }
+    
+    baseHours = initialHours + additionalHours;
+  }
   
   // Apply project type modifier
   const projectTypeModifier = getProjectTypeTimeModifier(projectType);
