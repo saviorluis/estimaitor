@@ -47,7 +47,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   });
 
   // Default terms and conditions
-  const defaultTerms = `1. Payment Terms: 50% deposit required to secure booking, balance due within 15 days of completion.
+  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.
 2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
 3. Scope: This quote covers only the services explicitly described.
 4. Additional Services: Any services not specified will be quoted separately.
