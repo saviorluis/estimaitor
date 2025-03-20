@@ -52,6 +52,11 @@ export const generateQuoteDocx = async (
   clientInfo: ClientInfo,
   quoteInfo: QuoteInfo
 ): Promise<Blob> => {
+  // Validate data before proceeding
+  if (!formData || !estimateData) {
+    throw new Error("Form data or estimate data is missing");
+  }
+
   // Create a new document
   const doc = new Document({
     sections: [
