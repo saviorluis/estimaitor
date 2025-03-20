@@ -561,10 +561,26 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
-            <p>Estimated Hours: {estimateData.estimatedHours} hours</p>
-            <p>Team Size: {formData.numberOfCleaners} cleaners</p>
-            <p>Hours Per Cleaner: {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours</p>
-            <p>Estimated Completion: {Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)</p>
+            {formData.cleaningType === 'complete' ? (
+              <>
+                <p>Total Project Hours: {estimateData.estimatedHours} hours</p>
+                <p>Team Size: {formData.numberOfCleaners} cleaners</p>
+                <p className="font-semibold">Multiple Cleaning Phases:</p>
+                <ul className="list-disc ml-5 mt-2 text-sm">
+                  <li>Rough Clean: {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s)</li>
+                  <li>Final Clean: {Math.ceil(estimateData.estimatedHours * 0.4 / (8 * formData.numberOfCleaners))} day(s)</li>
+                  <li>Powder Puff Clean: {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s)</li>
+                </ul>
+                <p className="mt-2 text-sm italic">Note: Cleaning phases are typically scheduled at different stages of the construction project.</p>
+              </>
+            ) : (
+              <>
+                <p>Estimated Hours: {estimateData.estimatedHours} hours</p>
+                <p>Team Size: {formData.numberOfCleaners} cleaners</p>
+                <p>Hours Per Cleaner: {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours</p>
+                <p>Estimated Completion: {Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)</p>
+              </>
+            )}
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Additional Information</h3>
