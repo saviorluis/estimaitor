@@ -54,7 +54,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     projectName: '',
     projectAddress: '',
     notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
-    terms: `1. Payment Terms: 50% deposit required to secure booking, balance due upon completion.
+    terms: `1. Payment Terms: 50% deposit required to secure booking, balance due within 15 days of completion.
 2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
 3. Scope: This quote covers only the services explicitly described.
 4. Additional Services: Any services not specified will be quoted separately.
