@@ -853,7 +853,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     })
   );
   
-  // Markup if applicable
+  // Add markup if applicable
   if (formData.applyMarkup) {
     rows.push(
       new TableRow({
@@ -863,7 +863,8 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: "Professional Cleaning Markup",
+                    text: formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment',
+                    bold: true,
                   }),
                 ],
               }),

@@ -67,10 +67,23 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate overnight cost if applicable
   let overnightCost = 0;
   if (stayingOvernight) {
-    const hotelRooms = Math.ceil(numberOfCleaners / 2); // 2 people per room
+    // Calculate number of hotel rooms (2 people per room)
+    const hotelRooms = Math.ceil(numberOfCleaners / 2);
     const hotelCost = hotelRooms * HOTEL_COST_PER_NIGHT * numberOfNights;
+    
+    // Calculate per diem for meals and incidentals
     const perDiemCost = numberOfCleaners * PER_DIEM_PER_DAY * numberOfNights;
-    overnightCost = hotelCost + perDiemCost;
+    
+    // Calculate additional vehicle costs when more than 2 cleaners
+    // Each vehicle can transport 2-3 people, so we need additional vehicles for larger teams
+    let vehicleCost = 0;
+    if (numberOfCleaners > 2) {
+      const additionalVehicles = Math.ceil(numberOfCleaners / 3) - 1; // First vehicle already accounted for
+      const additionalMileageCost = additionalVehicles * roundTripDistance * TRAVEL_COST_PER_MILE;
+      vehicleCost = additionalMileageCost;
+    }
+    
+    overnightCost = hotelCost + perDiemCost + vehicleCost;
   }
 
   // Calculate pressure washing cost if applicable

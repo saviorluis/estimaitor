@@ -155,6 +155,10 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#666666',
   },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 });
 
 // Get cleaning type display name
@@ -392,7 +396,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           {formData.applyMarkup && (
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>Professional Cleaning Markup</Text>
+                <Text>{formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment'}</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(estimateData.markup)}</Text>

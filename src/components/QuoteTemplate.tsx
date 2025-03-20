@@ -575,7 +575,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {formData.applyMarkup && (
                 <tr>
                   <td className="border p-2">
-                    Professional Cleaning Markup
+                    {formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment'}
                   </td>
                   <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
                 </tr>
@@ -615,7 +615,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <li><span className="font-medium">Final Clean:</span> {Math.ceil((estimateData.estimatedHours || 0) * 0.4 / (8 * (formData.numberOfCleaners || 1)))} day(s) - After construction completion</li>
                   <li><span className="font-medium">Touch-up Clean:</span> {Math.ceil((estimateData.estimatedHours || 0) * 0.3 / (8 * (formData.numberOfCleaners || 1)))} day(s) - Before client move-in/opening</li>
                 </ul>
-                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline, typically spanning several weeks or months.</p>
+                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
               </>
             ) : (
               <>
