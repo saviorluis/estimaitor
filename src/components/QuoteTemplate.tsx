@@ -536,10 +536,43 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 </tr>
               )}
 
+              {/* Window Cleaning if applicable */}
+              {formData.needsWindowCleaning && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Window Cleaning Services</div>
+                    <div className="text-sm">{formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows} large windows, {formData.numberOfHighAccessWindows} high-access windows</div>
+                    <div className="text-sm">Includes all necessary equipment and cleaning solutions</div>
+                    {!formData.chargeForWindowCleaning && (
+                      <div className="text-sm italic text-gray-500">Window cleaning will be quoted separately</div>
+                    )}
+                  </td>
+                  <td className="border p-2 text-right">
+                    {formData.chargeForWindowCleaning ? formatCurrency(estimateData.windowCleaningCost) : 'Separate Quote'}
+                  </td>
+                </tr>
+              )}
+
               {/* Subtotal */}
               <tr className="bg-gray-100">
                 <td className="border p-2 font-semibold">Subtotal</td>
                 <td className="border p-2 text-right font-semibold">{formatCurrency(estimateData.totalBeforeMarkup)}</td>
+              </tr>
+
+              {/* Markup if applicable */}
+              {formData.applyMarkup && (
+                <tr>
+                  <td className="border p-2">
+                    Professional Cleaning Markup
+                  </td>
+                  <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
+                </tr>
+              )}
+
+              {/* Sales Tax */}
+              <tr>
+                <td className="border p-2">Sales Tax (7%)</td>
+                <td className="border p-2 text-right">{formatCurrency(estimateData.salesTax)}</td>
               </tr>
 
               {/* Total */}
@@ -550,14 +583,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             </tbody>
           </table>
           
-          {/* Add markup note if applyMarkup is true */}
-          {formData.applyMarkup && (
-            <div className="mt-2 text-sm italic text-gray-600">
-              <p>Note: This quote includes a 50% markup for {formData.cleaningType === 'complete' 
-                ? "additional cleaning stages and multiple site visits" 
-                : "additional supplies, equipment, and specialized cleaning materials"}.</p>
-            </div>
-          )}
+          {/* Remove the markup note and replace with a general note */}
+          <div className="mt-2 text-sm italic text-gray-600">
+            <p>Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.</p>
+          </div>
         </div>
 
         {/* Project Timeline and Additional Information */}

@@ -236,25 +236,21 @@ export const generateQuoteDocx = async (
           // Service Details Table
           createServiceDetailsTable(estimateData, formData),
           
-          // Markup note if applicable
-          ...(formData.applyMarkup ? [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Note: This quote includes a 50% markup for ${formData.cleaningType === 'complete' 
-                    ? "additional cleaning stages and multiple site visits" 
-                    : "additional supplies, equipment, and specialized cleaning materials"}.`,
-                  italics: true,
-                  size: 18,
-                  color: "666666",
-                }),
-              ],
-              spacing: {
-                before: 120,
-                after: 120,
-              },
-            })
-          ] : []),
+          // General note about prices
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.",
+                italics: true,
+                size: 18,
+                color: "666666",
+              }),
+            ],
+            spacing: {
+              before: 120,
+              after: 120,
+            },
+          }),
           
           // Spacing
           new Paragraph({ text: "" }),
@@ -667,13 +663,28 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
                   new TextRun("Includes all necessary equipment and cleaning solutions"),
                 ],
               }),
+              ...(formData.chargeForWindowCleaning ? [] : [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "Window cleaning will be quoted separately",
+                      italics: true,
+                      color: "888888",
+                    }),
+                  ],
+                }),
+              ]),
             ],
           }),
           new TableCell({
             children: [
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
-                children: [new TextRun(formatCurrency(estimateData.windowCleaningCost))],
+                children: [
+                  new TextRun(formData.chargeForWindowCleaning ? 
+                    formatCurrency(estimateData.windowCleaningCost) : 
+                    "Separate Quote"),
+                ],
               }),
             ],
           }),
@@ -830,6 +841,62 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
                   bold: true,
                 }),
               ],
+            }),
+          ],
+        }),
+      ],
+    })
+  );
+  
+  // Markup if applicable
+  if (formData.applyMarkup) {
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "Professional Cleaning Markup",
+                  }),
+                ],
+              }),
+            ],
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [new TextRun(formatCurrency(estimateData.markup))],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+  }
+  
+  // Sales Tax
+  rows.push(
+    new TableRow({
+      children: [
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Sales Tax (7%)",
+                }),
+              ],
+            }),
+          ],
+        }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [new TextRun(formatCurrency(estimateData.salesTax))],
             }),
           ],
         }),

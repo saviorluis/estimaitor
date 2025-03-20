@@ -37,6 +37,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     needsPressureWashing,
     pressureWashingArea,
     needsWindowCleaning,
+    chargeForWindowCleaning,
     numberOfWindows,
     numberOfLargeWindows,
     numberOfHighAccessWindows,
@@ -88,7 +89,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate window cleaning cost if applicable
   let windowCleaningCost = 0;
-  if (needsWindowCleaning) {
+  if (needsWindowCleaning && chargeForWindowCleaning) {
     // Standard windows
     const standardWindowsCost = (numberOfWindows || 0) * WINDOW_CLEANING_COST_PER_WINDOW;
     
@@ -125,7 +126,12 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Apply markup if selected
   const markup = applyMarkup ? totalBeforeMarkup * 0.5 : 0;
-  const totalPrice = applyMarkup ? totalBeforeMarkup + markup : totalBeforeMarkup;
+  
+  // Calculate sales tax (7%)
+  const salesTax = (totalBeforeMarkup + markup) * 0.07;
+  
+  // Calculate total price
+  const totalPrice = totalBeforeMarkup + markup + salesTax;
 
   // Calculate estimated hours based on square footage, project type, and cleaning type
   let estimatedHours = calculateEstimatedHours(
@@ -169,6 +175,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     urgencyMultiplier,
     totalBeforeMarkup,
     markup,
+    salesTax,
     totalPrice,
     estimatedHours,
     pricePerSquareFoot,

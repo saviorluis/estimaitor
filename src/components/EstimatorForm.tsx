@@ -51,10 +51,12 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       needsPressureWashing: false,
       pressureWashingArea: 0,
       needsWindowCleaning: false,
+      chargeForWindowCleaning: false,
       numberOfWindows: 0,
       numberOfLargeWindows: 0,
       numberOfHighAccessWindows: 0,
-      numberOfDisplayCases: 0
+      numberOfDisplayCases: 0,
+      ...getSavedFormData()
     }
   });
 
@@ -367,6 +369,18 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Windows requiring ladders or lifts (above 12ft). Cost: $30 per window.
                 </p>
+              </div>
+
+              <div className="flex items-center mt-3">
+                <input
+                  type="checkbox"
+                  id="chargeForWindowCleaning"
+                  {...register('chargeForWindowCleaning')}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:border-slate-600"
+                />
+                <label htmlFor="chargeForWindowCleaning" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Include window cleaning in quote cost (uncheck to note windows but not charge)
+                </label>
               </div>
             </div>
           )}

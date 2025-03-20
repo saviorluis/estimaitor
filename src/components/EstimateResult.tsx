@@ -191,6 +191,19 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 <span>{formatCurrency(estimateData.totalBeforeMarkup)}</span>
               </div>
             </div>
+            
+            {formData.applyMarkup && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-300">Professional Cleaning Markup:</span>
+                <span>{formatCurrency(estimateData.markup)}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-300">Sales Tax (7%):</span>
+              <span>{formatCurrency(estimateData.salesTax)}</span>
+            </div>
+            
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between text-lg font-bold">
                 <span className="text-gray-800 dark:text-white">Total:</span>
@@ -221,7 +234,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${formData.pressureWashingArea.toLocaleString()} sq ft)` : 'No'}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Window Cleaning:</span> {formData.needsWindowCleaning ? 
-                `Yes (${formData.numberOfWindows} standard, ${formData.numberOfLargeWindows} large, ${formData.numberOfHighAccessWindows} high-access)` : 'No'}</p>
+                `Yes (${formData.numberOfWindows} standard, ${formData.numberOfLargeWindows} large, ${formData.numberOfHighAccessWindows} high-access)${formData.chargeForWindowCleaning ? '' : ' - Quoted Separately'}` : 'No'}</p>
             </div>
           </div>
           
@@ -230,14 +243,9 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               With {formData.numberOfCleaners} cleaners, this project will take approximately {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours to complete.
             </p>
-            {formData.applyMarkup && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
-                Note: A 50% markup has been applied for {formData.cleaningType === 'complete' 
-                  ? "additional cleaning stages and multiple site visits" 
-                  : "additional supplies, equipment, and specialized cleaning materials"} 
-                ({formatCurrency(estimateData.markup)}).
-              </p>
-            )}
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
+              Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.
+            </p>
           </div>
         </div>
       </div>

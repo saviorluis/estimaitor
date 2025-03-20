@@ -346,6 +346,23 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         )}
 
+        {/* Window Cleaning if applicable */}
+        {formData.needsWindowCleaning && (
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCell, styles.descriptionCell]}>
+              <Text style={styles.bold}>Window Cleaning Services</Text>
+              <Text>{formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows} large windows, {formData.numberOfHighAccessWindows} high-access windows</Text>
+              <Text>Includes all necessary equipment and cleaning solutions</Text>
+              {!formData.chargeForWindowCleaning && (
+                <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>
+              )}
+            </View>
+            <View style={[styles.tableCell, styles.amountCell]}>
+              <Text>{formData.chargeForWindowCleaning ? formatCurrency(estimateData.windowCleaningCost) : 'Separate Quote'}</Text>
+            </View>
+          </View>
+        )}
+
         {/* Subtotal */}
         <View style={[styles.tableRow, styles.subtotalRow]}>
           <View style={[styles.tableCell, styles.descriptionCell]}>
@@ -353,6 +370,28 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
           <View style={[styles.tableCell, styles.amountCell]}>
             <Text style={styles.bold}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
+          </View>
+        </View>
+
+        {/* Markup if applicable */}
+        {formData.applyMarkup && (
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCell, styles.descriptionCell]}>
+              <Text>Professional Cleaning Markup</Text>
+            </View>
+            <View style={[styles.tableCell, styles.amountCell]}>
+              <Text>{formatCurrency(estimateData.markup)}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Sales Tax */}
+        <View style={styles.tableRow}>
+          <View style={[styles.tableCell, styles.descriptionCell]}>
+            <Text>Sales Tax (7%)</Text>
+          </View>
+          <View style={[styles.tableCell, styles.amountCell]}>
+            <Text>{formatCurrency(estimateData.salesTax)}</Text>
           </View>
         </View>
 
@@ -367,16 +406,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
       </View>
 
-      {/* Add markup note if applyMarkup is true */}
-      {formData.applyMarkup && (
-        <View style={{marginTop: 5, marginBottom: 10}}>
-          <Text style={{fontSize: 9, fontStyle: 'italic', color: '#666666'}}>
-            Note: This quote includes a 50% markup for {formData.cleaningType === 'complete' 
-              ? "additional cleaning stages and multiple site visits" 
-              : "additional supplies, equipment, and specialized cleaning materials"}.
-          </Text>
-        </View>
-      )}
+      {/* Replace markup note with general note */}
+      <View style={{marginTop: 5, marginBottom: 10}}>
+        <Text style={{fontSize: 9, fontStyle: 'italic', color: '#666666'}}>
+          Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.
+        </Text>
+      </View>
 
       {/* Project Timeline */}
       <View style={styles.infoGrid}>

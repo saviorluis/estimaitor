@@ -17,6 +17,7 @@ export interface FormData {
   needsPressureWashing: boolean;
   pressureWashingArea: number;
   needsWindowCleaning: boolean;
+  chargeForWindowCleaning: boolean;
   numberOfWindows: number;
   numberOfLargeWindows: number;
   numberOfHighAccessWindows: number;
@@ -33,6 +34,7 @@ export interface EstimateData {
   urgencyMultiplier: number;
   totalBeforeMarkup: number;
   markup: number;
+  salesTax: number;
   totalPrice: number;
   estimatedHours: number;
   pricePerSquareFoot: number;
