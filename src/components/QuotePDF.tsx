@@ -214,7 +214,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.companyInfo}>
-          <Text style={styles.title}>Professional Quote</Text>
+          <Text style={styles.title}>Quote</Text>
           <Text style={styles.companyName}>{companyInfo.name}</Text>
           <Text style={styles.companyDetails}>{companyInfo.address}</Text>
           <Text style={styles.companyDetails}>{companyInfo.city}</Text>

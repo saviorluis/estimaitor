@@ -349,7 +349,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         {/* Header */}
         <div className="flex justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Professional Quote</h1>
+            <h1 className="text-2xl font-bold mb-2">Quote</h1>
             <p className="font-semibold">{companyInfo.name}</p>
             <p className="text-sm">{companyInfo.address}</p>
             <p className="text-sm">{companyInfo.city}</p>

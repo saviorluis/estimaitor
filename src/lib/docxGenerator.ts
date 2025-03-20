@@ -62,7 +62,7 @@ export const generateQuoteDocx = async (
           new Paragraph({
             children: [
               new TextRun({
-                text: "Professional Quote",
+                text: "Quote",
                 size: 36,
                 bold: true,
               }),
