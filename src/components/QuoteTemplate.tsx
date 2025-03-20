@@ -76,7 +76,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle client information changes
   const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setClientInfo(prev => ({ ...prev, [name]: value }));
+    setClientInfo((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   // Handle quote information changes
