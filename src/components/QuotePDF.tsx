@@ -214,7 +214,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.companyInfo}>
-          <Text style={styles.title}>Quote</Text>
           <Text style={styles.companyName}>{companyInfo.name}</Text>
           <Text style={styles.companyDetails}>{companyInfo.address}</Text>
           <Text style={styles.companyDetails}>{companyInfo.city}</Text>
@@ -419,6 +418,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       {/* Footer */}
       <View style={styles.footer}>
         <Text>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</Text>
+        <Text style={{marginTop: 5, fontStyle: 'italic'}}>
+          All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
+        </Text>
       </View>
     </Page>
   </Document>

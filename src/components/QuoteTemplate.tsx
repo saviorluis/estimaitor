@@ -407,7 +407,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         {/* Header */}
         <div className="flex justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Quote</h1>
             <p className="font-semibold">{companyInfo.name}</p>
             <p className="text-sm">{companyInfo.address}</p>
             <p className="text-sm">{companyInfo.city}</p>
@@ -619,6 +618,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         {/* Footer */}
         <div className="text-center text-xs text-gray-500 mt-12">
           <p>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</p>
+          <p className="mt-2 text-xs italic">
+            All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
+          </p>
         </div>
       </div>
     </div>

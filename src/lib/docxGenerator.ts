@@ -59,15 +59,6 @@ export const generateQuoteDocx = async (
         properties: {},
         children: [
           // Header with company and quote info
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Quote",
-                size: 36,
-                bold: true,
-              }),
-            ],
-          }),
           
           // Company and Quote Info Table
           new Table({
@@ -450,6 +441,17 @@ export const generateQuoteDocx = async (
                 text: `Thank you for your business! | ${companyInfo.name} | ${companyInfo.phone} | ${companyInfo.email}`,
                 size: 18,
                 color: "666666",
+              }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [
+              new TextRun({
+                text: "All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.",
+                size: 18,
+                color: "666666",
+                italics: true,
               }),
             ],
           }),
