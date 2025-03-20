@@ -43,7 +43,7 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
 export const VCT_COST_PER_SQFT = 0.10;
 
 // Travel cost per mile (accounting for round trip)
-export const TRAVEL_COST_PER_MILE = 1.25;
+export const TRAVEL_COST_PER_MILE = 0.65; // Standard business mileage rate
 
 // Hotel cost per night per room
 export const HOTEL_COST_PER_NIGHT = 150;
