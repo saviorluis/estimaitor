@@ -450,7 +450,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           <div className="mb-4 p-4 bg-gray-50 rounded">
             <h4 className="font-semibold mb-2">Scope of Work</h4>
             <p className="whitespace-pre-line text-sm">
-              {SCOPE_OF_WORK[formData.projectType]} ({formData.squareFootage.toLocaleString()} sq ft)
+              {SCOPE_OF_WORK[formData.projectType] || ''} ({(formData.squareFootage || 0).toLocaleString()} sq ft)
             </p>
           </div>
 

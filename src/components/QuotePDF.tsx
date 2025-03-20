@@ -265,10 +265,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         {/* Base Cleaning Service */}
         <View style={styles.tableRow}>
           <View style={[styles.tableCell, styles.descriptionCell]}>
-            <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
-            <Text>Base Price: {formatCurrency(estimateData.basePrice)}</Text>
-            <Text>Project Type Multiplier: {(estimateData.projectTypeMultiplier).toFixed(2)}x</Text>
-            <Text>Cleaning Type Multiplier: {(estimateData.cleaningTypeMultiplier).toFixed(2)}x</Text>
+            <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+            <Text>Base Price: {formatCurrency(estimateData.basePrice || 0)}</Text>
+            <Text>Project Type Multiplier: {((estimateData.projectTypeMultiplier || 1)).toFixed(2)}x</Text>
+            <Text>Cleaning Type Multiplier: {((estimateData.cleaningTypeMultiplier || 1)).toFixed(2)}x</Text>
           </View>
           <View style={[styles.tableCell, styles.amountCell]}>
             <Text>{formatCurrency(estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier)}</Text>

@@ -141,11 +141,11 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-300">Project Type Multiplier:</span>
-              <span className="font-medium">{estimateData.projectTypeMultiplier.toFixed(2)}x</span>
+              <span className="font-medium">{(estimateData.projectTypeMultiplier || 1).toFixed(2)}x</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-300">Cleaning Type Multiplier:</span>
-              <span className="font-medium">{estimateData.cleaningTypeMultiplier.toFixed(2)}x</span>
+              <span className="font-medium">{(estimateData.cleaningTypeMultiplier || 1).toFixed(2)}x</span>
             </div>
             {estimateData.vctCost > 0 && (
               <div className="flex justify-between">
@@ -183,7 +183,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             )}
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-300">Urgency Multiplier:</span>
-              <span className="font-medium">{estimateData.urgencyMultiplier.toFixed(2)}x</span>
+              <span className="font-medium">{(estimateData.urgencyMultiplier || 1).toFixed(2)}x</span>
             </div>
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between font-medium">

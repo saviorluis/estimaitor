@@ -528,17 +528,17 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             }),
             new Paragraph({
               children: [
-                new TextRun(`Base Price: ${formatCurrency(estimateData.basePrice)}`),
+                new TextRun(`Base Price: ${formatCurrency(estimateData.basePrice || 0)}`),
               ],
             }),
             new Paragraph({
               children: [
-                new TextRun(`Project Type Multiplier: ${(estimateData.projectTypeMultiplier).toFixed(2)}x`),
+                new TextRun(`Project Type Multiplier: ${((estimateData.projectTypeMultiplier || 1)).toFixed(2)}x`),
               ],
             }),
             new Paragraph({
               children: [
-                new TextRun(`Cleaning Type Multiplier: ${(estimateData.cleaningTypeMultiplier).toFixed(2)}x`),
+                new TextRun(`Cleaning Type Multiplier: ${((estimateData.cleaningTypeMultiplier || 1)).toFixed(2)}x`),
               ],
             }),
           ],
