@@ -357,22 +357,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         </View>
 
-        {/* Markup if applicable */}
-        {formData.applyMarkup && (
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>
-                {formData.cleaningType === 'complete' 
-                  ? "Additional Cleaning Stages (Multiple Visits)" 
-                  : "Additional Supplies & Equipment"}
-              </Text>
-            </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(estimateData.markup)}</Text>
-            </View>
-          </View>
-        )}
-
         {/* Total */}
         <View style={[styles.tableRow, styles.totalRow]}>
           <View style={[styles.tableCell, styles.descriptionCell]}>
@@ -383,6 +367,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         </View>
       </View>
+
+      {/* Add markup note if applyMarkup is true */}
+      {formData.applyMarkup && (
+        <View style={{marginTop: 5, marginBottom: 10}}>
+          <Text style={{fontSize: 9, fontStyle: 'italic', color: '#666666'}}>
+            Note: This quote includes a 50% markup for {formData.cleaningType === 'complete' 
+              ? "additional cleaning stages and multiple site visits" 
+              : "additional supplies, equipment, and specialized cleaning materials"}.
+          </Text>
+        </View>
+      )}
 
       {/* Project Timeline */}
       <View style={styles.infoGrid}>

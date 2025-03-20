@@ -245,6 +245,26 @@ export const generateQuoteDocx = async (
           // Service Details Table
           createServiceDetailsTable(estimateData, formData),
           
+          // Markup note if applicable
+          ...(formData.applyMarkup ? [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Note: This quote includes a 50% markup for ${formData.cleaningType === 'complete' 
+                    ? "additional cleaning stages and multiple site visits" 
+                    : "additional supplies, equipment, and specialized cleaning materials"}.`,
+                  italics: true,
+                  size: 18,
+                  color: "666666",
+                }),
+              ],
+              spacing: {
+                before: 120,
+                after: 120,
+              },
+            })
+          ] : []),
+          
           // Spacing
           new Paragraph({ text: "" }),
           
@@ -815,38 +835,6 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     })
   );
   
-  // Markup if applicable
-  if (formData.applyMarkup) {
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: formData.cleaningType === 'complete' 
-                      ? "Additional Cleaning Stages (Multiple Visits)" 
-                      : "Additional Supplies & Equipment",
-                    bold: true,
-                  }),
-                ],
-              }),
-            ],
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [new TextRun(formatCurrency(estimateData.markup))],
-              }),
-            ],
-          }),
-        ],
-      })
-    );
-  }
-  
   // Total
   rows.push(
     new TableRow({
@@ -886,7 +874,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     })
   );
   
-  return new Table({
+  const table = new Table({
     width: {
       size: 100,
       type: WidthType.PERCENTAGE,
@@ -925,4 +913,11 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     },
     rows,
   });
+  
+  // Add markup note if applicable
+  if (formData.applyMarkup) {
+    return table;
+  }
+  
+  return table;
 } 

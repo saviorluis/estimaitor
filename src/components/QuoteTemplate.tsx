@@ -543,18 +543,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 <td className="border p-2 text-right font-semibold">{formatCurrency(estimateData.totalBeforeMarkup)}</td>
               </tr>
 
-              {/* Markup if applicable */}
-              {formData.applyMarkup && (
-                <tr>
-                  <td className="border p-2 font-semibold">
-                    {formData.cleaningType === 'complete' 
-                      ? "Additional Cleaning Stages (Multiple Visits)" 
-                      : "Additional Supplies & Equipment"}
-                  </td>
-                  <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
-                </tr>
-              )}
-
               {/* Total */}
               <tr className="bg-blue-50">
                 <td className="border p-2 font-bold">TOTAL</td>
@@ -562,6 +550,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               </tr>
             </tbody>
           </table>
+          
+          {/* Add markup note if applyMarkup is true */}
+          {formData.applyMarkup && (
+            <div className="mt-2 text-sm italic text-gray-600">
+              <p>Note: This quote includes a 50% markup for {formData.cleaningType === 'complete' 
+                ? "additional cleaning stages and multiple site visits" 
+                : "additional supplies, equipment, and specialized cleaning materials"}.</p>
+            </div>
+          )}
         </div>
 
         {/* Project Timeline and Additional Information */}

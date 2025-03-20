@@ -125,7 +125,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Apply markup if selected
   const markup = applyMarkup ? totalBeforeMarkup * 0.5 : 0;
-  const totalPrice = totalBeforeMarkup + markup;
+  const totalPrice = applyMarkup ? totalBeforeMarkup + markup : totalBeforeMarkup;
 
   // Calculate estimated hours based on square footage, project type, and cleaning type
   let estimatedHours = calculateEstimatedHours(
