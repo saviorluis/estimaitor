@@ -361,7 +361,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         {formData.applyMarkup && (
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>Service Fee (50%)</Text>
+              <Text style={styles.bold}>
+                {formData.cleaningType === 'complete' 
+                  ? "Additional Cleaning Stages (Multiple Visits)" 
+                  : "Additional Supplies & Equipment"}
+              </Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
               <Text>{formatCurrency(estimateData.markup)}</Text>

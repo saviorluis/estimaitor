@@ -825,7 +825,9 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: "Service Fee (50%)",
+                    text: formData.cleaningType === 'complete' 
+                      ? "Additional Cleaning Stages (Multiple Visits)" 
+                      : "Additional Supplies & Equipment",
                     bold: true,
                   }),
                 ],

@@ -546,7 +546,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {/* Markup if applicable */}
               {formData.applyMarkup && (
                 <tr>
-                  <td className="border p-2 font-semibold">Service Fee (50%)</td>
+                  <td className="border p-2 font-semibold">
+                    {formData.cleaningType === 'complete' 
+                      ? "Additional Cleaning Stages (Multiple Visits)" 
+                      : "Additional Supplies & Equipment"}
+                  </td>
                   <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
                 </tr>
               )}

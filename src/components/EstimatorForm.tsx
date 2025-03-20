@@ -443,11 +443,12 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
         <div className="flex items-center">
           <input
             type="checkbox"
+            id="applyMarkup"
             {...register('applyMarkup')}
             className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
           />
-          <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-            Apply 1.5x Markup (50% profit margin)
+          <label htmlFor="applyMarkup" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            Include Additional Cleaning Costs
           </label>
         </div>
 
