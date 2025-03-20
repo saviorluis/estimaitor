@@ -863,7 +863,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment',
+                    text: formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment',
                     bold: true,
                   }),
                 ],

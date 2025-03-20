@@ -478,9 +478,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               <tr>
                 <td className="border p-2">
                   <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
-                  <div className="text-sm">Base Price: {formatCurrency(estimateData.basePrice || 0)}</div>
-                  <div className="text-sm">Project Type Multiplier: {(estimateData.projectTypeMultiplier || 1).toFixed(2)}x</div>
-                  <div className="text-sm">Cleaning Type Multiplier: {(estimateData.cleaningTypeMultiplier || 1).toFixed(2)}x</div>
                 </td>
                 <td className="border p-2 text-right">
                   {formatCurrency((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1))}
@@ -575,7 +572,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {formData.applyMarkup && (
                 <tr>
                   <td className="border p-2">
-                    {formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment'}
+                    {formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment'}
                   </td>
                   <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
                 </tr>

@@ -285,9 +285,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-              <Text>Base Price: {formatCurrency(estimateData.basePrice || 0)}</Text>
-              <Text>Project Type Multiplier: {((estimateData.projectTypeMultiplier || 1)).toFixed(2)}x</Text>
-              <Text>Cleaning Type Multiplier: {((estimateData.cleaningTypeMultiplier || 1)).toFixed(2)}x</Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
               <Text>{formatCurrency(estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier)}</Text>
@@ -396,7 +393,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           {formData.applyMarkup && (
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>{formData.cleaningType === 'complete' ? 'Complete Package (All 3 Stages)' : 'Additional Supplies & Equipment'}</Text>
+                <Text>{formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment'}</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(estimateData.markup)}</Text>
