@@ -93,7 +93,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     switch (type) {
       case 'rough': return 'Rough Clean (First Stage)';
       case 'final': return 'Final Clean (Second Stage)';
-      case 'powder_puff': return 'Powder Puff Clean (Third Stage)';
+      case 'powder_puff': return 'Touch-up Clean (Third Stage)';
       case 'complete': return 'Complete Package (All Three Stages)';
       default: return type;
     }
@@ -565,13 +565,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               <>
                 <p>Total Project Hours: {estimateData.estimatedHours} hours</p>
                 <p>Team Size: {formData.numberOfCleaners} cleaners</p>
-                <p className="font-semibold">Multiple Cleaning Phases:</p>
-                <ul className="list-disc ml-5 mt-2 text-sm">
-                  <li>Rough Clean: {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s)</li>
-                  <li>Final Clean: {Math.ceil(estimateData.estimatedHours * 0.4 / (8 * formData.numberOfCleaners))} day(s)</li>
-                  <li>Powder Puff Clean: {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s)</li>
+                <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
+                <ul className="list-disc ml-5 mt-1 text-sm">
+                  <li><span className="font-medium">Rough Clean:</span> {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s) - During construction</li>
+                  <li><span className="font-medium">Final Clean:</span> {Math.ceil(estimateData.estimatedHours * 0.4 / (8 * formData.numberOfCleaners))} day(s) - After construction completion</li>
+                  <li><span className="font-medium">Touch-up Clean:</span> {Math.ceil(estimateData.estimatedHours * 0.3 / (8 * formData.numberOfCleaners))} day(s) - Before client move-in/opening</li>
                 </ul>
-                <p className="mt-2 text-sm italic">Note: Cleaning phases are typically scheduled at different stages of the construction project.</p>
+                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline, typically spanning several weeks or months.</p>
               </>
             ) : (
               <>
