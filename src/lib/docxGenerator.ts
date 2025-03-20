@@ -207,7 +207,7 @@ export const generateQuoteDocx = async (
                         children: [new TextRun(`Project Type: ${getProjectTypeDisplay(formData.projectType)}`)],
                       }),
                       new Paragraph({
-                        children: [new TextRun(`Square Footage: ${formData.squareFootage.toLocaleString()} sq ft`)],
+                        children: [new TextRun(`Square Footage: ${(formData.squareFootage || 0).toLocaleString()} sq ft`)],
                       }),
                       new Paragraph({
                         children: [new TextRun(`Cleaning Type: ${getCleaningTypeDisplay(formData.cleaningType)}`)],
@@ -521,7 +521,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${formData.squareFootage.toLocaleString()} sq ft`,
+                  text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${(formData.squareFootage || 0).toLocaleString()} sq ft`,
                   bold: true,
                 }),
               ],
@@ -615,7 +615,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               }),
               new Paragraph({
                 children: [
-                  new TextRun(`${formData.pressureWashingArea.toLocaleString()} sq ft of exterior/concrete surfaces`),
+                  new TextRun(`${(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces`),
                 ],
               }),
               new Paragraph({
@@ -655,7 +655,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               }),
               new Paragraph({
                 children: [
-                  new TextRun(`${formData.numberOfWindows} standard windows, ${formData.numberOfLargeWindows} large windows, ${formData.numberOfHighAccessWindows} high-access windows`),
+                  new TextRun(`${(formData.numberOfWindows || 0)} standard windows, ${(formData.numberOfLargeWindows || 0)} large windows, ${(formData.numberOfHighAccessWindows || 0)} high-access windows`),
                 ],
               }),
               new Paragraph({
@@ -709,7 +709,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             }),
             new Paragraph({
               children: [
-                new TextRun(`${formData.distanceFromOffice} miles at current gas price ($${(formData.gasPrice || 0).toFixed(2)}/gallon)`),
+                new TextRun(`${(formData.distanceFromOffice || 0)} miles at current gas price ($${((formData.gasPrice || 0)).toFixed(2)}/gallon)`),
               ],
             }),
           ],

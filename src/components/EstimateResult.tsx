@@ -219,10 +219,10 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             <div>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Project Type:</span> {formData.projectType.charAt(0).toUpperCase() + formData.projectType.slice(1).replace('_', ' ')}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Cleaning Type:</span> {formData.cleaningType.charAt(0).toUpperCase() + formData.cleaningType.slice(1).replace('_', ' ')}</p>
-              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Square Footage:</span> {formData.squareFootage.toLocaleString()} sq ft</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Square Footage:</span> {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">VCT Flooring:</span> {formData.hasVCT ? 'Yes' : 'No'}</p>
-              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Distance from Office:</span> {formData.distanceFromOffice} miles</p>
-              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Gas Price:</span> ${typeof formData.gasPrice === 'number' ? formData.gasPrice.toFixed(2) : Number(formData.gasPrice).toFixed(2)}/gallon</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Distance from Office:</span> {formData.distanceFromOffice || 0} miles</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Gas Price:</span> ${typeof formData.gasPrice === 'number' ? (formData.gasPrice || 0).toFixed(2) : Number(formData.gasPrice || 0).toFixed(2)}/gallon</p>
             </div>
             <div>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Overnight Stay:</span> {formData.stayingOvernight ? `Yes (${formData.numberOfNights} night(s))` : 'No'}</p>
@@ -232,16 +232,16 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 <span className="font-semibold text-gray-700 dark:text-gray-300">Additional Cleaning Costs:</span> 
                 {formData.applyMarkup ? 'Included' : 'Not Included'}
               </p>
-              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${formData.pressureWashingArea.toLocaleString()} sq ft)` : 'No'}</p>
+              <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${(formData.pressureWashingArea || 0).toLocaleString()} sq ft)` : 'No'}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Window Cleaning:</span> {formData.needsWindowCleaning ? 
-                `Yes (${formData.numberOfWindows} standard, ${formData.numberOfLargeWindows} large, ${formData.numberOfHighAccessWindows} high-access)${formData.chargeForWindowCleaning ? '' : ' - Quoted Separately'}` : 'No'}</p>
+                `Yes (${formData.numberOfWindows || 0} standard, ${formData.numberOfLargeWindows || 0} large, ${formData.numberOfHighAccessWindows || 0} high-access)${formData.chargeForWindowCleaning ? '' : ' - Quoted Separately'}` : 'No'}</p>
             </div>
           </div>
           
           <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated Hours: {estimateData.estimatedHours.toFixed(2)} hours</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated Hours: {(estimateData.estimatedHours || 0).toFixed(2)} hours</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              With {formData.numberOfCleaners} cleaners, this project will take approximately {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours to complete.
+              With {formData.numberOfCleaners || 1} cleaners, this project will take approximately {((estimateData.estimatedHours || 0) / (formData.numberOfCleaners || 1)).toFixed(1)} hours to complete.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
               Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.

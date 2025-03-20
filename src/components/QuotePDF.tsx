@@ -244,7 +244,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
           <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
           <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-          <Text style={styles.infoValue}>Square Footage: {formData.squareFootage.toLocaleString()} sq ft</Text>
+          <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
           <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
         </View>
       </View>
@@ -293,7 +293,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>Pressure Washing Services</Text>
-              <Text>{formData.pressureWashingArea.toLocaleString()} sq ft of exterior/concrete surfaces</Text>
+              <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
               <Text>Includes equipment rental and materials</Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
@@ -306,7 +306,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.tableRow}>
           <View style={[styles.tableCell, styles.descriptionCell]}>
             <Text style={styles.bold}>Travel Expenses</Text>
-            <Text>{formData.distanceFromOffice} miles at current gas price (${(formData.gasPrice || 0).toFixed(2)}/gallon)</Text>
+            <Text>{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</Text>
           </View>
           <View style={[styles.tableCell, styles.amountCell]}>
             <Text>{formatCurrency(estimateData.travelCost)}</Text>
@@ -351,7 +351,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>Window Cleaning Services</Text>
-              <Text>{formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows} large windows, {formData.numberOfHighAccessWindows} high-access windows</Text>
+              <Text>{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</Text>
               <Text>Includes all necessary equipment and cleaning solutions</Text>
               {!formData.chargeForWindowCleaning && (
                 <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>

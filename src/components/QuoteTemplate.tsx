@@ -437,7 +437,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <p>{quoteInfo.projectName || '[Project Name]'}</p>
             <p>{quoteInfo.projectAddress || '[Project Address]'}</p>
             <p>Project Type: {getProjectTypeDisplay(formData.projectType)}</p>
-            <p>Square Footage: {formData.squareFootage.toLocaleString()} sq ft</p>
+            <p>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
             <p>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</p>
           </div>
         </div>
@@ -491,7 +491,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 <tr>
                   <td className="border p-2">
                     <div className="font-semibold">Pressure Washing Services</div>
-                    <div className="text-sm">{formData.pressureWashingArea.toLocaleString()} sq ft of exterior/concrete surfaces</div>
+                    <div className="text-sm">{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</div>
                     <div className="text-sm">Includes equipment rental and materials</div>
                   </td>
                   <td className="border p-2 text-right">{formatCurrency(estimateData.pressureWashingCost)}</td>
@@ -502,7 +502,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               <tr>
                 <td className="border p-2">
                   <div className="font-semibold">Travel Expenses</div>
-                  <div className="text-sm">{formData.distanceFromOffice} miles at current gas price (${(formData.gasPrice || 0).toFixed(2)}/gallon)</div>
+                  <div className="text-sm">{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</div>
                 </td>
                 <td className="border p-2 text-right">{formatCurrency(estimateData.travelCost)}</td>
               </tr>
@@ -541,7 +541,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 <tr>
                   <td className="border p-2">
                     <div className="font-semibold">Window Cleaning Services</div>
-                    <div className="text-sm">{formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows} large windows, {formData.numberOfHighAccessWindows} high-access windows</div>
+                    <div className="text-sm">{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</div>
                     <div className="text-sm">Includes all necessary equipment and cleaning solutions</div>
                     {!formData.chargeForWindowCleaning && (
                       <div className="text-sm italic text-gray-500">Window cleaning will be quoted separately</div>
