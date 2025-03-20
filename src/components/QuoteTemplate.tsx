@@ -465,10 +465,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {/* Base Cleaning Service */}
               <tr>
                 <td className="border p-2">
-                  <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</div>
-                  <div className="text-sm">Base Price: {formatCurrency(estimateData.basePrice)}</div>
-                  <div className="text-sm">Project Type Multiplier: {(estimateData.projectTypeMultiplier).toFixed(2)}x</div>
-                  <div className="text-sm">Cleaning Type Multiplier: {(estimateData.cleaningTypeMultiplier).toFixed(2)}x</div>
+                  <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
+                  <div className="text-sm">Base Price: {formatCurrency(estimateData.basePrice || 0)}</div>
+                  <div className="text-sm">Project Type Multiplier: {(estimateData.projectTypeMultiplier || 1).toFixed(2)}x</div>
+                  <div className="text-sm">Cleaning Type Multiplier: {(estimateData.cleaningTypeMultiplier || 1).toFixed(2)}x</div>
                 </td>
                 <td className="border p-2 text-right">
                   {formatCurrency(estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier)}
