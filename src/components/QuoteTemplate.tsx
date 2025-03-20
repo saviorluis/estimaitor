@@ -24,6 +24,18 @@ interface QuoteTemplateProps {
 }
 
 const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData }) => {
+  // Early return if data isn't fully loaded
+  if (!estimateData || !formData) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-xl text-gray-600">Loading quote data...</p>
+          <p className="text-sm text-gray-500 mt-2">Please wait while we prepare your quote.</p>
+        </div>
+      </div>
+    );
+  }
+  
   // Company information state
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "Big Brother Property Solutions",
