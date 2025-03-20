@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatDate, formatCurrency, generateQuoteNumber } from '@/lib/utils';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -46,6 +46,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     phone: '',
   });
 
+  // Default terms and conditions
+  const defaultTerms = `1. Payment Terms: 50% deposit required to secure booking, balance due within 15 days of completion.
+2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
+3. Scope: This quote covers only the services explicitly described.
+4. Additional Services: Any services not specified will be quoted separately.
+5. Equipment: All necessary cleaning equipment and supplies are included.
+6. Access: Client must provide necessary access to the property.
+7. Utilities: Working electricity and water must be available on-site.
+8. Quote Validity: This quote is valid for 30 days from the date issued.`;
+
   // Quote information state
   const [quoteInfo, setQuoteInfo] = useState({
     quoteNumber: generateQuoteNumber(),
@@ -54,14 +64,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     projectName: '',
     projectAddress: '',
     notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
-    terms: `1. Payment Terms: 50% deposit required to secure booking, balance due within 15 days of completion.
-2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
-3. Scope: This quote covers only the services explicitly described.
-4. Additional Services: Any services not specified will be quoted separately.
-5. Equipment: All necessary cleaning equipment and supplies are included.
-6. Access: Client must provide necessary access to the property.
-7. Utilities: Working electricity and water must be available on-site.
-8. Quote Validity: This quote is valid for 30 days from the date issued.`,
+    terms: defaultTerms,
   });
 
   // Handle company information changes
