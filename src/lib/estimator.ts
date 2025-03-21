@@ -204,6 +204,40 @@ function calculateEstimatedHours(
   projectType: string,
   cleaningType: string
 ): number {
+  // Special case for jewelry stores - they need more detailed calculation
+  if (projectType === 'jewelry_store') {
+    // Jewelry stores have their own calculation that's more conservative
+    let jewelryStoreHours;
+    
+    if (squareFootage <= 1000) {
+      jewelryStoreHours = squareFootage / 750; // Base rate for small jewelry stores
+    } else if (squareFootage <= 5000) {
+      // First 1000 sq ft
+      const initialHours = 1000 / 750;
+      // Remaining at even more efficient rate
+      const remainingSqFt = squareFootage - 1000;
+      const additionalHours = remainingSqFt / 1000;
+      jewelryStoreHours = initialHours + additionalHours;
+    } else {
+      // First 1000 sq ft
+      const initialHours = 1000 / 750;
+      // Next 4000 sq ft
+      const tier1Hours = 4000 / 1000;
+      // Remaining at even more efficient rate
+      const remainingSqFt = squareFootage - 5000;
+      const additionalHours = remainingSqFt / 1200;
+      jewelryStoreHours = initialHours + tier1Hours + additionalHours;
+    }
+    
+    // Apply cleaning type modifier only (jewelry store modifier already accounted for)
+    const cleaningTypeModifier = CLEANING_TYPE_TIME_MULTIPLIERS[cleaningType as CleaningType] || 1;
+    jewelryStoreHours *= cleaningTypeModifier;
+    
+    // Round to nearest quarter hour
+    return Math.ceil(jewelryStoreHours * 4) / 4;
+  }
+  
+  // Standard calculation for all other project types
   // Base calculation: 1 hour per 1000 square feet
   // For larger projects, we apply a scaling factor to account for efficiency gains
   let baseHours;

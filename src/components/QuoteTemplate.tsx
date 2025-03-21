@@ -608,9 +608,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 <p>Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
                 <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
                 <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Rough Clean:</span> {Math.ceil((estimateData.estimatedHours || 0) * 0.3 / (8 * (formData.numberOfCleaners || 1)))} day(s) - During construction</li>
-                  <li><span className="font-medium">Final Clean:</span> {Math.ceil((estimateData.estimatedHours || 0) * 0.4 / (8 * (formData.numberOfCleaners || 1)))} day(s) - After construction completion</li>
-                  <li><span className="font-medium">Touch-up Clean:</span> {Math.ceil((estimateData.estimatedHours || 0) * 0.3 / (8 * (formData.numberOfCleaners || 1)))} day(s) - Before client move-in/opening</li>
+                  <li><span className="font-medium">Rough Clean:</span> 30% of total hours - During construction</li>
+                  <li><span className="font-medium">Final Clean:</span> 40% of total hours - After construction completion</li>
+                  <li><span className="font-medium">Touch-up Clean:</span> 30% of total hours - Before client move-in/opening</li>
                 </ul>
                 <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
               </>

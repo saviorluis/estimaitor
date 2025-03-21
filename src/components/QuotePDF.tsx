@@ -433,10 +433,26 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Project Timeline</Text>
-            <Text style={styles.infoValue}>Estimated Hours: {estimateData.estimatedHours} hours</Text>
-            <Text style={styles.infoValue}>Team Size: {formData.numberOfCleaners} cleaners</Text>
-            <Text style={styles.infoValue}>Hours Per Cleaner: {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours</Text>
-            <Text style={styles.infoValue}>Estimated Completion: {Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)</Text>
+            {formData.cleaningType === 'complete' ? (
+              <>
+                <Text style={styles.infoValue}>Total Project Hours: {estimateData.estimatedHours} hours</Text>
+                <Text style={styles.infoValue}>Team Size: {formData.numberOfCleaners} cleaners</Text>
+                <Text style={{...styles.infoValue, fontWeight: 'bold', marginTop: 5}}>Three-Stage Cleaning Schedule:</Text>
+                <Text style={styles.infoValue}>• Rough Clean: 30% of total hours - During construction</Text>
+                <Text style={styles.infoValue}>• Final Clean: 40% of total hours - After construction completion</Text>
+                <Text style={styles.infoValue}>• Touch-up Clean: 30% of total hours - Before client move-in/opening</Text>
+                <Text style={{...styles.infoValue, fontStyle: 'italic', marginTop: 5, fontSize: 9}}>
+                  Note: These cleaning phases are performed at different stages during the construction timeline.
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.infoValue}>Estimated Hours: {estimateData.estimatedHours} hours</Text>
+                <Text style={styles.infoValue}>Team Size: {formData.numberOfCleaners} cleaners</Text>
+                <Text style={styles.infoValue}>Hours Per Cleaner: {(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours</Text>
+                <Text style={styles.infoValue}>Estimated Completion: {Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)</Text>
+              </>
+            )}
           </View>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Additional Information</Text>

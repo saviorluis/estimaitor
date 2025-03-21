@@ -284,18 +284,64 @@ export const generateQuoteDocx = async (
                           }),
                         ],
                       }),
-                      new Paragraph({
-                        children: [new TextRun(`Estimated Hours: ${estimateData.estimatedHours} hours`)],
-                      }),
+                      
+                      // For "complete" cleaning type, show the three-stage schedule
+                      formData.cleaningType === 'complete' 
+                      ? new Paragraph({
+                          children: [new TextRun(`Total Project Hours: ${estimateData.estimatedHours} hours`)],
+                        })
+                      : new Paragraph({
+                          children: [new TextRun(`Estimated Hours: ${estimateData.estimatedHours} hours`)],
+                        }),
+                        
                       new Paragraph({
                         children: [new TextRun(`Team Size: ${formData.numberOfCleaners} cleaners`)],
                       }),
-                      new Paragraph({
-                        children: [new TextRun(`Hours Per Cleaner: ${(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours`)],
-                      }),
-                      new Paragraph({
-                        children: [new TextRun(`Estimated Completion: ${Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)`)],
-                      }),
+                      
+                      // Add specific content for complete cleaning type
+                      ...(formData.cleaningType === 'complete' 
+                        ? [
+                            new Paragraph({
+                              children: [
+                                new TextRun({
+                                  text: "Three-Stage Cleaning Schedule:",
+                                  bold: true,
+                                }),
+                              ],
+                            }),
+                            new Paragraph({
+                              children: [
+                                new TextRun("• Rough Clean: 30% of total hours - During construction"),
+                              ],
+                            }),
+                            new Paragraph({
+                              children: [
+                                new TextRun("• Final Clean: 40% of total hours - After construction completion"),
+                              ],
+                            }),
+                            new Paragraph({
+                              children: [
+                                new TextRun("• Touch-up Clean: 30% of total hours - Before client move-in/opening"),
+                              ],
+                            }),
+                            new Paragraph({
+                              children: [
+                                new TextRun({
+                                  text: "Note: These cleaning phases are performed at different stages during the construction timeline.",
+                                  italics: true,
+                                }),
+                              ],
+                            }),
+                          ]
+                        : [
+                            new Paragraph({
+                              children: [new TextRun(`Hours Per Cleaner: ${(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours`)],
+                            }),
+                            new Paragraph({
+                              children: [new TextRun(`Estimated Completion: ${Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)`)],
+                            }),
+                          ]
+                      ),
                     ],
                   }),
                   new TableCell({
@@ -459,6 +505,51 @@ export const generateQuoteDocx = async (
         ],
       },
     ],
+  });
+
+  // Create the timeline section based on the cleaning type
+  const timelineSection = new Paragraph({
+    children: [
+      new TextRun({ text: "Project Timeline", bold: true, size: 28 }),
+      new TextRun({ text: "\n\n" }),
+    ],
+  });
+
+  if (formData.cleaningType === 'complete') {
+    timelineSection.addChildElement(
+      new TextRun({ 
+        text: `Total Project Hours: ${estimateData.estimatedHours} hours\n` +
+              `Team Size: ${formData.numberOfCleaners} cleaners\n\n` +
+              "Three-Stage Cleaning Schedule:\n",
+      })
+    );
+    
+    timelineSection.addChildElement(
+      new TextRun({ 
+        text: "• Rough Clean: 30% of total hours - During construction\n" +
+              "• Final Clean: 40% of total hours - After construction completion\n" +
+              "• Touch-up Clean: 30% of total hours - Before client move-in/opening\n\n" +
+              "Note: These cleaning phases are performed at different stages during the construction timeline.",
+        italics: true,
+        size: 22
+      })
+    );
+  } else {
+    // Existing code for non-complete cleaning types
+    timelineSection.addChildElement(
+      new TextRun({ 
+        text: `Estimated Hours: ${estimateData.estimatedHours} hours\n` +
+              `Team Size: ${formData.numberOfCleaners} cleaners\n` +
+              `Hours Per Cleaner: ${(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours\n` +
+              `Estimated Completion: ${Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)`,
+      })
+    );
+  }
+
+  // Add the timeline section to the document
+  doc.addSection({
+    properties: {},
+    children: [timelineSection],
   });
 
   // Generate the document as a blob
