@@ -286,11 +286,6 @@ export const generateQuoteDocx = async (
                       }),
                       
                       // For "complete" cleaning type, show the three-stage schedule without hours
-                      new Paragraph({
-                        children: [new TextRun(`Team Size: ${formData.numberOfCleaners} cleaners`)],
-                      }),
-                      
-                      // Add specific content for complete cleaning type without hours
                       ...(formData.cleaningType === 'complete' 
                         ? [
                             new Paragraph({
@@ -325,7 +320,11 @@ export const generateQuoteDocx = async (
                               ],
                             }),
                           ]
-                        : []
+                        : [
+                            new Paragraph({
+                              children: [new TextRun(`Team Size: ${formData.numberOfCleaners} cleaners`)],
+                            }),
+                          ]
                       ),
                     ],
                   }),

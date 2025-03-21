@@ -435,7 +435,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.subtitle}>Project Timeline</Text>
             {formData.cleaningType === 'complete' ? (
               <>
-                <Text style={styles.infoValue}>Team Size: {formData.numberOfCleaners} cleaners</Text>
                 <Text style={{...styles.infoValue, fontWeight: 'bold', marginTop: 5}}>Three-Stage Cleaning Schedule:</Text>
                 <Text style={styles.infoValue}>• Rough Clean: During construction</Text>
                 <Text style={styles.infoValue}>• Final Clean: After construction completion</Text>

@@ -604,7 +604,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
             {formData.cleaningType === 'complete' ? (
               <>
-                <p>Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
                 <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
                 <ul className="list-disc ml-5 mt-1 text-sm">
                   <li><span className="font-medium">Rough Clean:</span> During construction</li>
