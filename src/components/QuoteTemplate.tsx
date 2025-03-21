@@ -109,7 +109,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       case 'rough': return 'Rough Clean (First Stage)';
       case 'final': return 'Final Clean (Second Stage)';
       case 'powder_puff': return 'Touch-up Clean (Third Stage)';
-      case 'complete': return 'Complete Package (All Three Stages)';
+      case 'complete': return 'Commercial Cleaning';
       default: return type;
     }
   };
@@ -572,7 +572,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {formData.applyMarkup && (
                 <tr>
                   <td className="border p-2">
-                    {formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment'}
+                    {formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}
                   </td>
                   <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
                 </tr>

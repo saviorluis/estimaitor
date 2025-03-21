@@ -167,7 +167,7 @@ const getCleaningTypeDisplay = (type: string): string => {
     case 'rough': return 'Rough Clean (First Stage)';
     case 'final': return 'Final Clean (Second Stage)';
     case 'powder_puff': return 'Powder Puff Clean (Third Stage)';
-    case 'complete': return 'Complete Package (All Three Stages)';
+    case 'complete': return 'Commercial Cleaning';
     default: return type;
   }
 };
@@ -393,7 +393,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           {formData.applyMarkup && (
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>{formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment'}</Text>
+                <Text>{formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(estimateData.markup)}</Text>

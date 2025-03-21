@@ -194,7 +194,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             
             {formData.applyMarkup && (
               <div className="flex justify-between mt-2">
-                <span className="text-gray-600 dark:text-gray-300">{formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment'}:</span>
+                <span className="text-gray-600 dark:text-gray-300">{formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}:</span>
                 <span className="ml-2 font-medium">{formatCurrency(estimateData.markup)}</span>
               </div>
             )}

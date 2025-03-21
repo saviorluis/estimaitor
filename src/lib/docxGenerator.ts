@@ -35,7 +35,7 @@ const getCleaningTypeDisplay = (type: string): string => {
     case 'rough': return 'Rough Clean (First Stage)';
     case 'final': return 'Final Clean (Second Stage)';
     case 'powder_puff': return 'Powder Puff Clean (Third Stage)';
-    case 'complete': return 'Complete Package (All Three Stages)';
+    case 'complete': return 'Commercial Cleaning';
     default: return type;
   }
 };
@@ -863,7 +863,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: formData.cleaningType === 'complete' ? 'Commercial Cleaning' : 'Additional Supplies & Equipment',
+                    text: formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment',
                     bold: true,
                   }),
                 ],
