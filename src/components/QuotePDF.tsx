@@ -177,6 +177,12 @@ const getProjectTypeDisplay = (type: string): string => {
   return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
 };
 
+// Add a safe formatter to prevent errors in the PDF generation
+const formatValue = (value: string | number | undefined | null, defaultValue: string = ''): string => {
+  if (value === undefined || value === null) return defaultValue;
+  return String(value);
+};
+
 interface QuotePDFProps {
   estimateData: EstimateData;
   formData: FormData;
@@ -213,8 +219,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   clientInfo, 
   quoteInfo 
 }) => {
-  // Add this check at the beginning of the component function, after the props are destructured
-  // Early return or handling for undefined data
+  // Early return for undefined data
   if (!estimateData || !formData) {
     return (
       <Document>
@@ -226,6 +231,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       </Document>
     );
   }
+  
+  // Ensure all objects have default values to prevent rendering errors
+  const safeCompanyInfo = companyInfo || {
+    name: '', address: '', city: '', phone: '', email: '', website: ''
+  };
+  
+  const safeClientInfo = clientInfo || {
+    name: '', company: '', address: '', email: '', phone: ''
+  };
+  
+  const safeQuoteInfo = quoteInfo || {
+    quoteNumber: '', date: '', validUntil: '', projectName: '', 
+    projectAddress: '', notes: '', terms: ''
+  };
 
   return (
     <Document>
@@ -233,18 +252,18 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>{companyInfo.name}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.phone}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.email}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.website}</Text>
+            <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
+            <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
+            <Text style={styles.companyDetails}>{safeCompanyInfo.city}</Text>
+            <Text style={styles.companyDetails}>{safeCompanyInfo.phone}</Text>
+            <Text style={styles.companyDetails}>{safeCompanyInfo.email}</Text>
+            <Text style={styles.companyDetails}>{safeCompanyInfo.website}</Text>
           </View>
           <View style={styles.quoteInfo}>
             <Text style={styles.quoteTitle}>QUOTE</Text>
-            <Text style={styles.quoteDetails}>Quote #: {quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDetails}>Date: {quoteInfo.date}</Text>
-            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+            <Text style={styles.quoteDetails}>Quote #: {safeQuoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDetails}>Date: {safeQuoteInfo.date}</Text>
+            <Text style={styles.quoteDetails}>Valid Until: {safeQuoteInfo.validUntil}</Text>
           </View>
         </View>
 
@@ -252,16 +271,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Client Information</Text>
-            <Text style={styles.infoValue}>{clientInfo.name}</Text>
-            <Text style={styles.infoValue}>{clientInfo.company}</Text>
-            <Text style={styles.infoValue}>{clientInfo.address}</Text>
-            <Text style={styles.infoValue}>{clientInfo.email}</Text>
-            <Text style={styles.infoValue}>{clientInfo.phone}</Text>
+            <Text style={styles.infoValue}>{safeClientInfo.name}</Text>
+            <Text style={styles.infoValue}>{safeClientInfo.company}</Text>
+            <Text style={styles.infoValue}>{safeClientInfo.address}</Text>
+            <Text style={styles.infoValue}>{safeClientInfo.email}</Text>
+            <Text style={styles.infoValue}>{safeClientInfo.phone}</Text>
           </View>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Project Information</Text>
-            <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
-            <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
+            <Text style={styles.infoValue}>{safeQuoteInfo.projectName}</Text>
+            <Text style={styles.infoValue}>{safeQuoteInfo.projectAddress}</Text>
             <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
             <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
             <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
@@ -451,13 +470,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Additional Information</Text>
-            <Text style={styles.notes}>{quoteInfo.notes}</Text>
+            <Text style={styles.notes}>{safeQuoteInfo.notes}</Text>
           </View>
         </View>
 
         {/* Terms & Conditions */}
         <Text style={styles.subtitle}>Terms & Conditions</Text>
-        <Text style={styles.terms}>{quoteInfo.terms}</Text>
+        <Text style={styles.terms}>{safeQuoteInfo.terms}</Text>
 
         {/* Signature Section */}
         <View style={styles.signatureSection}>
@@ -479,7 +498,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</Text>
+          <Text>Thank you for your business! | {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}</Text>
           <Text style={{marginTop: 5, fontStyle: 'italic'}}>
             All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
           </Text>

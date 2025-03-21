@@ -164,7 +164,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           fileName={`Quote-${quoteInfo.quoteNumber}.pdf`}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
-          {({ loading }) => (loading ? 'Generating PDF...' : 'Download PDF')}
+          {({ loading, error }) => {
+            if (error) {
+              console.error("PDF generation error:", error);
+              return 'Error generating PDF';
+            }
+            return loading ? 'Generating PDF...' : 'Download PDF';
+          }}
         </PDFDownloadLink>
         <button 
           onClick={handleWordDownload}

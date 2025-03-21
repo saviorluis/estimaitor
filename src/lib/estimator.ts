@@ -161,10 +161,17 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Add window cleaning hours if applicable
   if (needsWindowCleaning) {
-    const totalWindows = (numberOfWindows || 0) + 
-                         (numberOfLargeWindows || 0) * 1.5 + 
-                         (numberOfHighAccessWindows || 0) * 2;
-    const windowCleaningHours = totalWindows / WINDOW_CLEANING_WINDOWS_PER_HOUR;
+    // Cap the number of windows to prevent unreasonably high hour estimates
+    const totalStandardWindows = Math.min(numberOfWindows || 0, 100);
+    const totalLargeWindows = Math.min(numberOfLargeWindows || 0, 50);
+    const totalHighAccessWindows = Math.min(numberOfHighAccessWindows || 0, 25);
+    
+    const totalWindows = totalStandardWindows + 
+                       (totalLargeWindows * 1.5) + 
+                       (totalHighAccessWindows * 2);
+                       
+    // Cap total window cleaning hours to a reasonable amount
+    const windowCleaningHours = Math.min(totalWindows / WINDOW_CLEANING_WINDOWS_PER_HOUR, 40);
     estimatedHours += windowCleaningHours;
   }
 
