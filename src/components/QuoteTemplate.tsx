@@ -604,22 +604,18 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
             {formData.cleaningType === 'complete' ? (
               <>
-                <p>Total Project Hours: {(estimateData.estimatedHours || 0)} hours</p>
                 <p>Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
                 <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
                 <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Rough Clean:</span> 30% of total hours - During construction</li>
-                  <li><span className="font-medium">Final Clean:</span> 40% of total hours - After construction completion</li>
-                  <li><span className="font-medium">Touch-up Clean:</span> 30% of total hours - Before client move-in/opening</li>
+                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                  <li><span className="font-medium">Touch-up Clean:</span> Before client move-in/opening</li>
                 </ul>
                 <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
               </>
             ) : (
               <>
-                <p>Estimated Hours: {(estimateData.estimatedHours || 0)} hours</p>
                 <p>Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
-                <p>Hours Per Cleaner: {((estimateData.estimatedHours || 0) / (formData.numberOfCleaners || 1)).toFixed(1)} hours</p>
-                <p>Estimated Completion: {Math.ceil((estimateData.estimatedHours || 0) / (8 * (formData.numberOfCleaners || 1)))} day(s)</p>
               </>
             )}
           </div>

@@ -285,20 +285,12 @@ export const generateQuoteDocx = async (
                         ],
                       }),
                       
-                      // For "complete" cleaning type, show the three-stage schedule
-                      formData.cleaningType === 'complete' 
-                      ? new Paragraph({
-                          children: [new TextRun(`Total Project Hours: ${estimateData.estimatedHours} hours`)],
-                        })
-                      : new Paragraph({
-                          children: [new TextRun(`Estimated Hours: ${estimateData.estimatedHours} hours`)],
-                        }),
-                        
+                      // For "complete" cleaning type, show the three-stage schedule without hours
                       new Paragraph({
                         children: [new TextRun(`Team Size: ${formData.numberOfCleaners} cleaners`)],
                       }),
                       
-                      // Add specific content for complete cleaning type
+                      // Add specific content for complete cleaning type without hours
                       ...(formData.cleaningType === 'complete' 
                         ? [
                             new Paragraph({
@@ -311,17 +303,17 @@ export const generateQuoteDocx = async (
                             }),
                             new Paragraph({
                               children: [
-                                new TextRun("• Rough Clean: 30% of total hours - During construction"),
+                                new TextRun("• Rough Clean: During construction"),
                               ],
                             }),
                             new Paragraph({
                               children: [
-                                new TextRun("• Final Clean: 40% of total hours - After construction completion"),
+                                new TextRun("• Final Clean: After construction completion"),
                               ],
                             }),
                             new Paragraph({
                               children: [
-                                new TextRun("• Touch-up Clean: 30% of total hours - Before client move-in/opening"),
+                                new TextRun("• Touch-up Clean: Before client move-in/opening"),
                               ],
                             }),
                             new Paragraph({
@@ -333,14 +325,7 @@ export const generateQuoteDocx = async (
                               ],
                             }),
                           ]
-                        : [
-                            new Paragraph({
-                              children: [new TextRun(`Hours Per Cleaner: ${(estimateData.estimatedHours / formData.numberOfCleaners).toFixed(1)} hours`)],
-                            }),
-                            new Paragraph({
-                              children: [new TextRun(`Estimated Completion: ${Math.ceil(estimateData.estimatedHours / (8 * formData.numberOfCleaners))} day(s)`)],
-                            }),
-                          ]
+                        : []
                       ),
                     ],
                   }),
