@@ -1,18 +1,21 @@
 import { ProjectType, CleaningType } from './types';
 
 // Base rate per square foot (in dollars)
-export const BASE_RATE_PER_SQFT = 0.15;
+export const BASE_RATE_PER_SQFT = 0.18;
 
 // Project type multipliers
 export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
-  restaurant: 1.3,
-  medical: 1.4,
+  restaurant: 1.4,
+  medical: 1.5,
   office: 1.0,
-  retail: 1.1,
-  industrial: 1.2,
-  educational: 1.15,
-  hotel: 1.35,
-  jewelry_store: 1.5
+  retail: 1.2,
+  industrial: 1.3,
+  educational: 1.25,
+  hotel: 1.45,
+  jewelry_store: 1.6,
+  apartment: 1.1,
+  warehouse: 1.2,
+  dormitory: 1.3
 };
 
 // Cleaning type multipliers
@@ -20,7 +23,7 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
   final: 1.0,
   powder_puff: 1.3,
-  complete: 2.0
+  complete: 2.2
 };
 
 // Cleaning type descriptions
@@ -36,26 +39,26 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
   final: 1.0,
   powder_puff: 1.4,
-  complete: 2.5
+  complete: 2.7
 };
 
 // VCT (Vinyl Composition Tile) additional cost per square foot
-export const VCT_COST_PER_SQFT = 0.10;
+export const VCT_COST_PER_SQFT = 0.15;
 
 // Travel cost per mile (accounting for round trip)
-export const TRAVEL_COST_PER_MILE = 0.65; // Standard business mileage rate
+export const TRAVEL_COST_PER_MILE = 0.75; // Updated business mileage rate
 
 // Hotel cost per night per room
-export const HOTEL_COST_PER_NIGHT = 150;
+export const HOTEL_COST_PER_NIGHT = 175;
 
 // Per diem rate per person per day
-export const PER_DIEM_PER_DAY = 75;
+export const PER_DIEM_PER_DAY = 85;
 
 // Pressure washing cost per square foot
-export const PRESSURE_WASHING_COST_PER_SQFT = 0.35;
+export const PRESSURE_WASHING_COST_PER_SQFT = 0.40;
 
 // Pressure washing equipment rental cost per day
-export const PRESSURE_WASHING_EQUIPMENT_RENTAL = 150;
+export const PRESSURE_WASHING_EQUIPMENT_RENTAL = 180;
 
 // Pressure washing productivity (square feet per hour)
 export const PRESSURE_WASHING_SQFT_PER_HOUR = 500;
@@ -63,15 +66,15 @@ export const PRESSURE_WASHING_SQFT_PER_HOUR = 500;
 // Urgency multipliers based on urgency level (1-10)
 export const URGENCY_MULTIPLIERS: Record<number, number> = {
   1: 1.00, // No rush
-  2: 1.03,
-  3: 1.06,
-  4: 1.09,
-  5: 1.12, // Medium urgency
-  6: 1.15,
-  7: 1.18,
-  8: 1.21,
-  9: 1.25,
-  10: 1.30 // Extremely urgent
+  2: 1.04,
+  3: 1.08,
+  4: 1.12,
+  5: 1.16, // Medium urgency
+  6: 1.20,
+  7: 1.24,
+  8: 1.28,
+  9: 1.32,
+  10: 1.40 // Extremely urgent
 };
 
 // Helper function to get recommended number of cleaners based on square footage
@@ -94,14 +97,17 @@ export const AVERAGE_MPG = 25;
 
 // Productivity rates (square feet per hour per cleaner)
 export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
-  restaurant: 500,
-  medical: 450,
-  office: 650,
-  retail: 600,
-  industrial: 800,
-  educational: 550,
-  hotel: 480,      // Hotels require more detailed cleaning of guest rooms
-  jewelry_store: 400  // Jewelry stores require meticulous attention to detail
+  restaurant: 450, // More detailed cleaning for health standards
+  medical: 400,    // Strict standards require more time
+  office: 600,
+  retail: 550,
+  industrial: 750,
+  educational: 500,
+  hotel: 425,      // More detailed cleaning of guest rooms
+  jewelry_store: 350,  // Requires meticulous detail work
+  apartment: 550,     // Similar to residential cleaning but larger scale
+  warehouse: 850,     // Large open spaces, more efficient cleaning
+  dormitory: 500      // Similar to hotel but with common areas and shared spaces
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -117,14 +123,14 @@ export const calculateUrgencyMultiplier = (urgencyLevel: number): number => {
 };
 
 // Window cleaning costs
-export const WINDOW_CLEANING_COST_PER_WINDOW = 15; // Base cost per standard window
-export const WINDOW_CLEANING_LARGE_WINDOW_MULTIPLIER = 1.5; // Multiplier for large windows
-export const WINDOW_CLEANING_HIGH_ACCESS_MULTIPLIER = 2.0; // Multiplier for windows requiring lifts/ladders
-export const WINDOW_CLEANING_WINDOWS_PER_HOUR = 6; // Average windows cleaned per hour
+export const WINDOW_CLEANING_COST_PER_WINDOW = 18; // Base cost per standard window
+export const WINDOW_CLEANING_LARGE_WINDOW_MULTIPLIER = 1.6; // Multiplier for large windows
+export const WINDOW_CLEANING_HIGH_ACCESS_MULTIPLIER = 2.2; // Multiplier for windows requiring lifts/ladders
+export const WINDOW_CLEANING_WINDOWS_PER_HOUR = 5; // Average windows cleaned per hour
 
 // Display case cleaning costs
-export const DISPLAY_CASE_CLEANING_COST = 25; // Cost per display case
-export const DISPLAY_CASE_TIME_PER_UNIT = 0.5; // Hours per display case
+export const DISPLAY_CASE_CLEANING_COST = 30; // Cost per display case
+export const DISPLAY_CASE_TIME_PER_UNIT = 0.6; // Hours per display case
 
 export const SCOPE_OF_WORK: { [key: string]: string } = {
   restaurant: "Final Cleaning includes:\n" +
@@ -203,5 +209,32 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Careful cleaning of display case tracks and locks\n" +
     "• Detailed cleaning of display lighting\n" +
     "• Cleaning and sanitizing of display case shelving\n" +
-    "Cost per display case: $25 (includes interior and exterior cleaning)"
+    "Cost per display case: $30 (includes interior and exterior cleaning)",
+    
+  apartment: "Final Cleaning includes:\n" +
+    "• Sweep/mop all hard surface floors and vacuum carpeted areas in units and common areas\n" +
+    "• Clean all windows in common areas and entrances\n" +
+    "• Clean light fixtures and perform hi-lo dusting throughout the property\n" +
+    "• Detail clean lobbies, mailrooms, and other shared spaces\n" +
+    "• Clean and sanitize common area restrooms and laundry facilities\n" +
+    "• Clean fitness centers and amenity spaces\n" +
+    "• Dust and clean all accessible surfaces in common areas",
+    
+  warehouse: "Final Cleaning includes:\n" +
+    "• Sweep/dust mop warehouse floors and clean office areas\n" +
+    "• Clean windows and entrance areas\n" +
+    "• Clean light fixtures and perform hi-lo dusting of accessible areas\n" +
+    "• Clean break rooms and bathroom facilities\n" +
+    "• Detail clean offices and meeting rooms\n" +
+    "• Clean accessible warehouse racking and storage areas\n" +
+    "• Special attention to loading dock and receiving areas",
+    
+  dormitory: "Final Cleaning includes:\n" +
+    "• Sweep/mop all hard surface floors and vacuum carpeted areas in rooms and common spaces\n" +
+    "• Clean all common area windows and entrance glass\n" +
+    "• Clean light fixtures and perform hi-lo dusting throughout the facility\n" +
+    "• Sanitize shared bathroom facilities and shower areas\n" +
+    "• Detail clean lounges, study areas, and communal kitchens\n" +
+    "• Clean and sanitize laundry facilities\n" +
+    "• Special attention to high-touch surfaces in all common areas"
 }; 

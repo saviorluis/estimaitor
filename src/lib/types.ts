@@ -1,4 +1,4 @@
-export type ProjectType = 'restaurant' | 'medical' | 'office' | 'retail' | 'industrial' | 'educational' | 'hotel' | 'jewelry_store';
+export type ProjectType = 'restaurant' | 'medical' | 'office' | 'retail' | 'industrial' | 'educational' | 'hotel' | 'jewelry_store' | 'apartment' | 'warehouse' | 'dormitory';
 
 export type CleaningType = 'rough' | 'final' | 'powder_puff' | 'complete';
 
