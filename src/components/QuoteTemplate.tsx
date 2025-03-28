@@ -35,7 +35,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       </div>
     );
   }
-  
+
   // Company information state
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "Big Brother Property Solutions",
@@ -45,7 +45,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     email: "bids@bigbroprops.com",
     website: "www.bigbrotherpropertysolutions.com"
   });
-  
+
   // State to track if company info is being edited
   const [editingCompanyInfo, setEditingCompanyInfo] = useState(false);
 
@@ -119,9 +119,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   };
 
-  // Handle print function
+  // Handle print function - add a slight delay to ensure styles are applied
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
+  // Create the print-friendly PDF button that shows explicit instructions
+  const handlePrintToPDF = () => {
+    alert(
+      "To save as PDF:\n\n" +
+      "1. In the print dialog that opens, select 'Save as PDF' as the destination/printer\n" +
+      "2. Click 'Save' to download the PDF file\n\n" +
+      "This will create a professionally formatted PDF of your quote."
+    );
+    handlePrint();
   };
 
   // Handle Word document download
@@ -141,35 +154,35 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
   };
 
+  useEffect(() => {
+    // Add a class to the body when component mounts for print-specific CSS
+    document.body.classList.add('quote-print-ready');
+    
+    // Remove it when component unmounts
+    return () => {
+      document.body.classList.remove('quote-print-ready');
+    };
+  }, []);
+
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0">
+    <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
       {/* Print and Download Buttons - Hidden when printing */}
       <div className="flex justify-end mb-6 print:hidden">
-        <button 
+        <button
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
         >
           Print Quote
         </button>
-        
-        {/* Replace the broken PDF download button with a button that explains how to save as PDF */}
+
         <button
-          onClick={() => {
-            alert(
-              "To save as PDF:\n\n" +
-              "1. Click the 'Print Quote' button\n" +
-              "2. In the print dialog, select 'Save as PDF' as the destination/printer\n" +
-              "3. Click 'Save' to download the PDF file\n\n" +
-              "This will create a properly formatted PDF of your quote."
-            );
-            handlePrint();
-          }}
+          onClick={handlePrintToPDF}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
           Save as PDF
         </button>
-        
-        <button 
+
+        <button
           onClick={handleWordDownload}
           className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
         >
@@ -181,14 +194,14 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       <div className="mb-6 print:hidden">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-semibold border-b pb-1">Your Company Information</h3>
-          <button 
+          <button
             onClick={() => setEditingCompanyInfo(!editingCompanyInfo)}
             className="text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
           >
             {editingCompanyInfo ? 'Done Editing' : 'Edit Company Info'}
           </button>
         </div>
-        
+
         {editingCompanyInfo ? (
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -417,8 +430,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </div>
       </div>
 
-      {/* Quote Preview */}
-      <div className="border p-8 rounded-lg">
+      {/* Quote Preview - This is what will be printed*/}
+      <div className="border p-8 rounded-lg print:border-0 print:p-0 print:shadow-none print:mt-0">
         {/* Header */}
         <div className="flex justify-between mb-8">
           <div>
@@ -430,59 +443,74 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <p className="text-sm">{companyInfo.website}</p>
           </div>
           <div className="text-right">
-            <h2 className="text-xl font-bold text-blue-600">QUOTE</h2>
+            <h2 className="text-xl font-bold text-blue-600 print:text-black">QUOTE</h2>
             <p className="text-sm">Quote #: {quoteInfo.quoteNumber}</p>
             <p className="text-sm">Date: {quoteInfo.date}</p>
             <p className="text-sm">Valid Until: {quoteInfo.validUntil}</p>
           </div>
         </div>
 
-        {/* Client and Project Information */}
+        {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
+        <div className="hidden print:block print:mb-8"></div>
+
+        {/* Client and Project Information - Ensure no empty placeholders in printed version */}
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
-            <p>{clientInfo.name || '[Client Name]'}</p>
-            <p>{clientInfo.company || '[Company]'}</p>
-            <p>{clientInfo.address || '[Address]'}</p>
-            <p>{clientInfo.email || '[Email]'}</p>
-            <p>{clientInfo.phone || '[Phone]'}</p>
+            <p className="print:hidden">{clientInfo.name || '[Client Name]'}</p>
+            <p className="print:hidden">{clientInfo.company || '[Company]'}</p>
+            <p className="print:hidden">{clientInfo.address || '[Address]'}</p>
+            <p className="print:hidden">{clientInfo.email || '[Email]'}</p>
+            <p className="print:hidden">{clientInfo.phone || '[Phone]'}</p>
+            
+            {/* Only show in printed version if data is available */}
+            <p className="hidden print:block">{clientInfo.name ? clientInfo.name : ''}</p>
+            <p className="hidden print:block">{clientInfo.company ? clientInfo.company : ''}</p>
+            <p className="hidden print:block">{clientInfo.address ? clientInfo.address : ''}</p>
+            <p className="hidden print:block">{clientInfo.email ? clientInfo.email : ''}</p>
+            <p className="hidden print:block">{clientInfo.phone ? clientInfo.phone : ''}</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
-            <p>{quoteInfo.projectName || '[Project Name]'}</p>
-            <p>{quoteInfo.projectAddress || '[Project Address]'}</p>
+            <p className="print:hidden">{quoteInfo.projectName || '[Project Name]'}</p>
+            <p className="print:hidden">{quoteInfo.projectAddress || '[Project Address]'}</p>
+            
+            {/* Only show in printed version if data is available */}
+            <p className="hidden print:block">{quoteInfo.projectName ? quoteInfo.projectName : ''}</p>
+            <p className="hidden print:block">{quoteInfo.projectAddress ? quoteInfo.projectAddress : ''}</p>
+            
             <p>Project Type: {getProjectTypeDisplay(formData.projectType)}</p>
             <p>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
             <p>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</p>
           </div>
         </div>
 
-        {/* Service Details */}
+        {/* Service Details - Enhance table for printing */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold mb-2 border-b pb-1">Service Details</h3>
-          
+
           {/* Scope of Work */}
-          <div className="mb-4 p-4 bg-gray-50 rounded">
+          <div className="mb-4 p-4 bg-gray-50 print:bg-white rounded">
             <h4 className="font-semibold mb-2">Scope of Work</h4>
             <p className="whitespace-pre-line text-sm">
               {SCOPE_OF_WORK[formData.projectType] || ''} ({(formData.squareFootage || 0).toLocaleString()} sq ft)
             </p>
           </div>
 
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse print:border print:border-gray-300">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">Description</th>
-                <th className="border p-2 text-right">Amount</th>
+              <tr className="bg-gray-100 print:bg-gray-50">
+                <th className="border p-2 text-left print:font-bold">Description</th>
+                <th className="border p-2 text-right print:font-bold">Amount</th>
               </tr>
             </thead>
             <tbody>
               {/* Base Cleaning Service */}
               <tr>
-                <td className="border p-2">
+                <td className="border p-2 print:border print:border-gray-300">
                   <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
                 </td>
-                <td className="border p-2 text-right">
+                <td className="border p-2 text-right print:border print:border-gray-300">
                   {formatCurrency((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1))}
                 </td>
               </tr>
@@ -490,11 +518,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               {/* VCT Flooring if applicable */}
               {formData.hasVCT && (
                 <tr>
-                  <td className="border p-2">
+                  <td className="border p-2 print:border print:border-gray-300">
                     <div className="font-semibold">VCT Flooring Treatment</div>
                     <div className="text-sm">Stripping, waxing, and buffing of vinyl composition tile</div>
                   </td>
-                  <td className="border p-2 text-right">{formatCurrency(estimateData.vctCost)}</td>
+                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(estimateData.vctCost)}</td>
                 </tr>
               )}
 
@@ -541,7 +569,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <td className="border p-2 text-right">
                     {formatCurrency(
                       (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-                      (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) * 
+                        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
                       ((estimateData.urgencyMultiplier || 1) - 1)
                     )}
                   </td>
@@ -594,7 +622,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               </tr>
             </tbody>
           </table>
-          
+
           {/* Remove the markup note and replace with a general note */}
           <div className="mt-2 text-sm italic text-gray-600">
             <p>Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.</p>

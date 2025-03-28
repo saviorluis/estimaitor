@@ -1,0 +1,55 @@
+/* Add these print-specific styles at the end of the file */
+@media print {
+  /* Hide the rest of the UI when printing */
+  body:not(.quote-print-ready) * {
+    display: none !important;
+  }
+  
+  /* Style adjustments for printed quote */
+  body {
+    font-family: Arial, sans-serif;
+    color: black;
+    background: white;
+  }
+  
+  /* Ensure borders are visible */
+  .print\:border {
+    border: 1px solid #ddd !important;
+  }
+  
+  /* Page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+  
+  /* Table styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* Header and footer margin adjustments */
+  @page {
+    margin: 0.5in;
+  }
+  
+  /* Font adjustments */
+  h1, h2, h3, h4, h5, h6 {
+    color: black;
+  }
+  
+  /* Better spacing */
+  p {
+    margin-bottom: 0.25rem;
+  }
+} 
