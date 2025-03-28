@@ -166,7 +166,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 type="text"
                 id="clientName"
                 {...register('clientName')}
-                className="form-input"
+                className="form-input text-gray-800 dark:text-white"
                 placeholder="Enter client name"
               />
             </div>
@@ -178,7 +178,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 type="text"
                 id="projectName"
                 {...register('projectName')}
-                className="form-input"
+                className="form-input text-gray-800 dark:text-white"
                 placeholder="Enter project name"
               />
             </div>
