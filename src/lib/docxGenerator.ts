@@ -482,7 +482,7 @@ export const generateQuoteDocx = async (
                             }),
                             new Paragraph({
                               alignment: AlignmentType.CENTER,
-                              bullets: {
+                              bullet: {
                                 level: 0,
                               },
                               children: [
@@ -494,7 +494,7 @@ export const generateQuoteDocx = async (
                             }),
                             new Paragraph({
                               alignment: AlignmentType.CENTER,
-                              bullets: {
+                              bullet: {
                                 level: 0,
                               },
                               children: [
@@ -506,7 +506,7 @@ export const generateQuoteDocx = async (
                             }),
                             new Paragraph({
                               alignment: AlignmentType.CENTER,
-                              bullets: {
+                              bullet: {
                                 level: 0, 
                               },
                               children: [
