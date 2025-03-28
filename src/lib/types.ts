@@ -22,6 +22,8 @@ export interface FormData {
   numberOfLargeWindows: number;
   numberOfHighAccessWindows: number;
   numberOfDisplayCases: number;
+  clientName?: string;
+  projectName?: string;
 }
 
 export interface EstimateData {

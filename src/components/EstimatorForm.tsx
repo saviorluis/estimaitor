@@ -152,6 +152,39 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     <div>
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white border-b pb-2">Project Details</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Client Information Section - Add at the beginning of the form */}
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-700 dark:text-gray-200">
+            Client Information
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-field">
+              <label htmlFor="clientName" className="form-label">
+                Client Name
+              </label>
+              <input
+                type="text"
+                id="clientName"
+                {...register('clientName')}
+                className="form-input"
+                placeholder="Enter client name"
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="projectName" className="form-label">
+                Project Name
+              </label>
+              <input
+                type="text"
+                id="projectName"
+                {...register('projectName')}
+                className="form-input"
+                placeholder="Enter project name"
+              />
+            </div>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Project Type
