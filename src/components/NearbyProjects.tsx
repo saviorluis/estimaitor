@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
+// Define the project interface
 interface Project {
-  id: string;
+  id: number;
   name: string;
   type: string;
   address: string;
@@ -10,90 +11,104 @@ interface Project {
   imageUrl: string;
 }
 
-const NearbyProjects = () => {
+const NearbyProjects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
-    // Get user's location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          fetchNearbyProjects(position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          // Load sample data if location access is denied
-          loadSampleProjects();
+    const loadProjects = async () => {
+      try {
+        // Get user's location if browser supports it
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setUserCoords({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              });
+              
+              // Get fake project data regardless of location
+              setProjects(getFakeProjects());
+              setLoading(false);
+            },
+            (error) => {
+              console.error("Error getting location:", error);
+              // Still load projects even if location is denied
+              setLocationError("Location access denied. Showing general projects instead.");
+              setProjects(getFakeProjects());
+              setLoading(false);
+            },
+            { timeout: 10000 }
+          );
+        } else {
+          // Browser doesn't support geolocation
+          setLocationError("Your browser doesn't support geolocation. Showing general projects instead.");
+          setProjects(getFakeProjects());
           setLoading(false);
         }
-      );
-    } else {
-      // Geolocation not supported
-      loadSampleProjects();
-      setLoading(false);
-    }
+      } catch (error) {
+        console.error("Error loading projects:", error);
+        setProjects(getFakeProjects());
+        setLoading(false);
+      }
+    };
+
+    loadProjects();
   }, []);
 
-  const fetchNearbyProjects = async (lat: number, lng: number) => {
-    // In a real app, this would be an API call to fetch nearby projects
-    // For now, we'll simulate with sample data
-    loadSampleProjects();
-    setLoading(false);
-  };
-
-  const loadSampleProjects = () => {
+  const getFakeProjects = (): Project[] => {
     // Sample data for demonstration
-    const sampleProjects: Project[] = [
+    return [
       {
-        id: '1',
-        name: 'Downtown Office Complex',
-        type: 'Office Space',
-        address: '123 Business Ave, Charlotte, NC',
+        id: 1,
+        name: "Downtown Office Building",
+        type: "Office Space",
+        address: "123 Business Ave, Charlotte, NC",
         distance: 2.3,
-        completionDate: '2023-03-15',
-        imageUrl: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
+        completionDate: "2023-05-15",
+        imageUrl: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=500"
       },
       {
-        id: '2',
-        name: 'Riverside Medical Center',
-        type: 'Medical Facility',
-        address: '456 Health Blvd, Raleigh, NC',
-        distance: 3.7,
-        completionDate: '2023-04-10',
-        imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
+        id: 2,
+        name: "Green Valley Medical Center",
+        type: "Healthcare Facility",
+        address: "456 Health Dr, Raleigh, NC",
+        distance: 3.1,
+        completionDate: "2023-04-22",
+        imageUrl: "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=500"
       },
       {
-        id: '3',
-        name: 'Gourmet Restaurant & Bar',
-        type: 'Restaurant',
-        address: '789 Culinary St, Atlanta, GA',
-        distance: 5.1,
-        completionDate: '2023-02-28',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
+        id: 3,
+        name: "Riverside Restaurant",
+        type: "Restaurant",
+        address: "789 River Rd, Charleston, SC",
+        distance: 4.5,
+        completionDate: "2023-06-03",
+        imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=500"
       },
       {
-        id: '4',
-        name: 'Luxury Jewelry Boutique',
-        type: 'Jewelry Store',
-        address: '101 Diamond Rd, Charleston, SC',
-        distance: 4.8,
-        completionDate: '2023-05-05',
-        imageUrl: 'https://images.unsplash.com/photo-1465014925804-7b9ede58d0d7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3'
+        id: 4,
+        name: "Tech Park Building C",
+        type: "Office Space",
+        address: "101 Innovation Way, Atlanta, GA",
+        distance: 5.8,
+        completionDate: "2023-05-30",
+        imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=500"
       }
     ];
-    
-    setProjects(sampleProjects);
   };
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
       <h2 className="text-2xl font-bold text-indigo-700 dark:text-indigo-400 mb-6">Nearby Projects</h2>
+      
+      {locationError && (
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded text-sm text-yellow-800 dark:text-yellow-300">
+          {locationError}
+        </div>
+      )}
       
       {loading ? (
         <div className="flex justify-center items-center h-64">

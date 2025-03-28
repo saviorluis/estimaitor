@@ -51,6 +51,28 @@ export default function Home() {
     window.location.reload();
   };
 
+  // Add a loading state to prevent rendering until data is loaded
+  if (!isLoaded) {
+    return (
+      <main className="flex flex-col min-h-screen">
+        <header className="py-8 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-xl shadow-lg mb-8">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">EstimAItor</h1>
+            <p className="text-xl text-indigo-100">
+              AI Commercial Cleaning Estimator for Construction Projects
+            </p>
+          </div>
+        </header>
+        <div className="container mx-auto px-4 flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">Loading application...</p>
+            <div className="animate-pulse w-16 h-16 mx-auto rounded-full bg-indigo-400"></div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex flex-col min-h-screen">
       <header className="py-8 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-xl shadow-lg mb-8">

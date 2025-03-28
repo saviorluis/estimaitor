@@ -77,12 +77,28 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
     fetchRecommendations();
   }, [estimateData, formData]);
 
-  const formatCurrency = (value: number): string => {
-    return value.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
+  // Early return if data is not available
+  if (!estimateData || !formData) {
+    return (
+      <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          Loading estimate data...
+        </h2>
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Safe function to format currency with null checks
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null) return '$0.00';
+    return '$' + value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
   };
 
