@@ -151,27 +151,32 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         >
           Print Quote
         </button>
-        <PDFDownloadLink
-          document={
-            <QuotePDF 
-              estimateData={estimateData} 
-              formData={formData} 
-              companyInfo={companyInfo} 
-              clientInfo={clientInfo} 
-              quoteInfo={quoteInfo} 
-            />
-          }
-          fileName={`Quote-${quoteInfo.quoteNumber}.pdf`}
+        <button
+          onClick={() => {
+            try {
+              const blob = new Blob([JSON.stringify({
+                estimateData,
+                formData,
+                companyInfo,
+                clientInfo,
+                quoteInfo
+              })], { type: 'application/json' });
+              
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = `Quote-${quoteInfo.quoteNumber}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } catch (error) {
+              console.error("Error generating PDF:", error);
+              alert("There was an error generating the PDF. You can try the Print option instead.");
+            }
+          }}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
-          {({ loading, error }) => {
-            if (error) {
-              console.error("PDF generation error:", error);
-              return 'Error generating PDF';
-            }
-            return loading ? 'Generating PDF...' : 'Download PDF';
-          }}
-        </PDFDownloadLink>
+          Download PDF
+        </button>
         <button 
           onClick={handleWordDownload}
           className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
