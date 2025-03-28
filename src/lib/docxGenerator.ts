@@ -59,9 +59,74 @@ export const generateQuoteDocx = async (
 
   // Create a new document
   const doc = new Document({
+    styles: {
+      paragraphStyles: [
+        {
+          id: "Normal",
+          name: "Normal",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: {
+            size: 24,
+            font: "Calibri",
+          },
+          paragraph: {
+            spacing: {
+              line: 276,
+            },
+          },
+        },
+        {
+          id: "Heading1",
+          name: "Heading 1",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: {
+            size: 32,
+            bold: true,
+            color: "2E74B5",
+          },
+          paragraph: {
+            spacing: {
+              before: 240,
+              after: 120,
+            },
+          },
+        },
+        {
+          id: "Heading2",
+          name: "Heading 2",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: {
+            size: 28,
+            bold: true,
+            color: "2E74B5",
+          },
+          paragraph: {
+            spacing: {
+              before: 240,
+              after: 120,
+            },
+          },
+        },
+      ],
+    },
     sections: [
       {
-        properties: {},
+        properties: {
+          page: {
+            margin: {
+              top: 720,
+              right: 720,
+              bottom: 720,
+              left: 720,
+            },
+          },
+        },
         children: [
           // Header with company and quote info
           
@@ -71,6 +136,14 @@ export const generateQuoteDocx = async (
               size: 100,
               type: WidthType.PERCENTAGE,
             },
+            borders: {
+              top: { style: BorderStyle.NONE },
+              bottom: { style: BorderStyle.NONE },
+              left: { style: BorderStyle.NONE },
+              right: { style: BorderStyle.NONE },
+              insideHorizontal: { style: BorderStyle.NONE },
+              insideVertical: { style: BorderStyle.NONE },
+            },
             rows: [
               new TableRow({
                 children: [
@@ -79,30 +152,48 @@ export const generateQuoteDocx = async (
                       size: 50,
                       type: WidthType.PERCENTAGE,
                     },
+                    verticalAlign: AlignmentType.CENTER,
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
                     children: [
                       new Paragraph({
+                        alignment: AlignmentType.LEFT,
+                        spacing: {
+                          before: 120,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: companyInfo.name,
                             bold: true,
-                            size: 24,
+                            size: 32,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({
-                        children: [new TextRun(companyInfo.address)],
+                        alignment: AlignmentType.LEFT,
+                        children: [new TextRun({ text: companyInfo.address, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(companyInfo.city)],
+                        alignment: AlignmentType.LEFT,
+                        children: [new TextRun({ text: companyInfo.city, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(companyInfo.phone)],
+                        alignment: AlignmentType.LEFT,
+                        children: [new TextRun({ text: companyInfo.phone, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(companyInfo.email)],
+                        alignment: AlignmentType.LEFT,
+                        children: [new TextRun({ text: companyInfo.email, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(companyInfo.website)],
+                        alignment: AlignmentType.LEFT,
+                        children: [new TextRun({ text: companyInfo.website, size: 24 })],
                       }),
                     ],
                   }),
@@ -111,29 +202,40 @@ export const generateQuoteDocx = async (
                       size: 50,
                       type: WidthType.PERCENTAGE,
                     },
+                    verticalAlign: AlignmentType.CENTER,
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
                     children: [
                       new Paragraph({
                         alignment: AlignmentType.RIGHT,
+                        spacing: {
+                          before: 120,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "QUOTE",
                             bold: true,
-                            size: 32,
-                            color: "0066CC",
+                            size: 40,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.RIGHT,
-                        children: [new TextRun(`Quote #: ${quoteInfo.quoteNumber}`)],
+                        children: [new TextRun({ text: `Quote #: ${quoteInfo.quoteNumber}`, size: 24 })],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.RIGHT,
-                        children: [new TextRun(`Date: ${quoteInfo.date}`)],
+                        children: [new TextRun({ text: `Date: ${quoteInfo.date}`, size: 24 })],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.RIGHT,
-                        children: [new TextRun(`Valid Until: ${quoteInfo.validUntil}`)],
+                        children: [new TextRun({ text: `Valid Until: ${quoteInfo.validUntil}`, size: 24 })],
                       }),
                     ],
                   }),
@@ -152,6 +254,14 @@ export const generateQuoteDocx = async (
               size: 100,
               type: WidthType.PERCENTAGE,
             },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              bottom: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              left: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              right: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+            },
             rows: [
               new TableRow({
                 children: [
@@ -160,30 +270,52 @@ export const generateQuoteDocx = async (
                       size: 50,
                       type: WidthType.PERCENTAGE,
                     },
+                    shading: {
+                      fill: "F9F9F9",
+                    },
+                    margins: {
+                      top: 100,
+                      bottom: 100,
+                      left: 100,
+                      right: 100,
+                    },
                     children: [
                       new Paragraph({
                         heading: HeadingLevel.HEADING_2,
+                        alignment: AlignmentType.CENTER,
+                        thematicBreak: true,
+                        spacing: {
+                          before: 120,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "Client Information",
                             bold: true,
+                            size: 28,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({
-                        children: [new TextRun(clientInfo.name || "[Client Name]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: clientInfo.name || "[Client Name]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(clientInfo.company || "[Company]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: clientInfo.company || "[Company]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(clientInfo.address || "[Address]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: clientInfo.address || "[Address]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(clientInfo.email || "[Email]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: clientInfo.email || "[Email]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(clientInfo.phone || "[Phone]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: clientInfo.phone || "[Phone]", size: 24 })],
                       }),
                     ],
                   }),
@@ -192,30 +324,52 @@ export const generateQuoteDocx = async (
                       size: 50,
                       type: WidthType.PERCENTAGE,
                     },
+                    shading: {
+                      fill: "F9F9F9",
+                    },
+                    margins: {
+                      top: 100,
+                      bottom: 100,
+                      left: 100,
+                      right: 100,
+                    },
                     children: [
                       new Paragraph({
                         heading: HeadingLevel.HEADING_2,
+                        alignment: AlignmentType.CENTER,
+                        thematicBreak: true,
+                        spacing: {
+                          before: 120,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "Project Information",
                             bold: true,
+                            size: 28,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({
-                        children: [new TextRun(quoteInfo.projectName || "[Project Name]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: quoteInfo.projectName || "[Project Name]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(quoteInfo.projectAddress || "[Project Address]")],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: quoteInfo.projectAddress || "[Project Address]", size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(`Project Type: ${getProjectTypeDisplay(formData.projectType)}`)],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: `Project Type: ${getProjectTypeDisplay(formData.projectType)}`, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(`Square Footage: ${(formData.squareFootage || 0).toLocaleString()} sq ft`)],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: `Square Footage: ${(formData.squareFootage || 0).toLocaleString()} sq ft`, size: 24 })],
                       }),
                       new Paragraph({
-                        children: [new TextRun(`Cleaning Type: ${getCleaningTypeDisplay(formData.cleaningType)}`)],
+                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: `Cleaning Type: ${getCleaningTypeDisplay(formData.cleaningType)}`, size: 24 })],
                       }),
                     ],
                   }),
@@ -266,6 +420,14 @@ export const generateQuoteDocx = async (
               size: 100,
               type: WidthType.PERCENTAGE,
             },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              bottom: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              left: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              right: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+            },
             rows: [
               new TableRow({
                 children: [
@@ -274,13 +436,29 @@ export const generateQuoteDocx = async (
                       size: 50,
                       type: WidthType.PERCENTAGE,
                     },
+                    shading: {
+                      fill: "F9F9F9",
+                    },
+                    margins: {
+                      top: 100,
+                      bottom: 100,
+                      left: 100,
+                      right: 100,
+                    },
                     children: [
                       new Paragraph({
                         heading: HeadingLevel.HEADING_2,
+                        alignment: AlignmentType.CENTER,
+                        spacing: {
+                          before: 120,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "Project Timeline",
                             bold: true,
+                            size: 28,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
@@ -289,40 +467,77 @@ export const generateQuoteDocx = async (
                       ...(formData.cleaningType === 'complete' 
                         ? [
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              spacing: {
+                                before: 100,
+                                after: 100,
+                              },
                               children: [
                                 new TextRun({
                                   text: "Three-Stage Cleaning Schedule:",
                                   bold: true,
+                                  size: 24,
                                 }),
                               ],
                             }),
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              bullets: {
+                                level: 0,
+                              },
                               children: [
-                                new TextRun("• Rough Clean: During construction"),
+                                new TextRun({
+                                  text: "Rough Clean: During construction",
+                                  size: 24,
+                                }),
                               ],
                             }),
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              bullets: {
+                                level: 0,
+                              },
                               children: [
-                                new TextRun("• Final Clean: After construction completion"),
+                                new TextRun({
+                                  text: "Final Clean: After construction completion",
+                                  size: 24,
+                                }),
                               ],
                             }),
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              bullets: {
+                                level: 0, 
+                              },
                               children: [
-                                new TextRun("• Touch-up Clean: Before client move-in/opening"),
+                                new TextRun({
+                                  text: "Touch-up Clean: Before client move-in/opening",
+                                  size: 24,
+                                }),
                               ],
                             }),
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              spacing: {
+                                before: 100,
+                              },
                               children: [
                                 new TextRun({
                                   text: "Note: These cleaning phases are performed at different stages during the construction timeline.",
                                   italics: true,
+                                  size: 24,
+                                  color: "666666",
                                 }),
                               ],
                             }),
                           ]
                         : [
                             new Paragraph({
-                              children: [new TextRun(`Team Size: ${formData.numberOfCleaners} cleaners`)],
+                              alignment: AlignmentType.CENTER,
+                              children: [new TextRun({ 
+                                text: `Team Size: ${formData.numberOfCleaners} cleaners`,
+                                size: 24,
+                              })],
                             }),
                           ]
                       ),
@@ -359,17 +574,37 @@ export const generateQuoteDocx = async (
           // Terms & Conditions
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
+            alignment: AlignmentType.CENTER,
+            spacing: {
+              before: 240,
+              after: 120,
+            },
             children: [
               new TextRun({
                 text: "Terms & Conditions",
                 bold: true,
+                size: 28,
+                color: "2E74B5",
               }),
             ],
           }),
           
           ...quoteInfo.terms.split('\n').map(line => 
             new Paragraph({
-              children: [new TextRun(line)],
+              alignment: AlignmentType.LEFT,
+              spacing: {
+                before: 60,
+                after: 60,
+              },
+              indent: {
+                left: 360,
+              },
+              children: [
+                new TextRun({
+                  text: line,
+                  size: 24,
+                }),
+              ],
             })
           ),
           
@@ -383,6 +618,14 @@ export const generateQuoteDocx = async (
               size: 100,
               type: WidthType.PERCENTAGE,
             },
+            borders: {
+              top: { style: BorderStyle.NONE },
+              bottom: { style: BorderStyle.NONE },
+              left: { style: BorderStyle.NONE },
+              right: { style: BorderStyle.NONE },
+              insideHorizontal: { style: BorderStyle.NONE },
+              insideVertical: { style: BorderStyle.NONE },
+            },
             rows: [
               new TableRow({
                 children: [
@@ -391,30 +634,67 @@ export const generateQuoteDocx = async (
                       size: 45,
                       type: WidthType.PERCENTAGE,
                     },
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
                     children: [
                       new Paragraph({
                         heading: HeadingLevel.HEADING_2,
+                        alignment: AlignmentType.CENTER,
+                        spacing: {
+                          before: 240,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "Acceptance",
                             bold: true,
+                            size: 28,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({ text: "" }),
                       new Paragraph({ text: "" }),
                       new Paragraph({
-                        children: [new TextRun("_______________________________")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "____________________________________",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({
-                        children: [new TextRun("Client Signature")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "Client Signature",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({ text: "" }),
                       new Paragraph({
-                        children: [new TextRun("_______________________________")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "____________________________________",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({
-                        children: [new TextRun("Date")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "Date",
+                            size: 24,
+                          }),
+                        ],
                       }),
                     ],
                   }),
@@ -423,6 +703,12 @@ export const generateQuoteDocx = async (
                       size: 10,
                       type: WidthType.PERCENTAGE,
                     },
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
                     children: [new Paragraph({ text: "" })],
                   }),
                   new TableCell({
@@ -430,30 +716,67 @@ export const generateQuoteDocx = async (
                       size: 45,
                       type: WidthType.PERCENTAGE,
                     },
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
                     children: [
                       new Paragraph({
                         heading: HeadingLevel.HEADING_2,
+                        alignment: AlignmentType.CENTER,
+                        spacing: {
+                          before: 240,
+                          after: 120,
+                        },
                         children: [
                           new TextRun({
                             text: "Provider",
                             bold: true,
+                            size: 28,
+                            color: "2E74B5",
                           }),
                         ],
                       }),
                       new Paragraph({ text: "" }),
                       new Paragraph({ text: "" }),
                       new Paragraph({
-                        children: [new TextRun("_______________________________")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "____________________________________",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({
-                        children: [new TextRun("Authorized Signature")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "Authorized Signature",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({ text: "" }),
                       new Paragraph({
-                        children: [new TextRun("_______________________________")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "____________________________________",
+                            size: 24,
+                          }),
+                        ],
                       }),
                       new Paragraph({
-                        children: [new TextRun("Date")],
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                          new TextRun({
+                            text: "Date",
+                            size: 24,
+                          }),
+                        ],
                       }),
                     ],
                   }),
@@ -467,11 +790,17 @@ export const generateQuoteDocx = async (
           new Paragraph({ text: "" }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
+            thematicBreak: true,
+            spacing: {
+              before: 240,
+              after: 120,
+            },
             children: [
               new TextRun({
-                text: `Thank you for your business! | ${companyInfo.name} | ${companyInfo.phone} | ${companyInfo.email}`,
-                size: 18,
-                color: "666666",
+                text: `Thank you for your business!`,
+                size: 28,
+                bold: true,
+                color: "2E74B5",
               }),
             ],
           }),
@@ -479,8 +808,22 @@ export const generateQuoteDocx = async (
             alignment: AlignmentType.CENTER,
             children: [
               new TextRun({
+                text: `${companyInfo.name} | ${companyInfo.phone} | ${companyInfo.email}`,
+                size: 24,
+                color: "666666",
+              }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: {
+              before: 120,
+              after: 240,
+            },
+            children: [
+              new TextRun({
                 text: "All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.",
-                size: 18,
+                size: 22,
                 color: "666666",
                 italics: true,
               }),
@@ -510,14 +853,22 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             type: WidthType.PERCENTAGE,
           },
           shading: {
-            fill: "F0F0F0",
+            fill: "E6E6E6",
+          },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
           },
           children: [
             new Paragraph({
+              alignment: AlignmentType.CENTER,
               children: [
                 new TextRun({
                   text: "Description",
                   bold: true,
+                  size: 24,
                 }),
               ],
             }),
@@ -529,15 +880,22 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             type: WidthType.PERCENTAGE,
           },
           shading: {
-            fill: "F0F0F0",
+            fill: "E6E6E6",
+          },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "AAAAAA" },
           },
           children: [
             new Paragraph({
-              alignment: AlignmentType.RIGHT,
+              alignment: AlignmentType.CENTER,
               children: [
                 new TextRun({
                   text: "Amount",
                   bold: true,
+                  size: 24,
                 }),
               ],
             }),
@@ -931,14 +1289,23 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       children: [
         new TableCell({
           shading: {
-            fill: "E6F0FF",
+            fill: "2E74B5",
+          },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
           },
           children: [
             new Paragraph({
+              alignment: AlignmentType.LEFT,
               children: [
                 new TextRun({
                   text: "TOTAL",
                   bold: true,
+                  size: 28,
+                  color: "FFFFFF",
                 }),
               ],
             }),
@@ -946,7 +1313,13 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
         }),
         new TableCell({
           shading: {
-            fill: "E6F0FF",
+            fill: "2E74B5",
+          },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            bottom: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            left: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
+            right: { style: BorderStyle.SINGLE, size: 2, color: "2E74B5" },
           },
           children: [
             new Paragraph({
@@ -955,6 +1328,8 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
                 new TextRun({
                   text: formatCurrency(estimateData.totalPrice),
                   bold: true,
+                  size: 28,
+                  color: "FFFFFF",
                 }),
               ],
             }),
