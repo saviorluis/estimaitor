@@ -151,32 +151,24 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         >
           Print Quote
         </button>
+        
+        {/* Replace the broken PDF download button with a button that explains how to save as PDF */}
         <button
           onClick={() => {
-            try {
-              const blob = new Blob([JSON.stringify({
-                estimateData,
-                formData,
-                companyInfo,
-                clientInfo,
-                quoteInfo
-              })], { type: 'application/json' });
-              
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = `Quote-${quoteInfo.quoteNumber}.pdf`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            } catch (error) {
-              console.error("Error generating PDF:", error);
-              alert("There was an error generating the PDF. You can try the Print option instead.");
-            }
+            alert(
+              "To save as PDF:\n\n" +
+              "1. Click the 'Print Quote' button\n" +
+              "2. In the print dialog, select 'Save as PDF' as the destination/printer\n" +
+              "3. Click 'Save' to download the PDF file\n\n" +
+              "This will create a properly formatted PDF of your quote."
+            );
+            handlePrint();
           }}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
-          Download PDF
+          Save as PDF
         </button>
+        
         <button 
           onClick={handleWordDownload}
           className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
