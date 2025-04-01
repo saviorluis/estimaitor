@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   },
   subtotalText: {
     fontWeight: 'bold',
-    fontSize: 11,
+    fontSize: 10,
   },
   totalText: {
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 11,
   },
 });
 
@@ -417,18 +417,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.subtotalText}>Subtotal</Text>
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
-
-          {/* Markup if applicable */}
-          {formData.applyMarkup && (
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>{formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}</Text>
-              </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(estimateData.markup)}</Text>
-              </View>
-            </View>
-          )}
 
           {/* Sales Tax */}
           <View style={styles.row}>
