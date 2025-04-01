@@ -319,6 +319,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.tableRow}>
             <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+              <Text style={{fontSize: 9, marginTop: 5}}>
+                {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || PROJECT_SCOPES.default.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`)}
+              </Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
               <Text>{formatCurrency(estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier)}</Text>
@@ -451,12 +454,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={styles.infoValue}>• Touch-up Clean: Before client move-in/opening</Text>
                 <Text style={{...styles.infoValue, fontStyle: 'italic', marginTop: 5, fontSize: 9}}>
                   Note: These cleaning phases are performed at different stages during the construction timeline.
-                </Text>
-                
-                {/* Scope of Work */}
-                <Text style={{...styles.infoValue, fontWeight: 'bold', marginTop: 10}}>Scope of Work:</Text>
-                <Text style={{...styles.infoValue, fontSize: 9}}>
-                  {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || PROJECT_SCOPES.default.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`)}
                 </Text>
               </>
             ) : (
