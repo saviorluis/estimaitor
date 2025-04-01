@@ -24,6 +24,9 @@ interface QuoteTemplateProps {
 }
 
 const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData }) => {
+  // State for custom markup percentage
+  const [markupPercentage, setMarkupPercentage] = useState<number>(0);
+  const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
     return (
@@ -103,6 +106,128 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     setQuoteInfo(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle markup percentage change
+  const handleMarkupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    setMarkupPercentage(isNaN(value) ? 0 : value);
+  };
+
+  // Calculate adjusted prices with markup
+  useEffect(() => {
+    if (!estimateData) return;
+
+    // Get all the line items
+    const lineItems = [
+      {
+        key: 'basePrice',
+        value: (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)
+      }
+    ];
+
+    if (formData.hasVCT) {
+      lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
+    }
+
+    if (formData.needsPressureWashing) {
+      lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
+    }
+
+    lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
+
+    if (formData.stayingOvernight) {
+      lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
+    }
+
+    if (estimateData.urgencyMultiplier > 1) {
+      const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+        ((estimateData.urgencyMultiplier || 1) - 1);
+      lineItems.push({ key: 'urgencyCost', value: urgencyCost });
+    }
+
+    if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+      lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
+    }
+
+    // Calculate total before markup
+    const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
+    
+    // If markup percentage is 0, use original prices
+    if (markupPercentage === 0) {
+      setAdjustedPrices({});
+      return;
+    }
+
+    // Calculate markup amount
+    const markupAmount = totalBeforeMarkup * (markupPercentage / 100);
+    
+    // Distribute markup proportionally
+    const adjustedPrices: {[key: string]: number} = {};
+    lineItems.forEach(item => {
+      const proportion = item.value / totalBeforeMarkup;
+      const itemMarkup = markupAmount * proportion;
+      adjustedPrices[item.key] = item.value + itemMarkup;
+    });
+
+    setAdjustedPrices(adjustedPrices);
+  }, [estimateData, formData, markupPercentage]);
+
+  // Get adjusted price for a line item
+  const getAdjustedPrice = (key: string, originalPrice: number): number => {
+    return adjustedPrices[key] !== undefined ? adjustedPrices[key] : originalPrice;
+  };
+
+  // Calculate adjusted total
+  const calculateAdjustedTotal = (): number => {
+    if (!estimateData || Object.keys(adjustedPrices).length === 0) {
+      return estimateData?.totalPrice || 0;
+    }
+
+    // Sum all adjusted prices
+    let subtotal = 0;
+    
+    // Base price
+    subtotal += getAdjustedPrice('basePrice', 
+      (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
+    
+    // VCT cost
+    if (formData.hasVCT) {
+      subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
+    }
+    
+    // Pressure washing
+    if (formData.needsPressureWashing) {
+      subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
+    }
+    
+    // Travel cost
+    subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
+    
+    // Overnight cost
+    if (formData.stayingOvernight) {
+      subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
+    }
+    
+    // Urgency cost
+    if (estimateData.urgencyMultiplier > 1) {
+      const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+        ((estimateData.urgencyMultiplier || 1) - 1);
+      subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
+    }
+    
+    // Window cleaning
+    if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+      subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
+    }
+    
+    // Add sales tax
+    const salesTax = subtotal * 0.07;
+    
+    // Return total
+    return subtotal + salesTax;
+  };
+
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
     switch (type) {
@@ -127,22 +252,43 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   };
 
   // Direct PDF download using react-pdf
-  const handlePDFDownload = () => {
-    // Create a blob from the PDF document
-    const blob = pdf(
-      <QuotePDF 
-        estimateData={estimateData} 
-        formData={formData} 
-        companyInfo={companyInfo}
-        clientInfo={clientInfo}
-        quoteInfo={quoteInfo}
-      />
-    ).toBlob();
-    
-    // When the blob is ready, use it to create a download
-    blob.then(blobData => {
+  const handlePDFDownload = async () => {
+    console.log('PDF download button clicked');
+    try {
+      // Create a blob from the PDF document
+      console.log('Creating PDF blob...');
+      // Create adjusted estimate data with markup
+      const adjustedEstimateData = {...estimateData};
+      
+      // If markup is applied, adjust the prices
+      if (Object.keys(adjustedPrices).length > 0) {
+        // Calculate adjusted subtotal
+        const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
+        
+        // Calculate adjusted sales tax
+        const salesTax = subtotal * 0.07;
+        
+        // Update the estimate data with adjusted values
+        adjustedEstimateData.totalBeforeMarkup = subtotal;
+        adjustedEstimateData.salesTax = salesTax;
+        adjustedEstimateData.totalPrice = subtotal + salesTax;
+      }
+      
+      const blob = await pdf(
+        <QuotePDF 
+          estimateData={adjustedEstimateData} 
+          formData={formData} 
+          companyInfo={companyInfo}
+          clientInfo={clientInfo}
+          quoteInfo={quoteInfo}
+        />
+      ).toBlob();
+      
+      console.log('PDF blob created successfully');
+      
       // Create a URL for the blob
-      const url = URL.createObjectURL(blobData);
+      const url = URL.createObjectURL(blob);
+      console.log('Created URL for blob:', url);
       
       // Create a temporary link element
       const link = document.createElement('a');
@@ -151,19 +297,43 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       
       // Append to the document, click it, and remove it
       document.body.appendChild(link);
+      console.log('Clicking download link...');
       link.click();
       document.body.removeChild(link);
       
       // Clean up the URL object
       setTimeout(() => URL.revokeObjectURL(url), 100);
-    });
+      console.log('PDF download process completed');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('There was an error generating the PDF. Falling back to print dialog.');
+      // Fallback to print dialog if PDF generation fails
+      handlePrint();
+    }
   };
 
   // Handle Word document download
   const handleWordDownload = async () => {
     try {
+      // Create adjusted estimate data with markup
+      const adjustedEstimateData = {...estimateData};
+      
+      // If markup is applied, adjust the prices
+      if (Object.keys(adjustedPrices).length > 0) {
+        // Calculate adjusted subtotal
+        const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
+        
+        // Calculate adjusted sales tax
+        const salesTax = subtotal * 0.07;
+        
+        // Update the estimate data with adjusted values
+        adjustedEstimateData.totalBeforeMarkup = subtotal;
+        adjustedEstimateData.salesTax = salesTax;
+        adjustedEstimateData.totalPrice = subtotal + salesTax;
+      }
+      
       const blob = await generateQuoteDocx(
-        estimateData,
+        adjustedEstimateData,
         formData,
         companyInfo,
         clientInfo,
@@ -382,6 +552,35 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       {/* Quote Information */}
       <div className="mb-6 print:hidden">
         <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project and Quote Details</h3>
+        
+        {/* Markup Percentage Input */}
+        <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Price Adjustment (Markup Percentage)
+          </label>
+          <div className="flex items-center">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={markupPercentage}
+              onChange={handleMarkupChange}
+              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-gray-700">%</span>
+            <div className="ml-4 text-sm text-gray-600">
+              {markupPercentage > 0 ? (
+                <span>Adding {markupPercentage}% markup evenly distributed across all line items</span>
+              ) : (
+                <span>No markup applied</span>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            This will adjust all prices proportionally to maintain the same relative pricing structure.
+          </p>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Name</label>
@@ -522,7 +721,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
                 </td>
                 <td className="border p-2 text-right print:border print:border-gray-300">
-                  {formatCurrency((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1))}
+                  {formatCurrency(getAdjustedPrice('basePrice', (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)))}
                 </td>
               </tr>
 
@@ -533,7 +732,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                     <div className="font-semibold">VCT Flooring Treatment</div>
                     <div className="text-sm">Stripping, waxing, and buffing of vinyl composition tile</div>
                   </td>
-                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(estimateData.vctCost)}</td>
+                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}</td>
                 </tr>
               )}
 
@@ -545,7 +744,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                     <div className="text-sm">{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</div>
                     <div className="text-sm">Includes equipment rental and materials</div>
                   </td>
-                  <td className="border p-2 text-right">{formatCurrency(estimateData.pressureWashingCost)}</td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
                 </tr>
               )}
 
@@ -555,7 +754,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <div className="font-semibold">Travel Expenses</div>
                   <div className="text-sm">{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</div>
                 </td>
-                <td className="border p-2 text-right">{formatCurrency(estimateData.travelCost)}</td>
+                <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
               </tr>
 
               {/* Overnight Accommodations if applicable */}
@@ -566,7 +765,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                     <div className="text-sm">{formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members</div>
                     <div className="text-sm">Includes hotel and per diem expenses</div>
                   </td>
-                  <td className="border p-2 text-right">{formatCurrency(estimateData.overnightCost)}</td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('overnightCost', estimateData.overnightCost || 0))}</td>
                 </tr>
               )}
 
@@ -579,9 +778,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   </td>
                   <td className="border p-2 text-right">
                     {formatCurrency(
-                      (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-                        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-                      ((estimateData.urgencyMultiplier || 1) - 1)
+                      getAdjustedPrice('urgencyCost',
+                        (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+                          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+                        ((estimateData.urgencyMultiplier || 1) - 1)
+                      )
                     )}
                   </td>
                 </tr>
@@ -599,28 +800,38 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                     )}
                   </td>
                   <td className="border p-2 text-right">
-                    {formData.chargeForWindowCleaning ? formatCurrency(estimateData.windowCleaningCost) : 'Separate Quote'}
+                    {formData.chargeForWindowCleaning ? formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0)) : 'Separate Quote'}
                   </td>
                 </tr>
               )}
 
-              {/* Subtotal */}
-              <tr>
-                <td className="border p-2 font-semibold">Subtotal</td>
-                <td className="border p-2 text-right font-semibold">{formatCurrency(estimateData.totalBeforeMarkup)}</td>
-              </tr>
+              {/* Calculate adjusted subtotal */}
+              {(() => {
+                const subtotal = Object.keys(adjustedPrices).length > 0 
+                  ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                  : estimateData.totalBeforeMarkup;
+                return (
+                  <>
+                    {/* Subtotal */}
+                    <tr>
+                      <td className="border p-2 font-semibold">Subtotal</td>
+                      <td className="border p-2 text-right font-semibold">{formatCurrency(subtotal)}</td>
+                    </tr>
 
-              {/* Sales Tax */}
-              <tr>
-                <td className="border p-2">Sales Tax (7%)</td>
-                <td className="border p-2 text-right">{formatCurrency(estimateData.salesTax)}</td>
-              </tr>
+                    {/* Sales Tax */}
+                    <tr>
+                      <td className="border p-2">Sales Tax (7%)</td>
+                      <td className="border p-2 text-right">{formatCurrency(subtotal * 0.07)}</td>
+                    </tr>
 
-              {/* Total */}
-              <tr className="bg-blue-600 text-white">
-                <td className="border p-2 font-bold">TOTAL</td>
-                <td className="border p-2 text-right font-bold">{formatCurrency(estimateData.totalPrice)}</td>
-              </tr>
+                    {/* Total */}
+                    <tr className="bg-blue-600 text-white">
+                      <td className="border p-2 font-bold">TOTAL</td>
+                      <td className="border p-2 text-right font-bold">{formatCurrency(subtotal * 1.07)}</td>
+                    </tr>
+                  </>
+                );
+              })()}
             </tbody>
           </table>
 

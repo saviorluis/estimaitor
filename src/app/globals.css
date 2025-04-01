@@ -1,15 +1,15 @@
 /* Add these print-specific styles at the end of the file */
 @media print {
-  /* Hide the rest of the UI when printing */
-  body:not(.quote-print-ready) * {
-    display: none !important;
-  }
-  
   /* Style adjustments for printed quote */
   body {
     font-family: Arial, sans-serif;
     color: black;
     background: white;
+  }
+  
+  /* Hide elements that shouldn't be printed */
+  .print\:hidden {
+    display: none !important;
   }
   
   /* Ensure borders are visible */
@@ -52,4 +52,4 @@
   p {
     margin-bottom: 0.25rem;
   }
-} 
+}

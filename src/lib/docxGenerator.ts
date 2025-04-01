@@ -129,7 +129,7 @@ export const generateQuoteDocx = async (
         },
         children: [
           // Header with company and quote info
-          
+
           // Company and Quote Info Table
           new Table({
             width: {
@@ -243,11 +243,11 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
+
           // Spacing
           new Paragraph({ text: "" }),
           new Paragraph({ text: "" }),
-          
+
           // Client and Project Info Table
           new Table({
             width: {
@@ -377,10 +377,10 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
+
           // Spacing
           new Paragraph({ text: "" }),
-          
+
           // Service Details Heading
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
@@ -391,10 +391,10 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
+
           // Service Details Table
           createServiceDetailsTable(estimateData, formData),
-          
+
           // General note about prices
           new Paragraph({
             children: [
@@ -410,10 +410,10 @@ export const generateQuoteDocx = async (
               after: 120,
             },
           }),
-          
+
           // Spacing
           new Paragraph({ text: "" }),
-          
+
           // Project Timeline and Additional Info
           new Table({
             width: {
@@ -462,84 +462,84 @@ export const generateQuoteDocx = async (
                           }),
                         ],
                       }),
-                      
+
                       // For "complete" cleaning type, show the three-stage schedule without hours
-                      ...(formData.cleaningType === 'complete' 
+                      ...(formData.cleaningType === 'complete'
                         ? [
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              spacing: {
-                                before: 100,
-                                after: 100,
-                              },
-                              children: [
-                                new TextRun({
-                                  text: "Three-Stage Cleaning Schedule:",
-                                  bold: true,
-                                  size: 24,
-                                }),
-                              ],
-                            }),
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              bullet: {
-                                level: 0,
-                              },
-                              children: [
-                                new TextRun({
-                                  text: "Rough Clean: During construction",
-                                  size: 24,
-                                }),
-                              ],
-                            }),
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              bullet: {
-                                level: 0,
-                              },
-                              children: [
-                                new TextRun({
-                                  text: "Final Clean: After construction completion",
-                                  size: 24,
-                                }),
-                              ],
-                            }),
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              bullet: {
-                                level: 0, 
-                              },
-                              children: [
-                                new TextRun({
-                                  text: "Touch-up Clean: Before client move-in/opening",
-                                  size: 24,
-                                }),
-                              ],
-                            }),
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              spacing: {
-                                before: 100,
-                              },
-                              children: [
-                                new TextRun({
-                                  text: "Note: These cleaning phases are performed at different stages during the construction timeline.",
-                                  italics: true,
-                                  size: 24,
-                                  color: "666666",
-                                }),
-                              ],
-                            }),
-                          ]
-                        : [
-                            new Paragraph({
-                              alignment: AlignmentType.CENTER,
-                              children: [new TextRun({ 
-                                text: `Team Size: ${formData.numberOfCleaners} cleaners`,
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: {
+                              before: 100,
+                              after: 100,
+                            },
+                            children: [
+                              new TextRun({
+                                text: "Three-Stage Cleaning Schedule:",
+                                bold: true,
                                 size: 24,
-                              })],
-                            }),
-                          ]
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            bullet: {
+                              level: 0,
+                            },
+                            children: [
+                              new TextRun({
+                                text: "Rough Clean: During construction",
+                                size: 24,
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            bullet: {
+                              level: 0,
+                            },
+                            children: [
+                              new TextRun({
+                                text: "Final Clean: After construction completion",
+                                size: 24,
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            bullet: {
+                              level: 0,
+                            },
+                            children: [
+                              new TextRun({
+                                text: "Touch-up Clean: Before client move-in/opening",
+                                size: 24,
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: {
+                              before: 100,
+                            },
+                            children: [
+                              new TextRun({
+                                text: "Note: These cleaning phases are performed at different stages during the construction timeline.",
+                                italics: true,
+                                size: 24,
+                                color: "666666",
+                              }),
+                            ],
+                          }),
+                        ]
+                        : [
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [new TextRun({
+                              text: `Team Size: ${formData.numberOfCleaners} cleaners`,
+                              size: 24,
+                            })],
+                          }),
+                        ]
                       ),
                     ],
                   }),
@@ -567,10 +567,10 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
+
           // Spacing
           new Paragraph({ text: "" }),
-          
+
           // Terms & Conditions
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
@@ -588,8 +588,8 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
-          ...quoteInfo.terms.split('\n').map(line => 
+
+          ...quoteInfo.terms.split('\n').map(line =>
             new Paragraph({
               alignment: AlignmentType.LEFT,
               spacing: {
@@ -607,11 +607,11 @@ export const generateQuoteDocx = async (
               ],
             })
           ),
-          
+
           // Spacing
           new Paragraph({ text: "" }),
           new Paragraph({ text: "" }),
-          
+
           // Signature Section
           new Table({
             width: {
@@ -784,7 +784,7 @@ export const generateQuoteDocx = async (
               }),
             ],
           }),
-          
+
           // Footer
           new Paragraph({ text: "" }),
           new Paragraph({ text: "" }),
@@ -841,7 +841,7 @@ export const generateQuoteDocx = async (
 // Helper function to create the service details table
 function createServiceDetailsTable(estimateData: EstimateData, formData: FormData): Table {
   const rows: TableRow[] = [];
-  
+
   // Header row
   rows.push(
     new TableRow({
@@ -904,7 +904,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   // Base Cleaning Service
   rows.push(
     new TableRow({
@@ -928,8 +928,8 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               children: [
                 new TextRun(
                   formatCurrency(
-                    estimateData.basePrice * 
-                    estimateData.projectTypeMultiplier * 
+                    estimateData.basePrice *
+                    estimateData.projectTypeMultiplier *
                     estimateData.cleaningTypeMultiplier
                   )
                 ),
@@ -940,7 +940,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   // VCT Flooring if applicable
   if (formData.hasVCT) {
     rows.push(
@@ -975,7 +975,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Pressure Washing if applicable
   if (formData.needsPressureWashing) {
     rows.push(
@@ -1015,7 +1015,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Window Cleaning if applicable
   if (formData.needsWindowCleaning) {
     rows.push(
@@ -1059,8 +1059,8 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
-                  new TextRun(formData.chargeForWindowCleaning ? 
-                    formatCurrency(estimateData.windowCleaningCost) : 
+                  new TextRun(formData.chargeForWindowCleaning ?
+                    formatCurrency(estimateData.windowCleaningCost) :
                     "Separate Quote"),
                 ],
               }),
@@ -1070,7 +1070,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Travel Expenses
   rows.push(
     new TableRow({
@@ -1103,7 +1103,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   // Overnight Accommodations if applicable
   if (formData.stayingOvernight) {
     rows.push(
@@ -1143,7 +1143,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Urgency Adjustment if applicable
   if (estimateData.urgencyMultiplier > 1) {
     rows.push(
@@ -1174,7 +1174,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
                   new TextRun(
                     formatCurrency(
                       ((estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier) +
-                      estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) * 
+                        estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) *
                       (estimateData.urgencyMultiplier - 1)
                     )
                   ),
@@ -1186,7 +1186,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Subtotal
   rows.push(
     new TableRow({
@@ -1225,7 +1225,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   // Add markup if applicable
   if (formData.applyMarkup) {
     rows.push(
@@ -1255,7 +1255,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       })
     );
   }
-  
+
   // Sales Tax
   rows.push(
     new TableRow({
@@ -1282,7 +1282,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   // Total
   rows.push(
     new TableRow({
@@ -1338,7 +1338,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-  
+
   const table = new Table({
     width: {
       size: 100,
@@ -1378,11 +1378,11 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     },
     rows,
   });
-  
+
   // Add markup note if applicable
   if (formData.applyMarkup) {
     return table;
   }
-  
+
   return table;
 } 
