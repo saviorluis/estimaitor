@@ -126,39 +126,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }, 100);
   };
 
-  // Direct PDF download using react-pdf
-  const handlePDFDownload = () => {
-    // Create a blob from the PDF document
-    const blob = pdf(
-      <QuotePDF 
-        estimateData={estimateData} 
-        formData={formData} 
-        companyInfo={companyInfo}
-        clientInfo={clientInfo}
-        quoteInfo={quoteInfo}
-      />
-    ).toBlob();
-    
-    // When the blob is ready, use it to create a download
-    blob.then(blobData => {
-      // Create a URL for the blob
-      const url = URL.createObjectURL(blobData);
-      
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Quote-${quoteInfo.quoteNumber}.pdf`;
-      
-      // Append to the document, click it, and remove it
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up the URL object
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    });
-  };
-
   // Handle Word document download
   const handleWordDownload = async () => {
     try {
@@ -197,12 +164,23 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           Print Quote
         </button>
 
-        <button
-          onClick={handlePDFDownload}
+        <PDFDownloadLink
+          document={
+            <QuotePDF 
+              estimateData={estimateData} 
+              formData={formData} 
+              companyInfo={companyInfo}
+              clientInfo={clientInfo}
+              quoteInfo={quoteInfo}
+            />
+          }
+          fileName={`Quote-${quoteInfo.quoteNumber}.pdf`}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
-          Save as PDF
-        </button>
+          {({ blob, url, loading, error }) =>
+            loading ? 'Loading PDF...' : 'Save as PDF'
+          }
+        </PDFDownloadLink>
 
         <button
           onClick={handleWordDownload}
