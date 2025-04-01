@@ -159,6 +159,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  totalText: {
+    fontWeight: 'bold',
+  },
 });
 
 // Get cleaning type display name
@@ -399,13 +402,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Subtotal */}
-          <View style={[styles.tableRow, styles.subtotalRow]}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>Subtotal</Text>
-            </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text style={styles.bold}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
-            </View>
+          <View style={styles.row}>
+            <Text style={styles.bold}>Subtotal</Text>
+            <Text style={styles.bold}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
 
           {/* Markup if applicable */}
@@ -421,23 +420,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Sales Tax */}
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text>Sales Tax (7%)</Text>
-            </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(estimateData.salesTax)}</Text>
-            </View>
+          <View style={styles.row}>
+            <Text>Sales Tax (7%)</Text>
+            <Text>{formatCurrency(estimateData.salesTax)}</Text>
           </View>
 
           {/* Total */}
-          <View style={[styles.tableRow, styles.totalRow]}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>TOTAL</Text>
-            </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text style={styles.bold}>{formatCurrency(estimateData.totalPrice)}</Text>
-            </View>
+          <View style={[styles.row, styles.totalRow]}>
+            <Text style={styles.totalText}>TOTAL</Text>
+            <Text style={styles.totalText}>{formatCurrency(estimateData.totalPrice)}</Text>
           </View>
         </View>
 

@@ -128,23 +128,22 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate total before markup
   const totalBeforeMarkup = (
-    (basePrice * projectTypeMultiplier * cleaningTypeMultiplier) +
+    basePrice * projectTypeMultiplier * cleaningTypeMultiplier +
     vctCost +
     travelCost +
     overnightCost +
     pressureWashingCost +
-    windowCleaningCost +
-    displayCaseCost
-  ) * urgencyMultiplier;
+    windowCleaningCost
+  );
 
-  // Apply markup if selected
-  const markup = applyMarkup ? totalBeforeMarkup * 0.5 : 0;
-  
-  // Calculate sales tax (7%)
-  const salesTax = (totalBeforeMarkup + markup) * 0.07;
-  
-  // Calculate total price
-  const totalPrice = totalBeforeMarkup + markup + salesTax;
+  // Apply markup to base price if selected
+  const basePriceWithMarkup = applyMarkup ? totalBeforeMarkup * 1.5 : totalBeforeMarkup;
+
+  // Calculate sales tax on the total including markup
+  const salesTax = basePriceWithMarkup * 0.07;
+
+  // Calculate final total
+  const totalPrice = basePriceWithMarkup + salesTax;
 
   // Calculate estimated hours based on square footage, project type, and cleaning type
   let estimatedHours = calculateEstimatedHours(
@@ -193,8 +192,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
     travelCost,
     overnightCost,
     urgencyMultiplier,
-    totalBeforeMarkup,
-    markup,
+    totalBeforeMarkup: basePriceWithMarkup,
+    markup: 0,
     salesTax,
     totalPrice,
     estimatedHours,

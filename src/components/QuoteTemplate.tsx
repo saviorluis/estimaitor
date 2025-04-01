@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatDate, formatCurrency, generateQuoteNumber } from '@/lib/utils';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import { generateQuoteDocx } from '@/lib/docxGenerator';
@@ -126,15 +126,37 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }, 100);
   };
 
-  // Create the print-friendly PDF button that shows explicit instructions
-  const handlePrintToPDF = () => {
-    alert(
-      "To save as PDF:\n\n" +
-      "1. In the print dialog that opens, select 'Save as PDF' as the destination/printer\n" +
-      "2. Click 'Save' to download the PDF file\n\n" +
-      "This will create a professionally formatted PDF of your quote."
-    );
-    handlePrint();
+  // Direct PDF download using react-pdf
+  const handlePDFDownload = () => {
+    // Create a blob from the PDF document
+    const blob = pdf(
+      <QuotePDF 
+        estimateData={estimateData} 
+        formData={formData} 
+        companyInfo={companyInfo}
+        clientInfo={clientInfo}
+        quoteInfo={quoteInfo}
+      />
+    ).toBlob();
+    
+    // When the blob is ready, use it to create a download
+    blob.then(blobData => {
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blobData);
+      
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Quote-${quoteInfo.quoteNumber}.pdf`;
+      
+      // Append to the document, click it, and remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    });
   };
 
   // Handle Word document download
@@ -176,7 +198,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </button>
 
         <button
-          onClick={handlePrintToPDF}
+          onClick={handlePDFDownload}
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
           Save as PDF
@@ -211,7 +233,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 name="name"
                 value={companyInfo.name}
                 onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -457,27 +479,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
-            <p className="print:hidden">{clientInfo.name || '[Client Name]'}</p>
-            <p className="print:hidden">{clientInfo.company || '[Company]'}</p>
-            <p className="print:hidden">{clientInfo.address || '[Address]'}</p>
-            <p className="print:hidden">{clientInfo.email || '[Email]'}</p>
-            <p className="print:hidden">{clientInfo.phone || '[Phone]'}</p>
-            
-            {/* Only show in printed version if data is available */}
-            <p className="hidden print:block">{clientInfo.name ? clientInfo.name : ''}</p>
-            <p className="hidden print:block">{clientInfo.company ? clientInfo.company : ''}</p>
-            <p className="hidden print:block">{clientInfo.address ? clientInfo.address : ''}</p>
-            <p className="hidden print:block">{clientInfo.email ? clientInfo.email : ''}</p>
-            <p className="hidden print:block">{clientInfo.phone ? clientInfo.phone : ''}</p>
+            <p>{clientInfo.name || '[Client Name]'}</p>
+            <p>{clientInfo.company || '[Company]'}</p>
+            <p>{clientInfo.address || '[Address]'}</p>
+            <p>{clientInfo.email || '[Email]'}</p>
+            <p>{clientInfo.phone || '[Phone]'}</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
-            <p className="print:hidden">{quoteInfo.projectName || '[Project Name]'}</p>
-            <p className="print:hidden">{quoteInfo.projectAddress || '[Project Address]'}</p>
-            
-            {/* Only show in printed version if data is available */}
-            <p className="hidden print:block">{quoteInfo.projectName ? quoteInfo.projectName : ''}</p>
-            <p className="hidden print:block">{quoteInfo.projectAddress ? quoteInfo.projectAddress : ''}</p>
+            <p>{quoteInfo.projectName || '[Project Name]'}</p>
+            <p>{quoteInfo.projectAddress || '[Project Address]'}</p>
             
             <p>Project Type: {getProjectTypeDisplay(formData.projectType)}</p>
             <p>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
@@ -594,20 +605,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               )}
 
               {/* Subtotal */}
-              <tr className="bg-gray-100">
+              <tr>
                 <td className="border p-2 font-semibold">Subtotal</td>
                 <td className="border p-2 text-right font-semibold">{formatCurrency(estimateData.totalBeforeMarkup)}</td>
               </tr>
-
-              {/* Markup if applicable */}
-              {formData.applyMarkup && (
-                <tr>
-                  <td className="border p-2">
-                    {formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}
-                  </td>
-                  <td className="border p-2 text-right">{formatCurrency(estimateData.markup)}</td>
-                </tr>
-              )}
 
               {/* Sales Tax */}
               <tr>
@@ -616,7 +617,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               </tr>
 
               {/* Total */}
-              <tr className="bg-blue-50">
+              <tr className="bg-blue-600 text-white">
                 <td className="border p-2 font-bold">TOTAL</td>
                 <td className="border p-2 text-right font-bold">{formatCurrency(estimateData.totalPrice)}</td>
               </tr>
@@ -691,4 +692,4 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   );
 };
 
-export default QuoteTemplate; 
+export default QuoteTemplate;
