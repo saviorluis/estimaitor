@@ -115,9 +115,11 @@ const styles = StyleSheet.create({
   },
   subtotalRow: {
     backgroundColor: '#F0F0F0',
+    marginTop: 5,
   },
   totalRow: {
     backgroundColor: '#E6F0FF',
+    marginTop: 5,
   },
   bold: {
     fontWeight: 'bold',
@@ -160,9 +162,16 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    padding: 5,
+    fontSize: 10,
+  },
+  subtotalText: {
+    fontWeight: 'bold',
+    fontSize: 11,
   },
   totalText: {
     fontWeight: 'bold',
+    fontSize: 12,
   },
 });
 
@@ -404,9 +413,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Subtotal */}
-          <View style={styles.row}>
-            <Text style={styles.bold}>Subtotal</Text>
-            <Text style={styles.bold}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
+          <View style={[styles.row, styles.subtotalRow]}>
+            <Text style={styles.subtotalText}>Subtotal</Text>
+            <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
 
           {/* Markup if applicable */}
