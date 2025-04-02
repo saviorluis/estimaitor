@@ -277,50 +277,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const adjustedEstimateData = {...estimateData};
       
-      // Calculate subtotal exactly as shown in the browser
-      let subtotal = 0;
+      // Calculate subtotal EXACTLY as shown in the browser preview
+      // This is a direct copy of the calculation used in the print view
+      const subtotal = Object.keys(adjustedPrices).length > 0 
+        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+        : estimateData.totalBeforeMarkup;
       
-      // Base price
-      subtotal += getAdjustedPrice('basePrice', 
-        (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
-      
-      // VCT cost
-      if (formData.hasVCT) {
-        subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
-      }
-      
-      // Pressure washing
-      if (formData.needsPressureWashing) {
-        subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
-      }
-      
-      // Travel cost
-      subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
-      
-      // Overnight cost
-      if (formData.stayingOvernight) {
-        subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
-      }
-      
-      // Urgency cost
-      if (estimateData.urgencyMultiplier > 1) {
-        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-          ((estimateData.urgencyMultiplier || 1) - 1);
-        subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
-      }
-      
-      // Window cleaning
-      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
-        subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
-      }
-      
-      // Display case cleaning for jewelry stores
-      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-        subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
-      }
-      
-      // Calculate sales tax
+      // Calculate sales tax 
       const salesTax = subtotal * 0.07;
       
       // Set all the values for the PDF
@@ -373,48 +336,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const adjustedEstimateData = {...estimateData};
       
-      // Calculate subtotal exactly as shown in the browser
-      let subtotal = 0;
-      
-      // Base price
-      subtotal += getAdjustedPrice('basePrice', 
-        (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
-      
-      // VCT cost
-      if (formData.hasVCT) {
-        subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
-      }
-      
-      // Pressure washing
-      if (formData.needsPressureWashing) {
-        subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
-      }
-      
-      // Travel cost
-      subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
-      
-      // Overnight cost
-      if (formData.stayingOvernight) {
-        subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
-      }
-      
-      // Urgency cost
-      if (estimateData.urgencyMultiplier > 1) {
-        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-          ((estimateData.urgencyMultiplier || 1) - 1);
-        subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
-      }
-      
-      // Window cleaning
-      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
-        subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
-      }
-      
-      // Display case cleaning for jewelry stores
-      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-        subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
-      }
+      // Calculate subtotal EXACTLY as shown in the browser preview
+      // This is a direct copy of the calculation used in the print view
+      const subtotal = Object.keys(adjustedPrices).length > 0 
+        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+        : estimateData.totalBeforeMarkup;
       
       // Calculate sales tax
       const salesTax = subtotal * 0.07;
