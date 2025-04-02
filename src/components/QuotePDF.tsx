@@ -203,7 +203,12 @@ const formatValue = (value: string | number | undefined | null, defaultValue: st
 };
 
 interface QuotePDFProps {
-  estimateData: EstimateData;
+  estimateData: EstimateData & {
+    // Add optional adjusted line item prices
+    adjustedLineItems?: {
+      [key: string]: number;
+    };
+  };
   formData: FormData;
   companyInfo: {
     name: string;
@@ -328,7 +333,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier)}</Text>
+              <Text>{formatCurrency(
+                estimateData.adjustedLineItems?.basePrice !== undefined 
+                  ? estimateData.adjustedLineItems.basePrice 
+                  : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+              )}</Text>
             </View>
           </View>
 
@@ -340,7 +349,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text>Stripping, waxing, and buffing of vinyl composition tile</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(estimateData.vctCost)}</Text>
+                <Text>{formatCurrency(
+                  estimateData.adjustedLineItems?.vctCost !== undefined 
+                    ? estimateData.adjustedLineItems.vctCost 
+                    : estimateData.vctCost
+                )}</Text>
               </View>
             </View>
           )}
@@ -366,7 +379,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(estimateData.pressureWashingCost)}</Text>
+                <Text>{formatCurrency(
+                  estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
+                    ? estimateData.adjustedLineItems.pressureWashingCost 
+                    : estimateData.pressureWashingCost
+                )}</Text>
               </View>
             </View>
           )}
@@ -378,7 +395,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <Text>{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(estimateData.travelCost)}</Text>
+              <Text>{formatCurrency(
+                estimateData.adjustedLineItems?.travelCost !== undefined 
+                  ? estimateData.adjustedLineItems.travelCost 
+                  : estimateData.travelCost
+              )}</Text>
             </View>
           </View>
 
@@ -526,4 +547,4 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   );
 };
 
-export default QuotePDF; 
+export default QuotePDF;

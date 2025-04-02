@@ -56,6 +56,7 @@ export interface EstimateData {
   windowCleaningCost: number;
   displayCaseCost: number;
   aiRecommendations: string[];
+  adjustedLineItems?: {[key: string]: number};
 }
 
 export interface AIRecommendationRequest {
@@ -75,4 +76,4 @@ export interface AIRecommendationRequest {
 
 export interface AIRecommendationResponse {
   recommendations: string[];
-} 
+}

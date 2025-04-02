@@ -52,13 +52,26 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // State to track if company info is being edited
   const [editingCompanyInfo, setEditingCompanyInfo] = useState(false);
 
-  // Client information state
-  const [clientInfo, setClientInfo] = useState({
-    name: '',
-    company: '',
-    address: '',
-    email: '',
-    phone: '',
+  // Client information state - initialize from localStorage if available
+  const [clientInfo, setClientInfo] = useState(() => {
+    // Only run this code on the client side
+    if (typeof window !== 'undefined') {
+      const savedClientInfo = localStorage.getItem('quoteClientInfo');
+      return savedClientInfo ? JSON.parse(savedClientInfo) : {
+        name: '',
+        company: '',
+        address: '',
+        email: '',
+        phone: '',
+      };
+    }
+    return {
+      name: '',
+      company: '',
+      address: '',
+      email: '',
+      phone: '',
+    };
   });
 
   // Default terms and conditions
@@ -94,10 +107,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle client information changes
   const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setClientInfo((prev) => ({
-      ...prev,
+    const updatedClientInfo = {
+      ...clientInfo,
       [name]: value
-    }));
+    };
+    setClientInfo(updatedClientInfo);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('quoteClientInfo', JSON.stringify(updatedClientInfo));
+    }
   };
 
   // Handle quote information changes
@@ -291,6 +310,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       adjustedEstimateData.markup = Object.keys(adjustedPrices).length > 0 ? subtotal - estimateData.totalBeforeMarkup : estimateData.markup;
       adjustedEstimateData.salesTax = salesTax;
       adjustedEstimateData.totalPrice = subtotal + salesTax;
+      
+      // Add adjusted line items to the estimate data
+      if (Object.keys(adjustedPrices).length > 0) {
+        adjustedEstimateData.adjustedLineItems = adjustedPrices;
+      }
       
       const blob = await pdf(
         <QuotePDF 
@@ -661,25 +685,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <textarea
               name="terms"
               value={quoteInfo.terms}
-              onChange={handleQuoteChange}
-              rows={8}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Terms and conditions for the quote"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Quote Preview - This is what will be printed*/}
-      <div className="border p-8 rounded-lg print:border-0 print:p-0 print:shadow-none print:mt-0">
-        {/* Header */}
-        <div className="flex justify-between mb-8">
-          <div>
-            <p className="font-semibold">{companyInfo.name}</p>
-            <p className="text-sm">{companyInfo.address}</p>
-            <p className="text-sm">{companyInfo.city}</p>
-            <p className="text-sm">{companyInfo.phone}</p>
-            <p className="text-sm">{companyInfo.email}</p>
             <p className="text-sm">{companyInfo.website}</p>
           </div>
           <div className="text-right">
