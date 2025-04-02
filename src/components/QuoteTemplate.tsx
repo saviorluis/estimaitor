@@ -149,11 +149,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
     }
 
+    // Display case cleaning for jewelry stores
+    if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+      lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
+    }
+
     // Calculate total before markup
     const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
     
-    // If markup percentage is 0, use original prices
-    if (markupPercentage === 0) {
+    // If markup percentage is 0, and there's no built-in markup, use original prices
+    if (markupPercentage === 0 && estimateData.markup === 0) {
+      setAdjustedPrices({});
+      return;
+    }
+    
+    // If there's no custom markup but there is built-in markup, we don't need to adjust
+    if (markupPercentage === 0 && estimateData.markup > 0) {
       setAdjustedPrices({});
       return;
     }
@@ -221,6 +232,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
     }
     
+    // Display case cleaning for jewelry stores
+    if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+      subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
+    }
+    
     // Add sales tax
     const salesTax = subtotal * 0.07;
     
@@ -260,7 +276,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create adjusted estimate data with markup
       const adjustedEstimateData = {...estimateData};
       
-      // If markup is applied, adjust the prices
+      // If we have a custom markup (adjustedPrices has entries), use those values
       if (Object.keys(adjustedPrices).length > 0) {
         // Calculate adjusted subtotal
         const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
@@ -270,8 +286,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         
         // Update the estimate data with adjusted values
         adjustedEstimateData.totalBeforeMarkup = subtotal;
+        adjustedEstimateData.markup = subtotal - estimateData.totalBeforeMarkup; // Calculate actual markup amount
         adjustedEstimateData.salesTax = salesTax;
         adjustedEstimateData.totalPrice = subtotal + salesTax;
+      } else if (estimateData.markup > 0) {
+        // If there's built-in markup from the estimator but no custom markup,
+        // make sure we're using the correct values
+        adjustedEstimateData.totalBeforeMarkup = estimateData.totalBeforeMarkup;
+        adjustedEstimateData.markup = estimateData.markup;
+        adjustedEstimateData.salesTax = estimateData.salesTax;
+        adjustedEstimateData.totalPrice = estimateData.totalPrice;
       }
       
       const blob = await pdf(
@@ -318,7 +342,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create adjusted estimate data with markup
       const adjustedEstimateData = {...estimateData};
       
-      // If markup is applied, adjust the prices
+      // If we have a custom markup (adjustedPrices has entries), use those values
       if (Object.keys(adjustedPrices).length > 0) {
         // Calculate adjusted subtotal
         const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
@@ -328,8 +352,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         
         // Update the estimate data with adjusted values
         adjustedEstimateData.totalBeforeMarkup = subtotal;
+        adjustedEstimateData.markup = subtotal - estimateData.totalBeforeMarkup; // Calculate actual markup amount
         adjustedEstimateData.salesTax = salesTax;
         adjustedEstimateData.totalPrice = subtotal + salesTax;
+      } else if (estimateData.markup > 0) {
+        // If there's built-in markup from the estimator but no custom markup,
+        // make sure we're using the correct values
+        adjustedEstimateData.totalBeforeMarkup = estimateData.totalBeforeMarkup;
+        adjustedEstimateData.markup = estimateData.markup;
+        adjustedEstimateData.salesTax = estimateData.salesTax;
+        adjustedEstimateData.totalPrice = estimateData.totalPrice;
       }
       
       const blob = await generateQuoteDocx(
@@ -802,6 +834,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <td className="border p-2 text-right">
                     {formData.chargeForWindowCleaning ? formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0)) : 'Separate Quote'}
                   </td>
+                </tr>
+              )}
+
+              {/* Display case cleaning for jewelry stores */}
+              {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Display Case Cleaning</div>
+                    <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display cases</div>
+                  </td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0))}</td>
                 </tr>
               )}
 
