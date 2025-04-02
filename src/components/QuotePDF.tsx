@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { PROJECT_SCOPES } from '@/lib/constants';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -347,7 +347,19 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Pressure Washing Services</Text>
                 <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
-                <Text>Includes equipment rental and materials</Text>
+                <Text style={{fontSize: 9, marginTop: 5}}>
+                  Service includes professional-grade cleaning solutions and equipment. Standard rates:
+                  {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})
+                  {'\n'}• Roof Wash: ${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft
+                  {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
+                  {'\n'}• Decks/Trex: ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
+                  {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
+                </Text>
+                <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
+                  Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
+                    ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
+                    PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
+                </Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(estimateData.pressureWashingCost)}</Text>

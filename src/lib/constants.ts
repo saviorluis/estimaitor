@@ -254,4 +254,121 @@ export const PROJECT_SCOPES: Record<string, string> = {
   office: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures and ceiling fans; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean and sanitize all workstations and desks; clean and disinfect all public areas including lobbies, hallways, and elevators; clean and polish all glass surfaces including mirrors and windows; clean and sanitize all furniture including chairs and tables; clean and disinfect all bathroom fixtures and surfaces; clean and sanitize all high-touch areas including door handles, light switches, and elevator buttons; properly clean trash receptacles and surrounding areas; clean and sanitize all conference rooms and meeting areas; clean and sanitize all break rooms and kitchen areas; clean and sanitize all reception areas and waiting rooms.`,
   
   default: `Final Cleaning of ___ Sq Ft ___ includes: sweep/mop all hard surface floors; wipe interior/exterior windows and clean bathrooms; clean light fixtures, hi-lo dusting; clean and sanitize all surfaces; clean and disinfect all high-touch areas; properly clean trash receptacles and surrounding areas.`
+};
+
+// Pressure Washing Constants
+export const PRESSURE_WASHING_RATES = {
+  SOFT_WASH: {
+    rate: 0.18, // per square foot
+    minimum: 235,
+    description: 'Soft wash service for houses and buildings'
+  },
+  ROOF_WASH: {
+    rate: 0.50, // per square foot
+    description: 'Roof cleaning service'
+  },
+  DRIVEWAY: {
+    rate: 0.20, // per square foot
+    description: 'Driveway cleaning service'
+  },
+  DECK: {
+    rate: 1.00, // per square foot
+    description: 'Deck cleaning service'
+  },
+  TREX: {
+    rate: 1.00, // per square foot
+    description: 'Trex deck cleaning service'
+  },
+  DAILY_RATE: 1800 // for jobs outside standard rates
+};
+
+export const PRESSURE_WASHING_CHEMICALS = {
+  BLEACH: {
+    name: 'Bleach',
+    cost: 4.00,
+    ratios: {
+      HOUSE: '10:1 (4 oz soap)',
+      ROOF: '1:1 (8 oz soap)'
+    }
+  },
+  ONE_RESTORE: {
+    name: 'One Restore',
+    costs: {
+      GALLON: 36.20,
+      FIVE_GALLONS: 155.80
+    },
+    ratio: 'Whole DP 7 or 10:1',
+    use: 'Fossil'
+  },
+  F9: {
+    name: 'F9',
+    costs: {
+      GALLON: 49.00
+    },
+    ratios: ['5:1', '10:1'],
+    use: 'Calcium'
+  },
+  CLEANSOL: {
+    name: 'Cleansol BC',
+    costs: {
+      GALLON: 30.25,
+      FIVE_GALLONS: 126.10
+    },
+    ratio: '40:1',
+    use: 'Oxidization, General Purpose'
+  },
+  HOT_STAIN: {
+    name: 'Hot Stain Remover',
+    costs: {
+      GALLON: 32.40,
+      FIVE_GALLONS: 136.85
+    },
+    ratio: '5:1',
+    use: 'Organic grade'
+  },
+  NMD80: {
+    name: 'NMD80',
+    costs: {
+      GALLON: 22.90,
+      FIVE_GALLONS: 82.00
+    },
+    ratio: '5:1',
+    use: 'Masonary mix'
+  },
+  F9_BARC: {
+    name: 'F9 BARC',
+    cost: 49.00,
+    use: 'Specialized cleaning'
+  },
+  F9_EFFLO: {
+    name: 'F9 Efflo',
+    cost: 49.00,
+    use: 'Specialized cleaning'
+  },
+  F9_GROUNDSKEEPER: {
+    name: 'F9 Groundskeeper',
+    cost: 49.00,
+    use: 'Specialized cleaning'
+  },
+  DOUBLE_EAGLE: {
+    name: 'Double Eagle Degreaser',
+    cost: 42.50,
+    use: 'Degreasing'
+  },
+  TAGINATOR: {
+    name: 'Taginator',
+    cost: 51.00,
+    use: 'Tag removal'
+  },
+  TAGAWAY: {
+    name: 'Tagaway',
+    cost: 52.00,
+    use: 'Tag removal'
+  }
+};
+
+export const PRESSURE_WASHING_PAYMENT_TERMS = {
+  INDUSTRIAL: 'Net 30',
+  COMMERCIAL: 'Net 10',
+  RESIDENTIAL: 'POI (Payment on Invoice)'
 }; 
