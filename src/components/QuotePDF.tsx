@@ -438,6 +438,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
 
+          {/* Markup if applicable */}
+          {estimateData.markup > 0 && (
+            <View style={styles.row}>
+              <Text>Additional Cleaning Costs (50%)</Text>
+              <Text>{formatCurrency(estimateData.markup)}</Text>
+            </View>
+          )}
+
           {/* Sales Tax */}
           <View style={styles.row}>
             <Text>Sales Tax (7%)</Text>
