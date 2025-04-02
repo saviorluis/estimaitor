@@ -39,14 +39,28 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     );
   }
 
-  // Company information state
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
-    name: "Big Brother Property Solutions",
-    address: "1200 Eastchester Dr.",
-    city: "High Point, NC 27265",
-    phone: "(336) 624-7442",
-    email: "bids@bigbroprops.com",
-    website: "www.bigbrotherpropertysolutions.com"
+  // Company information state - initialize from localStorage if available
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => {
+    // Only run this code on the client side
+    if (typeof window !== 'undefined') {
+      const savedCompanyInfo = localStorage.getItem('quoteCompanyInfo');
+      return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : {
+        name: "Big Brother Property Solutions",
+        address: "1200 Eastchester Dr.",
+        city: "High Point, NC 27265",
+        phone: "(336) 624-7442",
+        email: "bids@bigbroprops.com",
+        website: "www.bigbrotherpropertysolutions.com"
+      };
+    }
+    return {
+      name: "Big Brother Property Solutions",
+      address: "1200 Eastchester Dr.",
+      city: "High Point, NC 27265",
+      phone: "(336) 624-7442",
+      email: "bids@bigbroprops.com",
+      website: "www.bigbrotherpropertysolutions.com"
+    };
   });
 
   // State to track if company info is being edited
@@ -98,10 +112,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle company information changes
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCompanyInfo((prev) => ({
-      ...prev,
+    const updatedCompanyInfo = {
+      ...companyInfo,
       [name]: value
-    }));
+    };
+    setCompanyInfo(updatedCompanyInfo);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('quoteCompanyInfo', JSON.stringify(updatedCompanyInfo));
+    }
   };
 
   // Handle client information changes

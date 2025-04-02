@@ -412,7 +412,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text>Includes hotel and per diem expenses</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(estimateData.overnightCost)}</Text>
+                <Text>{formatCurrency(
+                  estimateData.adjustedLineItems?.overnightCost !== undefined 
+                    ? estimateData.adjustedLineItems.overnightCost 
+                    : estimateData.overnightCost
+                )}</Text>
               </View>
             </View>
           )}
@@ -427,9 +431,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>
                   {formatCurrency(
-                    ((estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier) +
-                    estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) * 
-                    (estimateData.urgencyMultiplier - 1)
+                    estimateData.adjustedLineItems?.urgencyCost !== undefined
+                      ? estimateData.adjustedLineItems.urgencyCost
+                      : ((estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier) +
+                        estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) * 
+                        (estimateData.urgencyMultiplier - 1)
                   )}
                 </Text>
               </View>
@@ -448,21 +454,42 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 )}
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formData.chargeForWindowCleaning ? formatCurrency(estimateData.windowCleaningCost) : 'Separate Quote'}</Text>
+                <Text>{formData.chargeForWindowCleaning ? formatCurrency(
+                  estimateData.adjustedLineItems?.windowCleaningCost !== undefined
+                    ? estimateData.adjustedLineItems.windowCleaningCost
+                    : estimateData.windowCleaningCost
+                ) : 'Separate Quote'}</Text>
               </View>
             </View>
           )}
 
-          {/* Subtotal */}
+          {/* Display case cleaning for jewelry stores */}
+          {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={styles.bold}>Display Case Cleaning</Text>
+                <Text>{(formData.numberOfDisplayCases || 0)} display cases</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency(
+                  estimateData.adjustedLineItems?.displayCaseCost !== undefined
+                    ? estimateData.adjustedLineItems.displayCaseCost
+                    : estimateData.displayCaseCost
+                )}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Subtotal - Use the adjusted subtotal that's calculated in handlePDFDownload */}
           <View style={[styles.row, styles.subtotalRow]}>
             <Text style={styles.subtotalText}>Subtotal</Text>
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
 
-          {/* Markup if applicable */}
+          {/* Markup if applicable - only show if there's a markup value */}
           {estimateData.markup > 0 && (
             <View style={styles.row}>
-              <Text>Additional Cleaning Costs (50%)</Text>
+              <Text>Additional Cleaning Costs</Text>
               <Text>{formatCurrency(estimateData.markup)}</Text>
             </View>
           )}
