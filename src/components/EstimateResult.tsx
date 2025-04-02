@@ -208,13 +208,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </div>
             </div>
             
-            {formData.applyMarkup && (
-              <div className="flex justify-between mt-2">
-                <span className="text-gray-600 dark:text-gray-300">{formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment'}:</span>
-                <span className="ml-2 font-medium">{formatCurrency(estimateData.markup)}</span>
-              </div>
-            )}
-            
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-300">Sales Tax (7%):</span>
               <span>{formatCurrency(estimateData.salesTax)}</span>
@@ -244,10 +237,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Overnight Stay:</span> {formData.stayingOvernight ? `Yes (${formData.numberOfNights} night(s))` : 'No'}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Number of Cleaners:</span> {formData.numberOfCleaners}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Urgency Level:</span> {formData.urgencyLevel}/10</p>
-              <p className="text-sm">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Additional Cleaning Costs:</span> 
-                {formData.applyMarkup ? 'Included' : 'Not Included'}
-              </p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Pressure Washing:</span> {formData.needsPressureWashing ? `Yes (${(formData.pressureWashingArea || 0).toLocaleString()} sq ft)` : 'No'}</p>
               <p className="text-sm"><span className="font-semibold text-gray-700 dark:text-gray-300">Window Cleaning:</span> {formData.needsWindowCleaning ? 
                 `Yes (${formData.numberOfWindows || 0} standard, ${formData.numberOfLargeWindows || 0} large, ${formData.numberOfHighAccessWindows || 0} high-access)${formData.chargeForWindowCleaning ? '' : ' - Quoted Separately'}` : 'No'}</p>
