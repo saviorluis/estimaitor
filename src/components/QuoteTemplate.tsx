@@ -128,7 +128,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle markup percentage change
   const handleMarkupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
-    setMarkupPercentage(isNaN(value) ? 0 : value);
+    const newValue = isNaN(value) ? 0 : value;
+    setMarkupPercentage(newValue);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('quoteMarkupPercentage', newValue.toString());
+    }
   };
 
   // Calculate adjusted prices with markup
@@ -374,6 +380,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       adjustedEstimateData.markup = Object.keys(adjustedPrices).length > 0 ? subtotal - estimateData.totalBeforeMarkup : estimateData.markup;
       adjustedEstimateData.salesTax = salesTax;
       adjustedEstimateData.totalPrice = subtotal + salesTax;
+      
+      // Add adjusted line items to the estimate data
+      if (Object.keys(adjustedPrices).length > 0) {
+        adjustedEstimateData.adjustedLineItems = adjustedPrices;
+      }
       
       const blob = await generateQuoteDocx(
         adjustedEstimateData,
@@ -685,13 +696,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <textarea
               name="terms"
               value={quoteInfo.terms}
-            <p className="text-sm">{companyInfo.website}</p>
-          </div>
-          <div className="text-right">
-            <h2 className="text-xl font-bold text-blue-600 print:text-black">QUOTE</h2>
-            <p className="text-sm">Quote #: {quoteInfo.quoteNumber}</p>
-            <p className="text-sm">Date: {quoteInfo.date}</p>
-            <p className="text-sm">Valid Until: {quoteInfo.validUntil}</p>
+              onChange={handleQuoteChange}
+              rows={8}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Terms and conditions for the quote"
+            />
           </div>
         </div>
 
