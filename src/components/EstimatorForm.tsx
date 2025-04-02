@@ -201,6 +201,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="educational">Educational Facility</option>
             <option value="hotel">Hotel (up to 100,000 sq ft)</option>
             <option value="jewelry_store">Jewelry Store</option>
+            <option value="apartment">Apartment Complex</option>
+            <option value="warehouse">Warehouse</option>
+            <option value="dormitory">Dormitory</option>
+            <option value="grocery_store">Grocery Store</option>
           </select>
           {errors.projectType && (
             <p className="text-red-500 text-xs mt-1">{errors.projectType.message}</p>

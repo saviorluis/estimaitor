@@ -189,7 +189,11 @@ const getCleaningTypeDisplay = (type: string): string => {
 
 // Get project type display name
 const getProjectTypeDisplay = (type: string): string => {
-  return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+  switch (type) {
+    case 'jewelry_store': return 'Jewelry Store';
+    case 'grocery_store': return 'Grocery Store';
+    default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+  }
 };
 
 // Add a safe formatter to prevent errors in the PDF generation
