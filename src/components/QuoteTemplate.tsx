@@ -273,30 +273,61 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       // Create a blob from the PDF document
       console.log('Creating PDF blob...');
-      // Create adjusted estimate data with markup
+      
+      // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const adjustedEstimateData = {...estimateData};
       
-      // If we have a custom markup (adjustedPrices has entries), use those values
-      if (Object.keys(adjustedPrices).length > 0) {
-        // Calculate adjusted subtotal
-        const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
-        
-        // Calculate adjusted sales tax
-        const salesTax = subtotal * 0.07;
-        
-        // Update the estimate data with adjusted values
-        adjustedEstimateData.totalBeforeMarkup = subtotal;
-        adjustedEstimateData.markup = subtotal - estimateData.totalBeforeMarkup; // Calculate actual markup amount
-        adjustedEstimateData.salesTax = salesTax;
-        adjustedEstimateData.totalPrice = subtotal + salesTax;
-      } else if (estimateData.markup > 0) {
-        // If there's built-in markup from the estimator but no custom markup,
-        // make sure we're using the correct values
-        adjustedEstimateData.totalBeforeMarkup = estimateData.totalBeforeMarkup;
-        adjustedEstimateData.markup = estimateData.markup;
-        adjustedEstimateData.salesTax = estimateData.salesTax;
-        adjustedEstimateData.totalPrice = estimateData.totalPrice;
+      // Calculate subtotal exactly as shown in the browser
+      let subtotal = 0;
+      
+      // Base price
+      subtotal += getAdjustedPrice('basePrice', 
+        (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
+      
+      // VCT cost
+      if (formData.hasVCT) {
+        subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
       }
+      
+      // Pressure washing
+      if (formData.needsPressureWashing) {
+        subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
+      }
+      
+      // Travel cost
+      subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
+      
+      // Overnight cost
+      if (formData.stayingOvernight) {
+        subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
+      }
+      
+      // Urgency cost
+      if (estimateData.urgencyMultiplier > 1) {
+        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+          ((estimateData.urgencyMultiplier || 1) - 1);
+        subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
+      }
+      
+      // Window cleaning
+      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+        subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
+      }
+      
+      // Display case cleaning for jewelry stores
+      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+        subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
+      }
+      
+      // Calculate sales tax
+      const salesTax = subtotal * 0.07;
+      
+      // Set all the values for the PDF
+      adjustedEstimateData.totalBeforeMarkup = subtotal;
+      adjustedEstimateData.markup = Object.keys(adjustedPrices).length > 0 ? subtotal - estimateData.totalBeforeMarkup : estimateData.markup;
+      adjustedEstimateData.salesTax = salesTax;
+      adjustedEstimateData.totalPrice = subtotal + salesTax;
       
       const blob = await pdf(
         <QuotePDF 
@@ -339,30 +370,60 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle Word document download
   const handleWordDownload = async () => {
     try {
-      // Create adjusted estimate data with markup
+      // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const adjustedEstimateData = {...estimateData};
       
-      // If we have a custom markup (adjustedPrices has entries), use those values
-      if (Object.keys(adjustedPrices).length > 0) {
-        // Calculate adjusted subtotal
-        const subtotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
-        
-        // Calculate adjusted sales tax
-        const salesTax = subtotal * 0.07;
-        
-        // Update the estimate data with adjusted values
-        adjustedEstimateData.totalBeforeMarkup = subtotal;
-        adjustedEstimateData.markup = subtotal - estimateData.totalBeforeMarkup; // Calculate actual markup amount
-        adjustedEstimateData.salesTax = salesTax;
-        adjustedEstimateData.totalPrice = subtotal + salesTax;
-      } else if (estimateData.markup > 0) {
-        // If there's built-in markup from the estimator but no custom markup,
-        // make sure we're using the correct values
-        adjustedEstimateData.totalBeforeMarkup = estimateData.totalBeforeMarkup;
-        adjustedEstimateData.markup = estimateData.markup;
-        adjustedEstimateData.salesTax = estimateData.salesTax;
-        adjustedEstimateData.totalPrice = estimateData.totalPrice;
+      // Calculate subtotal exactly as shown in the browser
+      let subtotal = 0;
+      
+      // Base price
+      subtotal += getAdjustedPrice('basePrice', 
+        (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
+      
+      // VCT cost
+      if (formData.hasVCT) {
+        subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
       }
+      
+      // Pressure washing
+      if (formData.needsPressureWashing) {
+        subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
+      }
+      
+      // Travel cost
+      subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
+      
+      // Overnight cost
+      if (formData.stayingOvernight) {
+        subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
+      }
+      
+      // Urgency cost
+      if (estimateData.urgencyMultiplier > 1) {
+        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+          ((estimateData.urgencyMultiplier || 1) - 1);
+        subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
+      }
+      
+      // Window cleaning
+      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+        subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
+      }
+      
+      // Display case cleaning for jewelry stores
+      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+        subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
+      }
+      
+      // Calculate sales tax
+      const salesTax = subtotal * 0.07;
+      
+      // Set all the values for the Word document
+      adjustedEstimateData.totalBeforeMarkup = subtotal;
+      adjustedEstimateData.markup = Object.keys(adjustedPrices).length > 0 ? subtotal - estimateData.totalBeforeMarkup : estimateData.markup;
+      adjustedEstimateData.salesTax = salesTax;
+      adjustedEstimateData.totalPrice = subtotal + salesTax;
       
       const blob = await generateQuoteDocx(
         adjustedEstimateData,
