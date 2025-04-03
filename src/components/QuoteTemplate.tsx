@@ -8,7 +8,46 @@ import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import { generateQuoteDocx } from '@/lib/docxGenerator';
 import { SCOPE_OF_WORK } from '@/lib/constants';
-import CompanyLogo from '../assets/placeholder-logo';
+
+// Inline logo component to avoid import issues
+const CompanyLogo = ({ className = "" }: { className?: string }) => {
+  return (
+    <div className={`flex items-center justify-center ${className}`}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 200 80"
+        className="w-full h-full"
+      >
+        <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+        <text
+          x="100"
+          y="40"
+          fontFamily="Arial, sans-serif"
+          fontSize="24"
+          fontWeight="bold"
+          textAnchor="middle"
+          fill="white"
+          dominantBaseline="middle"
+        >
+          BBPS
+        </text>
+        <text
+          x="100"
+          y="60"
+          fontFamily="Arial, sans-serif"
+          fontSize="10"
+          textAnchor="middle"
+          fill="white"
+          dominantBaseline="middle"
+        >
+          Big Brother Property Solutions
+        </text>
+      </svg>
+    </div>
+  );
+};
 
 interface CompanyInfo {
   name: string;
@@ -556,8 +595,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </div>
 
         <div className="flex">
-          <div className="mr-4 flex-shrink-0 w-40">
-            <CompanyLogo className="w-full" />
+          <div className="mr-4 flex-shrink-0 w-32 h-20">
+            <CompanyLogo className="w-full h-full" />
           </div>
           {editingCompanyInfo ? (
             <div className="grid grid-cols-2 gap-4 flex-grow">
@@ -824,7 +863,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <div className="flex items-center mb-4">
-              <div className="w-32 mr-3">
+              <div className="w-24 h-16 mr-3">
                 <CompanyLogo />
               </div>
               <div>

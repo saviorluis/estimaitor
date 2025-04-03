@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   logoContainer: {
-    width: 100,
+    width: 80,
+    height: 40,
     marginRight: 10
   },
   companyHeader: {
