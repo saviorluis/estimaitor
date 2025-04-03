@@ -225,8 +225,50 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       adjustedPrices[item.key] = item.value + itemMarkup;
     });
 
-    setAdjustedPrices(adjustedPrices);
+    // Balance window cleaning pricing with base price
+    const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
+    if (Object.keys(balancedPrices).length > 0) {
+      setAdjustedPrices(balancedPrices);
+    } else {
+      setAdjustedPrices(adjustedPrices);
+    }
   }, [estimateData, formData, markupPercentage]);
+
+  // Function to balance window cleaning pricing with base cleaning cost
+  const balancePricing = (
+    adjustedPrices: {[key: string]: number}, 
+    lineItems: Array<{key: string, value: number}>, 
+    totalBeforeMarkup: number
+  ): {[key: string]: number} => {
+    const result = {...adjustedPrices};
+    
+    // Find the base price and window cleaning items
+    const basePrice = lineItems.find(item => item.key === 'basePrice');
+    const windowCleaning = lineItems.find(item => item.key === 'windowCleaningCost');
+    
+    // Only balance if both exist and window cleaning is being charged
+    if (basePrice && windowCleaning && windowCleaning.value > 0 && formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+      // Only apply if markup has been applied
+      if (markupPercentage > 0) {
+        // Calculate original markup for window cleaning
+        const windowProportion = windowCleaning.value / totalBeforeMarkup;
+        const windowMarkup = (totalBeforeMarkup * (markupPercentage / 100)) * windowProportion;
+        
+        // Calculate how much to transfer (50% of the window cleaning markup)
+        const transferAmount = windowMarkup * 0.5;
+        
+        // Remove the transfer amount from window cleaning
+        result['windowCleaningCost'] = adjustedPrices['windowCleaningCost'] - transferAmount;
+        
+        // Add the transfer amount to base price
+        result['basePrice'] = adjustedPrices['basePrice'] + transferAmount;
+        
+        return result;
+      }
+    }
+    
+    return {};
+  };
 
   // Get adjusted price for a line item
   const getAdjustedPrice = (key: string, originalPrice: number): number => {
