@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatDate, formatCurrency, generateQuoteNumber } from '@/lib/utils';
+import { formatDate, formatCurrency, generateQuoteNumber, getQuoteCounter, incrementQuoteCounter } from '@/lib/utils';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import { generateQuoteDocx } from '@/lib/docxGenerator';
 import { SCOPE_OF_WORK } from '@/lib/constants';
+import CompanyLogo from '@/assets/placeholder-logo';
 
 interface CompanyInfo {
   name: string;
@@ -27,6 +28,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // State for custom markup percentage
   const [markupPercentage, setMarkupPercentage] = useState<number>(0);
   const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
+  // State for quote counter
+  const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
     return (
@@ -155,6 +158,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (typeof window !== 'undefined') {
       localStorage.setItem('quoteMarkupPercentage', newValue.toString());
     }
+  };
+
+  // Handle quote counter increment
+  const handleIncrementCounter = () => {
+    const newCounter = incrementQuoteCounter();
+    setQuoteCounter(newCounter);
+    // Update the quote number in the quoteInfo state
+    setQuoteInfo(prev => ({
+      ...prev,
+      quoteNumber: `Q-${new Date().getFullYear()}-${newCounter}`
+    }));
   };
 
   // Calculate adjusted prices with markup
@@ -401,10 +415,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const url = URL.createObjectURL(blob);
       console.log('Created URL for blob:', url);
       
+      // Generate filename based on project name and location
+      const projectName = quoteInfo.projectName.trim() || 'Quote';
+      const projectLocation = quoteInfo.projectAddress.trim() || '';
+      const fileName = projectName && projectLocation 
+        ? `${projectName} ${projectLocation} Quote.pdf`
+        : `Quote-${quoteInfo.quoteNumber}.pdf`;
+      
       // Create a temporary link element
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Quote-${quoteInfo.quoteNumber}.pdf`;
+      link.download = fileName;
       
       // Append to the document, click it, and remove it
       document.body.appendChild(link);
@@ -449,6 +470,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         adjustedEstimateData.adjustedLineItems = adjustedPrices;
       }
       
+      // Generate filename based on project name and location
+      const projectName = quoteInfo.projectName.trim() || 'Quote';
+      const projectLocation = quoteInfo.projectAddress.trim() || '';
+      const fileName = projectName && projectLocation 
+        ? `${projectName} ${projectLocation} Quote.docx`
+        : `Quote-${quoteInfo.quoteNumber}.docx`;
+      
       const blob = await generateQuoteDocx(
         adjustedEstimateData,
         formData,
@@ -456,7 +484,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         clientInfo,
         quoteInfo
       );
-      saveAs(blob, `Quote-${quoteInfo.quoteNumber}.docx`);
+      saveAs(blob, fileName);
     } catch (error) {
       console.error('Error generating Word document:', error);
       alert('There was an error generating the Word document. Please try again.');
@@ -499,6 +527,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </button>
       </div>
 
+      {/* Quote Counter Display - Hidden when printing */}
+      <div className="flex items-center mb-6 print:hidden">
+        <div className="flex-1">
+          <div className="bg-gray-100 p-3 rounded-lg inline-block">
+            <span className="text-gray-700 font-semibold">Current Quote #:</span>
+            <span className="ml-2 text-blue-600 font-bold">{quoteCounter}</span>
+          </div>
+          <button
+            onClick={handleIncrementCounter}
+            className="ml-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition"
+          >
+            Increment Quote #
+          </button>
+        </div>
+      </div>
+
       {/* Your Company Information - Hidden when printing */}
       <div className="mb-6 print:hidden">
         <div className="flex justify-between items-center mb-2">
@@ -511,97 +555,102 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </button>
         </div>
 
-        {editingCompanyInfo ? (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
-              <input
-                type="text"
-                name="name"
-                value={companyInfo.name}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-              <input
-                type="text"
-                name="phone"
-                value={companyInfo.phone}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
-              <input
-                type="text"
-                name="address"
-                value={companyInfo.address}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-              <input
-                type="text"
-                name="email"
-                value={companyInfo.email}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
-              <input
-                type="text"
-                name="city"
-                value={companyInfo.city}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
-              <input
-                type="text"
-                name="website"
-                value={companyInfo.website}
-                onChange={handleCompanyChange}
-                className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+        <div className="flex">
+          <div className="mr-4 flex-shrink-0 w-40">
+            <CompanyLogo className="w-full" />
           </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg">
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name:</p>
-              <p className="font-semibold text-gray-900 dark:text-gray-100">{companyInfo.name}</p>
+          {editingCompanyInfo ? (
+            <div className="grid grid-cols-2 gap-4 flex-grow">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={companyInfo.name}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={companyInfo.phone}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={companyInfo.address}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <input
+                  type="text"
+                  name="email"
+                  value={companyInfo.email}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={companyInfo.city}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+                <input
+                  type="text"
+                  name="website"
+                  value={companyInfo.website}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone:</p>
-              <p className="text-gray-900 dark:text-gray-100">{companyInfo.phone}</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg flex-grow">
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name:</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">{companyInfo.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.phone}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Address:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.address}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Email:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.email}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">City:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.city}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Website:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.website}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Address:</p>
-              <p className="text-gray-900 dark:text-gray-100">{companyInfo.address}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Email:</p>
-              <p className="text-gray-900 dark:text-gray-100">{companyInfo.email}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">City:</p>
-              <p className="text-gray-900 dark:text-gray-100">{companyInfo.city}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Website:</p>
-              <p className="text-gray-900 dark:text-gray-100">{companyInfo.website}</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Client Information - Hidden when printing */}
@@ -774,6 +823,14 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         {/* Client and Project Information - Ensure no empty placeholders in printed version */}
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
+            <div className="flex items-center mb-4">
+              <div className="w-32 mr-3">
+                <CompanyLogo />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold border-b pb-1">Quote #{quoteCounter}</h3>
+              </div>
+            </div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
             <p>{clientInfo.name || '[Client Name]'}</p>
             <p>{clientInfo.company || '[Company]'}</p>
@@ -849,7 +906,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               <tr>
                 <td className="border p-2">
                   <div className="font-semibold">Travel Expenses</div>
-                  <div className="text-sm">{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</div>
+                  <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
                 </td>
                 <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
               </tr>

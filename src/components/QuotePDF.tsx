@@ -1,8 +1,8 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS } from '@/lib/constants';
+import { formatCurrency, getQuoteCounter } from '@/lib/utils';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -174,6 +174,42 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 11,
   },
+  logoContainer: {
+    width: 100,
+    marginRight: 10
+  },
+  companyHeader: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    alignItems: 'center'
+  },
+  quoteDate: {
+    fontSize: 10,
+    marginBottom: 3,
+  },
+  quoteExpiry: {
+    fontSize: 10,
+    marginBottom: 3,
+  },
+  lineItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 5,
+    fontSize: 10,
+  },
+  lineItemContent: {
+    width: '70%',
+  },
+  lineItemTitle: {
+    fontWeight: 'bold',
+  },
+  lineItemDescription: {
+    fontSize: 9,
+  },
+  lineItemAmount: {
+    width: '30%',
+    textAlign: 'right',
+  },
 });
 
 // Get cleaning type display name
@@ -236,6 +272,67 @@ interface QuotePDFProps {
   };
 }
 
+// Create a component for the logo
+const CompanyLogoSVG = () => (
+  <svg width="200" height="80" viewBox="0 0 200 80">
+    <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+    <text
+      x="100"
+      y="40"
+      fontFamily="Helvetica-Bold"
+      fontSize="24"
+      textAnchor="middle"
+      fill="white"
+    >
+      BBPS
+    </text>
+    <text
+      x="100"
+      y="60"
+      fontFamily="Helvetica"
+      fontSize="10"
+      textAnchor="middle"
+      fill="white"
+    >
+      Big Brother Property Solutions
+    </text>
+  </svg>
+);
+
+// Helper function to create a data URL from SVG for use in Image component
+const createLogoDataURL = () => {
+  const svgString = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80">
+      <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+      <text
+        x="100"
+        y="40"
+        font-family="Arial, sans-serif"
+        font-size="24"
+        font-weight="bold"
+        text-anchor="middle"
+        fill="white"
+        dominant-baseline="middle"
+      >
+        BBPS
+      </text>
+      <text
+        x="100"
+        y="60"
+        font-family="Arial, sans-serif"
+        font-size="10"
+        text-anchor="middle"
+        fill="white"
+        dominant-baseline="middle"
+      >
+        Big Brother Property Solutions
+      </text>
+    </svg>
+  `;
+  
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString.trim())}`;
+};
+
 const QuotePDF: React.FC<QuotePDFProps> = ({ 
   estimateData, 
   formData, 
@@ -243,6 +340,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   clientInfo, 
   quoteInfo 
 }) => {
+  // Get the current quote counter value
+  const quoteCounter = getQuoteCounter();
+  const logoDataURL = createLogoDataURL();
+  
   // Early return for undefined data
   if (!estimateData || !formData) {
     return (
@@ -273,21 +374,26 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header Section */}
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
-            <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
-            <Text style={styles.companyDetails}>{safeCompanyInfo.city}</Text>
-            <Text style={styles.companyDetails}>{safeCompanyInfo.phone}</Text>
-            <Text style={styles.companyDetails}>{safeCompanyInfo.email}</Text>
-            <Text style={styles.companyDetails}>{safeCompanyInfo.website}</Text>
+            <View style={styles.companyHeader}>
+              <View style={styles.logoContainer}>
+                <Image src={logoDataURL} />
+              </View>
+              <View>
+                <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
+                <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
+                <Text style={styles.companyDetails}>{safeCompanyInfo.city}</Text>
+                <Text style={styles.companyDetails}>Phone: {safeCompanyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>{safeCompanyInfo.email}</Text>
+              </View>
+            </View>
           </View>
           <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>QUOTE</Text>
-            <Text style={styles.quoteDetails}>Quote #: {safeQuoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDetails}>Date: {safeQuoteInfo.date}</Text>
-            <Text style={styles.quoteDetails}>Valid Until: {safeQuoteInfo.validUntil}</Text>
+            <Text style={styles.quoteTitle}>QUOTE #{quoteCounter}</Text>
+            <Text style={styles.quoteDate}>Date: {safeQuoteInfo.date}</Text>
+            <Text style={styles.quoteExpiry}>Valid Until: {safeQuoteInfo.validUntil}</Text>
           </View>
         </View>
 
@@ -389,18 +495,18 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Travel Expenses */}
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>Travel Expenses</Text>
-              <Text>{(formData.distanceFromOffice || 0)} miles at current gas price (${((formData.gasPrice || 0)).toFixed(2)}/gallon)</Text>
+          <View style={styles.lineItem}>
+            <View style={styles.lineItemContent}>
+              <Text style={styles.lineItemTitle}>Travel Expenses</Text>
+              <Text style={styles.lineItemDescription}>{formData.distanceFromOffice || 0} miles</Text>
             </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(
+            <Text style={styles.lineItemAmount}>
+              {formatCurrency(
                 estimateData.adjustedLineItems?.travelCost !== undefined 
                   ? estimateData.adjustedLineItems.travelCost 
                   : estimateData.travelCost
-              )}</Text>
-            </View>
+              )}
+            </Text>
           </View>
 
           {/* Overnight Accommodations if applicable */}
@@ -485,6 +591,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.subtotalText}>Subtotal</Text>
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
+
+          {/* Markup is now included in the line items, so we don't need to show it separately */}
 
           {/* Sales Tax */}
           <View style={styles.row}>
