@@ -8,7 +8,7 @@ import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import { generateQuoteDocx } from '@/lib/docxGenerator';
 import { SCOPE_OF_WORK } from '@/lib/constants';
-import CompanyLogo from '@/assets/placeholder-logo';
+import CompanyLogo from '../assets/placeholder-logo';
 
 interface CompanyInfo {
   name: string;
