@@ -287,6 +287,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   // Get the current quote counter value
   const quoteCounter = getQuoteCounter();
   
+  // Base64 encoded blue rectangle with "BBPS" text (as a placeholder)
+  const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAABQCAYAAABcbTqwAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDEtMjNUMTU6MzA6MDMtMDU6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTAxLTIzVDE1OjMwOjAzLTA1OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTAxLTIzVDE1OjMwOjAzLTA1OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjVjMzBjODhmLTJiYjQt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";
+  
   // Early return for undefined data
   if (!estimateData || !formData) {
     return (
@@ -322,33 +325,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
-                <Svg viewBox="0 0 200 80" style={styles.logo}>
-                  <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-                  <Text
-                    x="100"
-                    y="40"
-                    style={{
-                      textAnchor: 'middle',
-                      fill: 'white',
-                      fontFamily: 'Helvetica-Bold',
-                      fontSize: 24,
-                    }}
-                  >
-                    BBPS
-                  </Text>
-                  <Text
-                    x="100"
-                    y="60"
-                    style={{
-                      textAnchor: 'middle',
-                      fill: 'white',
-                      fontFamily: 'Helvetica',
-                      fontSize: 10,
-                    }}
-                  >
-                    Big Brother Property Solutions
-                  </Text>
-                </Svg>
+                <Image src={logoBase64} style={styles.logo} />
               </View>
               <View>
                 <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
