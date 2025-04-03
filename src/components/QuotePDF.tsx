@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image, Svg, Rect, G, Path } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
@@ -179,6 +179,10 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 10
   },
+  logo: {
+    width: '100%',
+    height: '100%',
+  },
   companyHeader: {
     flexDirection: 'row',
     marginBottom: 10,
@@ -273,67 +277,6 @@ interface QuotePDFProps {
   };
 }
 
-// Create a component for the logo
-const CompanyLogoSVG = () => (
-  <svg width="200" height="80" viewBox="0 0 200 80">
-    <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-    <text
-      x="100"
-      y="40"
-      fontFamily="Helvetica-Bold"
-      fontSize="24"
-      textAnchor="middle"
-      fill="white"
-    >
-      BBPS
-    </text>
-    <text
-      x="100"
-      y="60"
-      fontFamily="Helvetica"
-      fontSize="10"
-      textAnchor="middle"
-      fill="white"
-    >
-      Big Brother Property Solutions
-    </text>
-  </svg>
-);
-
-// Helper function to create a data URL from SVG for use in Image component
-const createLogoDataURL = () => {
-  const svgString = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80">
-      <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-      <text
-        x="100"
-        y="40"
-        font-family="Arial, sans-serif"
-        font-size="24"
-        font-weight="bold"
-        text-anchor="middle"
-        fill="white"
-        dominant-baseline="middle"
-      >
-        BBPS
-      </text>
-      <text
-        x="100"
-        y="60"
-        font-family="Arial, sans-serif"
-        font-size="10"
-        text-anchor="middle"
-        fill="white"
-        dominant-baseline="middle"
-      >
-        Big Brother Property Solutions
-      </text>
-    </svg>
-  `;
-  
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString.trim())}`;
-};
-
 const QuotePDF: React.FC<QuotePDFProps> = ({ 
   estimateData, 
   formData, 
@@ -343,7 +286,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   // Get the current quote counter value
   const quoteCounter = getQuoteCounter();
-  const logoDataURL = createLogoDataURL();
   
   // Early return for undefined data
   if (!estimateData || !formData) {
@@ -380,7 +322,33 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
-                <Image src={logoDataURL} />
+                <Svg viewBox="0 0 200 80" style={styles.logo}>
+                  <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+                  <Text
+                    x="100"
+                    y="40"
+                    style={{
+                      textAnchor: 'middle',
+                      fill: 'white',
+                      fontFamily: 'Helvetica-Bold',
+                      fontSize: 24,
+                    }}
+                  >
+                    BBPS
+                  </Text>
+                  <Text
+                    x="100"
+                    y="60"
+                    style={{
+                      textAnchor: 'middle',
+                      fill: 'white',
+                      fontFamily: 'Helvetica',
+                      fontSize: 10,
+                    }}
+                  >
+                    Big Brother Property Solutions
+                  </Text>
+                </Svg>
               </View>
               <View>
                 <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
