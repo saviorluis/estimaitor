@@ -566,22 +566,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </button>
       </div>
 
-      {/* Quote Counter Display - Hidden when printing */}
-      <div className="flex items-center mb-6 print:hidden">
-        <div className="flex-1">
-          <div className="bg-gray-100 p-3 rounded-lg inline-block">
-            <span className="text-gray-700 font-semibold">Current Quote #:</span>
-            <span className="ml-2 text-blue-600 font-bold">{quoteCounter}</span>
-          </div>
-          <button
-            onClick={handleIncrementCounter}
-            className="ml-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition"
-          >
-            Increment Quote #
-          </button>
-        </div>
-      </div>
-
       {/* Your Company Information - Hidden when printing */}
       <div className="mb-6 print:hidden">
         <div className="flex justify-between items-center mb-2">
@@ -595,11 +579,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </div>
 
         <div className="flex">
-          <div className="mr-4 flex-shrink-0 w-32 h-20">
-            <CompanyLogo className="w-full h-full" />
-          </div>
           {editingCompanyInfo ? (
-            <div className="grid grid-cols-2 gap-4 flex-grow">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
                 <input
@@ -662,7 +643,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg flex-grow">
+            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg w-full">
               <div>
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name:</p>
                 <p className="font-semibold text-gray-900 dark:text-gray-100">{companyInfo.name}</p>
@@ -784,6 +765,43 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </div>
           <p className="text-xs text-gray-500 mt-2">
             This will adjust all prices proportionally to maintain the same relative pricing structure.
+          </p>
+        </div>
+        
+        {/* Quote Counter Input */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Quote Number
+          </label>
+          <div className="flex items-center">
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={quoteCounter}
+              onChange={(e) => {
+                const newValue = parseInt(e.target.value, 10);
+                if (!isNaN(newValue) && newValue > 0) {
+                  setQuoteCounter(newValue);
+                  // Save to localStorage
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('quoteCounter', newValue.toString());
+                  }
+                  // Update the quote number in quoteInfo
+                  setQuoteInfo(prev => ({
+                    ...prev,
+                    quoteNumber: `Q-${new Date().getFullYear()}-${newValue}`
+                  }));
+                }
+              }}
+              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <div className="ml-4 text-sm text-gray-600">
+              Current Quote #: <span className="font-semibold">{quoteCounter}</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Quote counter starts from 121 and will be remembered between sessions.
           </p>
         </div>
         
