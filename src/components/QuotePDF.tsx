@@ -289,8 +289,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   
   // Logo path for PDF - use absolute URL for deployment
   const logoPath = process.env.NEXT_PUBLIC_VERCEL_URL 
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/Screenshot%202025-01-23%20at%203.30.03%20PM%20copy.png` 
-    : '/Screenshot 2025-01-23 at 3.30.03 PM copy.png';
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/images/Screenshot%202025-01-23%20at%203.30.03%20PM%20copy.png` 
+    : '/images/Screenshot 2025-01-23 at 3.30.03 PM copy.png';
   
   // Early return for undefined data
   if (!estimateData || !formData) {
