@@ -175,13 +175,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   logoContainer: {
-    width: 80,
-    height: 40,
-    marginRight: 10
+    width: 120,
+    height: 60,
+    marginRight: 15,
+    marginBottom: 5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   logo: {
     width: '100%',
     height: '100%',
+    objectFit: 'contain'
   },
   companyHeader: {
     flexDirection: 'row',
