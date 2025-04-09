@@ -194,6 +194,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             className="input-field"
           >
             <option value="restaurant">Restaurant</option>
+            <option value="fast_food">Fast Food Restaurant</option>
             <option value="medical">Medical Facility</option>
             <option value="office">Office Space</option>
             <option value="retail">Retail Space</option>
@@ -205,6 +206,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="warehouse">Warehouse</option>
             <option value="dormitory">Dormitory</option>
             <option value="grocery_store">Grocery Store</option>
+            <option value="yoga_studio">Yoga Studio</option>
+            <option value="kids_fitness">Children's Fitness Center</option>
           </select>
           {errors.projectType && (
             <p className="text-red-500 text-xs mt-1">{errors.projectType.message}</p>
