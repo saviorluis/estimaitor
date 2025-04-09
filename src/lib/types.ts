@@ -10,7 +10,10 @@ export type ProjectType =
   | 'apartment'
   | 'warehouse'
   | 'dormitory'
-  | 'grocery_store';
+  | 'grocery_store'
+  | 'yoga_studio'
+  | 'kids_fitness'
+  | 'fast_food';
 
 export type CleaningType = 'rough' | 'final' | 'powder_puff' | 'complete';
 
