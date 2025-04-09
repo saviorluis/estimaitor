@@ -5,18 +5,21 @@ export const BASE_RATE_PER_SQFT = 0.18;
 
 // Project type multipliers
 export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
-  restaurant: 1.4,
-  medical: 1.5,
+  restaurant: 1.3,
+  medical: 1.4,
   office: 1.0,
   retail: 1.2,
   industrial: 1.3,
   educational: 1.25,
-  hotel: 1.45,
-  jewelry_store: 1.6,
+  hotel: 1.35,
+  jewelry_store: 1.4,
   apartment: 1.1,
   warehouse: 1.2,
-  dormitory: 1.3,
-  grocery_store: 1.35
+  dormitory: 1.2,
+  grocery_store: 1.3,
+  yoga_studio: 1.15,
+  kids_fitness: 1.25,
+  fast_food: 1.3
 };
 
 // Cleaning type multipliers
@@ -109,7 +112,10 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   apartment: 550,     // Similar to residential cleaning but larger scale
   warehouse: 850,     // Large open spaces, more efficient cleaning
   dormitory: 500,      // Similar to hotel but with common areas and shared spaces
-  grocery_store: 480
+  grocery_store: 480,
+  yoga_studio: 500,    // Similar to fitness centers, focus on sanitization
+  kids_fitness: 450,   // Extra attention to safety and sanitization
+  fast_food: 450      // Similar to restaurants, focused on food service areas
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -240,26 +246,82 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Clean and sanitize laundry facilities\n" +
     "• Special attention to high-touch surfaces in all common areas",
 
-  grocery_store: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); clean interior/exterior storefront windows and doors; clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area."
+  grocery_store: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); clean interior/exterior storefront windows and doors; clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area.",
+
+  yoga_studio: `
+    • Dust and clean all surfaces, including yoga equipment storage areas and props
+    • Vacuum and mop studio floors with appropriate cleaning solutions safe for yoga mats
+    • Clean and sanitize changing rooms, lockers, and shower facilities
+    • Wipe down mirrors and windows
+    • Empty all trash receptacles and replace liners
+    • Clean and sanitize water stations and common areas
+    • Dust light fixtures and ceiling fans
+    • Clean and sanitize bathroom facilities
+    • Wipe down reception desk and lobby area
+    • Clean entrance glass doors and windows
+    • Sanitize yoga mats and props storage areas
+  `,
+
+  kids_fitness: `
+    • Clean and sanitize all gym equipment and play structures
+    • Vacuum and mop all floor areas with child-safe cleaning solutions
+    • Sanitize mats, padding, and soft play areas
+    • Clean mirrors and windows throughout the facility
+    • Dust and wipe down all surfaces, including cubbies and storage areas
+    • Clean and sanitize bathroom facilities
+    • Empty all trash receptacles and replace liners
+    • Clean and sanitize water fountains
+    • Wipe down reception desk and parent waiting areas
+    • Clean entrance glass doors and windows
+    • Special attention to sanitizing high-touch areas and equipment
+    • Clean and organize equipment storage areas
+  `,
+
+  fast_food: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; clean interior/exterior storefront windows and doors; remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.`
 };
 
 // Project type specific scopes of work
-export const PROJECT_SCOPES: Record<string, string> = {
-  fast_food: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; clean interior/exterior storefront windows and doors; remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.`,
-  
-  restaurant: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; clean interior/exterior storefront windows and doors; remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.`,
-  
-  hotel: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures and ceiling fans; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean and sanitize all guest rooms and bathrooms; clean and disinfect all public areas including lobbies, hallways, and elevators; clean and polish all glass surfaces including mirrors and windows; clean and sanitize all furniture including beds, chairs, and tables; clean and disinfect all bathroom fixtures and surfaces; clean and sanitize all high-touch areas including door handles, light switches, and remote controls; properly clean trash receptacles and surrounding areas; clean and sanitize all fitness center equipment and areas; clean and sanitize all meeting rooms and conference areas; clean and sanitize all pool areas and equipment.`,
-  
-  medical: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures and ceiling fans; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean and disinfect all patient rooms and bathrooms; clean and sanitize all medical equipment and surfaces; clean and disinfect all public areas including waiting rooms, hallways, and elevators; clean and polish all glass surfaces including mirrors and windows; clean and sanitize all furniture including chairs and tables; clean and disinfect all bathroom fixtures and surfaces; clean and sanitize all high-touch areas including door handles, light switches, and elevator buttons; properly clean trash receptacles and surrounding areas; clean and sanitize all exam rooms and medical equipment; clean and sanitize all nurse stations and medical supply areas; clean and sanitize all laboratory areas and equipment.`,
-  
-  retail: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures and ceiling fans; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean and sanitize all sales areas and display cases; clean and disinfect all public areas including entrances, hallways, and elevators; clean and polish all glass surfaces including mirrors and windows; clean and sanitize all furniture including display tables and chairs; clean and disinfect all bathroom fixtures and surfaces; clean and sanitize all high-touch areas including door handles, light switches, and elevator buttons; properly clean trash receptacles and surrounding areas; clean and sanitize all fitting rooms and storage areas; clean and sanitize all checkout areas and POS systems; clean and sanitize all employee break rooms and offices.`,
-  
-  office: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures and ceiling fans; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean and sanitize all workstations and desks; clean and disinfect all public areas including lobbies, hallways, and elevators; clean and polish all glass surfaces including mirrors and windows; clean and sanitize all furniture including chairs and tables; clean and disinfect all bathroom fixtures and surfaces; clean and sanitize all high-touch areas including door handles, light switches, and elevator buttons; properly clean trash receptacles and surrounding areas; clean and sanitize all conference rooms and meeting areas; clean and sanitize all break rooms and kitchen areas; clean and sanitize all reception areas and waiting rooms.`,
-  
-  grocery_store: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); clean interior/exterior storefront windows and doors; clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area.`,
-  
-  default: `Final Cleaning of ___ Sq Ft ___ includes: sweep/mop all hard surface floors; wipe interior/exterior windows and clean bathrooms; clean light fixtures, hi-lo dusting; clean and sanitize all surfaces; clean and disinfect all high-touch areas; properly clean trash receptacles and surrounding areas.`
+export const PROJECT_SCOPES: Record<ProjectType, string> = {
+  restaurant: `${SCOPE_OF_WORK.restaurant}`,
+  medical: `${SCOPE_OF_WORK.medical}`,
+  office: `${SCOPE_OF_WORK.office}`,
+  retail: `${SCOPE_OF_WORK.retail}`,
+  industrial: `${SCOPE_OF_WORK.industrial}`,
+  educational: `${SCOPE_OF_WORK.educational}`,
+  hotel: `${SCOPE_OF_WORK.hotel}`,
+  jewelry_store: `${SCOPE_OF_WORK.jewelry_store}`,
+  apartment: `${SCOPE_OF_WORK.apartment}`,
+  warehouse: `${SCOPE_OF_WORK.warehouse}`,
+  dormitory: `${SCOPE_OF_WORK.dormitory}`,
+  grocery_store: `${SCOPE_OF_WORK.grocery_store}`,
+  fast_food: `${SCOPE_OF_WORK.fast_food}`,
+  yoga_studio: `
+    • Dust and clean all surfaces, including yoga equipment storage areas and props
+    • Vacuum and mop studio floors with appropriate cleaning solutions safe for yoga mats
+    • Clean and sanitize changing rooms, lockers, and shower facilities
+    • Wipe down mirrors and windows
+    • Empty all trash receptacles and replace liners
+    • Clean and sanitize water stations and common areas
+    • Dust light fixtures and ceiling fans
+    • Clean and sanitize bathroom facilities
+    • Wipe down reception desk and lobby area
+    • Clean entrance glass doors and windows
+    • Sanitize yoga mats and props storage areas
+  `,
+  kids_fitness: `
+    • Clean and sanitize all gym equipment and play structures
+    • Vacuum and mop all floor areas with child-safe cleaning solutions
+    • Sanitize mats, padding, and soft play areas
+    • Clean mirrors and windows throughout the facility
+    • Dust and wipe down all surfaces, including cubbies and storage areas
+    • Clean and sanitize bathroom facilities
+    • Empty all trash receptacles and replace liners
+    • Clean and sanitize water fountains
+    • Wipe down reception desk and parent waiting areas
+    • Clean entrance glass doors and windows
+    • Special attention to sanitizing high-touch areas and equipment
+    • Clean and organize equipment storage areas
+  `
 };
 
 // Pressure Washing Constants
