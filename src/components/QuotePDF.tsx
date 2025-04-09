@@ -508,8 +508,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Window Cleaning Services</Text>
-                <Text>{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</Text>
+                <Text>{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} {formData.projectType === 'yoga_studio' ? 'mirrors/large windows' : formData.projectType === 'kids_fitness' ? 'wall mirrors/large windows' : 'large windows'}, {(formData.numberOfHighAccessWindows || 0)} high-access windows</Text>
                 <Text>Includes all necessary equipment and cleaning solutions</Text>
+                {(formData.projectType === 'yoga_studio' || formData.projectType === 'kids_fitness') && (
+                  <Text style={{fontSize: 9, marginTop: 3}}>Note: For {formData.projectType === 'yoga_studio' ? 'yoga studios' : 'children\'s fitness centers'}, large windows category includes studio wall mirrors</Text>
+                )}
                 {!formData.chargeForWindowCleaning && (
                   <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>
                 )}

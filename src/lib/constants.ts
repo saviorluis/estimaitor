@@ -143,7 +143,8 @@ export const DISPLAY_CASE_TIME_PER_UNIT = 0.6; // Hours per display case
 export const SCOPE_OF_WORK: { [key: string]: string } = {
   restaurant: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and deep clean kitchen areas\n" +
-    "• Wipe interior/exterior windows and clean/sanitize bathrooms\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean/sanitize bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Degrease and sanitize kitchen surfaces, hoods, and equipment areas\n" +
     "• Clean and sanitize food preparation surfaces and dining areas\n" +
@@ -152,7 +153,8 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   medical: "Final Cleaning includes:\n" +
     "• Sweep/mop/sanitize all hard surface floors with hospital-grade disinfectants\n" +
-    "• Wipe interior/exterior windows and sanitize all bathrooms\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Sanitize all medical equipment surfaces and patient areas\n" +
     "• Detail clean and disinfect exam rooms and waiting areas\n" +
@@ -161,7 +163,8 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   office: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
-    "• Wipe interior/exterior windows and clean bathrooms\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean and sanitize break rooms and kitchen areas\n" +
     "• Detail clean conference rooms and reception areas\n" +
@@ -170,7 +173,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   retail: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean display areas\n" +
-    "• Clean all windows (interior/exterior) and entrance glass\n" +
+    "• Spot clean entrance glass (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Detail clean fitting rooms and customer areas\n" +
     "• Clean and sanitize checkout counters and service desks\n" +
@@ -179,7 +182,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   industrial: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean work areas\n" +
-    "• Clean windows and skylights (interior/exterior)\n" +
+    "• Spot clean accessible windows and skylights (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean and degrease machinery areas (external surfaces only)\n" +
     "• Clean break rooms and bathroom facilities\n" +
@@ -188,7 +191,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   educational: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean classroom spaces\n" +
-    "• Clean all windows (interior/exterior) and glass surfaces\n" +
+    "• Spot clean interior glass surfaces (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Sanitize desks, chairs, and educational equipment\n" +
     "• Deep clean cafeteria and food service areas\n" +
@@ -197,7 +200,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   hotel: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
-    "• Clean all windows (interior/exterior) and glass surfaces\n" +
+    "• Spot clean interior glass surfaces (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Detail clean guest rooms and corridors\n" +
     "• Clean and sanitize all bathroom facilities\n" +
@@ -206,12 +209,11 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   jewelry_store: "Final Cleaning includes:\n" +
     "• Professional cleaning of all glass display cases (interior and exterior)\n" +
-    "• Specialized cleaning of mirrors and glass surfaces with jewelry-safe solutions\n" +
+    "• Basic cleaning of mirrors and interior glass surfaces (full window service quoted separately)\n" +
     "• Meticulous dusting and polishing of display case lighting fixtures\n" +
     "• Detailed cleaning of customer consultation areas and seating\n" +
     "• Thorough cleaning of security fixtures and entrance areas\n" +
     "• Premium floor care with attention to high-end flooring materials\n" +
-    "• Streak-free cleaning of all windows and reflective surfaces\n" +
     "\nDisplay Cases:\n" +
     "• Interior and exterior cleaning with specialized glass cleaners\n" +
     "• Careful cleaning of display case tracks and locks\n" +
@@ -221,7 +223,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     
   apartment: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas in units and common areas\n" +
-    "• Clean all windows in common areas and entrances\n" +
+    "• Spot clean common area windows and entrances (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting throughout the property\n" +
     "• Detail clean lobbies, mailrooms, and other shared spaces\n" +
     "• Clean and sanitize common area restrooms and laundry facilities\n" +
@@ -230,7 +232,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     
   warehouse: "Final Cleaning includes:\n" +
     "• Sweep/dust mop warehouse floors and clean office areas\n" +
-    "• Clean windows and entrance areas\n" +
+    "• Spot clean entrance areas (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting of accessible areas\n" +
     "• Clean break rooms and bathroom facilities\n" +
     "• Detail clean offices and meeting rooms\n" +
@@ -239,26 +241,24 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     
   dormitory: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas in rooms and common spaces\n" +
-    "• Clean all common area windows and entrance glass\n" +
+    "• Spot clean common area glass and entrances (full window service quoted separately)\n" +
     "• Clean light fixtures and perform hi-lo dusting throughout the facility\n" +
     "• Sanitize shared bathroom facilities and shower areas\n" +
     "• Detail clean lounges, study areas, and communal kitchens\n" +
     "• Clean and sanitize laundry facilities\n" +
     "• Special attention to high-touch surfaces in all common areas",
 
-  grocery_store: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); clean interior/exterior storefront windows and doors; clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area.",
+  grocery_store: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); spot clean storefront windows and doors (full window service quoted separately); clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area.",
 
   yoga_studio: `
     • Dust and clean all surfaces, including yoga equipment storage areas and props
     • Vacuum and mop studio floors with appropriate cleaning solutions safe for yoga mats
     • Clean and sanitize changing rooms, lockers, and shower facilities
-    • Wipe down mirrors and windows
     • Empty all trash receptacles and replace liners
     • Clean and sanitize water stations and common areas
     • Dust light fixtures and ceiling fans
     • Clean and sanitize bathroom facilities
     • Wipe down reception desk and lobby area
-    • Clean entrance glass doors and windows
     • Sanitize yoga mats and props storage areas
   `,
 
@@ -266,18 +266,16 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     • Clean and sanitize all gym equipment and play structures
     • Vacuum and mop all floor areas with child-safe cleaning solutions
     • Sanitize mats, padding, and soft play areas
-    • Clean mirrors and windows throughout the facility
     • Dust and wipe down all surfaces, including cubbies and storage areas
     • Clean and sanitize bathroom facilities
     • Empty all trash receptacles and replace liners
     • Clean and sanitize water fountains
     • Wipe down reception desk and parent waiting areas
-    • Clean entrance glass doors and windows
     • Special attention to sanitizing high-touch areas and equipment
     • Clean and organize equipment storage areas
   `,
 
-  fast_food: `Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; clean interior/exterior storefront windows and doors; remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.`
+  fast_food: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; spot clean storefront windows and doors (full window service quoted separately); remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas."
 };
 
 // Project type specific scopes of work
@@ -299,26 +297,22 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
     • Dust and clean all surfaces, including yoga equipment storage areas and props
     • Vacuum and mop studio floors with appropriate cleaning solutions safe for yoga mats
     • Clean and sanitize changing rooms, lockers, and shower facilities
-    • Wipe down mirrors and windows
     • Empty all trash receptacles and replace liners
     • Clean and sanitize water stations and common areas
     • Dust light fixtures and ceiling fans
     • Clean and sanitize bathroom facilities
     • Wipe down reception desk and lobby area
-    • Clean entrance glass doors and windows
     • Sanitize yoga mats and props storage areas
   `,
   kids_fitness: `
     • Clean and sanitize all gym equipment and play structures
     • Vacuum and mop all floor areas with child-safe cleaning solutions
     • Sanitize mats, padding, and soft play areas
-    • Clean mirrors and windows throughout the facility
     • Dust and wipe down all surfaces, including cubbies and storage areas
     • Clean and sanitize bathroom facilities
     • Empty all trash receptacles and replace liners
     • Clean and sanitize water fountains
     • Wipe down reception desk and parent waiting areas
-    • Clean entrance glass doors and windows
     • Special attention to sanitizing high-touch areas and equipment
     • Clean and organize equipment storage areas
   `
