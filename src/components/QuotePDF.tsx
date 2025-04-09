@@ -387,7 +387,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
               <Text style={{fontSize: 9, marginTop: 5}}>
-                {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || PROJECT_SCOPES.default.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`)}
+                {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
               </Text>
             </View>
             <View style={[styles.tableCell, styles.amountCell]}>
