@@ -242,6 +242,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'fast_food': return 'Fast Food Restaurant';
     case 'yoga_studio': return 'Yoga Studio';
     case 'kids_fitness': return 'Children\'s Fitness Center';
+    case 'bakery': return 'Bakery';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };
