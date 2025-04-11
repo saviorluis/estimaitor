@@ -47,14 +47,14 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Ensure gasPrice is a number
   const gasPrice = typeof rawGasPrice === 'string' ? parseFloat(rawGasPrice) : (rawGasPrice || 3.50);
 
-  // Calculate base price
-  const basePrice = squareFootage * BASE_RATE_PER_SQFT;
-
   // Apply project type multiplier
   const projectTypeMultiplier = PROJECT_TYPE_MULTIPLIERS[projectType];
   
   // Apply cleaning type multiplier
   const cleaningTypeMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
+
+  // Calculate base price
+  const basePrice = squareFootage * BASE_RATE_PER_SQFT * projectTypeMultiplier * cleaningTypeMultiplier;
 
   // Calculate VCT cost if applicable
   const vctCost = hasVCT ? squareFootage * VCT_COST_PER_SQFT : 0;
@@ -128,7 +128,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate total before markup
   const totalBeforeMarkup = (
-    basePrice * projectTypeMultiplier * cleaningTypeMultiplier +
+    basePrice +
     vctCost +
     travelCost +
     overnightCost +

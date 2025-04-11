@@ -19,7 +19,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   grocery_store: 1.3,
   yoga_studio: 1.15,
   kids_fitness: 1.25,
-  fast_food: 1.3
+  fast_food: 1.3,
+  bakery: 1.35
 };
 
 // Cleaning type multipliers
@@ -115,7 +116,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   grocery_store: 480,
   yoga_studio: 500,    // Similar to fitness centers, focus on sanitization
   kids_fitness: 450,   // Extra attention to safety and sanitization
-  fast_food: 450      // Similar to restaurants, focused on food service areas
+  fast_food: 450,      // Similar to restaurants, focused on food service areas
+  bakery: 430          // Detailed cleaning of bakery equipment and food prep areas
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -275,7 +277,21 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     • Clean and organize equipment storage areas
   `,
 
-  fast_food: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; spot clean storefront windows and doors (full window service quoted separately); remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas."
+  fast_food: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; spot clean storefront windows and doors (full window service quoted separately); remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.",
+
+  bakery: "Final Cleaning includes:\n" +
+    "• Sweep/mop/sanitize all hard surface floors with food-safe cleaners\n" +
+    "• Spot clean entrance glass (full window service quoted separately)\n" +
+    "• Clean and sanitize all food preparation surfaces and equipment\n" +
+    "• Clean and polish all stainless steel surfaces and bakery display cases\n" +
+    "• Deep clean ovens, mixers, and specialized bakery equipment (external surfaces)\n" +
+    "• Clean and sanitize customer service areas and café seating\n" +
+    "• Dust and clean all light fixtures and perform hi-lo dusting\n" +
+    "• Detail clean and sanitize storage areas and shelving\n" +
+    "• Clean and sanitize bathroom facilities\n" +
+    "• Empty all trash receptacles and replace liners\n" +
+    "• Clean and sanitize employee break areas\n" +
+    "• Special attention to removing flour and other bakery ingredients from surfaces"
 };
 
 // Project type specific scopes of work
@@ -315,7 +331,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
     • Wipe down reception desk and parent waiting areas
     • Special attention to sanitizing high-touch areas and equipment
     • Clean and organize equipment storage areas
-  `
+  `,
+  bakery: `${SCOPE_OF_WORK.bakery}`
 };
 
 // Pressure Washing Constants

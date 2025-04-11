@@ -13,7 +13,8 @@ export type ProjectType =
   | 'grocery_store'
   | 'yoga_studio'
   | 'kids_fitness'
-  | 'fast_food';
+  | 'fast_food'
+  | 'bakery';
 
 export type CleaningType = 'rough' | 'final' | 'powder_puff' | 'complete';
 
