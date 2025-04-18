@@ -14,7 +14,8 @@ export type ProjectType =
   | 'yoga_studio'
   | 'kids_fitness'
   | 'fast_food'
-  | 'bakery';
+  | 'bakery'
+  | 'pet_resort';
 
 export type CleaningType = 'rough' | 'final' | 'powder_puff' | 'complete';
 

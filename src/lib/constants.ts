@@ -20,7 +20,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   yoga_studio: 1.15,
   kids_fitness: 1.25,
   fast_food: 1.3,
-  bakery: 1.35
+  bakery: 1.35,
+  pet_resort: 1.4
 };
 
 // Cleaning type multipliers
@@ -117,7 +118,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   yoga_studio: 500,    // Similar to fitness centers, focus on sanitization
   kids_fitness: 450,   // Extra attention to safety and sanitization
   fast_food: 450,      // Similar to restaurants, focused on food service areas
-  bakery: 430          // Detailed cleaning of bakery equipment and food prep areas
+  bakery: 430,         // Detailed cleaning of bakery equipment and food prep areas
+  pet_resort: 400      // Thorough sanitization for animal areas and specialized cleaning
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -291,7 +293,19 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Clean and sanitize bathroom facilities\n" +
     "• Empty all trash receptacles and replace liners\n" +
     "• Clean and sanitize employee break areas\n" +
-    "• Special attention to removing flour and other bakery ingredients from surfaces"
+    "• Special attention to removing flour and other bakery ingredients from surfaces",
+
+  pet_resort: "Final Cleaning includes:\n" +
+    "• Sweep/mop/sanitize all hard surface floors with pet-safe cleaners\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean and sanitize all bathroom facilities\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Sanitize and deep clean animal boarding areas and kennels\n" +
+    "• Clean and disinfect play areas and pet runs\n" +
+    "• Detail clean grooming stations and bathing facilities\n" +
+    "• Sanitize reception areas and waiting rooms\n" +
+    "• Clean and disinfect feeding stations and food prep areas\n" +
+    "• Special attention to odor control and pet hair removal"
 };
 
 // Project type specific scopes of work
@@ -332,7 +346,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
     • Special attention to sanitizing high-touch areas and equipment
     • Clean and organize equipment storage areas
   `,
-  bakery: `${SCOPE_OF_WORK.bakery}`
+  bakery: `${SCOPE_OF_WORK.bakery}`,
+  pet_resort: `${SCOPE_OF_WORK.pet_resort}`
 };
 
 // Pressure Washing Constants

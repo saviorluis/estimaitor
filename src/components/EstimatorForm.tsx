@@ -209,6 +209,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="grocery_store">Grocery Store</option>
             <option value="yoga_studio">Yoga Studio</option>
             <option value="kids_fitness">Children's Fitness Center</option>
+            <option value="pet_resort">Pet Resort/Animal Boarding</option>
           </select>
           {errors.projectType && (
             <p className="text-red-500 text-xs mt-1">{errors.projectType.message}</p>
