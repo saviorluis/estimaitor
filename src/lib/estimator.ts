@@ -314,6 +314,8 @@ function getProjectTypeTimeModifier(projectType: string): number {
       return 1.6; // Hotels have many rooms and bathrooms requiring detailed cleaning
     case 'jewelry_store':
       return 1.2; // Jewelry stores - reduced from 1.7 to be more realistic
+    case 'beauty_store':
+      return 1.4; // Beauty stores require detailed cleaning of product displays
     case 'office':
     default:
       return 1.0; // Office is the baseline

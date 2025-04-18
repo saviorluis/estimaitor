@@ -21,7 +21,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   kids_fitness: 1.25,
   fast_food: 1.3,
   bakery: 1.35,
-  pet_resort: 1.4
+  pet_resort: 1.4,
+  beauty_store: 1.3
 };
 
 // Cleaning type multipliers
@@ -119,7 +120,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   kids_fitness: 450,   // Extra attention to safety and sanitization
   fast_food: 450,      // Similar to restaurants, focused on food service areas
   bakery: 430,         // Detailed cleaning of bakery equipment and food prep areas
-  pet_resort: 400      // Thorough sanitization for animal areas and specialized cleaning
+  pet_resort: 400,      // Thorough sanitization for animal areas and specialized cleaning
+  beauty_store: 420    // Detailed cleaning of product displays and testing stations
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -305,7 +307,20 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Detail clean grooming stations and bathing facilities\n" +
     "• Sanitize reception areas and waiting rooms\n" +
     "• Clean and disinfect feeding stations and food prep areas\n" +
-    "• Special attention to odor control and pet hair removal"
+    "• Special attention to odor control and pet hair removal",
+
+  beauty_store: "Final Cleaning includes:\n" +
+    "• Sweep/mop all hard surface floors and deep clean retail areas\n" +
+    "• Spot clean interior windows and mirrors (full window service quoted separately)\n" +
+    "• Clean and sanitize all bathroom facilities\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Detail clean product display shelves and cosmetic testing stations\n" +
+    "• Sanitize makeup testing areas and applicators\n" +
+    "• Clean and polish glass display cases and countertops\n" +
+    "• Dust and clean all retail fixtures and shelving\n" +
+    "• Detail clean checkout counters and service areas\n" +
+    "• Clean and sanitize employee break rooms and back-of-house areas\n" +
+    "• Special attention to makeup residue and product spills"
 };
 
 // Project type specific scopes of work
@@ -347,7 +362,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
     • Clean and organize equipment storage areas
   `,
   bakery: `${SCOPE_OF_WORK.bakery}`,
-  pet_resort: `${SCOPE_OF_WORK.pet_resort}`
+  pet_resort: `${SCOPE_OF_WORK.pet_resort}`,
+  beauty_store: `${SCOPE_OF_WORK.beauty_store}`
 };
 
 // Pressure Washing Constants
