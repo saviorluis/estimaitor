@@ -22,7 +22,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   fast_food: 1.3,
   bakery: 1.35,
   pet_resort: 1.4,
-  beauty_store: 1.3
+  beauty_store: 1.3,
+  interactive_toy_store: 1.45
 };
 
 // Cleaning type multipliers
@@ -121,7 +122,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   fast_food: 450,      // Similar to restaurants, focused on food service areas
   bakery: 430,         // Detailed cleaning of bakery equipment and food prep areas
   pet_resort: 400,      // Thorough sanitization for animal areas and specialized cleaning
-  beauty_store: 420    // Detailed cleaning of product displays and testing stations
+  beauty_store: 420,    // Detailed cleaning of product displays and testing stations
+  interactive_toy_store: 380    // Interactive play areas and complex environments require detailed cleaning
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -320,7 +322,22 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Dust and clean all retail fixtures and shelving\n" +
     "• Detail clean checkout counters and service areas\n" +
     "• Clean and sanitize employee break rooms and back-of-house areas\n" +
-    "• Special attention to makeup residue and product spills"
+    "• Special attention to makeup residue and product spills",
+
+  interactive_toy_store: "Final Cleaning includes:\n" +
+    "• Mascot Area: Deep clean costume storage, sanitize mascot props and photo zones\n" +
+    "• Hallways: Sweep/mop all hallway floors, clean themed walls and interactive elements\n" +
+    "• Retail A: Dust and clean merchandise displays, clean product shelving, sanitize interactive demos\n" +
+    "• Retail B: Vacuum carpeted play areas, sanitize toys and activity stations, clean countertops\n" +
+    "• Stockroom: Organize and clean storage areas, sweep/mop floors, dust inventory shelving\n" +
+    "• Bathrooms: Deep clean and sanitize all toilet facilities, refill soap dispensers, clean mirrors\n" +
+    "• Office: Dust and clean workstations, sanitize shared equipment, clean floors\n" +
+    "• Janitor Area: Organize cleaning supplies, sanitize mop sinks, clean equipment storage\n" +
+    "• Clean light fixtures and perform hi-lo dusting throughout all areas\n" +
+    "• Sanitize all high-touch interactive elements and play stations\n" +
+    "• Spot clean interior walls, displays, and themed decorations\n" +
+    "• Empty all trash receptacles and replace liners\n" +
+    "• Special attention to sanitizing children's play areas and interactive installations"
 };
 
 // Project type specific scopes of work
@@ -363,7 +380,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   `,
   bakery: `${SCOPE_OF_WORK.bakery}`,
   pet_resort: `${SCOPE_OF_WORK.pet_resort}`,
-  beauty_store: `${SCOPE_OF_WORK.beauty_store}`
+  beauty_store: `${SCOPE_OF_WORK.beauty_store}`,
+  interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`
 };
 
 // Pressure Washing Constants

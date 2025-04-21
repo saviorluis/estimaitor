@@ -211,6 +211,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="kids_fitness">Children's Fitness Center</option>
             <option value="pet_resort">Pet Resort/Animal Boarding</option>
             <option value="beauty_store">Beauty/Cosmetics Store</option>
+            <option value="interactive_toy_store">Interactive Toy Store (CAMP-style)</option>
           </select>
           {errors.projectType && (
             <p className="text-red-500 text-xs mt-1">{errors.projectType.message}</p>
