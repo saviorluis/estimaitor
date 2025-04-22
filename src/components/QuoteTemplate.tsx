@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatDate, formatCurrency, generateQuoteNumber, getQuoteCounter, incrementQuoteCounter } from '@/lib/utils';
-import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
-import { saveAs } from 'file-saver';
+import { pdf } from '@react-pdf/renderer';
 import QuotePDF from './QuotePDF';
-import { generateQuoteDocx } from '@/lib/docxGenerator';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -69,6 +67,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
   // State for quote counter
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
+  // State for showing cover page in PDF
+  const [showCoverPage, setShowCoverPage] = useState<boolean>(false);
+  
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
     return (
@@ -458,6 +459,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
+          showCoverPage={showCoverPage}
         />
       ).toBlob();
       
@@ -496,53 +498,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
   };
 
-  // Handle Word document download
-  const handleWordDownload = async () => {
-    try {
-      // Create adjusted estimate data with the EXACT same calculation as the browser preview
-      const adjustedEstimateData = {...estimateData};
-      
-      // Calculate subtotal EXACTLY as shown in the browser preview
-      // This is a direct copy of the calculation used in the print view
-      const subtotal = Object.keys(adjustedPrices).length > 0 
-        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-        : estimateData.totalBeforeMarkup;
-      
-      // Calculate sales tax
-      const salesTax = subtotal * 0.07;
-      
-      // Set all the values for the Word document
-      adjustedEstimateData.totalBeforeMarkup = subtotal;
-      adjustedEstimateData.markup = Object.keys(adjustedPrices).length > 0 ? subtotal - estimateData.totalBeforeMarkup : estimateData.markup;
-      adjustedEstimateData.salesTax = salesTax;
-      adjustedEstimateData.totalPrice = subtotal + salesTax;
-      
-      // Add adjusted line items to the estimate data
-      if (Object.keys(adjustedPrices).length > 0) {
-        adjustedEstimateData.adjustedLineItems = adjustedPrices;
-      }
-      
-      // Generate filename based on project name and location
-      const projectName = quoteInfo.projectName.trim() || 'Quote';
-      const projectLocation = quoteInfo.projectAddress.trim() || '';
-      const fileName = projectName && projectLocation 
-        ? `${projectName} ${projectLocation} Quote.docx`
-        : `Quote-${quoteInfo.quoteNumber}.docx`;
-      
-      const blob = await generateQuoteDocx(
-        adjustedEstimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo
-      );
-      saveAs(blob, fileName);
-    } catch (error) {
-      console.error('Error generating Word document:', error);
-      alert('There was an error generating the Word document. Please try again.');
-    }
-  };
-
   useEffect(() => {
     // Add a class to the body when component mounts for print-specific CSS
     document.body.classList.add('quote-print-ready');
@@ -557,6 +512,18 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
       {/* Print and Download Buttons - Hidden when printing */}
       <div className="flex justify-end mb-6 print:hidden">
+        <div className="mr-auto flex items-center">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={showCoverPage}
+              onChange={(e) => setShowCoverPage(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+            />
+            <span className="ml-2 text-sm text-gray-700">Include cover page</span>
+          </label>
+        </div>
+        
         <button
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
@@ -569,13 +536,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
           Save as PDF
-        </button>
-
-        <button
-          onClick={handleWordDownload}
-          className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
-        >
-          Download Word (.docx)
         </button>
       </div>
 

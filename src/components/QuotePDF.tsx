@@ -286,6 +286,7 @@ interface QuotePDFProps {
     notes: string;
     terms: string;
   };
+  showCoverPage?: boolean;
 }
 
 const QuotePDF: React.FC<QuotePDFProps> = ({ 
@@ -293,13 +294,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   formData, 
   companyInfo, 
   clientInfo, 
-  quoteInfo 
+  quoteInfo,
+  showCoverPage = false
 }) => {
   // Get the current quote counter value
   const quoteCounter = getQuoteCounter();
   
   // Use a static path in the assets directory
   const logoPath = '/assets/logo.png';  // This will always look in the public/assets directory
+  const coverPagePath = '/assets/cover-page-placeholder.jpg'; // Placeholder for the cover page
   
   // Early return for undefined data
   if (!estimateData || !formData) {
@@ -330,6 +333,135 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
   return (
     <Document>
+      {/* Optional Cover Page */}
+      {showCoverPage && (
+        <Page size="A4" style={styles.page}>
+          <View style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            padding: 20
+          }}>
+            {/* Company Logo - Larger size for cover */}
+            <View style={{
+              width: 250,
+              height: 125,
+              marginBottom: 20
+            }}>
+              <Image src={logoPath} style={{
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }} />
+            </View>
+            
+            {/* Cover Title */}
+            <Text style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              marginBottom: 10,
+              color: '#2563eb'
+            }}>
+              CLEANING SERVICE PROPOSAL
+            </Text>
+            
+            <Text style={{
+              fontSize: 16,
+              marginBottom: 5
+            }}>
+              Prepared for:
+            </Text>
+            
+            <Text style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              marginBottom: 20
+            }}>
+              {safeClientInfo.company || safeClientInfo.name}
+            </Text>
+            
+            {/* Placeholder for cover image */}
+            <View style={{
+              width: '100%',
+              height: 300,
+              marginBottom: 20,
+              border: '1pt solid #cccccc'
+            }}>
+              <Text style={{
+                fontSize: 14,
+                color: '#666666',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}>
+                Cover Image Placeholder
+              </Text>
+            </View>
+            
+            {/* Company Capability Statement */}
+            <View style={{
+              padding: 15,
+              backgroundColor: '#f8fafc',
+              borderRadius: 5,
+              marginBottom: 20
+            }}>
+              <Text style={{
+                fontSize: 14,
+                fontWeight: 'bold',
+                marginBottom: 10
+              }}>
+                COMPANY CAPABILITY STATEMENT
+              </Text>
+              
+              <Text style={{
+                fontSize: 10,
+                marginBottom: 10
+              }}>
+                {safeCompanyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
+                medical facilities, retail spaces, and office environments. With over a decade of experience, 
+                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
+              </Text>
+              
+              <Text style={{
+                fontSize: 10
+              }}>
+                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
+                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
+              </Text>
+            </View>
+            
+            {/* Contact Information */}
+            <View style={{
+              position: 'absolute',
+              bottom: 30,
+              left: 0,
+              right: 0,
+              textAlign: 'center'
+            }}>
+              <Text style={{
+                fontSize: 10,
+                color: '#666666'
+              }}>
+                {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}
+              </Text>
+              <Text style={{
+                fontSize: 10,
+                color: '#666666'
+              }}>
+                {safeCompanyInfo.address}, {safeCompanyInfo.city}
+              </Text>
+              <Text style={{
+                fontSize: 10,
+                color: '#666666'
+              }}>
+                {safeCompanyInfo.website}
+              </Text>
+            </View>
+          </View>
+        </Page>
+      )}
+
+      {/* Main Quote Page (existing page) */}
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
