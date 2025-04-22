@@ -219,19 +219,26 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       console.log('Project Type:', formData.projectType, 'Project Type Multiplier:', estimateData.projectTypeMultiplier);
       console.log('Cleaning Type:', formData.cleaningType, 'Cleaning Type Multiplier:', estimateData.cleaningTypeMultiplier);
 
-      // Get all the line items
-      const basePrice = (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1);
-      console.log('Base Price Calculation:', {
-        rawBasePrice: estimateData.basePrice,
-        projectTypeMultiplier: estimateData.projectTypeMultiplier,
-        cleaningTypeMultiplier: estimateData.cleaningTypeMultiplier,
-        calculatedBasePrice: basePrice
+      // IMPORTANT: The basePrice coming from estimateData already includes:
+      // 1. The square footage calculation
+      // 2. The project type multiplier
+      // 3. The cleaning type multiplier
+      // So we DON'T need to multiply it again by these factors here
+
+      // Check if the price per square foot seems reasonable
+      const calculatedPricePerSqFt = estimateData.basePrice / formData.squareFootage;
+      console.log('Price per square foot calculation check:', {
+        basePrice: estimateData.basePrice,
+        squareFootage: formData.squareFootage,
+        calculatedPricePerSqFt,
+        expectedPricePerSqFt: 0.18 * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
       });
       
+      // Get all the line items
       const lineItems = [
         {
           key: 'basePrice',
-          value: basePrice
+          value: estimateData.basePrice // Use the base price directly, don't multiply again
         }
       ];
 
@@ -371,9 +378,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     // Sum all adjusted prices
     let subtotal = 0;
     
-    // Base price
-    subtotal += getAdjustedPrice('basePrice', 
-      (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
+    // Base price - IMPORTANT: This already includes project type and cleaning type multipliers
+    subtotal += getAdjustedPrice('basePrice', estimateData.basePrice || 0);
     
     // VCT cost
     if (formData.hasVCT) {
@@ -497,14 +503,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       } else {
         console.log('Creating new adjusted line items for PDF');
         // We need to ensure the base price includes the cleaning type multiplier
-        const basePrice = (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1);
+        const basePrice = estimateData.basePrice || 0; // Use this directly as it already includes the multipliers
         const vctCost = formData.hasVCT ? (estimateData.vctCost || 0) : 0;
         const pressureWashingCost = formData.needsPressureWashing ? (estimateData.pressureWashingCost || 0) : 0;
         const travelCost = estimateData.travelCost || 0;
         const overnightCost = formData.stayingOvernight ? (estimateData.overnightCost || 0) : 0;
         
+        // For urgency calculation, use the original components but don't multiply basePrice again
         const urgencyCost = estimateData.urgencyMultiplier > 1 ? 
-          (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+          ((estimateData.basePrice || 0) +
            (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
           ((estimateData.urgencyMultiplier || 1) - 1) : 0;
         
@@ -546,6 +553,14 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           adjustedEstimateData.totalBeforeMarkup = lineItemTotal;
           adjustedEstimateData.salesTax = lineItemTotal * 0.07;
           adjustedEstimateData.totalPrice = lineItemTotal + (lineItemTotal * 0.07);
+          
+          // Check price per square foot to help diagnose issues
+          console.log('PRICE PER SQUARE FOOT CHECK:', {
+            original: estimateData.pricePerSquareFoot,
+            recalculated: lineItemTotal / formData.squareFootage,
+            difference: (lineItemTotal / formData.squareFootage) - estimateData.pricePerSquareFoot,
+            percentDifference: (((lineItemTotal / formData.squareFootage) - estimateData.pricePerSquareFoot) / estimateData.pricePerSquareFoot) * 100
+          });
         }
       }
       
@@ -1047,7 +1062,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
                 </td>
                 <td className="border p-2 text-right print:border print:border-gray-300">
-                  {formatCurrency(getAdjustedPrice('basePrice', (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)))}
+                  {formatCurrency(getAdjustedPrice('basePrice', estimateData.basePrice || 0))}
                 </td>
               </tr>
 
