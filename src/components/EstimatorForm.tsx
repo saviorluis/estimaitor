@@ -226,10 +226,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             {...register('cleaningType', { required: 'Cleaning type is required' })}
             className="input-field"
           >
-            <option value="rough">Rough Clean (First Stage - 80% of standard rate)</option>
-            <option value="final">Final Clean (Second Stage - Standard rate)</option>
-            <option value="powder_puff">Powder Puff Clean (Third Stage - 130% of standard rate)</option>
-            <option value="complete">Complete Package (All Three Stages - 200% of standard rate)</option>
+            <option value="rough">Rough Clean (80% of standard rate)</option>
+            <option value="final">Final Clean (Standard rate)</option>
+            <option value="rough_final">Rough & Final Clean (120% of standard rate)</option>
+            <option value="rough_final_touchup">Rough, Final & Touchup (145% of standard rate)</option>
           </select>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {CLEANING_TYPE_DESCRIPTIONS[watch('cleaningType') as CleaningType]}

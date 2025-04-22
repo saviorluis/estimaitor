@@ -30,24 +30,24 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
 export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
   final: 1.0,
-  powder_puff: 1.3,
-  complete: 2.2
+  rough_final: 1.2,
+  rough_final_touchup: 1.45
 };
 
 // Cleaning type descriptions
 export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
-  rough: "First stage cleaning that focuses on debris removal and basic surface cleaning.",
-  final: "Second stage cleaning that includes detailed cleaning of all visible surfaces.",
-  powder_puff: "Third stage cleaning that adds finishing touches and detail work.",
-  complete: "Comprehensive package that includes all three cleaning stages for maximum cleanliness."
+  rough: "First stage cleaning that focuses on debris removal and basic surface cleaning (80% of standard rate).",
+  final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
+  rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
+  rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate)."
 };
 
 // Cleaning type time multipliers (how much longer each type takes)
 export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
   final: 1.0,
-  powder_puff: 1.4,
-  complete: 2.7
+  rough_final: 1.5,
+  rough_final_touchup: 1.8
 };
 
 // VCT (Vinyl Composition Tile) additional cost per square foot

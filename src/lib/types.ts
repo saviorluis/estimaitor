@@ -19,7 +19,7 @@ export type ProjectType =
   | 'beauty_store'
   | 'interactive_toy_store';
 
-export type CleaningType = 'rough' | 'final' | 'powder_puff' | 'complete';
+export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup';
 
 export interface FormData {
   projectType: ProjectType;
