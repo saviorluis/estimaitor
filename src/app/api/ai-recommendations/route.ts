@@ -14,8 +14,10 @@ export async function POST(request: Request) {
     
     // Get cleaning type name
     const getCleaningTypeName = (type: string): string => {
-      if (type === 'rough') return 'Rough Clean (Basic)';
-      if (type === 'powder_puff') return 'Powder Puff Clean (Detailed)';
+      if (type === 'rough') return 'Rough Clean (80% of standard rate)';
+      if (type === 'final') return 'Final Clean (Standard rate)';
+      if (type === 'rough_final') return 'Rough & Final Clean (120% of standard rate)';
+      if (type === 'rough_final_touchup') return 'Rough, Final & Touchup (145% of standard rate)';
       return 'Final Clean (Standard)';
     };
 

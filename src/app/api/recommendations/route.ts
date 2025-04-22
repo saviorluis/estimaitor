@@ -73,14 +73,16 @@ function generateRecommendations(data: AIRecommendationRequest): string[] {
       recommendations.push('Bring a variety of cleaning solutions for different surfaces');
       recommendations.push('Plan for detailed cleaning of all visible surfaces');
       break;
-    case 'powder_puff':
-      recommendations.push('Bring specialized equipment for detail work and finishing touches');
-      recommendations.push('Allow extra time for thorough inspection and touch-ups');
+    case 'rough_final':
+      recommendations.push('Prepare for a two-stage cleaning process with debris removal followed by detailed cleaning');
+      recommendations.push('Bring equipment for both rough cleaning and detailed final touches');
+      recommendations.push('Schedule proper inspection between the rough and final stages');
       break;
-    case 'complete':
-      recommendations.push('Prepare for a multi-day cleaning process with different teams');
+    case 'rough_final_touchup':
+      recommendations.push('Prepare for a comprehensive three-stage cleaning process');
       recommendations.push('Bring full range of equipment from heavy-duty to detail cleaning tools');
-      recommendations.push('Schedule proper inspection points between cleaning stages');
+      recommendations.push('Allow extra time for final inspection and touchup work');
+      recommendations.push('Consider splitting team members for different cleaning stages');
       break;
   }
   
