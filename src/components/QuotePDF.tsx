@@ -356,110 +356,103 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={{
             flex: 1,
             alignItems: 'center',
-            justifyContent: 'flex-start',
-            padding: 20
+            justifyContent: 'center',
+            padding: 40
           }}>
-            {/* Company Logo - Larger size for cover */}
+            {/* Company Logo - Large size for cover */}
             <View style={{
-              width: 250,
-              height: 125,
-              marginBottom: 20
+              width: 350,
+              height: 175,
+              marginBottom: 40,
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
               <Image src={logoPath} style={{
-                maxWidth: '100%',
-                maxHeight: '100%'
+                width: '100%',
+                objectFit: 'contain'
               }} />
             </View>
             
             {/* Cover Title */}
             <Text style={{
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: 'bold',
-              marginBottom: 10,
-              color: '#2563eb'
+              marginBottom: 24,
+              color: '#2563eb',
+              textAlign: 'center'
             }}>
               CLEANING SERVICE PROPOSAL
             </Text>
             
             <Text style={{
-              fontSize: 16,
-              marginBottom: 5
+              fontSize: 18,
+              marginBottom: 8,
+              textAlign: 'center'
             }}>
               Prepared for:
             </Text>
             
             <Text style={{
-              fontSize: 18,
+              fontSize: 22,
               fontWeight: 'bold',
-              marginBottom: 20
+              marginBottom: 40,
+              textAlign: 'center'
             }}>
               {safeClientInfo.company || safeClientInfo.name}
             </Text>
             
-            {/* Placeholder for cover image */}
+            {/* Project information */}
             <View style={{
-              width: '100%',
-              height: 300,
-              marginBottom: 20,
-              border: '1pt solid #cccccc'
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#666666',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}>
-                Cover Image Placeholder
-              </Text>
-            </View>
-            
-            {/* Company Capability Statement */}
-            <View style={{
-              padding: 15,
-              backgroundColor: '#f8fafc',
+              padding: 20,
+              backgroundColor: '#f0f9ff',
               borderRadius: 5,
-              marginBottom: 20
+              marginBottom: 40,
+              width: '80%',
+              alignItems: 'center'
             }}>
               <Text style={{
                 fontSize: 14,
-                fontWeight: 'bold',
-                marginBottom: 10
+                marginBottom: 8,
+                textAlign: 'center'
               }}>
-                COMPANY CAPABILITY STATEMENT
+                Project: {safeQuoteInfo.projectName}
               </Text>
-              
               <Text style={{
-                fontSize: 10,
-                marginBottom: 10
+                fontSize: 14,
+                marginBottom: 8,
+                textAlign: 'center'
               }}>
-                {safeCompanyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
-                medical facilities, retail spaces, and office environments. With over a decade of experience, 
-                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
+                Location: {safeQuoteInfo.projectAddress}
               </Text>
-              
               <Text style={{
-                fontSize: 10
+                fontSize: 14,
+                textAlign: 'center'
               }}>
-                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
-                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
+                Quote #: {safeQuoteInfo.quoteNumber}
               </Text>
             </View>
             
             {/* Contact Information */}
             <View style={{
               position: 'absolute',
-              bottom: 30,
+              bottom: 40,
               left: 0,
               right: 0,
               textAlign: 'center'
             }}>
               <Text style={{
+                fontSize: 12,
+                color: '#333333',
+                fontWeight: 'bold',
+                marginBottom: 8
+              }}>
+                {safeCompanyInfo.name}
+              </Text>
+              <Text style={{
                 fontSize: 10,
                 color: '#666666'
               }}>
-                {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}
+                {safeCompanyInfo.phone} | {safeCompanyInfo.email}
               </Text>
               <Text style={{
                 fontSize: 10,
@@ -469,9 +462,287 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </Text>
               <Text style={{
                 fontSize: 10,
-                color: '#666666'
+                color: '#666666',
+                marginTop: 4
               }}>
                 {safeCompanyInfo.website}
+              </Text>
+            </View>
+          </View>
+        </Page>
+      )}
+
+      {/* Second Cover Page - Capability Statement with Photos */}
+      {showCoverPage && (
+        <Page size="A4" style={styles.page}>
+          <View style={{
+            flex: 1,
+            padding: 40
+          }}>
+            {/* Header */}
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20
+            }}>
+              <View style={{
+                width: 120,
+                height: 60
+              }}>
+                <Image src={logoPath} style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain'
+                }} />
+              </View>
+              <Text style={{
+                fontSize: 22,
+                fontWeight: 'bold',
+                marginLeft: 20,
+                color: '#2563eb'
+              }}>
+                COMPANY CAPABILITIES
+              </Text>
+            </View>
+            
+            {/* Company Capability Statement */}
+            <View style={{
+              padding: 20,
+              backgroundColor: '#f8fafc',
+              borderRadius: 5,
+              marginBottom: 30
+            }}>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                marginBottom: 15,
+                color: '#1e40af'
+              }}>
+                ABOUT OUR COMPANY
+              </Text>
+              
+              <Text style={{
+                fontSize: 11,
+                marginBottom: 10,
+                lineHeight: 1.5
+              }}>
+                {safeCompanyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
+                medical facilities, retail spaces, and office environments. With over a decade of experience, 
+                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
+              </Text>
+              
+              <Text style={{
+                fontSize: 11,
+                marginBottom: 10,
+                lineHeight: 1.5
+              }}>
+                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
+                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
+              </Text>
+
+              <Text style={{
+                fontSize: 11,
+                lineHeight: 1.5
+              }}>
+                Our comprehensive cleaning services include detailed cleaning of all surfaces, specialized floor care, 
+                sanitization of high-touch areas, window cleaning, and post-construction cleanup. We customize our 
+                approach to meet the unique needs of each facility we service.
+              </Text>
+            </View>
+            
+            {/* Sample Projects */}
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+              marginBottom: 15,
+              color: '#1e40af'
+            }}>
+              SAMPLE PROJECTS
+            </Text>
+            
+            {/* Grid of example projects with photos */}
+            <View style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              marginBottom: 30
+            }}>
+              {/* First Project */}
+              <View style={{
+                width: '48%',
+                marginBottom: 20,
+                border: '1pt solid #e5e7eb',
+                borderRadius: 5,
+                overflow: 'hidden'
+              }}>
+                <View style={{
+                  height: 120,
+                  backgroundColor: '#f3f4f6',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: '#6b7280'
+                  }}>
+                    Medical Facility Photo
+                  </Text>
+                </View>
+                <View style={{
+                  padding: 10
+                }}>
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    marginBottom: 5
+                  }}>
+                    Medical Office Building
+                  </Text>
+                  <Text style={{
+                    fontSize: 9
+                  }}>
+                    Complete post-construction cleaning of 35,000 sq ft medical facility with specialized sanitization protocols.
+                  </Text>
+                </View>
+              </View>
+              
+              {/* Second Project */}
+              <View style={{
+                width: '48%',
+                marginBottom: 20,
+                border: '1pt solid #e5e7eb',
+                borderRadius: 5,
+                overflow: 'hidden'
+              }}>
+                <View style={{
+                  height: 120,
+                  backgroundColor: '#f3f4f6',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: '#6b7280'
+                  }}>
+                    Restaurant Photo
+                  </Text>
+                </View>
+                <View style={{
+                  padding: 10
+                }}>
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    marginBottom: 5
+                  }}>
+                    High-End Restaurant
+                  </Text>
+                  <Text style={{
+                    fontSize: 9
+                  }}>
+                    Final clean of 8,500 sq ft restaurant with detailed kitchen, dining areas, and bar service areas.
+                  </Text>
+                </View>
+              </View>
+              
+              {/* Third Project */}
+              <View style={{
+                width: '48%',
+                border: '1pt solid #e5e7eb',
+                borderRadius: 5,
+                overflow: 'hidden'
+              }}>
+                <View style={{
+                  height: 120,
+                  backgroundColor: '#f3f4f6',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: '#6b7280'
+                  }}>
+                    Office Space Photo
+                  </Text>
+                </View>
+                <View style={{
+                  padding: 10
+                }}>
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    marginBottom: 5
+                  }}>
+                    Corporate Office Complex
+                  </Text>
+                  <Text style={{
+                    fontSize: 9
+                  }}>
+                    Rough and final cleaning of 50,000 sq ft commercial office space with glass partitions and executive areas.
+                  </Text>
+                </View>
+              </View>
+              
+              {/* Fourth Project */}
+              <View style={{
+                width: '48%',
+                border: '1pt solid #e5e7eb',
+                borderRadius: 5,
+                overflow: 'hidden'
+              }}>
+                <View style={{
+                  height: 120,
+                  backgroundColor: '#f3f4f6',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: '#6b7280'
+                  }}>
+                    Retail Space Photo
+                  </Text>
+                </View>
+                <View style={{
+                  padding: 10
+                }}>
+                  <Text style={{
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    marginBottom: 5
+                  }}>
+                    Retail Shopping Center
+                  </Text>
+                  <Text style={{
+                    fontSize: 9
+                  }}>
+                    Post-construction cleaning of 75,000 sq ft retail space with detailed display areas and customer zones.
+                  </Text>
+                </View>
+              </View>
+            </View>
+            
+            {/* Footer */}
+            <View style={{
+              position: 'absolute',
+              bottom: 40,
+              left: 40,
+              right: 40,
+              borderTop: '1pt solid #e5e7eb',
+              paddingTop: 10,
+              textAlign: 'center'
+            }}>
+              <Text style={{
+                fontSize: 10,
+                color: '#4b5563'
+              }}>
+                For more information about our services or to schedule a consultation,
+              </Text>
+              <Text style={{
+                fontSize: 10,
+                color: '#4b5563'
+              }}>
+                please contact us at {safeCompanyInfo.phone} or {safeCompanyInfo.email}
               </Text>
             </View>
           </View>

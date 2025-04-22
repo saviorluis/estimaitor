@@ -11,6 +11,11 @@
   .print\:hidden {
     display: none !important;
   }
+
+  /* Show elements that should only be visible in print */
+  .hidden.print\:block {
+    display: block !important;
+  }
   
   /* Ensure borders are visible */
   .print\:border {
@@ -18,8 +23,17 @@
   }
   
   /* Page breaks */
+  .page-break-after,
   .page-break {
     page-break-after: always;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-avoid {
+    page-break-inside: avoid;
   }
   
   /* Table styles */
@@ -34,13 +48,14 @@
   }
   
   th {
-    background-color: #f2f2f2;
+    background-color: #f2f2f2 !important;
     font-weight: bold;
   }
   
   /* Header and footer margin adjustments */
   @page {
     margin: 0.5in;
+    size: 8.5in 11in;
   }
   
   /* Font adjustments */
@@ -51,5 +66,88 @@
   /* Better spacing */
   p {
     margin-bottom: 0.25rem;
+  }
+
+  /* Cover page styling */
+  .cover-page {
+    position: relative;
+    min-height: 10in;
+    page-break-after: always;
+  }
+
+  /* Ensure colors print properly */
+  .text-blue-600, 
+  .text-blue-800, 
+  .bg-blue-600 {
+    color: #2563eb !important;
+  }
+
+  .bg-blue-600 {
+    background-color: #2563eb !important;
+  }
+
+  .bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+
+  .bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  .text-white {
+    color: white !important;
+  }
+
+  /* PDF simulation mode - this is added when clicking Print Preview */
+  body.simulate-pdf-view {
+    width: 8.5in;
+    margin: 0 auto;
+    padding: 0.5in;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background: white;
+  }
+
+  body.simulate-pdf-view .page-break-after,
+  body.simulate-pdf-view .page-break {
+    margin-bottom: 0.75in;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 0.5in;
+  }
+}
+
+/* Add new styles for PDF preview on screen */
+@media screen {
+  body.simulate-pdf-view {
+    background-color: #f0f0f0;
+    padding: 2rem;
+  }
+  
+  body.simulate-pdf-view .hidden.print\:block {
+    display: block !important;
+  }
+  
+  body.simulate-pdf-view > div {
+    max-width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto 2rem;
+    padding: 0.5in;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  body.simulate-pdf-view .cover-page {
+    min-height: 10in;
+    border-bottom: 1px dashed #ccc;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  body.simulate-pdf-view .page-break-after:after,
+  body.simulate-pdf-view .page-break:after {
+    content: '';
+    display: block;
+    height: 1rem;
+    margin-top: 1rem;
+    border-bottom: 1px dashed #ccc;
   }
 }

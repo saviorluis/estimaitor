@@ -451,9 +451,43 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   // Handle print function - add a slight delay to ensure styles are applied
   const handlePrint = () => {
-    setTimeout(() => {
+    console.log('Print button clicked');
+    console.log('Current device type:', window.innerWidth <= 768 ? 'Mobile' : 'Desktop');
+    console.log('Raw estimate data:', estimateData);
+    console.log('Current form data:', formData);
+    
+    try {
+      // Apply the same adjustments as for PDF before printing to ensure consistency
+      // Add special class to the body for print-specific styling
+      document.body.classList.add('simulate-pdf-view');
+      
+      // Calculate subtotal exactly like in PDF generation
+      const subtotal = Object.keys(adjustedPrices).length > 0 
+        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+        : estimateData.totalBeforeMarkup;
+        
+      console.log('Print preview subtotal calculation:', {
+        subtotal,
+        useAdjustedPrices: Object.keys(adjustedPrices).length > 0
+      });
+      
+      // Log calculated subtotal for debugging
+      console.log('Subtotal for print:', subtotal);
+      
+      // Set a slight delay to ensure all styles are applied
+      setTimeout(() => {
+        window.print();
+        
+        // Remove the special class after printing
+        setTimeout(() => {
+          document.body.classList.remove('simulate-pdf-view');
+        }, 500);
+      }, 100);
+    } catch (error) {
+      console.error('Error preparing for print:', error);
+      // Fall back to basic print if there's an error
       window.print();
-    }, 100);
+    }
   };
 
   // Direct PDF download using react-pdf
@@ -677,7 +711,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               onChange={(e) => setShowCoverPage(e.target.checked)}
               className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
             />
-            <span className="ml-2 text-sm text-gray-700">Include cover page</span>
+            <span className="ml-2 text-sm text-gray-700">Include cover page with company capabilities</span>
           </label>
         </div>
         
@@ -685,7 +719,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
         >
-          Print Quote
+          Print Preview
         </button>
 
         <button
@@ -695,6 +729,154 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           Save as PDF
         </button>
       </div>
+
+      {/* Cover pages - Only shown when showCoverPage is true and when printing */}
+      {showCoverPage && (
+        <div className="hidden print:block">
+          {/* First Cover Page */}
+          <div className="cover-page page-break-after flex flex-col items-center justify-center p-10 h-[calc(100vh-80px)]">
+            <div className="w-[350px] h-[175px] mb-10 flex items-center justify-center">
+              <CompanyLogo className="w-full h-full object-contain" />
+            </div>
+            
+            <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
+              CLEANING SERVICE PROPOSAL
+            </h1>
+            
+            <p className="text-xl mb-2 text-center">
+              Prepared for:
+            </p>
+            
+            <p className="text-2xl font-bold mb-10 text-center">
+              {clientInfo.company || clientInfo.name || '[Client Name]'}
+            </p>
+            
+            <div className="p-5 bg-blue-50 rounded mb-10 w-4/5 text-center">
+              <p className="mb-2">
+                Project: {quoteInfo.projectName || '[Project Name]'}
+              </p>
+              <p className="mb-2">
+                Location: {quoteInfo.projectAddress || '[Project Address]'}
+              </p>
+              <p>
+                Quote #: {quoteInfo.quoteNumber}
+              </p>
+            </div>
+            
+            <div className="absolute bottom-10 text-center">
+              <p className="font-bold mb-2">{companyInfo.name}</p>
+              <p>{companyInfo.phone} | {companyInfo.email}</p>
+              <p>{companyInfo.address}, {companyInfo.city}</p>
+              <p className="mt-1">{companyInfo.website}</p>
+            </div>
+          </div>
+          
+          {/* Second Cover Page - Capabilities */}
+          <div className="cover-page page-break-after p-10 h-[calc(100vh-80px)]">
+            <div className="flex items-center mb-5">
+              <div className="w-[120px] h-[60px]">
+                <CompanyLogo className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-2xl font-bold ml-5 text-blue-600">
+                COMPANY CAPABILITIES
+              </h2>
+            </div>
+            
+            <div className="p-5 bg-gray-50 rounded mb-8">
+              <h3 className="text-lg font-bold mb-4 text-blue-800">
+                ABOUT OUR COMPANY
+              </h3>
+              
+              <p className="text-sm mb-3 leading-relaxed">
+                {companyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
+                medical facilities, retail spaces, and office environments. With over a decade of experience, 
+                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
+              </p>
+              
+              <p className="text-sm mb-3 leading-relaxed">
+                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
+                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
+              </p>
+              
+              <p className="text-sm leading-relaxed">
+                Our comprehensive cleaning services include detailed cleaning of all surfaces, specialized floor care, 
+                sanitization of high-touch areas, window cleaning, and post-construction cleanup. We customize our 
+                approach to meet the unique needs of each facility we service.
+              </p>
+            </div>
+            
+            <h3 className="text-lg font-bold mb-4 text-blue-800">
+              SAMPLE PROJECTS
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {/* Project 1 */}
+              <div className="border border-gray-200 rounded overflow-hidden">
+                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Medical Facility Photo</span>
+                </div>
+                <div className="p-3">
+                  <p className="font-bold mb-1">Medical Office Building</p>
+                  <p className="text-xs">
+                    Complete post-construction cleaning of 35,000 sq ft medical facility with specialized sanitization protocols.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Project 2 */}
+              <div className="border border-gray-200 rounded overflow-hidden">
+                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Restaurant Photo</span>
+                </div>
+                <div className="p-3">
+                  <p className="font-bold mb-1">High-End Restaurant</p>
+                  <p className="text-xs">
+                    Final clean of 8,500 sq ft restaurant with detailed kitchen, dining areas, and bar service areas.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Project 3 */}
+              <div className="border border-gray-200 rounded overflow-hidden">
+                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Office Space Photo</span>
+                </div>
+                <div className="p-3">
+                  <p className="font-bold mb-1">Corporate Office Complex</p>
+                  <p className="text-xs">
+                    Rough and final cleaning of 50,000 sq ft commercial office space with glass partitions and executive areas.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Project 4 */}
+              <div className="border border-gray-200 rounded overflow-hidden">
+                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">Retail Space Photo</span>
+                </div>
+                <div className="p-3">
+                  <p className="font-bold mb-1">Retail Shopping Center</p>
+                  <p className="text-xs">
+                    Post-construction cleaning of 75,000 sq ft retail space with detailed display areas and customer zones.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-10 left-10 right-10 border-t border-gray-200 pt-3 text-center">
+              <p className="text-sm text-gray-600">
+                For more information about our services or to schedule a consultation,
+              </p>
+              <p className="text-sm text-gray-600">
+                please contact us at {companyInfo.phone} or {companyInfo.email}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
+      <div className="hidden print:block print:mb-8"></div>
 
       {/* Your Company Information - Hidden when printing */}
       <div className="mb-6 print:hidden">

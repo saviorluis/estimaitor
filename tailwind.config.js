@@ -5,6 +5,16 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    'print:block',
+    'print:hidden',
+    'print:border',
+    'print:border-gray-300',
+    'page-break-after',
+    'page-break-before',
+    'page-break-avoid',
+    'simulate-pdf-view'
+  ],
   theme: {
     extend: {
       colors: {
