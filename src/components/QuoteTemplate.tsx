@@ -387,10 +387,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
     switch (type) {
-      case 'rough': return 'Rough Clean (First Stage)';
-      case 'final': return 'Final Clean (Second Stage)';
-      case 'powder_puff': return 'Touch-up Clean (Third Stage)';
-      case 'complete': return 'Commercial Cleaning';
+      case 'rough': return 'Rough Clean (80% of standard rate)';
+      case 'final': return 'Final Clean (Standard rate)';
+      case 'rough_final': return 'Rough & Final Clean (120% of standard rate)';
+      case 'rough_final_touchup': return 'Rough, Final & Touchup (145% of standard rate)';
       default: return type;
     }
   };
@@ -1067,7 +1067,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="grid grid-cols-2 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
-            {formData.cleaningType === 'complete' ? (
+            {formData.cleaningType === 'rough_final_touchup' ? (
               <>
                 <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
                 <ul className="list-disc ml-5 mt-1 text-sm">
@@ -1077,9 +1077,36 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 </ul>
                 <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
               </>
+            ) : formData.cleaningType === 'rough_final' ? (
+              <>
+                <p className="font-semibold mt-2">Two-Stage Cleaning Schedule:</p>
+                <ul className="list-disc ml-5 mt-1 text-sm">
+                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                </ul>
+                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
+              </>
+            ) : formData.cleaningType === 'rough' ? (
+              <>
+                <p className="font-semibold mt-2">Single-Stage Cleaning Schedule:</p>
+                <ul className="list-disc ml-5 mt-1 text-sm">
+                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                </ul>
+                <p className="mt-2 text-sm italic">Note: Rough cleaning is performed to clear construction debris and basic cleaning.</p>
+              </>
+            ) : formData.cleaningType === 'final' ? (
+              <>
+                <p className="font-semibold mt-2">Final Cleaning Schedule:</p>
+                <ul className="list-disc ml-5 mt-1 text-sm">
+                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                </ul>
+                <p className="mt-2 text-sm italic">Note: Final cleaning ensures the space is ready for occupancy or presentation.</p>
+              </>
             ) : (
               <>
-                <p>Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
+                <p className="font-semibold mt-2">Standard Cleaning Schedule:</p>
+                <p className="mt-1 text-sm">Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
+                <p className="mt-2 text-sm italic">Estimated completion time: {Math.ceil((formData.squareFootage || 0) / ((formData.numberOfCleaners || 1) * 500))} hours</p>
               </>
             )}
           </div>

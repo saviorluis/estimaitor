@@ -32,10 +32,10 @@ interface QuoteInfo {
 // Get cleaning type display name
 const getCleaningTypeDisplay = (type: string): string => {
   switch (type) {
-    case 'rough': return 'Rough Clean (First Stage)';
-    case 'final': return 'Final Clean (Second Stage)';
-    case 'powder_puff': return 'Powder Puff Clean (Third Stage)';
-    case 'complete': return 'Commercial Cleaning';
+    case 'rough': return 'Rough Clean (80% of standard rate)';
+    case 'final': return 'Final Clean (Standard rate)';
+    case 'rough_final': return 'Rough & Final Clean (120% of standard rate)';
+    case 'rough_final_touchup': return 'Rough, Final & Touchup (145% of standard rate)';
     default: return type;
   }
 };
@@ -463,8 +463,8 @@ export const generateQuoteDocx = async (
                         ],
                       }),
 
-                      // For "complete" cleaning type, show the three-stage schedule without hours
-                      ...(formData.cleaningType === 'complete'
+                      // For three-stage cleaning type, show the three-stage schedule without hours
+                      ...(formData.cleaningType === 'rough_final_touchup'
                         ? [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -1236,7 +1236,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: formData.cleaningType === 'complete' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment',
+                    text: formData.cleaningType === 'rough_final_touchup' ? 'Complete Package (All Three Stages)' : 'Additional Supplies & Equipment',
                     bold: true,
                   }),
                 ],
