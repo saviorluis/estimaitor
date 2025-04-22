@@ -226,10 +226,10 @@ const styles = StyleSheet.create({
 // Get cleaning type display name
 const getCleaningTypeDisplay = (type: string): string => {
   switch (type) {
-    case 'rough': return 'Rough Clean (80% of standard rate)';
-    case 'final': return 'Final Clean (Standard rate)';
-    case 'rough_final': return 'Rough & Final Clean (120% of standard rate)';
-    case 'rough_final_touchup': return 'Rough, Final & Touchup (145% of standard rate)';
+    case 'rough': return 'Rough Clean';
+    case 'final': return 'Final Clean';
+    case 'rough_final': return 'Rough & Final Clean';
+    case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
     default: return type;
   }
 };
@@ -243,6 +243,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'yoga_studio': return 'Yoga Studio';
     case 'kids_fitness': return 'Children\'s Fitness Center';
     case 'bakery': return 'Bakery';
+    case 'interactive_toy_store': return 'Interactive Toy Store';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };

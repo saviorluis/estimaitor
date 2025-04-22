@@ -135,10 +135,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
 3. Scope: This quote covers only the services explicitly described.
 4. Additional Services: Any services not specified will be quoted separately.
-5. Equipment: All necessary cleaning equipment and supplies are included.
-6. Access: Client must provide necessary access to the property.
-7. Utilities: Working electricity and water must be available on-site.
-8. Quote Validity: This quote is valid for 30 days from the date issued.`;
+5. Access: Client must provide necessary access to the property.
+6. Utilities: Working electricity and water must be available on-site.
+7. Quote Validity: This quote is valid for 30 days from the date issued.`;
 
   // Quote information state
   const [quoteInfo, setQuoteInfo] = useState({
@@ -387,17 +386,26 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
     switch (type) {
-      case 'rough': return 'Rough Clean (80% of standard rate)';
-      case 'final': return 'Final Clean (Standard rate)';
-      case 'rough_final': return 'Rough & Final Clean (120% of standard rate)';
-      case 'rough_final_touchup': return 'Rough, Final & Touchup (145% of standard rate)';
+      case 'rough': return 'Rough Clean';
+      case 'final': return 'Final Clean';
+      case 'rough_final': return 'Rough & Final Clean';
+      case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
       default: return type;
     }
   };
 
   // Get project type display name
   const getProjectTypeDisplay = (type: string): string => {
-    return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+    switch (type) {
+      case 'jewelry_store': return 'Jewelry Store';
+      case 'grocery_store': return 'Grocery Store';
+      case 'fast_food': return 'Fast Food Restaurant';
+      case 'yoga_studio': return 'Yoga Studio';
+      case 'kids_fitness': return 'Children\'s Fitness Center';
+      case 'bakery': return 'Bakery';
+      case 'interactive_toy_store': return 'Interactive Toy Store';
+      default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+    }
   };
 
   // Handle print function - add a slight delay to ensure styles are applied
@@ -436,6 +444,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Add adjusted line items to the estimate data
       if (Object.keys(adjustedPrices).length > 0) {
         adjustedEstimateData.adjustedLineItems = adjustedPrices;
+      } else {
+        // Ensure the base price includes the cleaning type multiplier
+        adjustedEstimateData.adjustedLineItems = {
+          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+        };
       }
       
       const blob = await pdf(
