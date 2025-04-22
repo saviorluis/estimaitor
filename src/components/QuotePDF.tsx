@@ -297,6 +297,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   quoteInfo,
   showCoverPage = false
 }) => {
+  console.log('QuotePDF - Received adjustedLineItems:', estimateData.adjustedLineItems);
+  console.log('QuotePDF - Received estimateData:', estimateData);
+  
   // Get the current quote counter value
   const quoteCounter = getQuoteCounter();
   
@@ -330,6 +333,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     quoteNumber: '', date: '', validUntil: '', projectName: '', 
     projectAddress: '', notes: '', terms: ''
   };
+
+  // Calculate totals for display in PDF
+  const adjustedLineItems = estimateData.adjustedLineItems || {};
+  const subtotal = Object.keys(adjustedLineItems).length > 0 
+    ? Object.values(adjustedLineItems).reduce((sum, price) => sum + price, 0)
+    : estimateData.totalBeforeMarkup;
+  
+  console.log('QuotePDF - Calculated subtotal:', subtotal);
+  console.log('QuotePDF - Using adjustedLineItems?', Object.keys(adjustedLineItems).length > 0);
+  
+  const salesTax = subtotal * 0.07;
+  const total = subtotal + salesTax;
+  
+  console.log('QuotePDF - Final values - Subtotal:', subtotal, 'Tax:', salesTax, 'Total:', total);
 
   return (
     <Document>
@@ -697,13 +714,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.totalText}>TOTAL</Text>
             <Text style={styles.totalText}>{formatCurrency(estimateData.totalPrice)}</Text>
           </View>
-        </View>
-
-        {/* Replace markup note with general note */}
-        <View style={{marginTop: 5, marginBottom: 10}}>
-          <Text style={{fontSize: 9, fontStyle: 'italic', color: '#666666'}}>
-            Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.
-          </Text>
         </View>
 
         {/* Project Timeline */}

@@ -214,76 +214,110 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   useEffect(() => {
     if (!estimateData) return;
 
-    // Get all the line items
-    const lineItems = [
-      {
-        key: 'basePrice',
-        value: (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)
+    try {
+      console.log('FormData:', formData);
+      console.log('Project Type:', formData.projectType, 'Project Type Multiplier:', estimateData.projectTypeMultiplier);
+      console.log('Cleaning Type:', formData.cleaningType, 'Cleaning Type Multiplier:', estimateData.cleaningTypeMultiplier);
+
+      // Get all the line items
+      const basePrice = (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1);
+      console.log('Base Price Calculation:', {
+        rawBasePrice: estimateData.basePrice,
+        projectTypeMultiplier: estimateData.projectTypeMultiplier,
+        cleaningTypeMultiplier: estimateData.cleaningTypeMultiplier,
+        calculatedBasePrice: basePrice
+      });
+      
+      const lineItems = [
+        {
+          key: 'basePrice',
+          value: basePrice
+        }
+      ];
+
+      if (formData.hasVCT) {
+        lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
       }
-    ];
 
-    if (formData.hasVCT) {
-      lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
-    }
+      if (formData.needsPressureWashing) {
+        lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
+      }
 
-    if (formData.needsPressureWashing) {
-      lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
-    }
+      lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
 
-    lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
+      if (formData.stayingOvernight) {
+        lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
+      }
 
-    if (formData.stayingOvernight) {
-      lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
-    }
+      if (estimateData.urgencyMultiplier > 1) {
+        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+          ((estimateData.urgencyMultiplier || 1) - 1);
+        lineItems.push({ key: 'urgencyCost', value: urgencyCost });
+      }
 
-    if (estimateData.urgencyMultiplier > 1) {
-      const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-        ((estimateData.urgencyMultiplier || 1) - 1);
-      lineItems.push({ key: 'urgencyCost', value: urgencyCost });
-    }
+      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+        lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
+      }
 
-    if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
-      lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
-    }
+      // Display case cleaning for jewelry stores
+      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+        lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
+      }
 
-    // Display case cleaning for jewelry stores
-    if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-      lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
-    }
+      // Calculate total before markup
+      const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
+      
+      // Log the base values for debugging
+      console.log('Base price calculation:', {
+        basePrice: estimateData.basePrice,
+        projectTypeMultiplier: estimateData.projectTypeMultiplier,
+        cleaningTypeMultiplier: estimateData.cleaningTypeMultiplier,
+        calculatedBasePrice: (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1),
+        totalBeforeMarkup,
+        lineItems
+      });
+      
+      // If markup percentage is 0, and there's no built-in markup, use original prices
+      if (markupPercentage === 0 && estimateData.markup === 0) {
+        setAdjustedPrices({});
+        return;
+      }
+      
+      // If there's no custom markup but there is built-in markup, we don't need to adjust
+      if (markupPercentage === 0 && estimateData.markup > 0) {
+        setAdjustedPrices({});
+        return;
+      }
 
-    // Calculate total before markup
-    const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
-    
-    // If markup percentage is 0, and there's no built-in markup, use original prices
-    if (markupPercentage === 0 && estimateData.markup === 0) {
-      setAdjustedPrices({});
-      return;
-    }
-    
-    // If there's no custom markup but there is built-in markup, we don't need to adjust
-    if (markupPercentage === 0 && estimateData.markup > 0) {
-      setAdjustedPrices({});
-      return;
-    }
+      // Calculate markup amount
+      const markupAmount = totalBeforeMarkup * (markupPercentage / 100);
+      
+      // Distribute markup proportionally
+      const adjustedPrices: {[key: string]: number} = {};
+      lineItems.forEach(item => {
+        const proportion = item.value / totalBeforeMarkup;
+        const itemMarkup = markupAmount * proportion;
+        adjustedPrices[item.key] = item.value + itemMarkup;
+      });
 
-    // Calculate markup amount
-    const markupAmount = totalBeforeMarkup * (markupPercentage / 100);
-    
-    // Distribute markup proportionally
-    const adjustedPrices: {[key: string]: number} = {};
-    lineItems.forEach(item => {
-      const proportion = item.value / totalBeforeMarkup;
-      const itemMarkup = markupAmount * proportion;
-      adjustedPrices[item.key] = item.value + itemMarkup;
-    });
-
-    // Balance window cleaning pricing with base price
-    const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
-    if (Object.keys(balancedPrices).length > 0) {
-      setAdjustedPrices(balancedPrices);
-    } else {
-      setAdjustedPrices(adjustedPrices);
+      // Balance window cleaning pricing with base price
+      const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
+      if (Object.keys(balancedPrices).length > 0) {
+        setAdjustedPrices(balancedPrices);
+      } else {
+        setAdjustedPrices(adjustedPrices);
+      }
+      
+      // Log the final adjusted prices for debugging
+      console.log('Final adjusted prices:', {
+        rawAdjustedPrices: adjustedPrices,
+        balancedPrices,
+        finalPrices: Object.keys(balancedPrices).length > 0 ? balancedPrices : adjustedPrices,
+        total: Object.values(Object.keys(balancedPrices).length > 0 ? balancedPrices : adjustedPrices).reduce((sum, price) => sum + price, 0)
+      });
+    } catch (error) {
+      console.error('Error calculating adjusted prices:', error);
     }
   }, [estimateData, formData, markupPercentage]);
 
@@ -419,6 +453,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Direct PDF download using react-pdf
   const handlePDFDownload = async () => {
     console.log('PDF download button clicked');
+    console.log('Current device type:', window.innerWidth <= 768 ? 'Mobile' : 'Desktop');
+    console.log('Raw estimate data:', estimateData);
+    console.log('Current form data:', formData);
+    console.log('Markup percentage:', markupPercentage);
+    console.log('Current adjusted prices:', adjustedPrices);
+    
     try {
       // Create a blob from the PDF document
       console.log('Creating PDF blob...');
@@ -432,6 +472,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
         : estimateData.totalBeforeMarkup;
       
+      console.log('PDF subtotal calculation:', {
+        usingAdjustedPrices: Object.keys(adjustedPrices).length > 0,
+        adjustedPricesTotal: Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : 0,
+        fallbackTotal: estimateData.totalBeforeMarkup,
+        calculatedSubtotal: subtotal
+      });
+      
       // Calculate sales tax 
       const salesTax = subtotal * 0.07;
       
@@ -444,14 +491,85 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       
       // Add adjusted line items to the estimate data
       if (Object.keys(adjustedPrices).length > 0) {
+        // Use the adjusted prices that already have markup distributed
         adjustedEstimateData.adjustedLineItems = adjustedPrices;
+        console.log('Using existing adjusted prices for PDF');
       } else {
-        // Ensure the base price includes the cleaning type multiplier
+        console.log('Creating new adjusted line items for PDF');
+        // We need to ensure the base price includes the cleaning type multiplier
+        const basePrice = (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1);
+        const vctCost = formData.hasVCT ? (estimateData.vctCost || 0) : 0;
+        const pressureWashingCost = formData.needsPressureWashing ? (estimateData.pressureWashingCost || 0) : 0;
+        const travelCost = estimateData.travelCost || 0;
+        const overnightCost = formData.stayingOvernight ? (estimateData.overnightCost || 0) : 0;
+        
+        const urgencyCost = estimateData.urgencyMultiplier > 1 ? 
+          (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+           (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+          ((estimateData.urgencyMultiplier || 1) - 1) : 0;
+        
+        const windowCleaningCost = (formData.needsWindowCleaning && formData.chargeForWindowCleaning) ? (estimateData.windowCleaningCost || 0) : 0;
+        const displayCaseCost = (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) ? (estimateData.displayCaseCost || 0) : 0;
+        
+        console.log('New line item calculations:', {
+          basePrice,
+          vctCost,
+          pressureWashingCost,
+          travelCost,
+          overnightCost,
+          urgencyCost,
+          windowCleaningCost,
+          displayCaseCost,
+          total: basePrice + vctCost + pressureWashingCost + travelCost + overnightCost + urgencyCost + windowCleaningCost + displayCaseCost
+        });
+        
         adjustedEstimateData.adjustedLineItems = {
-          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+          basePrice,
+          vctCost,
+          pressureWashingCost,
+          travelCost,
+          overnightCost,
+          urgencyCost,
+          windowCleaningCost,
+          displayCaseCost
         };
+        
+        // Double-check that the total of these line items matches our calculated subtotal
+        const lineItemTotal = Object.values(adjustedEstimateData.adjustedLineItems).reduce((sum, price) => sum + price, 0);
+        if (Math.abs(lineItemTotal - subtotal) > 0.01) {
+          console.error('WARNING: Line item total does not match subtotal!', {
+            lineItemTotal,
+            subtotal,
+            difference: lineItemTotal - subtotal
+          });
+          // Make sure the PDF uses the correct subtotal regardless
+          adjustedEstimateData.totalBeforeMarkup = lineItemTotal;
+          adjustedEstimateData.salesTax = lineItemTotal * 0.07;
+          adjustedEstimateData.totalPrice = lineItemTotal + (lineItemTotal * 0.07);
+        }
       }
       
+      console.log('PDF pricing data:', {
+        subtotal,
+        salesTax,
+        total: subtotal + salesTax,
+        adjustedLineItems: adjustedEstimateData.adjustedLineItems
+      });
+
+      // Log out comparison between display view and PDF data
+      console.log('Comparing Display vs PDF Values:', {
+        displayView: {
+          subtotal: subtotal,
+          total: subtotal + salesTax,
+          adjustedPrices
+        },
+        pdfData: {
+          subtotal: subtotal,
+          total: subtotal + salesTax,
+          adjustedLineItems: adjustedEstimateData.adjustedLineItems
+        }
+      });
+
       const blob = await pdf(
         <QuotePDF 
           estimateData={adjustedEstimateData} 
@@ -507,6 +625,30 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       document.body.classList.remove('quote-print-ready');
     };
   }, []);
+
+  // Add a useEffect to log the final price calculation whenever adjustedPrices changes
+  useEffect(() => {
+    if (Object.keys(adjustedPrices).length === 0) return;
+    
+    // Calculate the total that will be displayed in the table
+    const basePrice = adjustedPrices.basePrice !== undefined 
+      ? adjustedPrices.basePrice 
+      : (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1);
+    
+    // Calculate the total from all adjusted prices
+    const tableTotal = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
+    const tableTotalWithTax = tableTotal * 1.07;
+    
+    console.log('FINAL TABLE CALCULATION:', {
+      basePrice,
+      adjustedPrices,
+      tableSubtotal: tableTotal,
+      tableTax: tableTotal * 0.07,
+      tableTotal: tableTotalWithTax,
+      estimateDataTotal: estimateData.totalPrice,
+      difference: tableTotalWithTax - estimateData.totalPrice
+    });
+  }, [adjustedPrices, estimateData]);
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
@@ -1005,6 +1147,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 const subtotal = Object.keys(adjustedPrices).length > 0 
                   ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
                   : estimateData.totalBeforeMarkup;
+                const salesTax = subtotal * 0.07;
+                const total = subtotal + salesTax;
+                
                 return (
                   <>
                     {/* Subtotal */}
@@ -1016,24 +1161,19 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                     {/* Sales Tax */}
                     <tr>
                       <td className="border p-2">Sales Tax (7%)</td>
-                      <td className="border p-2 text-right">{formatCurrency(subtotal * 0.07)}</td>
+                      <td className="border p-2 text-right">{formatCurrency(salesTax)}</td>
                     </tr>
 
                     {/* Total */}
                     <tr className="bg-blue-600 text-white">
                       <td className="border p-2 font-bold">TOTAL</td>
-                      <td className="border p-2 text-right font-bold">{formatCurrency(subtotal * 1.07)}</td>
+                      <td className="border p-2 text-right font-bold">{formatCurrency(total)}</td>
                     </tr>
                   </>
                 );
               })()}
             </tbody>
           </table>
-
-          {/* Remove the markup note and replace with a general note */}
-          <div className="mt-2 text-sm italic text-gray-600">
-            <p>Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.</p>
-          </div>
         </div>
 
         {/* Project Timeline and Additional Information */}
