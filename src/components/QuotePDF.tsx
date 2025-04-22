@@ -226,10 +226,10 @@ const styles = StyleSheet.create({
 // Get cleaning type display name
 const getCleaningTypeDisplay = (type: string): string => {
   switch (type) {
-    case 'rough': return 'Rough Clean (First Stage)';
-    case 'final': return 'Final Clean (Second Stage)';
-    case 'powder_puff': return 'Powder Puff Clean (Third Stage)';
-    case 'complete': return 'Commercial Cleaning';
+    case 'rough': return 'Rough Clean (80% of standard rate)';
+    case 'final': return 'Final Clean (Standard rate)';
+    case 'rough_final': return 'Rough & Final Clean (120% of standard rate)';
+    case 'rough_final_touchup': return 'Rough, Final & Touchup (145% of standard rate)';
     default: return type;
   }
 };
@@ -577,7 +577,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Project Timeline</Text>
-            {formData.cleaningType === 'complete' ? (
+            {formData.cleaningType === 'rough_final_touchup' ? (
               <>
                 <Text style={{...styles.infoValue, fontWeight: 'bold', marginTop: 5}}>Three-Stage Cleaning Schedule:</Text>
                 <Text style={styles.infoValue}>• Rough Clean: During construction</Text>
