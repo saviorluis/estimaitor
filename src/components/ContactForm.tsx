@@ -143,6 +143,7 @@ const ContactForm = () => {
             <option value="restaurant">Restaurant</option>
             <option value="fast_food">Fast Food Restaurant</option>
             <option value="bakery">Bakery</option>
+            <option value="coffee_shop">Coffee Shop</option>
             <option value="medical">Medical Facility</option>
             <option value="office">Office Space</option>
             <option value="retail">Retail Space</option>

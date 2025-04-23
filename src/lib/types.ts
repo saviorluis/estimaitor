@@ -15,6 +15,8 @@ export type ProjectType =
   | 'kids_fitness'
   | 'fast_food'
   | 'bakery'
+  | 'coffee_shop'
+  | 'dental_office'
   | 'pet_resort'
   | 'beauty_store'
   | 'interactive_toy_store';

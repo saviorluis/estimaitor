@@ -21,6 +21,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   kids_fitness: 1.25,
   fast_food: 1.3,
   bakery: 1.35,
+  coffee_shop: 1.25,
+  dental_office: 1.4,
   pet_resort: 1.4,
   beauty_store: 1.3,
   interactive_toy_store: 1.45
@@ -121,6 +123,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   kids_fitness: 450,   // Extra attention to safety and sanitization
   fast_food: 450,      // Similar to restaurants, focused on food service areas
   bakery: 430,         // Detailed cleaning of bakery equipment and food prep areas
+  coffee_shop: 460,    // Specialized cleaning for coffee equipment and customer seating areas
+  dental_office: 380,  // Highly detailed cleaning requiring specialized protocols and disinfection
   pet_resort: 400,      // Thorough sanitization for animal areas and specialized cleaning
   beauty_store: 420,    // Detailed cleaning of product displays and testing stations
   interactive_toy_store: 380    // Interactive play areas and complex environments require detailed cleaning
@@ -299,6 +303,34 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Clean and sanitize employee break areas\n" +
     "• Special attention to removing flour and other bakery ingredients from surfaces",
 
+  coffee_shop: "Final Cleaning includes:\n" +
+    "• Sweep/mop/sanitize all hard surface floors with food-safe cleaners\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean and sanitize all food preparation surfaces and countertops\n" +
+    "• Clean and polish all stainless steel surfaces and display cases\n" +
+    "• Detail clean espresso machines, coffee grinders, and brewing equipment (external surfaces)\n" +
+    "• Clean and sanitize customer seating areas and café tables\n" +
+    "• Dust and clean all light fixtures and perform hi-lo dusting\n" +
+    "• Detail clean and sanitize storage areas and shelving\n" +
+    "• Clean and sanitize bathroom facilities\n" +
+    "• Empty all trash receptacles and replace liners\n" +
+    "• Clean and sanitize employee break areas\n" +
+    "• Special attention to coffee grounds, syrup residues, and milk spills",
+
+  dental_office: "Final Cleaning includes:\n" +
+    "• Sweep/mop/sanitize all hard surface floors with hospital-grade disinfectants\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean and sanitize all bathroom facilities with medical-grade cleaners\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Deep clean and sanitize dental operatories including chairs, equipment surfaces, and cabinetry\n" +
+    "• Sanitize dental equipment surfaces (external surfaces only - no internal components)\n" +
+    "• Clean and disinfect sterilization areas and lab spaces\n" +
+    "• Detail clean waiting room, reception area, and patient consultation rooms\n" +
+    "• Special attention to high-touch surfaces with medical-grade cleaners\n" +
+    "• Clean and sanitize employee break areas and staff workstations\n" +
+    "• Empty all trash receptacles and properly dispose of non-medical waste\n" +
+    "• Special attention to dental material residues and waterlines",
+
   pet_resort: "Final Cleaning includes:\n" +
     "• Sweep/mop/sanitize all hard surface floors with pet-safe cleaners\n" +
     "• Spot clean interior windows and glass (full window service quoted separately)\n" +
@@ -379,6 +411,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
     • Clean and organize equipment storage areas
   `,
   bakery: `${SCOPE_OF_WORK.bakery}`,
+  coffee_shop: `${SCOPE_OF_WORK.coffee_shop}`,
+  dental_office: `${SCOPE_OF_WORK.dental_office}`,
   pet_resort: `${SCOPE_OF_WORK.pet_resort}`,
   beauty_store: `${SCOPE_OF_WORK.beauty_store}`,
   interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`
