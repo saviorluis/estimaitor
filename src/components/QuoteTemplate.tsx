@@ -457,36 +457,64 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     console.log('Current form data:', formData);
     
     try {
-      // Apply the same adjustments as for PDF before printing to ensure consistency
-      // Add special class to the body for print-specific styling
+      // Hide all UI elements that shouldn't be printed
       document.body.classList.add('simulate-pdf-view');
       
-      // Calculate subtotal exactly like in PDF generation
-      const subtotal = Object.keys(adjustedPrices).length > 0 
-        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-        : estimateData.totalBeforeMarkup;
-        
-      console.log('Print preview subtotal calculation:', {
-        subtotal,
-        useAdjustedPrices: Object.keys(adjustedPrices).length > 0
-      });
+      // Create hidden container for print content only
+      const printContainer = document.createElement('div');
+      printContainer.id = 'pdf-print-container';
+      printContainer.style.position = 'fixed';
+      printContainer.style.top = '0';
+      printContainer.style.left = '0';
+      printContainer.style.width = '100%';
+      printContainer.style.height = '100%';
+      printContainer.style.backgroundColor = 'white';
+      printContainer.style.zIndex = '9999';
+      printContainer.style.overflow = 'auto';
       
-      // Log calculated subtotal for debugging
-      console.log('Subtotal for print:', subtotal);
+      // Get the content that should be in the PDF
+      const quoteContent = document.querySelector('.print-content-container');
       
-      // Set a slight delay to ensure all styles are applied
-      setTimeout(() => {
-        window.print();
+      if (quoteContent) {
+        // Clone the content to avoid modifying the original
+        const contentClone = quoteContent.cloneNode(true);
+        printContainer.appendChild(contentClone);
+        document.body.appendChild(printContainer);
         
-        // Remove the special class after printing
+        // Calculate subtotal exactly like in PDF generation
+        const subtotal = Object.keys(adjustedPrices).length > 0 
+          ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+          : estimateData.totalBeforeMarkup;
+          
+        console.log('Print preview subtotal calculation:', {
+          subtotal,
+          useAdjustedPrices: Object.keys(adjustedPrices).length > 0
+        });
+        
+        // Log calculated subtotal for debugging
+        console.log('Subtotal for print:', subtotal);
+        
+        // Set a slight delay to ensure all styles are applied
         setTimeout(() => {
+          window.print();
+          
+          // Remove the print container after printing
+          document.body.removeChild(printContainer);
+          
+          // Remove the special class after printing
           document.body.classList.remove('simulate-pdf-view');
-        }, 500);
-      }, 100);
+        }, 300);
+      } else {
+        console.error('Could not find quote content container');
+        // Fall back to regular print if container not found
+        window.print();
+        document.body.classList.remove('simulate-pdf-view');
+      }
     } catch (error) {
       console.error('Error preparing for print:', error);
       // Fall back to basic print if there's an error
       window.print();
+      document.body.classList.remove('simulate-pdf-view');
     }
   };
 
@@ -730,461 +758,63 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </button>
       </div>
 
-      {/* Cover pages - Only shown when showCoverPage is true and when printing */}
-      {showCoverPage && (
-        <div className="hidden print:block">
-          {/* First Cover Page */}
-          <div className="cover-page page-break-after flex flex-col items-center justify-center p-10 h-[calc(100vh-80px)]">
-            <div className="w-[350px] h-[175px] mb-10 flex items-center justify-center">
-              <CompanyLogo className="w-full h-full object-contain" />
-            </div>
-            
-            <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
-              CLEANING SERVICE PROPOSAL
-            </h1>
-            
-            <p className="text-xl mb-2 text-center">
-              Prepared for:
-            </p>
-            
-            <p className="text-2xl font-bold mb-10 text-center">
-              {clientInfo.company || clientInfo.name || '[Client Name]'}
-            </p>
-            
-            <div className="p-5 bg-blue-50 rounded mb-10 w-4/5 text-center">
-              <p className="mb-2">
-                Project: {quoteInfo.projectName || '[Project Name]'}
-              </p>
-              <p className="mb-2">
-                Location: {quoteInfo.projectAddress || '[Project Address]'}
-              </p>
-              <p>
-                Quote #: {quoteInfo.quoteNumber}
-              </p>
-            </div>
-            
-            <div className="absolute bottom-10 text-center">
-              <p className="font-bold mb-2">{companyInfo.name}</p>
-              <p>{companyInfo.phone} | {companyInfo.email}</p>
-              <p>{companyInfo.address}, {companyInfo.city}</p>
-              <p className="mt-1">{companyInfo.website}</p>
-            </div>
-          </div>
-          
-          {/* Second Cover Page - Capabilities */}
-          <div className="cover-page page-break-after p-10 h-[calc(100vh-80px)]">
-            <div className="flex items-center mb-5">
-              <div className="w-[120px] h-[60px]">
+      {/* Print content container - contains everything that should be in the PDF */}
+      <div className="print-content-container">
+        {/* Cover pages - Only shown when showCoverPage is true and when printing */}
+        {showCoverPage && (
+          <div className="hidden print:block">
+            {/* First Cover Page */}
+            <div className="cover-page page-break-after flex flex-col items-center justify-center p-10 h-[calc(100vh-80px)]">
+              <div className="w-[350px] h-[175px] mb-10 flex items-center justify-center">
                 <CompanyLogo className="w-full h-full object-contain" />
               </div>
-              <h2 className="text-2xl font-bold ml-5 text-blue-600">
-                COMPANY CAPABILITIES
+              
+              <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
+                POST CONSTRUCTION CLEANING
+              </h1>
+              
+              <h2 className="text-2xl font-bold mb-6 text-blue-600 text-center">
+                PROPOSAL
               </h2>
-            </div>
-            
-            <div className="p-5 bg-gray-50 rounded mb-8">
-              <h3 className="text-lg font-bold mb-4 text-blue-800">
-                ABOUT OUR COMPANY
-              </h3>
               
-              <p className="text-sm mb-3 leading-relaxed">
-                {companyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
-                medical facilities, retail spaces, and office environments. With over a decade of experience, 
-                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
+              <p className="text-xl mb-2 text-center">
+                Prepared for:
               </p>
               
-              <p className="text-sm mb-3 leading-relaxed">
-                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
-                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
+              <p className="text-2xl font-bold mb-10 text-center">
+                {clientInfo.company || clientInfo.name || '[Client Name]'}
               </p>
               
-              <p className="text-sm leading-relaxed">
-                Our comprehensive cleaning services include detailed cleaning of all surfaces, specialized floor care, 
-                sanitization of high-touch areas, window cleaning, and post-construction cleanup. We customize our 
-                approach to meet the unique needs of each facility we service.
-              </p>
-            </div>
-            
-            <h3 className="text-lg font-bold mb-4 text-blue-800">
-              SAMPLE PROJECTS
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {/* Project 1 */}
-              <div className="border border-gray-200 rounded overflow-hidden">
-                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Medical Facility Photo</span>
-                </div>
-                <div className="p-3">
-                  <p className="font-bold mb-1">Medical Office Building</p>
-                  <p className="text-xs">
-                    Complete post-construction cleaning of 35,000 sq ft medical facility with specialized sanitization protocols.
-                  </p>
-                </div>
+              <div className="p-5 bg-blue-50 rounded mb-10 w-4/5 text-center">
+                <p className="mb-2">
+                  Project: {quoteInfo.projectName || '[Project Name]'}
+                </p>
+                <p className="mb-2">
+                  Location: {quoteInfo.projectAddress || '[Project Address]'}
+                </p>
+                <p>
+                  Quote #: {quoteInfo.quoteNumber}
+                </p>
               </div>
               
-              {/* Project 2 */}
-              <div className="border border-gray-200 rounded overflow-hidden">
-                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Restaurant Photo</span>
-                </div>
-                <div className="p-3">
-                  <p className="font-bold mb-1">High-End Restaurant</p>
-                  <p className="text-xs">
-                    Final clean of 8,500 sq ft restaurant with detailed kitchen, dining areas, and bar service areas.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Project 3 */}
-              <div className="border border-gray-200 rounded overflow-hidden">
-                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Office Space Photo</span>
-                </div>
-                <div className="p-3">
-                  <p className="font-bold mb-1">Corporate Office Complex</p>
-                  <p className="text-xs">
-                    Rough and final cleaning of 50,000 sq ft commercial office space with glass partitions and executive areas.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Project 4 */}
-              <div className="border border-gray-200 rounded overflow-hidden">
-                <div className="h-[120px] bg-gray-100 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Retail Space Photo</span>
-                </div>
-                <div className="p-3">
-                  <p className="font-bold mb-1">Retail Shopping Center</p>
-                  <p className="text-xs">
-                    Post-construction cleaning of 75,000 sq ft retail space with detailed display areas and customer zones.
-                  </p>
-                </div>
+              <div className="absolute bottom-10 text-center">
+                <p className="font-bold mb-2">{companyInfo.name}</p>
+                <p>{companyInfo.phone} | {companyInfo.email}</p>
+                <p>{companyInfo.address}, {companyInfo.city}</p>
+                <p className="mt-1">{companyInfo.website}</p>
               </div>
             </div>
             
-            <div className="absolute bottom-10 left-10 right-10 border-t border-gray-200 pt-3 text-center">
-              <p className="text-sm text-gray-600">
-                For more information about our services or to schedule a consultation,
-              </p>
-              <p className="text-sm text-gray-600">
-                please contact us at {companyInfo.phone} or {companyInfo.email}
-              </p>
+            {/* Second Cover Page - Capabilities */}
+            <div className="cover-page page-break-after p-10 h-[calc(100vh-80px)] flex items-center justify-center">
+              <img 
+                src="/BBPS Capability copy.png" 
+                alt="Big Brother Property Solutions Capability Statement"
+                className="max-w-full max-h-full object-contain"
+              />
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
-      <div className="hidden print:block print:mb-8"></div>
-
-      {/* Your Company Information - Hidden when printing */}
-      <div className="mb-6 print:hidden">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold border-b pb-1">Your Company Information</h3>
-          <button
-            onClick={() => setEditingCompanyInfo(!editingCompanyInfo)}
-            className="text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
-          >
-            {editingCompanyInfo ? 'Done Editing' : 'Edit Company Info'}
-          </button>
-        </div>
-
-        <div className="flex">
-          {editingCompanyInfo ? (
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={companyInfo.name}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={companyInfo.phone}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={companyInfo.address}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input
-                  type="text"
-                  name="email"
-                  value={companyInfo.email}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={companyInfo.city}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
-                <input
-                  type="text"
-                  name="website"
-                  value={companyInfo.website}
-                  onChange={handleCompanyChange}
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg w-full">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name:</p>
-                <p className="font-semibold text-gray-900 dark:text-gray-100">{companyInfo.name}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone:</p>
-                <p className="text-gray-900 dark:text-gray-100">{companyInfo.phone}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Address:</p>
-                <p className="text-gray-900 dark:text-gray-100">{companyInfo.address}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Email:</p>
-                <p className="text-gray-900 dark:text-gray-100">{companyInfo.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">City:</p>
-                <p className="text-gray-900 dark:text-gray-100">{companyInfo.city}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Website:</p>
-                <p className="text-gray-900 dark:text-gray-100">{companyInfo.website}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Client Information - Hidden when printing */}
-      <div className="mb-6 print:hidden">
-        <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information (For Quote)</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
-            <input
-              type="text"
-              name="name"
-              value={clientInfo.name}
-              onChange={handleClientChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter client name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-            <input
-              type="text"
-              name="phone"
-              value={clientInfo.phone}
-              onChange={handleClientChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter client phone"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company</label>
-            <input
-              type="text"
-              name="company"
-              value={clientInfo.company}
-              onChange={handleClientChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter client company"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-            <input
-              type="text"
-              name="email"
-              value={clientInfo.email}
-              onChange={handleClientChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter client email"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
-            <input
-              type="text"
-              name="address"
-              value={clientInfo.address}
-              onChange={handleClientChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter client address"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Quote Information */}
-      <div className="mb-6 print:hidden">
-        <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project and Quote Details</h3>
-        
-        {/* Markup Percentage Input */}
-        <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price Adjustment (Markup Percentage)
-          </label>
-          <div className="flex items-center">
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="1"
-              value={markupPercentage}
-              onChange={handleMarkupChange}
-              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-gray-700">%</span>
-            <div className="ml-4 text-sm text-gray-600">
-              {markupPercentage > 0 ? (
-                <span>Adding {markupPercentage}% markup evenly distributed across all line items</span>
-              ) : (
-                <span>No markup applied</span>
-              )}
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            This will adjust all prices proportionally to maintain the same relative pricing structure.
-          </p>
-        </div>
-        
-        {/* Quote Counter Input */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Quote Number
-          </label>
-          <div className="flex items-center">
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={quoteCounter}
-              onChange={(e) => {
-                const newValue = parseInt(e.target.value, 10);
-                if (!isNaN(newValue) && newValue > 0) {
-                  setQuoteCounter(newValue);
-                  // Save to localStorage
-                  if (typeof window !== 'undefined') {
-                    localStorage.setItem('quoteCounter', newValue.toString());
-                  }
-                  // Update the quote number in quoteInfo
-                  setQuoteInfo(prev => ({
-                    ...prev,
-                    quoteNumber: `Q-${new Date().getFullYear()}-${newValue}`
-                  }));
-                }
-              }}
-              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <div className="ml-4 text-sm text-gray-600">
-              Current Quote #: <span className="font-semibold">{quoteCounter}</span>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Quote counter starts from 121 and will be remembered between sessions.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Name</label>
-            <input
-              type="text"
-              name="projectName"
-              value={quoteInfo.projectName}
-              onChange={handleQuoteChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter project name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quote Number</label>
-            <input
-              type="text"
-              name="quoteNumber"
-              value={quoteInfo.quoteNumber}
-              onChange={handleQuoteChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Quote number (auto-generated)"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Address</label>
-            <input
-              type="text"
-              name="projectAddress"
-              value={quoteInfo.projectAddress}
-              onChange={handleQuoteChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter project location"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until</label>
-            <input
-              type="text"
-              name="validUntil"
-              value={quoteInfo.validUntil}
-              onChange={handleQuoteChange}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Expiration date (auto-generated)"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
-            <textarea
-              name="notes"
-              value={quoteInfo.notes}
-              onChange={handleQuoteChange}
-              rows={3}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Additional notes about the project"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Terms & Conditions</label>
-            <textarea
-              name="terms"
-              value={quoteInfo.terms}
-              onChange={handleQuoteChange}
-              rows={8}
-              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Terms and conditions for the quote"
-            />
-          </div>
-        </div>
+        )}
 
         {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
         <div className="hidden print:block print:mb-8"></div>
@@ -1456,6 +1086,321 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           <p className="mt-2 text-xs italic">
             All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
           </p>
+        </div>
+      </div>
+
+      {/* Your Company Information - Hidden when printing */}
+      <div className="mb-6 print:hidden">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-semibold border-b pb-1">Your Company Information</h3>
+          <button
+            onClick={() => setEditingCompanyInfo(!editingCompanyInfo)}
+            className="text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
+          >
+            {editingCompanyInfo ? 'Done Editing' : 'Edit Company Info'}
+          </button>
+        </div>
+
+        <div className="flex">
+          {editingCompanyInfo ? (
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={companyInfo.name}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={companyInfo.phone}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={companyInfo.address}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <input
+                  type="text"
+                  name="email"
+                  value={companyInfo.email}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={companyInfo.city}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+                <input
+                  type="text"
+                  name="website"
+                  value={companyInfo.website}
+                  onChange={handleCompanyChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg w-full">
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name:</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">{companyInfo.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.phone}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Address:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.address}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Email:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.email}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">City:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.city}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Website:</p>
+                <p className="text-gray-900 dark:text-gray-100">{companyInfo.website}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Client Information - Hidden when printing */}
+      <div className="mb-6 print:hidden">
+        <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information (For Quote)</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
+            <input
+              type="text"
+              name="name"
+              value={clientInfo.name}
+              onChange={handleClientChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter client name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+            <input
+              type="text"
+              name="phone"
+              value={clientInfo.phone}
+              onChange={handleClientChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter client phone"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company</label>
+            <input
+              type="text"
+              name="company"
+              value={clientInfo.company}
+              onChange={handleClientChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter client company"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <input
+              type="text"
+              name="email"
+              value={clientInfo.email}
+              onChange={handleClientChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter client email"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+            <input
+              type="text"
+              name="address"
+              value={clientInfo.address}
+              onChange={handleClientChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter client address"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Quote Information */}
+      <div className="mb-6 print:hidden">
+        <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project and Quote Details</h3>
+        
+        {/* Markup Percentage Input */}
+        <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Price Adjustment (Markup Percentage)
+          </label>
+          <div className="flex items-center">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={markupPercentage}
+              onChange={handleMarkupChange}
+              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-gray-700">%</span>
+            <div className="ml-4 text-sm text-gray-600">
+              {markupPercentage > 0 ? (
+                <span>Adding {markupPercentage}% markup evenly distributed across all line items</span>
+              ) : (
+                <span>No markup applied</span>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            This will adjust all prices proportionally to maintain the same relative pricing structure.
+          </p>
+        </div>
+        
+        {/* Quote Counter Input */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Quote Number
+          </label>
+          <div className="flex items-center">
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={quoteCounter}
+              onChange={(e) => {
+                const newValue = parseInt(e.target.value, 10);
+                if (!isNaN(newValue) && newValue > 0) {
+                  setQuoteCounter(newValue);
+                  // Save to localStorage
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('quoteCounter', newValue.toString());
+                  }
+                  // Update the quote number in quoteInfo
+                  setQuoteInfo(prev => ({
+                    ...prev,
+                    quoteNumber: `Q-${new Date().getFullYear()}-${newValue}`
+                  }));
+                }
+              }}
+              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <button 
+              onClick={handleIncrementCounter}
+              className="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded text-sm"
+            >
+              Increment
+            </button>
+            <div className="ml-4 text-sm text-gray-600">
+              Current Quote #: <span className="font-semibold">{quoteCounter}</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Quote counter starts from 121 and will be remembered between sessions.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Name</label>
+            <input
+              type="text"
+              name="projectName"
+              value={quoteInfo.projectName}
+              onChange={handleQuoteChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter project name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quote Number</label>
+            <input
+              type="text"
+              name="quoteNumber"
+              value={quoteInfo.quoteNumber}
+              onChange={handleQuoteChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Quote number (auto-generated)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Address</label>
+            <input
+              type="text"
+              name="projectAddress"
+              value={quoteInfo.projectAddress}
+              onChange={handleQuoteChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Enter project location"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until</label>
+            <input
+              type="text"
+              name="validUntil"
+              value={quoteInfo.validUntil}
+              onChange={handleQuoteChange}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Expiration date (auto-generated)"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+            <textarea
+              name="notes"
+              value={quoteInfo.notes}
+              onChange={handleQuoteChange}
+              rows={3}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Additional notes about the project"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Terms & Conditions</label>
+            <textarea
+              name="terms"
+              value={quoteInfo.terms}
+              onChange={handleQuoteChange}
+              rows={8}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="Terms and conditions for the quote"
+            />
+          </div>
         </div>
       </div>
     </div>
