@@ -69,6 +69,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   // State for showing cover page in PDF
   const [showCoverPage, setShowCoverPage] = useState<boolean>(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
@@ -744,6 +745,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         </div>
         
         <button
+          onClick={() => setShowPreview(!showPreview)}
+          className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
+        >
+          {showPreview ? 'Hide Preview' : 'Show Preview'}
+        </button>
+
+        <button
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
         >
@@ -759,335 +767,337 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       </div>
 
       {/* Print content container - contains everything that should be in the PDF */}
-      <div className="print-content-container">
-        {/* Cover pages - Only shown when showCoverPage is true and when printing */}
-        {showCoverPage && (
-          <div className="hidden print:block">
-            {/* First Cover Page */}
-            <div className="cover-page page-break-after flex flex-col items-center justify-center p-10 h-[calc(100vh-80px)]">
-              <div className="w-[350px] h-[175px] mb-10 flex items-center justify-center">
-                <CompanyLogo className="w-full h-full object-contain" />
+      {showPreview && (
+        <div className="print-content-container mb-8">
+          {/* Cover pages - Only shown when showCoverPage is true and when printing */}
+          {showCoverPage && (
+            <div className="hidden print:block">
+              {/* First Cover Page */}
+              <div className="cover-page page-break-after flex flex-col items-center justify-center p-10 h-[calc(100vh-80px)]">
+                <div className="w-[350px] h-[175px] mb-10 flex items-center justify-center">
+                  <CompanyLogo className="w-full h-full object-contain" />
+                </div>
+                
+                <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
+                  POST CONSTRUCTION CLEANING
+                </h1>
+                
+                <h2 className="text-2xl font-bold mb-6 text-blue-600 text-center">
+                  PROPOSAL
+                </h2>
+                
+                <p className="text-xl mb-2 text-center">
+                  Prepared for:
+                </p>
+                
+                <p className="text-2xl font-bold mb-10 text-center">
+                  {clientInfo.company || clientInfo.name || '[Client Name]'}
+                </p>
+                
+                <div className="p-5 bg-blue-50 rounded mb-10 w-4/5 text-center">
+                  <p className="mb-2">
+                    Project: {quoteInfo.projectName || '[Project Name]'}
+                  </p>
+                  <p className="mb-2">
+                    Location: {quoteInfo.projectAddress || '[Project Address]'}
+                  </p>
+                  <p>
+                    Quote #: {quoteInfo.quoteNumber}
+                  </p>
+                </div>
+                
+                <div className="absolute bottom-10 text-center">
+                  <p className="font-bold mb-2">{companyInfo.name}</p>
+                  <p>{companyInfo.phone} | {companyInfo.email}</p>
+                  <p>{companyInfo.address}, {companyInfo.city}</p>
+                  <p className="mt-1">{companyInfo.website}</p>
+                </div>
               </div>
               
-              <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
-                POST CONSTRUCTION CLEANING
-              </h1>
+              {/* Second Cover Page - Capabilities */}
+              <div className="cover-page page-break-after p-10 h-[calc(100vh-80px)] flex items-center justify-center">
+                <img 
+                  src="/BBPS Capability copy.png" 
+                  alt="Big Brother Property Solutions Capability Statement"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
+          <div className="hidden print:block print:mb-8"></div>
+
+          {/* Client and Project Information - Ensure no empty placeholders in printed version */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            <div>
+              <div className="flex items-center mb-4">
+                <div className="w-24 h-16 mr-3">
+                  <CompanyLogo />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold border-b pb-1">Quote #{quoteCounter}</h3>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
+              <p>{clientInfo.name || '[Client Name]'}</p>
+              <p>{clientInfo.company || '[Company]'}</p>
+              <p>{clientInfo.address || '[Address]'}</p>
+              <p>{clientInfo.email || '[Email]'}</p>
+              <p>{clientInfo.phone || '[Phone]'}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
+              <p>{quoteInfo.projectName || '[Project Name]'}</p>
+              <p>{quoteInfo.projectAddress || '[Project Address]'}</p>
               
-              <h2 className="text-2xl font-bold mb-6 text-blue-600 text-center">
-                PROPOSAL
-              </h2>
-              
-              <p className="text-xl mb-2 text-center">
-                Prepared for:
+              <p>Project Type: {getProjectTypeDisplay(formData.projectType)}</p>
+              <p>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
+              <p>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</p>
+            </div>
+          </div>
+
+          {/* Service Details - Enhance table for printing */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Service Details</h3>
+
+            {/* Scope of Work */}
+            <div className="mb-4 p-4 bg-gray-50 print:bg-white rounded">
+              <h4 className="font-semibold mb-2">Scope of Work</h4>
+              <p className="whitespace-pre-line text-sm">
+                {SCOPE_OF_WORK[formData.projectType] || ''} ({(formData.squareFootage || 0).toLocaleString()} sq ft)
               </p>
-              
-              <p className="text-2xl font-bold mb-10 text-center">
-                {clientInfo.company || clientInfo.name || '[Client Name]'}
-              </p>
-              
-              <div className="p-5 bg-blue-50 rounded mb-10 w-4/5 text-center">
-                <p className="mb-2">
-                  Project: {quoteInfo.projectName || '[Project Name]'}
-                </p>
-                <p className="mb-2">
-                  Location: {quoteInfo.projectAddress || '[Project Address]'}
-                </p>
-                <p>
-                  Quote #: {quoteInfo.quoteNumber}
-                </p>
-              </div>
-              
-              <div className="absolute bottom-10 text-center">
-                <p className="font-bold mb-2">{companyInfo.name}</p>
-                <p>{companyInfo.phone} | {companyInfo.email}</p>
-                <p>{companyInfo.address}, {companyInfo.city}</p>
-                <p className="mt-1">{companyInfo.website}</p>
-              </div>
             </div>
-            
-            {/* Second Cover Page - Capabilities */}
-            <div className="cover-page page-break-after p-10 h-[calc(100vh-80px)] flex items-center justify-center">
-              <img 
-                src="/BBPS Capability copy.png" 
-                alt="Big Brother Property Solutions Capability Statement"
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-          </div>
-        )}
 
-        {/* Add a page break for printing at the beginning to ensure the quote starts on a fresh page */}
-        <div className="hidden print:block print:mb-8"></div>
-
-        {/* Client and Project Information - Ensure no empty placeholders in printed version */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          <div>
-            <div className="flex items-center mb-4">
-              <div className="w-24 h-16 mr-3">
-                <CompanyLogo />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold border-b pb-1">Quote #{quoteCounter}</h3>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
-            <p>{clientInfo.name || '[Client Name]'}</p>
-            <p>{clientInfo.company || '[Company]'}</p>
-            <p>{clientInfo.address || '[Address]'}</p>
-            <p>{clientInfo.email || '[Email]'}</p>
-            <p>{clientInfo.phone || '[Phone]'}</p>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
-            <p>{quoteInfo.projectName || '[Project Name]'}</p>
-            <p>{quoteInfo.projectAddress || '[Project Address]'}</p>
-            
-            <p>Project Type: {getProjectTypeDisplay(formData.projectType)}</p>
-            <p>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
-            <p>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</p>
-          </div>
-        </div>
-
-        {/* Service Details - Enhance table for printing */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Service Details</h3>
-
-          {/* Scope of Work */}
-          <div className="mb-4 p-4 bg-gray-50 print:bg-white rounded">
-            <h4 className="font-semibold mb-2">Scope of Work</h4>
-            <p className="whitespace-pre-line text-sm">
-              {SCOPE_OF_WORK[formData.projectType] || ''} ({(formData.squareFootage || 0).toLocaleString()} sq ft)
-            </p>
-          </div>
-
-          <table className="w-full border-collapse print:border print:border-gray-300">
-            <thead>
-              <tr className="bg-gray-100 print:bg-gray-50">
-                <th className="border p-2 text-left print:font-bold">Description</th>
-                <th className="border p-2 text-right print:font-bold">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Base Cleaning Service */}
-              <tr>
-                <td className="border p-2 print:border print:border-gray-300">
-                  <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
-                </td>
-                <td className="border p-2 text-right print:border print:border-gray-300">
-                  {formatCurrency(getAdjustedPrice('basePrice', estimateData.basePrice || 0))}
-                </td>
-              </tr>
-
-              {/* VCT Flooring if applicable */}
-              {formData.hasVCT && (
+            <table className="w-full border-collapse print:border print:border-gray-300">
+              <thead>
+                <tr className="bg-gray-100 print:bg-gray-50">
+                  <th className="border p-2 text-left print:font-bold">Description</th>
+                  <th className="border p-2 text-right print:font-bold">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Base Cleaning Service */}
                 <tr>
                   <td className="border p-2 print:border print:border-gray-300">
-                    <div className="font-semibold">VCT Flooring Treatment</div>
-                    <div className="text-sm">Stripping, waxing, and buffing of vinyl composition tile</div>
+                    <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
                   </td>
-                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}</td>
+                  <td className="border p-2 text-right print:border print:border-gray-300">
+                    {formatCurrency(getAdjustedPrice('basePrice', estimateData.basePrice || 0))}
+                  </td>
                 </tr>
-              )}
 
-              {/* Pressure Washing if applicable */}
-              {formData.needsPressureWashing && (
+                {/* VCT Flooring if applicable */}
+                {formData.hasVCT && (
+                  <tr>
+                    <td className="border p-2 print:border print:border-gray-300">
+                      <div className="font-semibold">VCT Flooring Treatment</div>
+                      <div className="text-sm">Stripping, waxing, and buffing of vinyl composition tile</div>
+                    </td>
+                    <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}</td>
+                  </tr>
+                )}
+
+                {/* Pressure Washing if applicable */}
+                {formData.needsPressureWashing && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Pressure Washing Services</div>
+                      <div className="text-sm">{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</div>
+                      <div className="text-sm">Includes equipment rental and materials</div>
+                    </td>
+                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
+                  </tr>
+                )}
+
+                {/* Travel Expenses */}
                 <tr>
                   <td className="border p-2">
-                    <div className="font-semibold">Pressure Washing Services</div>
-                    <div className="text-sm">{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</div>
-                    <div className="text-sm">Includes equipment rental and materials</div>
+                    <div className="font-semibold">Travel Expenses</div>
+                    <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
                   </td>
-                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
                 </tr>
-              )}
 
-              {/* Travel Expenses */}
-              <tr>
-                <td className="border p-2">
-                  <div className="font-semibold">Travel Expenses</div>
-                  <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
-                </td>
-                <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
-              </tr>
+                {/* Overnight Accommodations if applicable */}
+                {formData.stayingOvernight && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Overnight Accommodations</div>
+                      <div className="text-sm">{formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members</div>
+                      <div className="text-sm">Includes hotel and per diem expenses</div>
+                    </td>
+                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('overnightCost', estimateData.overnightCost || 0))}</td>
+                  </tr>
+                )}
 
-              {/* Overnight Accommodations if applicable */}
-              {formData.stayingOvernight && (
-                <tr>
-                  <td className="border p-2">
-                    <div className="font-semibold">Overnight Accommodations</div>
-                    <div className="text-sm">{formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members</div>
-                    <div className="text-sm">Includes hotel and per diem expenses</div>
-                  </td>
-                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('overnightCost', estimateData.overnightCost || 0))}</td>
-                </tr>
-              )}
+                {/* Urgency Adjustment if applicable */}
+                {estimateData.urgencyMultiplier > 1 && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Urgency Adjustment</div>
+                      <div className="text-sm">Priority scheduling (Level {formData.urgencyLevel}/10)</div>
+                    </td>
+                    <td className="border p-2 text-right">
+                      {formatCurrency(
+                        getAdjustedPrice('urgencyCost',
+                          (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+                            (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+                          ((estimateData.urgencyMultiplier || 1) - 1)
+                        )
+                      )}
+                    </td>
+                  </tr>
+                )}
 
-              {/* Urgency Adjustment if applicable */}
-              {estimateData.urgencyMultiplier > 1 && (
-                <tr>
-                  <td className="border p-2">
-                    <div className="font-semibold">Urgency Adjustment</div>
-                    <div className="text-sm">Priority scheduling (Level {formData.urgencyLevel}/10)</div>
-                  </td>
-                  <td className="border p-2 text-right">
-                    {formatCurrency(
-                      getAdjustedPrice('urgencyCost',
-                        (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-                          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-                        ((estimateData.urgencyMultiplier || 1) - 1)
-                      )
-                    )}
-                  </td>
-                </tr>
-              )}
+                {/* Window Cleaning if applicable */}
+                {formData.needsWindowCleaning && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Window Cleaning Services</div>
+                      <div className="text-sm">{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</div>
+                      <div className="text-sm">Includes all necessary equipment and cleaning solutions</div>
+                      {!formData.chargeForWindowCleaning && (
+                        <div className="text-sm italic text-gray-500">Window cleaning will be quoted separately</div>
+                      )}
+                    </td>
+                    <td className="border p-2 text-right">
+                      {formData.chargeForWindowCleaning ? formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0)) : 'Separate Quote'}
+                    </td>
+                  </tr>
+                )}
 
-              {/* Window Cleaning if applicable */}
-              {formData.needsWindowCleaning && (
-                <tr>
-                  <td className="border p-2">
-                    <div className="font-semibold">Window Cleaning Services</div>
-                    <div className="text-sm">{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</div>
-                    <div className="text-sm">Includes all necessary equipment and cleaning solutions</div>
-                    {!formData.chargeForWindowCleaning && (
-                      <div className="text-sm italic text-gray-500">Window cleaning will be quoted separately</div>
-                    )}
-                  </td>
-                  <td className="border p-2 text-right">
-                    {formData.chargeForWindowCleaning ? formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0)) : 'Separate Quote'}
-                  </td>
-                </tr>
-              )}
+                {/* Display case cleaning for jewelry stores */}
+                {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Display Case Cleaning</div>
+                      <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display cases</div>
+                    </td>
+                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0))}</td>
+                  </tr>
+                )}
 
-              {/* Display case cleaning for jewelry stores */}
-              {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (
-                <tr>
-                  <td className="border p-2">
-                    <div className="font-semibold">Display Case Cleaning</div>
-                    <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display cases</div>
-                  </td>
-                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0))}</td>
-                </tr>
-              )}
+                {/* Calculate adjusted subtotal */}
+                {(() => {
+                  const subtotal = Object.keys(adjustedPrices).length > 0 
+                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                    : estimateData.totalBeforeMarkup;
+                  const salesTax = subtotal * 0.07;
+                  const total = subtotal + salesTax;
+                  
+                  return (
+                    <>
+                      {/* Subtotal */}
+                      <tr>
+                        <td className="border p-2 font-semibold">Subtotal</td>
+                        <td className="border p-2 text-right font-semibold">{formatCurrency(subtotal)}</td>
+                      </tr>
 
-              {/* Calculate adjusted subtotal */}
-              {(() => {
-                const subtotal = Object.keys(adjustedPrices).length > 0 
-                  ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-                  : estimateData.totalBeforeMarkup;
-                const salesTax = subtotal * 0.07;
-                const total = subtotal + salesTax;
-                
-                return (
-                  <>
-                    {/* Subtotal */}
-                    <tr>
-                      <td className="border p-2 font-semibold">Subtotal</td>
-                      <td className="border p-2 text-right font-semibold">{formatCurrency(subtotal)}</td>
-                    </tr>
+                      {/* Sales Tax */}
+                      <tr>
+                        <td className="border p-2">Sales Tax (7%)</td>
+                        <td className="border p-2 text-right">{formatCurrency(salesTax)}</td>
+                      </tr>
 
-                    {/* Sales Tax */}
-                    <tr>
-                      <td className="border p-2">Sales Tax (7%)</td>
-                      <td className="border p-2 text-right">{formatCurrency(salesTax)}</td>
-                    </tr>
-
-                    {/* Total */}
-                    <tr className="bg-blue-600 text-white">
-                      <td className="border p-2 font-bold">TOTAL</td>
-                      <td className="border p-2 text-right font-bold">{formatCurrency(total)}</td>
-                    </tr>
-                  </>
-                );
-              })()}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Project Timeline and Additional Information */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
-            {formData.cleaningType === 'rough_final_touchup' ? (
-              <>
-                <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
-                <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
-                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
-                  <li><span className="font-medium">Touch-up Clean:</span> Before client move-in/opening</li>
-                </ul>
-                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
-              </>
-            ) : formData.cleaningType === 'rough_final' ? (
-              <>
-                <p className="font-semibold mt-2">Two-Stage Cleaning Schedule:</p>
-                <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
-                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
-                </ul>
-                <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
-              </>
-            ) : formData.cleaningType === 'rough' ? (
-              <>
-                <p className="font-semibold mt-2">Single-Stage Cleaning Schedule:</p>
-                <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Rough Clean:</span> During construction</li>
-                </ul>
-                <p className="mt-2 text-sm italic">Note: Rough cleaning is performed to clear construction debris and basic cleaning.</p>
-              </>
-            ) : formData.cleaningType === 'final' ? (
-              <>
-                <p className="font-semibold mt-2">Final Cleaning Schedule:</p>
-                <ul className="list-disc ml-5 mt-1 text-sm">
-                  <li><span className="font-medium">Final Clean:</span> After construction completion</li>
-                </ul>
-                <p className="mt-2 text-sm italic">Note: Final cleaning ensures the space is ready for occupancy or presentation.</p>
-              </>
-            ) : (
-              <>
-                <p className="font-semibold mt-2">Standard Cleaning Schedule:</p>
-                <p className="mt-1 text-sm">Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
-                <p className="mt-2 text-sm italic">Estimated completion time: {Math.ceil((formData.squareFootage || 0) / ((formData.numberOfCleaners || 1) * 500))} hours</p>
-              </>
-            )}
+                      {/* Total */}
+                      <tr className="bg-blue-600 text-white">
+                        <td className="border p-2 font-bold">TOTAL</td>
+                        <td className="border p-2 text-right font-bold">{formatCurrency(total)}</td>
+                      </tr>
+                    </>
+                  );
+                })()}
+              </tbody>
+            </table>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Additional Information</h3>
-            <p className="text-sm">{quoteInfo.notes}</p>
+
+          {/* Project Timeline and Additional Information */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Timeline</h3>
+              {formData.cleaningType === 'rough_final_touchup' ? (
+                <>
+                  <p className="font-semibold mt-2">Three-Stage Cleaning Schedule:</p>
+                  <ul className="list-disc ml-5 mt-1 text-sm">
+                    <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                    <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                    <li><span className="font-medium">Touch-up Clean:</span> Before client move-in/opening</li>
+                  </ul>
+                  <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
+                </>
+              ) : formData.cleaningType === 'rough_final' ? (
+                <>
+                  <p className="font-semibold mt-2">Two-Stage Cleaning Schedule:</p>
+                  <ul className="list-disc ml-5 mt-1 text-sm">
+                    <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                    <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                  </ul>
+                  <p className="mt-2 text-sm italic">Note: These cleaning phases are performed at different stages during the construction timeline.</p>
+                </>
+              ) : formData.cleaningType === 'rough' ? (
+                <>
+                  <p className="font-semibold mt-2">Single-Stage Cleaning Schedule:</p>
+                  <ul className="list-disc ml-5 mt-1 text-sm">
+                    <li><span className="font-medium">Rough Clean:</span> During construction</li>
+                  </ul>
+                  <p className="mt-2 text-sm italic">Note: Rough cleaning is performed to clear construction debris and basic cleaning.</p>
+                </>
+              ) : formData.cleaningType === 'final' ? (
+                <>
+                  <p className="font-semibold mt-2">Final Cleaning Schedule:</p>
+                  <ul className="list-disc ml-5 mt-1 text-sm">
+                    <li><span className="font-medium">Final Clean:</span> After construction completion</li>
+                  </ul>
+                  <p className="mt-2 text-sm italic">Note: Final cleaning ensures the space is ready for occupancy or presentation.</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold mt-2">Standard Cleaning Schedule:</p>
+                  <p className="mt-1 text-sm">Team Size: {(formData.numberOfCleaners || 1)} cleaners</p>
+                  <p className="mt-2 text-sm italic">Estimated completion time: {Math.ceil((formData.squareFootage || 0) / ((formData.numberOfCleaners || 1) * 500))} hours</p>
+                </>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Additional Information</h3>
+              <p className="text-sm">{quoteInfo.notes}</p>
+            </div>
+          </div>
+
+          {/* Terms & Conditions */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Terms & Conditions</h3>
+            <p className="text-sm whitespace-pre-line">{quoteInfo.terms}</p>
+          </div>
+
+          {/* Signature Section */}
+          <div className="grid grid-cols-2 gap-8 mt-12">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Acceptance</h3>
+              <div className="border-b border-black mt-8 mb-1"></div>
+              <p className="text-xs">Client Signature</p>
+              <div className="border-b border-black mt-8 mb-1"></div>
+              <p className="text-xs">Date</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2 border-b pb-1">Provider</h3>
+              <div className="border-b border-black mt-8 mb-1"></div>
+              <p className="text-xs">Authorized Signature</p>
+              <div className="border-b border-black mt-8 mb-1"></div>
+              <p className="text-xs">Date</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-xs text-gray-500 mt-12">
+            <p>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</p>
+            <p className="mt-2 text-xs italic">
+              All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
+            </p>
           </div>
         </div>
-
-        {/* Terms & Conditions */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Terms & Conditions</h3>
-          <p className="text-sm whitespace-pre-line">{quoteInfo.terms}</p>
-        </div>
-
-        {/* Signature Section */}
-        <div className="grid grid-cols-2 gap-8 mt-12">
-          <div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Acceptance</h3>
-            <div className="border-b border-black mt-8 mb-1"></div>
-            <p className="text-xs">Client Signature</p>
-            <div className="border-b border-black mt-8 mb-1"></div>
-            <p className="text-xs">Date</p>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Provider</h3>
-            <div className="border-b border-black mt-8 mb-1"></div>
-            <p className="text-xs">Authorized Signature</p>
-            <div className="border-b border-black mt-8 mb-1"></div>
-            <p className="text-xs">Date</p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-500 mt-12">
-          <p>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</p>
-          <p className="mt-2 text-xs italic">
-            All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
-          </p>
-        </div>
-      </div>
+      )}
 
       {/* Your Company Information - Hidden when printing */}
       <div className="mb-6 print:hidden">
