@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
+import { FormData, EstimateData, ProjectType, CleaningType, PressureWashingServiceType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
-import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/constants';
+import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS, PRESSURE_WASHING_RATES, PRESSURE_WASHING_SCOPE_OF_WORK } from '@/lib/constants';
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
@@ -20,6 +20,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
   const [needsPressureWashing, setNeedsPressureWashing] = useState(false);
   const [needsWindowCleaning, setNeedsWindowCleaning] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pressureWashingServices, setPressureWashingServices] = useState<PressureWashingServiceType[]>([]);
 
   // Get saved form data from localStorage
   const getSavedFormData = (): Partial<FormData> => {
@@ -128,6 +129,16 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     setNeedsWindowCleaning(needsWindowCleaningWatch);
   }, [needsWindowCleaningWatch]);
 
+  // Watch for changes in cleaning type to auto-select pressure washing if pressure_washing_only is selected
+  const cleaningType = watch('cleaningType');
+  
+  useEffect(() => {
+    if (cleaningType === 'pressure_washing_only') {
+      setValue('needsPressureWashing', true);
+      setNeedsPressureWashing(true);
+    }
+  }, [cleaningType, setValue]);
+
   // Handle form submission
   const onSubmit: SubmitHandler<FormData> = (data) => {
     // Ensure gasPrice is a number
@@ -231,6 +242,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="final">Final Clean (Standard rate)</option>
             <option value="rough_final">Rough & Final Clean (120% of standard rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% of standard rate)</option>
+            <option value="pressure_washing_only">Pressure Washing Only Service</option>
           </select>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {CLEANING_TYPE_DESCRIPTIONS[watch('cleaningType') as CleaningType]}
@@ -297,39 +309,408 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               id="needsPressureWashing"
               {...register('needsPressureWashing')}
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              disabled={cleaningType === 'pressure_washing_only'}
             />
             <label htmlFor="needsPressureWashing" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Pressure Washing Required
             </label>
           </div>
           
-          {needsPressureWashing && (
+          {(needsPressureWashing || cleaningType === 'pressure_washing_only') && (
             <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-md">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Area to Pressure Wash (sq ft)
-              </label>
-              <input
-                type="number"
-                {...register('pressureWashingArea', {
-                  required: needsPressureWashing ? 'Area is required' : false,
-                  min: {
-                    value: 100,
-                    message: 'Minimum area is 100 sq ft'
-                  },
-                  max: {
-                    value: 100000,
-                    message: 'Maximum area is 100,000 sq ft'
-                  }
-                })}
-                className="input-field"
-              />
-              {errors.pressureWashingArea && (
-                <p className="text-red-500 text-xs mt-1">{errors.pressureWashingArea.message}</p>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Select Pressure Washing Services
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-soft-wash"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('soft_wash');
+                        } else {
+                          const index = services.indexOf('soft_wash');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('soft_wash')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-soft-wash" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Soft Washing (House/Building) - ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-roof-wash"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('roof_wash');
+                        } else {
+                          const index = services.indexOf('roof_wash');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('roof_wash')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-roof-wash" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Roof Washing - ${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-driveway"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('driveway');
+                        } else {
+                          const index = services.indexOf('driveway');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('driveway')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-driveway" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Driveway - ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-deck"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('deck');
+                        } else {
+                          const index = services.indexOf('deck');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('deck')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-deck" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Wooden Deck - ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-trex"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('trex_deck');
+                        } else {
+                          const index = services.indexOf('trex_deck');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('trex_deck')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-trex" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Trex/Composite Deck - ${PRESSURE_WASHING_RATES.TREX.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-dumpster-corral"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('dumpster_corral');
+                        } else {
+                          const index = services.indexOf('dumpster_corral');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('dumpster_corral')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-dumpster-corral" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Dumpster Corral - ${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate}/sq ft
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-commercial"
+                      onChange={(e) => {
+                        const services = [...pressureWashingServices];
+                        if (e.target.checked) {
+                          services.push('commercial');
+                        } else {
+                          const index = services.indexOf('commercial');
+                          if (index !== -1) services.splice(index, 1);
+                        }
+                        setPressureWashingServices(services);
+                        setValue('pressureWashingServices', services);
+                      }}
+                      checked={pressureWashingServices.includes('commercial')}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="service-commercial" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      Commercial Areas - ${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Square footage inputs for each selected service */}
+              {pressureWashingServices.length > 0 && (
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">
+                  <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Enter Square Footage for Each Service:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {pressureWashingServices.includes('soft_wash') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Soft Wash Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              soft_wash: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('roof_wash') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Roof Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              roof_wash: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('driveway') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Driveway Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              driveway: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('deck') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Deck Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              deck: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('trex_deck') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Trex/Composite Deck Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              trex_deck: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('dumpster_corral') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Dumpster Corral Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              dumpster_corral: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                    {pressureWashingServices.includes('commercial') && (
+                      <div>
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          Commercial Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          className="input-field"
+                          placeholder="Enter area"
+                          onChange={(e) => {
+                            setValue('pressureWashingServiceAreas', {
+                              ...(watch('pressureWashingServiceAreas') || {}),
+                              commercial: parseInt(e.target.value) || 0
+                            });
+                          }}
+                          min={0}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Includes concrete, driveways, walkways, and exterior surfaces.
-                Cost: $0.35/sq ft plus equipment rental.
-              </p>
+
+              {/* Traditional total area input */}
+              {pressureWashingServices.length === 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Area to Pressure Wash (sq ft)
+                  </label>
+                  <input
+                    type="number"
+                    {...register('pressureWashingArea', {
+                      required: needsPressureWashing ? 'Area is required' : false,
+                      min: {
+                        value: 100,
+                        message: 'Minimum area is 100 sq ft'
+                      },
+                      max: {
+                        value: 100000,
+                        message: 'Maximum area is 100,000 sq ft'
+                      }
+                    })}
+                    className="input-field"
+                  />
+                  {errors.pressureWashingArea && (
+                    <p className="text-red-500 text-xs mt-1">{errors.pressureWashingArea.message}</p>
+                  )}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Includes concrete, driveways, walkways, and exterior surfaces.
+                    Cost: $0.35/sq ft plus equipment rental.
+                  </p>
+                </div>
+              )}
+
+              {/* Display scopes of work for selected services */}
+              {pressureWashingServices.length > 0 && (
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">
+                  <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Service Details:</h4>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-4">
+                    {pressureWashingServices.includes('soft_wash') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Soft Wash</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.SOFT_WASH}</p>
+                        <p className="text-xs mt-1 text-indigo-600 dark:text-indigo-400">Chemical: Bleach mixture (10:1 ratio with 4 oz soap)</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('roof_wash') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Roof Wash</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.ROOF_WASH}</p>
+                        <p className="text-xs mt-1 text-indigo-600 dark:text-indigo-400">Chemical: Bleach mixture (1:1 ratio with 8 oz soap)</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('driveway') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Driveway</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.DRIVEWAY}</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('deck') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Deck</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.DECK}</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('trex_deck') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Trex/Composite Deck</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.TREX}</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('dumpster_corral') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Dumpster Corral</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.DUMPSTER_CORRAL}</p>
+                      </div>
+                    )}
+                    
+                    {pressureWashingServices.includes('commercial') && (
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                        <h5 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Commercial Areas</h5>
+                        <p className="whitespace-pre-line text-xs">{PRESSURE_WASHING_SCOPE_OF_WORK.COMMERCIAL}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

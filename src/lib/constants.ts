@@ -33,7 +33,8 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
   final: 1.0,
   rough_final: 1.2,
-  rough_final_touchup: 1.45
+  rough_final_touchup: 1.45,
+  pressure_washing_only: 1.0
 };
 
 // Cleaning type descriptions
@@ -41,7 +42,8 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
   rough: "First stage cleaning that focuses on debris removal and basic surface cleaning (80% of standard rate).",
   final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
   rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
-  rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate)."
+  rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate).",
+  pressure_washing_only: "Specialized exterior pressure washing services only - no interior cleaning included."
 };
 
 // Cleaning type time multipliers (how much longer each type takes)
@@ -49,7 +51,8 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
   final: 1.0,
   rough_final: 1.5,
-  rough_final_touchup: 1.8
+  rough_final_touchup: 1.8,
+  pressure_washing_only: 1.0
 };
 
 // VCT (Vinyl Composition Tile) additional cost per square foot
@@ -441,9 +444,20 @@ export const PRESSURE_WASHING_RATES = {
     rate: 1.00, // per square foot
     description: 'Trex deck cleaning service'
   },
+  DUMPSTER_CORRAL: {
+    rate: 0.30, // per square foot
+    minimum: 300,
+    description: 'Dumpster corral cleaning service'
+  },
+  COMMERCIAL: {
+    rate: 0.25, // per square foot
+    minimum: 500,
+    description: 'Commercial surface pressure washing'
+  },
   DAILY_RATE: 1800 // for jobs outside standard rates
 };
 
+// Updated chemical information with detailed ratios and costs
 export const PRESSURE_WASHING_CHEMICALS = {
   BLEACH: {
     name: 'Bleach',
@@ -526,6 +540,22 @@ export const PRESSURE_WASHING_CHEMICALS = {
     name: 'Tagaway',
     cost: 52.00,
     use: 'Tag removal'
+  },
+  EFFORTLESS: {
+    name: 'Effortless',
+    costs: {
+      GALLON: 31.20,
+      FIVE_GALLONS: 130.95
+    },
+    use: 'General purpose cleaning'
+  },
+  HD_BRITENOL: {
+    name: 'HD Britenol',
+    costs: {
+      GALLON: 29.85,
+      FIVE_GALLONS: 124.05
+    },
+    use: 'Brightening agent'
   }
 };
 
@@ -533,4 +563,73 @@ export const PRESSURE_WASHING_PAYMENT_TERMS = {
   INDUSTRIAL: 'Net 30',
   COMMERCIAL: 'Net 10',
   RESIDENTIAL: 'POI (Payment on Invoice)'
+};
+
+// Add pressure washing scope of work
+export const PRESSURE_WASHING_SCOPE_OF_WORK = {
+  SOFT_WASH: "Soft Wash Service includes:\n" +
+    "• Professional high-volume, low-pressure cleaning system\n" +
+    "• Eco-friendly cleaning solutions customized for your surface\n" +
+    "• Complete treatment of all specified exterior surfaces\n" +
+    "• Removal of dirt, algae, mold, mildew, and light staining\n" +
+    "• Detailed attention to trouble areas and corners\n" +
+    "• Thorough rinsing to remove all cleaning solutions\n" +
+    "• Basic landscape protection during service\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  ROOF_WASH: "Roof Wash Service includes:\n" +
+    "• Specialized low-pressure roof cleaning system\n" +
+    "• Treatment with professional-grade cleaning solutions\n" +
+    "• Safe removal of black streaks, moss, and algae\n" +
+    "• Complete treatment of all roof surfaces\n" +
+    "• Cleaning of gutters from roof debris\n" +
+    "• Protection of surrounding landscaping\n" +
+    "• Safe application techniques that protect roof integrity\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  DRIVEWAY: "Driveway Pressure Washing includes:\n" +
+    "• High-pressure cleaning of concrete or asphalt surface\n" +
+    "• Pre-treatment with appropriate degreasing agents\n" +
+    "• Removal of oil stains, tire marks, and organic growth\n" +
+    "• Special attention to edges and trouble spots\n" +
+    "• Thorough rinsing to remove all cleaning solutions\n" +
+    "• Post-cleaning inspection with customer\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  DECK: "Deck Pressure Washing includes:\n" +
+    "• Appropriate pressure cleaning for wooden surfaces\n" +
+    "• Pre-treatment with wood-appropriate cleaning solutions\n" +
+    "• Removal of mildew, algae, and weathered gray surface\n" +
+    "• Detailed cleaning of railings, steps, and between boards\n" +
+    "• Safe techniques that protect wood integrity\n" +
+    "• Post-cleaning inspection\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  TREX: "Trex/Composite Deck Cleaning includes:\n" +
+    "• Low-pressure cleaning safe for composite surfaces\n" +
+    "• Specialized cleaning solutions for composite material\n" +
+    "• Safe removal of mold, mildew, food stains, and dirt\n" +
+    "• Detailed cleaning of railings, steps, and between boards\n" +
+    "• Techniques that maintain manufacturer warranty\n" +
+    "• Post-cleaning inspection\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  DUMPSTER_CORRAL: "Dumpster Corral Cleaning includes:\n" +
+    "• High-pressure deep cleaning of concrete pad\n" +
+    "• Treatment with heavy-duty degreasing agents\n" +
+    "• Sanitizing treatment to reduce odors\n" +
+    "• Cleaning of surrounding walls and enclosure\n" +
+    "• Removal of organic matter and waste residue\n" +
+    "• Proper disposal of cleaning wastewater\n" +
+    "• All necessary equipment and cleaning supplies",
+  
+  COMMERCIAL: "Commercial Pressure Washing Service includes:\n" +
+    "• Professional high-pressure cleaning of all specified areas\n" +
+    "• Pre-treatment with appropriate cleaning agents\n" +
+    "• Removal of dirt, grime, oil, and organic growth\n" +
+    "• Careful attention to high-traffic areas\n" +
+    "• Safe techniques for various surface materials\n" +
+    "• All necessary equipment, chemicals, and cleaning supplies\n" +
+    "• Compliance with local wastewater regulations\n" +
+    "• Professional uniformed technicians"
 }; 

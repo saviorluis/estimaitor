@@ -1,8 +1,8 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image, Svg, Rect, G, Path } from '@react-pdf/renderer';
-import { EstimateData, FormData } from '@/lib/types';
+import { EstimateData, FormData, PressureWashingServiceType } from '@/lib/types';
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, PRESSURE_WASHING_SCOPE_OF_WORK } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -221,16 +221,32 @@ const styles = StyleSheet.create({
     width: '30%',
     textAlign: 'right',
   },
+  subRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 5,
+    fontSize: 10,
+  },
+  subRowContent: {
+    width: '70%',
+  },
 });
 
 // Get cleaning type display name
 const getCleaningTypeDisplay = (type: string): string => {
   switch (type) {
-    case 'rough': return 'Rough Clean';
-    case 'final': return 'Final Clean';
-    case 'rough_final': return 'Rough & Final Clean';
-    case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
-    default: return type;
+    case 'rough':
+      return 'Rough Clean';
+    case 'final':
+      return 'Final Clean';
+    case 'rough_final':
+      return 'Rough & Final Clean';
+    case 'rough_final_touchup':
+      return 'Rough, Final & Touch-up Clean';
+    case 'pressure_washing_only':
+      return 'Pressure Washing Services';
+    default:
+      return type;
   }
 };
 
@@ -252,6 +268,141 @@ const getProjectTypeDisplay = (type: string): string => {
 const formatValue = (value: string | number | undefined | null, defaultValue: string = ''): string => {
   if (value === undefined || value === null) return defaultValue;
   return String(value);
+};
+
+// Add a new function to display pressure washing services
+const renderPressureWashingServices = (
+  formData: FormData, 
+  estimateData: any, 
+  styles: any
+) => {
+  const services = formData.pressureWashingServices || [];
+  const serviceAreas = formData.pressureWashingServiceAreas || {};
+  const serviceDetails = estimateData.pressureWashingServiceDetails || {};
+  
+  if (services.length === 0) {
+    // Traditional pressure washing display
+    return (
+      <View style={styles.tableRow}>
+        <View style={[styles.tableCell, styles.descriptionCell]}>
+          <Text style={styles.bold}>Pressure Washing Services</Text>
+          <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
+          <Text style={{fontSize: 9, marginTop: 5}}>
+            Service includes professional-grade cleaning solutions and equipment. Standard rates:
+            {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})
+            {'\n'}• Roof Wash: ${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft
+            {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
+            {'\n'}• Decks/Trex: ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
+            {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
+          </Text>
+          <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
+            Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
+              ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
+              PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
+          </Text>
+        </View>
+        <View style={[styles.tableCell, styles.amountCell]}>
+          <Text>{formatCurrency(
+            estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
+              ? estimateData.adjustedLineItems.pressureWashingCost 
+              : estimateData.pressureWashingCost
+          )}</Text>
+        </View>
+      </View>
+    );
+  }
+  
+  // Detailed pressure washing services display
+  return (
+    <>
+      <View style={styles.tableRow}>
+        <View style={[styles.tableCell, styles.descriptionCell]}>
+          <Text style={styles.bold}>Pressure Washing Services</Text>
+          <Text>Professional exterior cleaning services for the following areas:</Text>
+        </View>
+        <View style={[styles.tableCell, styles.amountCell]}>
+          <Text>{formData.cleaningType === 'pressure_washing_only' ? 
+            formatCurrency(estimateData.basePrice) : 
+            formatCurrency(
+              estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
+                ? estimateData.adjustedLineItems.pressureWashingCost 
+                : estimateData.pressureWashingCost
+            )}
+          </Text>
+        </View>
+      </View>
+      
+      {/* Individual pressure washing services */}
+      {services.map((service: PressureWashingServiceType) => {
+        const area = serviceAreas[service] || 0;
+        const details = serviceDetails[service] || { area: 0, cost: 0 };
+        
+        if (area <= 0) return null;
+        
+        // Service-specific scope content
+        let serviceDescription = '';
+        let serviceRate = '';
+        
+        switch(service) {
+          case 'soft_wash':
+            serviceDescription = 'Soft Wash (House/Building)';
+            serviceRate = `$${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})`;
+            break;
+          case 'roof_wash':
+            serviceDescription = 'Roof Washing';
+            serviceRate = `$${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft`;
+            break;
+          case 'driveway':
+            serviceDescription = 'Driveway Cleaning';
+            serviceRate = `$${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft`;
+            break;
+          case 'deck':
+            serviceDescription = 'Wooden Deck Cleaning';
+            serviceRate = `$${PRESSURE_WASHING_RATES.DECK.rate}/sq ft`;
+            break;
+          case 'trex_deck':
+            serviceDescription = 'Trex/Composite Deck Cleaning';
+            serviceRate = `$${PRESSURE_WASHING_RATES.TREX.rate}/sq ft`;
+            break;
+          case 'dumpster_corral':
+            serviceDescription = 'Dumpster Corral Cleaning';
+            serviceRate = `$${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum})`;
+            break;
+          case 'commercial':
+            serviceDescription = 'Commercial Surface Cleaning';
+            serviceRate = `$${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.COMMERCIAL.minimum})`;
+            break;
+          default:
+            serviceDescription = 'Custom Pressure Washing Service';
+            serviceRate = `Daily rate: $${PRESSURE_WASHING_RATES.DAILY_RATE}`;
+        }
+        
+        // Get scope of work for this service
+        const scopeKey = service.toUpperCase() as keyof typeof PRESSURE_WASHING_SCOPE_OF_WORK;
+        const scopeOfWork = PRESSURE_WASHING_SCOPE_OF_WORK[scopeKey] || '';
+        
+        return (
+          <View style={styles.subRow} key={service}>
+            <View style={styles.subRowContent}>
+              <Text style={{fontSize: 10, fontWeight: 'bold', marginBottom: 2}}>{serviceDescription}</Text>
+              <Text style={{fontSize: 9}}>{area.toLocaleString()} sq ft @ {serviceRate}</Text>
+              <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>{scopeOfWork.split('\n')[0]}</Text>
+            </View>
+            {/* Only show service cost in detailed view for pressure_washing_only type */}
+            {formData.cleaningType === 'pressure_washing_only' && (
+              <Text style={{fontSize: 9, textAlign: 'right'}}>{formatCurrency(details.cost)}</Text>
+            )}
+          </View>
+        );
+      })}
+      
+      <Text style={{fontSize: 9, marginTop: 5, marginLeft: 10, fontStyle: 'italic'}}>
+        Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
+          ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
+          PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
+      </Text>
+    </>
+  );
 };
 
 interface QuotePDFProps {
@@ -600,34 +751,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Pressure Washing if applicable */}
-          {formData.needsPressureWashing && (
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text style={styles.bold}>Pressure Washing Services</Text>
-                <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
-                <Text style={{fontSize: 9, marginTop: 5}}>
-                  Service includes professional-grade cleaning solutions and equipment. Standard rates:
-                  {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})
-                  {'\n'}• Roof Wash: ${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft
-                  {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
-                  {'\n'}• Decks/Trex: ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
-                  {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
-                </Text>
-                <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
-                  Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
-                    ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
-                    PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
-                </Text>
-              </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
-                    ? estimateData.adjustedLineItems.pressureWashingCost 
-                    : estimateData.pressureWashingCost
-                )}</Text>
-              </View>
-            </View>
-          )}
+          {(formData.needsPressureWashing || formData.cleaningType === 'pressure_washing_only') && 
+            renderPressureWashingServices(formData, estimateData, styles)
+          }
 
           {/* Travel Expenses */}
           <View style={styles.lineItem}>

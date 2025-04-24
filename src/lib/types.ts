@@ -21,7 +21,17 @@ export type ProjectType =
   | 'beauty_store'
   | 'interactive_toy_store';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup';
+export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only';
+
+export type PressureWashingServiceType = 
+  | 'soft_wash'
+  | 'roof_wash'
+  | 'driveway'
+  | 'deck'
+  | 'trex_deck'
+  | 'custom'
+  | 'dumpster_corral'
+  | 'commercial';
 
 export interface FormData {
   projectType: ProjectType;
@@ -37,6 +47,10 @@ export interface FormData {
   urgencyLevel: number;
   needsPressureWashing: boolean;
   pressureWashingArea: number;
+  pressureWashingServices?: PressureWashingServiceType[];
+  pressureWashingServiceAreas?: {
+    [key in PressureWashingServiceType]?: number;
+  };
   needsWindowCleaning: boolean;
   chargeForWindowCleaning: boolean;
   numberOfWindows: number;
@@ -62,6 +76,12 @@ export interface EstimateData {
   estimatedHours: number;
   pricePerSquareFoot: number;
   pressureWashingCost: number;
+  pressureWashingServiceDetails?: {
+    [key in PressureWashingServiceType]?: {
+      area: number;
+      cost: number;
+    };
+  };
   windowCleaningCost: number;
   displayCaseCost: number;
   aiRecommendations: string[];

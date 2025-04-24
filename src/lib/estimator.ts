@@ -1,4 +1,4 @@
-import { FormData, EstimateData, CleaningType } from './types';
+import { FormData, EstimateData, CleaningType, PressureWashingServiceType } from './types';
 import { 
   BASE_RATE_PER_SQFT, 
   PROJECT_TYPE_MULTIPLIERS, 
@@ -12,6 +12,7 @@ import {
   PRESSURE_WASHING_COST_PER_SQFT,
   PRESSURE_WASHING_EQUIPMENT_RENTAL,
   PRESSURE_WASHING_SQFT_PER_HOUR,
+  PRESSURE_WASHING_RATES,
   WINDOW_CLEANING_COST_PER_WINDOW,
   WINDOW_CLEANING_LARGE_WINDOW_MULTIPLIER,
   WINDOW_CLEANING_HIGH_ACCESS_MULTIPLIER,
@@ -36,6 +37,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
     urgencyLevel,
     needsPressureWashing,
     pressureWashingArea,
+    pressureWashingServices,
+    pressureWashingServiceAreas,
     needsWindowCleaning,
     chargeForWindowCleaning,
     numberOfWindows,
@@ -53,8 +56,16 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Apply cleaning type multiplier
   const cleaningTypeMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
 
-  // Calculate base price
-  const basePrice = squareFootage * BASE_RATE_PER_SQFT * projectTypeMultiplier * cleaningTypeMultiplier;
+  // For pressure washing only service type, reset the base price
+  let basePrice = 0;
+  
+  if (cleaningType === 'pressure_washing_only') {
+    // For pressure washing only, base price is 0 since we'll calculate it based on the services
+    basePrice = 0;
+  } else {
+    // Calculate normal base price for other cleaning types
+    basePrice = squareFootage * BASE_RATE_PER_SQFT * projectTypeMultiplier * cleaningTypeMultiplier;
+  }
 
   // Calculate VCT cost if applicable
   const vctCost = hasVCT ? squareFootage * VCT_COST_PER_SQFT : 0;
@@ -86,18 +97,93 @@ export function calculateEstimate(formData: FormData): EstimateData {
     overnightCost = hotelCost + perDiemCost + vehicleCost;
   }
 
-  // Calculate pressure washing cost if applicable
+  // Calculate pressure washing cost
   let pressureWashingCost = 0;
-  if (needsPressureWashing && pressureWashingArea > 0) {
-    // Cost includes equipment rental and per square foot cost
-    const areaCost = pressureWashingArea * PRESSURE_WASHING_COST_PER_SQFT;
-    
-    // Calculate how many days of equipment rental are needed
-    const hoursNeeded = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
-    const daysNeeded = Math.ceil(hoursNeeded / 8); // Assuming 8-hour workdays
-    const equipmentCost = PRESSURE_WASHING_EQUIPMENT_RENTAL * daysNeeded;
-    
-    pressureWashingCost = areaCost + equipmentCost;
+  const pressureWashingServiceDetails: Record<PressureWashingServiceType, {area: number, cost: number}> = {} as any;
+  
+  if (needsPressureWashing || cleaningType === 'pressure_washing_only') {
+    if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
+      // Detailed pressure washing services calculation
+      let totalPressureWashingArea = 0;
+      
+      // Calculate cost for each service
+      pressureWashingServices.forEach(service => {
+        const area = pressureWashingServiceAreas[service] || 0;
+        let serviceCost = 0;
+        
+        if (area > 0) {
+          totalPressureWashingArea += area;
+          
+          switch(service) {
+            case 'soft_wash':
+              // Minimum charge for soft wash
+              serviceCost = area * PRESSURE_WASHING_RATES.SOFT_WASH.rate;
+              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.SOFT_WASH.minimum);
+              break;
+            case 'roof_wash':
+              serviceCost = area * PRESSURE_WASHING_RATES.ROOF_WASH.rate;
+              break;
+            case 'driveway':
+              serviceCost = area * PRESSURE_WASHING_RATES.DRIVEWAY.rate;
+              break;
+            case 'deck':
+              serviceCost = area * PRESSURE_WASHING_RATES.DECK.rate;
+              break;
+            case 'trex_deck':
+              serviceCost = area * PRESSURE_WASHING_RATES.TREX.rate;
+              break;
+            case 'dumpster_corral':
+              serviceCost = area * PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate;
+              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum);
+              break;
+            case 'commercial':
+              serviceCost = area * PRESSURE_WASHING_RATES.COMMERCIAL.rate;
+              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.COMMERCIAL.minimum);
+              break;
+            default:
+              // Use daily rate for custom services
+              serviceCost = PRESSURE_WASHING_RATES.DAILY_RATE;
+          }
+          
+          // Store details for this service
+          pressureWashingServiceDetails[service] = {
+            area,
+            cost: serviceCost
+          };
+          
+          // Add to total pressure washing cost
+          pressureWashingCost += serviceCost;
+        }
+      });
+      
+      // Add equipment rental - once per job
+      if (totalPressureWashingArea > 0) {
+        // Calculate days needed based on total area
+        const hoursNeeded = totalPressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+        const daysNeeded = Math.ceil(hoursNeeded / 8); // Assuming 8-hour workdays
+        const equipmentCost = PRESSURE_WASHING_EQUIPMENT_RENTAL * daysNeeded;
+        
+        // Add equipment cost
+        pressureWashingCost += equipmentCost;
+      }
+    } else if (pressureWashingArea > 0) {
+      // Standard pressure washing calculation (backward compatibility)
+      const areaCost = pressureWashingArea * PRESSURE_WASHING_COST_PER_SQFT;
+      
+      // Calculate equipment rental days needed
+      const hoursNeeded = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+      const daysNeeded = Math.ceil(hoursNeeded / 8); // Assuming 8-hour workdays
+      const equipmentCost = PRESSURE_WASHING_EQUIPMENT_RENTAL * daysNeeded;
+      
+      pressureWashingCost = areaCost + equipmentCost;
+    }
+  }
+
+  // For pressure washing only service type, add the pressure washing cost to the base price
+  if (cleaningType === 'pressure_washing_only') {
+    basePrice = pressureWashingCost;
+    // Reset the pressure washing cost to 0 since we've incorporated it into the base price
+    pressureWashingCost = 0;
   }
 
   // Calculate window cleaning cost if applicable
@@ -149,43 +235,88 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate final total
   const totalPrice = totalWithMarkup + salesTax;
 
-  // Calculate estimated hours based on square footage, project type, and cleaning type
-  let estimatedHours = calculateEstimatedHours(
-    squareFootage,
-    projectType,
-    cleaningType
-  );
-
-  // Add pressure washing hours if applicable
-  if (needsPressureWashing && pressureWashingArea > 0) {
-    const pressureWashingHours = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
-    estimatedHours += pressureWashingHours;
-  }
-
-  // Add window cleaning hours if applicable
-  if (needsWindowCleaning) {
-    // Cap the number of windows to prevent unreasonably high hour estimates
-    const totalStandardWindows = Math.min(numberOfWindows || 0, 100);
-    const totalLargeWindows = Math.min(numberOfLargeWindows || 0, 50);
-    const totalHighAccessWindows = Math.min(numberOfHighAccessWindows || 0, 25);
+  // Calculate estimated hours
+  let estimatedHours = 0;
+  
+  if (cleaningType === 'pressure_washing_only') {
+    // For pressure washing only, hours are based solely on pressure washing services
+    if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
+      let totalArea = 0;
+      
+      // Sum up all areas
+      pressureWashingServices.forEach(service => {
+        totalArea += pressureWashingServiceAreas[service] || 0;
+      });
+      
+      // Calculate hours based on productivity rate
+      estimatedHours = totalArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+    } else if (pressureWashingArea > 0) {
+      estimatedHours = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+    }
+  } else {
+    // Normal hours calculation for other cleaning types
+    estimatedHours = calculateEstimatedHours(
+      squareFootage,
+      projectType,
+      cleaningType
+    );
     
-    const totalWindows = totalStandardWindows + 
-                       (totalLargeWindows * 1.5) + 
-                       (totalHighAccessWindows * 2);
-                       
-    // Cap total window cleaning hours to a reasonable amount
-    const windowCleaningHours = Math.min(totalWindows / WINDOW_CLEANING_WINDOWS_PER_HOUR, 40);
-    estimatedHours += windowCleaningHours;
+    // Add pressure washing hours if applicable
+    if (needsPressureWashing) {
+      if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
+        let totalArea = 0;
+        
+        // Sum up all areas
+        pressureWashingServices.forEach(service => {
+          totalArea += pressureWashingServiceAreas[service] || 0;
+        });
+        
+        // Calculate hours based on productivity rate
+        const pressureWashingHours = totalArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+        estimatedHours += pressureWashingHours;
+      } else if (pressureWashingArea > 0) {
+        const pressureWashingHours = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
+        estimatedHours += pressureWashingHours;
+      }
+    }
+    
+    // Add window cleaning hours if applicable
+    if (needsWindowCleaning) {
+      // Cap the number of windows to prevent unreasonably high hour estimates
+      const totalStandardWindows = Math.min(numberOfWindows || 0, 100);
+      const totalLargeWindows = Math.min(numberOfLargeWindows || 0, 50);
+      const totalHighAccessWindows = Math.min(numberOfHighAccessWindows || 0, 25);
+      
+      const totalWindows = totalStandardWindows + 
+                         (totalLargeWindows * 1.5) + 
+                         (totalHighAccessWindows * 2);
+                           
+      // Cap total window cleaning hours to a reasonable amount
+      const windowCleaningHours = Math.min(totalWindows / WINDOW_CLEANING_WINDOWS_PER_HOUR, 40);
+      estimatedHours += windowCleaningHours;
+    }
+    
+    // Add display case cleaning hours if applicable
+    if (projectType === 'jewelry_store' && numberOfDisplayCases > 0) {
+      const displayCaseHours = numberOfDisplayCases * DISPLAY_CASE_TIME_PER_UNIT;
+      estimatedHours += displayCaseHours;
+    }
   }
 
-  // Add display case cleaning hours if applicable
-  if (projectType === 'jewelry_store' && numberOfDisplayCases > 0) {
-    const displayCaseHours = numberOfDisplayCases * DISPLAY_CASE_TIME_PER_UNIT;
-    estimatedHours += displayCaseHours;
+  // Calculate price per square foot - for pressure washing only, we use total area
+  let totalArea = squareFootage;
+  if (cleaningType === 'pressure_washing_only') {
+    if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
+      totalArea = 0;
+      pressureWashingServices.forEach(service => {
+        totalArea += pressureWashingServiceAreas[service] || 0;
+      });
+    } else {
+      totalArea = pressureWashingArea;
+    }
   }
-
-  // Calculate price per square foot
-  const pricePerSquareFoot = totalPrice / squareFootage;
+  
+  const pricePerSquareFoot = totalArea > 0 ? totalPrice / totalArea : 0;
 
   // Return estimate data
   return {
@@ -203,6 +334,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     estimatedHours,
     pricePerSquareFoot,
     pressureWashingCost,
+    pressureWashingServiceDetails,
     windowCleaningCost,
     displayCaseCost,
     aiRecommendations: []
