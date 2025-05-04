@@ -497,11 +497,17 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              soft_wash: parseInt(e.target.value) || 0
+                              soft_wash: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.soft_wash || ''}
                           min={0}
                         />
+                        {cleaningType !== 'pressure_washing_only' && (watch('pressureWashingServiceAreas')?.soft_wash || 0) < PRESSURE_WASHING_RATES.SOFT_WASH.minimum / PRESSURE_WASHING_RATES.SOFT_WASH.rate && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            Note: Minimum charge of ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum} applies
+                          </p>
+                        )}
                       </div>
                     )}
                     {pressureWashingServices.includes('roof_wash') && (
@@ -516,9 +522,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              roof_wash: parseInt(e.target.value) || 0
+                              roof_wash: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.roof_wash || ''}
                           min={0}
                         />
                       </div>
@@ -535,9 +542,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              driveway: parseInt(e.target.value) || 0
+                              driveway: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.driveway || ''}
                           min={0}
                         />
                       </div>
@@ -554,9 +562,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              deck: parseInt(e.target.value) || 0
+                              deck: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.deck || ''}
                           min={0}
                         />
                       </div>
@@ -573,9 +582,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              trex_deck: parseInt(e.target.value) || 0
+                              trex_deck: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.trex_deck || ''}
                           min={0}
                         />
                       </div>
@@ -592,11 +602,17 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              dumpster_corral: parseInt(e.target.value) || 0
+                              dumpster_corral: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.dumpster_corral || ''}
                           min={0}
                         />
+                        {cleaningType !== 'pressure_washing_only' && (watch('pressureWashingServiceAreas')?.dumpster_corral || 0) < PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum / PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            Note: Minimum charge of ${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum} applies
+                          </p>
+                        )}
                       </div>
                     )}
                     {pressureWashingServices.includes('commercial') && (
@@ -611,11 +627,17 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                           onChange={(e) => {
                             setValue('pressureWashingServiceAreas', {
                               ...(watch('pressureWashingServiceAreas') || {}),
-                              commercial: parseInt(e.target.value) || 0
+                              commercial: parseFloat(e.target.value) || 0
                             });
                           }}
+                          value={watch('pressureWashingServiceAreas')?.commercial || ''}
                           min={0}
                         />
+                        {cleaningType !== 'pressure_washing_only' && (watch('pressureWashingServiceAreas')?.commercial || 0) < PRESSURE_WASHING_RATES.COMMERCIAL.minimum / PRESSURE_WASHING_RATES.COMMERCIAL.rate && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            Note: Minimum charge of ${PRESSURE_WASHING_RATES.COMMERCIAL.minimum} applies
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -709,6 +731,15 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Add a warning if no services are selected for pressure washing only */}
+              {cleaningType === 'pressure_washing_only' && (!pressureWashingServices.length || !pressureWashingServices.some(service => (watch('pressureWashingServiceAreas')?.[service] || 0) > 0)) && (
+                <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    <strong>Important:</strong> Please select at least one pressure washing service and enter a square footage above.
+                  </p>
                 </div>
               )}
             </div>

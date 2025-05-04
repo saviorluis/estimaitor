@@ -270,6 +270,18 @@ const formatValue = (value: string | number | undefined | null, defaultValue: st
   return String(value);
 };
 
+// Calculate the total pressure washing area
+const calculateTotalPressureWashingArea = (formData: FormData): number => {
+  if (!formData.pressureWashingServices || !formData.pressureWashingServiceAreas) return 0;
+  
+  let totalArea = 0;
+  formData.pressureWashingServices.forEach(service => {
+    totalArea += formData.pressureWashingServiceAreas?.[service] || 0;
+  });
+  
+  return totalArea;
+};
+
 // Add a new function to display pressure washing services
 const renderPressureWashingServices = (
   formData: FormData, 
@@ -280,12 +292,15 @@ const renderPressureWashingServices = (
   const serviceAreas = formData.pressureWashingServiceAreas || {};
   const serviceDetails = estimateData.pressureWashingServiceDetails || {};
   
+  // For pressure washing only quotes, we want to specifically format differently
+  const isPressureWashingOnly = formData.cleaningType === 'pressure_washing_only';
+  
   if (services.length === 0) {
     // Traditional pressure washing display
     return (
       <View style={styles.tableRow}>
         <View style={[styles.tableCell, styles.descriptionCell]}>
-          <Text style={styles.bold}>Pressure Washing Services</Text>
+          <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
           <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
           <Text style={{fontSize: 9, marginTop: 5}}>
             Service includes professional-grade cleaning solutions and equipment. Standard rates:
@@ -303,9 +318,11 @@ const renderPressureWashingServices = (
         </View>
         <View style={[styles.tableCell, styles.amountCell]}>
           <Text>{formatCurrency(
-            estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
-              ? estimateData.adjustedLineItems.pressureWashingCost 
-              : estimateData.pressureWashingCost
+            isPressureWashingOnly ? 
+              estimateData.basePrice : 
+              (estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
+                ? estimateData.adjustedLineItems.pressureWashingCost 
+                : estimateData.pressureWashingCost)
           )}</Text>
         </View>
       </View>
@@ -317,11 +334,11 @@ const renderPressureWashingServices = (
     <>
       <View style={styles.tableRow}>
         <View style={[styles.tableCell, styles.descriptionCell]}>
-          <Text style={styles.bold}>Pressure Washing Services</Text>
-          <Text>Professional exterior cleaning services for the following areas:</Text>
+          <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
+          <Text>{isPressureWashingOnly ? 'Comprehensive exterior cleaning for the following surfaces:' : 'Professional exterior cleaning services for the following areas:'}</Text>
         </View>
         <View style={[styles.tableCell, styles.amountCell]}>
-          <Text>{formData.cleaningType === 'pressure_washing_only' ? 
+          <Text>{isPressureWashingOnly ? 
             formatCurrency(estimateData.basePrice) : 
             formatCurrency(
               estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
@@ -389,7 +406,7 @@ const renderPressureWashingServices = (
               <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>{scopeOfWork.split('\n')[0]}</Text>
             </View>
             {/* Only show service cost in detailed view for pressure_washing_only type */}
-            {formData.cleaningType === 'pressure_washing_only' && (
+            {isPressureWashingOnly && (
               <Text style={{fontSize: 9, textAlign: 'right'}}>{formatCurrency(details.cost)}</Text>
             )}
           </View>
@@ -698,8 +715,21 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.infoValue}>{safeQuoteInfo.projectName}</Text>
             <Text style={styles.infoValue}>{safeQuoteInfo.projectAddress}</Text>
             <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-            <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-            <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+            {formData.cleaningType === 'pressure_washing_only' ? (
+              <>
+                <Text style={styles.infoValue}>Service Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+                {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 ? (
+                  <Text style={styles.infoValue}>Total Area: {calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft</Text>
+                ) : (
+                  <Text style={styles.infoValue}>Area: {(formData.pressureWashingArea || 0).toLocaleString()} sq ft</Text>
+                )}
+              </>
+            ) : (
+              <>
+                <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+                <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+              </>
+            )}
           </View>
         </View>
 
@@ -717,24 +747,26 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
 
           {/* Base Cleaning Service */}
-          <View style={styles.tableRow}>
-            <View style={[styles.tableCell, styles.descriptionCell]}>
-              <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-              <Text style={{fontSize: 9, marginTop: 5}}>
-                {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
-              </Text>
+          {formData.cleaningType !== 'pressure_washing_only' && (
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+                <Text style={{fontSize: 9, marginTop: 5}}>
+                  {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
+                </Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency(
+                  estimateData.adjustedLineItems?.basePrice !== undefined 
+                    ? estimateData.adjustedLineItems.basePrice 
+                    : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+                )}</Text>
+              </View>
             </View>
-            <View style={[styles.tableCell, styles.amountCell]}>
-              <Text>{formatCurrency(
-                estimateData.adjustedLineItems?.basePrice !== undefined 
-                  ? estimateData.adjustedLineItems.basePrice 
-                  : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
-              )}</Text>
-            </View>
-          </View>
+          )}
 
           {/* VCT Flooring if applicable */}
-          {formData.hasVCT && (
+          {formData.hasVCT && formData.cleaningType !== 'pressure_washing_only' && (
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>VCT Flooring Treatment</Text>

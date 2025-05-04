@@ -118,7 +118,10 @@ export function calculateEstimate(formData: FormData): EstimateData {
             case 'soft_wash':
               // Minimum charge for soft wash
               serviceCost = area * PRESSURE_WASHING_RATES.SOFT_WASH.rate;
-              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.SOFT_WASH.minimum);
+              // Only apply minimum charges for non-pressure washing only quotes
+              if (cleaningType !== 'pressure_washing_only' || serviceCost < PRESSURE_WASHING_RATES.SOFT_WASH.minimum) {
+                serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.SOFT_WASH.minimum);
+              }
               break;
             case 'roof_wash':
               serviceCost = area * PRESSURE_WASHING_RATES.ROOF_WASH.rate;
@@ -134,11 +137,17 @@ export function calculateEstimate(formData: FormData): EstimateData {
               break;
             case 'dumpster_corral':
               serviceCost = area * PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate;
-              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum);
+              // Apply minimum only for non-pressure washing only quotes
+              if (cleaningType !== 'pressure_washing_only' || serviceCost < PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum) {
+                serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum);
+              }
               break;
             case 'commercial':
               serviceCost = area * PRESSURE_WASHING_RATES.COMMERCIAL.rate;
-              serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.COMMERCIAL.minimum);
+              // Apply minimum only for non-pressure washing only quotes
+              if (cleaningType !== 'pressure_washing_only' || serviceCost < PRESSURE_WASHING_RATES.COMMERCIAL.minimum) {
+                serviceCost = Math.max(serviceCost, PRESSURE_WASHING_RATES.COMMERCIAL.minimum);
+              }
               break;
             default:
               // Use daily rate for custom services
