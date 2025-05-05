@@ -21,7 +21,7 @@ export type ProjectType =
   | 'beauty_store'
   | 'interactive_toy_store';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only';
+export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 
 export type PressureWashingServiceType = 
   | 'soft_wash'

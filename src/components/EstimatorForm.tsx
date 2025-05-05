@@ -136,6 +136,9 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     if (cleaningType === 'pressure_washing_only') {
       setValue('needsPressureWashing', true);
       setNeedsPressureWashing(true);
+    } else if (cleaningType === 'window_cleaning_only') {
+      setValue('needsWindowCleaning', true);
+      setNeedsWindowCleaning(true);
     }
   }, [cleaningType, setValue]);
 
@@ -243,6 +246,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="rough_final">Rough & Final Clean (120% of standard rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% of standard rate)</option>
             <option value="pressure_washing_only">Pressure Washing Only Service</option>
+            <option value="window_cleaning_only">Window Cleaning Only Service</option>
           </select>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {CLEANING_TYPE_DESCRIPTIONS[watch('cleaningType') as CleaningType]}
@@ -753,6 +757,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               id="needsWindowCleaning"
               {...register('needsWindowCleaning')}
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              disabled={cleaningType === 'window_cleaning_only'}
             />
             <label htmlFor="needsWindowCleaning" className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Window Cleaning Required
@@ -834,11 +839,21 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                   id="chargeForWindowCleaning"
                   {...register('chargeForWindowCleaning')}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:border-slate-600"
+                  disabled={cleaningType === 'window_cleaning_only'}
                 />
                 <label htmlFor="chargeForWindowCleaning" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   Include window cleaning in quote cost (uncheck to note windows but not charge)
                 </label>
               </div>
+
+              {/* Add a warning if no windows are specified for window cleaning only */}
+              {cleaningType === 'window_cleaning_only' && (Number(watch('numberOfWindows') || 0) + Number(watch('numberOfLargeWindows') || 0) + Number(watch('numberOfHighAccessWindows') || 0)) === 0 && (
+                <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    <strong>Important:</strong> Please specify at least one window type and quantity above.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

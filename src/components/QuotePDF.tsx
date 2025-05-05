@@ -245,6 +245,8 @@ const getCleaningTypeDisplay = (type: string): string => {
       return 'Rough, Final & Touch-up Clean';
     case 'pressure_washing_only':
       return 'Pressure Washing Services';
+    case 'window_cleaning_only':
+      return 'Window Cleaning Services';
     default:
       return type;
   }
@@ -429,6 +431,48 @@ const renderPressureWashingServices = (
           PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
       </Text>
     </>
+  );
+};
+
+// Add a function to render window cleaning services for window_cleaning_only option
+const renderWindowCleaningServices = (
+  formData: FormData,
+  estimateData: any,
+  styles: any
+) => {
+  const isWindowCleaningOnly = formData.cleaningType === 'window_cleaning_only';
+  
+  return (
+    <View style={styles.tableRow}>
+      <View style={[styles.tableCell, styles.descriptionCell]}>
+        <Text style={styles.bold}>{isWindowCleaningOnly ? 'Professional Window Cleaning Services' : 'Window Cleaning Services'}</Text>
+        <Text>{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} {formData.projectType === 'yoga_studio' ? 'mirrors/large windows' : formData.projectType === 'kids_fitness' ? 'wall mirrors/large windows' : 'large windows'}, {(formData.numberOfHighAccessWindows || 0)} high-access windows</Text>
+        <Text>Includes all necessary equipment, cleaning solutions, and labor</Text>
+        {(formData.projectType === 'yoga_studio' || formData.projectType === 'kids_fitness') && (
+          <Text style={{fontSize: 9, marginTop: 3}}>Note: For {formData.projectType === 'yoga_studio' ? 'yoga studios' : 'children\'s fitness centers'}, large windows category includes studio wall mirrors</Text>
+        )}
+        {isWindowCleaningOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+          <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
+            Note: Price includes travel ({formData.distanceFromOffice} miles)
+          </Text>
+        )}
+        {!formData.chargeForWindowCleaning && !isWindowCleaningOnly && (
+          <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>
+        )}
+      </View>
+      <View style={[styles.tableCell, styles.amountCell]}>
+        <Text>{isWindowCleaningOnly ? 
+          formatCurrency(estimateData.basePrice) : 
+          (formData.chargeForWindowCleaning ? 
+            formatCurrency(
+              estimateData.adjustedLineItems?.windowCleaningCost !== undefined
+                ? estimateData.adjustedLineItems.windowCleaningCost
+                : estimateData.windowCleaningCost
+            ) : 'Separate Quote'
+          )
+        }</Text>
+      </View>
+    </View>
   );
 };
 
@@ -734,6 +778,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   <Text style={styles.infoValue}>Area: {(formData.pressureWashingArea || 0).toLocaleString()} sq ft</Text>
                 )}
               </>
+            ) : formData.cleaningType === 'window_cleaning_only' ? (
+              <>
+                <Text style={styles.infoValue}>Service Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+                <Text style={styles.infoValue}>Windows: {(formData.numberOfWindows || 0)} standard, {(formData.numberOfLargeWindows || 0)} large, {(formData.numberOfHighAccessWindows || 0)} high-access</Text>
+              </>
             ) : (
               <>
                 <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
@@ -859,28 +908,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Window Cleaning if applicable */}
-          {formData.needsWindowCleaning && (
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text style={styles.bold}>Window Cleaning Services</Text>
-                <Text>{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} {formData.projectType === 'yoga_studio' ? 'mirrors/large windows' : formData.projectType === 'kids_fitness' ? 'wall mirrors/large windows' : 'large windows'}, {(formData.numberOfHighAccessWindows || 0)} high-access windows</Text>
-                <Text>Includes all necessary equipment and cleaning solutions</Text>
-                {(formData.projectType === 'yoga_studio' || formData.projectType === 'kids_fitness') && (
-                  <Text style={{fontSize: 9, marginTop: 3}}>Note: For {formData.projectType === 'yoga_studio' ? 'yoga studios' : 'children\'s fitness centers'}, large windows category includes studio wall mirrors</Text>
-                )}
-                {!formData.chargeForWindowCleaning && (
-                  <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>
-                )}
-              </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formData.chargeForWindowCleaning ? formatCurrency(
-                  estimateData.adjustedLineItems?.windowCleaningCost !== undefined
-                    ? estimateData.adjustedLineItems.windowCleaningCost
-                    : estimateData.windowCleaningCost
-                ) : 'Separate Quote'}</Text>
-              </View>
-            </View>
-          )}
+          {(formData.needsWindowCleaning || formData.cleaningType === 'window_cleaning_only') && 
+            renderWindowCleaningServices(formData, estimateData, styles)
+          }
 
           {/* Display case cleaning for jewelry stores */}
           {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (

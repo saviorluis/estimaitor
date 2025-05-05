@@ -233,6 +233,18 @@ export function calculateEstimate(formData: FormData): EstimateData {
     windowCleaningCost = standardWindowsCost + largeWindowsCost + highAccessWindowsCost;
   }
 
+  // For window cleaning only service type, add the window cleaning cost to the base price
+  if (cleaningType === 'window_cleaning_only') {
+    // For window cleaning only, we always include the cost
+    const effectiveWindowCost = (numberOfWindows || 0) * WINDOW_CLEANING_COST_PER_WINDOW +
+      (numberOfLargeWindows || 0) * WINDOW_CLEANING_COST_PER_WINDOW * WINDOW_CLEANING_LARGE_WINDOW_MULTIPLIER +
+      (numberOfHighAccessWindows || 0) * WINDOW_CLEANING_COST_PER_WINDOW * WINDOW_CLEANING_HIGH_ACCESS_MULTIPLIER;
+      
+    basePrice = effectiveWindowCost;
+    // Reset the window cleaning cost to 0 since we've incorporated it into the base price
+    windowCleaningCost = 0;
+  }
+
   // Calculate display case cleaning cost if it's a jewelry store
   let displayCaseCost = 0;
   if (projectType === 'jewelry_store' && numberOfDisplayCases > 0) {
@@ -295,6 +307,19 @@ export function calculateEstimate(formData: FormData): EstimateData {
     } else if (pressureWashingArea > 0) {
       estimatedHours = pressureWashingArea / PRESSURE_WASHING_SQFT_PER_HOUR;
     }
+  } else if (cleaningType === 'window_cleaning_only') {
+    // For window cleaning only, hours are based solely on window cleaning
+    // Cap the number of windows to prevent unreasonably high hour estimates
+    const totalStandardWindows = Math.min(numberOfWindows || 0, 100);
+    const totalLargeWindows = Math.min(numberOfLargeWindows || 0, 50);
+    const totalHighAccessWindows = Math.min(numberOfHighAccessWindows || 0, 25);
+    
+    const totalWindows = totalStandardWindows + 
+                       (totalLargeWindows * 1.5) + 
+                       (totalHighAccessWindows * 2);
+                         
+    // Cap total window cleaning hours to a reasonable amount
+    estimatedHours = Math.min(totalWindows / WINDOW_CLEANING_WINDOWS_PER_HOUR, 40);
   } else {
     // Normal hours calculation for other cleaning types
     estimatedHours = calculateEstimatedHours(
@@ -345,7 +370,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     }
   }
 
-  // Calculate price per square foot - for pressure washing only, we use total area
+  // Calculate price per square foot - for special service types, handle differently
   let totalArea = squareFootage;
   if (cleaningType === 'pressure_washing_only') {
     if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
@@ -356,6 +381,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     } else {
       totalArea = pressureWashingArea;
     }
+  } else if (cleaningType === 'window_cleaning_only') {
+    // For window cleaning only, we don't use square footage
+    totalArea = 0; // This will make pricePerSquareFoot = 0, which is fine for window-only
   }
   
   const pricePerSquareFoot = totalArea > 0 ? totalPrice / totalArea : 0;

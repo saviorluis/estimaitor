@@ -34,7 +34,8 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   final: 1.0,
   rough_final: 1.2,
   rough_final_touchup: 1.45,
-  pressure_washing_only: 1.0
+  pressure_washing_only: 1.0,
+  window_cleaning_only: 1.0
 };
 
 // Cleaning type descriptions
@@ -43,7 +44,8 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
   final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
   rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
   rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate).",
-  pressure_washing_only: "Specialized exterior pressure washing services only - no interior cleaning included. Allows for areas under 500 sq ft."
+  pressure_washing_only: "Specialized exterior pressure washing services only - no interior cleaning included. Allows for areas under 500 sq ft.",
+  window_cleaning_only: "Specialized window cleaning services only - no interior cleaning included. Removes square footage requirement and focuses only on windows."
 };
 
 // Cleaning type time multipliers (how much longer each type takes)
@@ -52,7 +54,8 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   final: 1.0,
   rough_final: 1.5,
   rough_final_touchup: 1.8,
-  pressure_washing_only: 1.0
+  pressure_washing_only: 1.0,
+  window_cleaning_only: 1.0
 };
 
 // VCT (Vinyl Composition Tile) additional cost per square foot
