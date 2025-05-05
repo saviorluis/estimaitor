@@ -56,6 +56,23 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Apply cleaning type multiplier
   const cleaningTypeMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
 
+  // Calculate travel cost (round trip)
+  const roundTripDistance = distanceFromOffice * 2; // Multiply by 2 for round trip
+  let travelCost = 0;
+
+  if (distanceFromOffice > 100) {
+    // For distant jobs (over 100 miles), show the travel cost but at a reduced rate
+    // Reduce the per-mile rate for distant jobs to balance pricing
+    travelCost = roundTripDistance * (TRAVEL_COST_PER_MILE * 0.65); // Reduced rate for long-distance
+    
+    // Round to a more even number for cleaner quotes
+    travelCost = Math.round(travelCost / 10) * 10;
+  } else {
+    // For nearby jobs, calculate travel cost but it will be distributed
+    // Instead of showing as separate item, we'll add it to the base price later
+    travelCost = 0; // Set to 0 as it won't appear as a line item
+  }
+
   // For pressure washing only service type, reset the base price
   let basePrice = 0;
   
@@ -65,15 +82,19 @@ export function calculateEstimate(formData: FormData): EstimateData {
   } else {
     // Calculate normal base price for other cleaning types
     basePrice = squareFootage * BASE_RATE_PER_SQFT * projectTypeMultiplier * cleaningTypeMultiplier;
+    
+    // For jobs within 100 miles, distribute travel cost into the base price
+    if (distanceFromOffice <= 100) {
+      const nearbyTravelCost = roundTripDistance * TRAVEL_COST_PER_MILE;
+      basePrice += nearbyTravelCost;
+      
+      // Round the base price to a cleaner number
+      basePrice = Math.ceil(basePrice / 5) * 5;
+    }
   }
 
   // Calculate VCT cost if applicable
   const vctCost = hasVCT ? squareFootage * VCT_COST_PER_SQFT : 0;
-
-  // Calculate travel cost (round trip)
-  const roundTripDistance = distanceFromOffice * 2; // Multiply by 2 for round trip
-  // Use a fixed rate per mile that already accounts for gas, wear and tear
-  const travelCost = roundTripDistance * TRAVEL_COST_PER_MILE;
 
   // Calculate overnight cost if applicable
   let overnightCost = 0;

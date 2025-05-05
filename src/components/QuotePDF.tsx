@@ -310,6 +310,11 @@ const renderPressureWashingServices = (
             {'\n'}• Decks/Trex: ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
             {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
           </Text>
+          {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+            <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
+              Note: Price includes travel ({formData.distanceFromOffice} miles)
+            </Text>
+          )}
           <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
             Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
               ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
@@ -336,6 +341,11 @@ const renderPressureWashingServices = (
         <View style={[styles.tableCell, styles.descriptionCell]}>
           <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
           <Text>{isPressureWashingOnly ? 'Comprehensive exterior cleaning for the following surfaces:' : 'Professional exterior cleaning services for the following areas:'}</Text>
+          {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+            <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
+              Note: Price includes travel ({formData.distanceFromOffice} miles)
+            </Text>
+          )}
         </View>
         <View style={[styles.tableCell, styles.amountCell]}>
           <Text>{isPressureWashingOnly ? 
@@ -754,6 +764,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={{fontSize: 9, marginTop: 5}}>
                   {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
                 </Text>
+                {formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+                  <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
+                    Note: Price includes travel ({formData.distanceFromOffice} miles)
+                  </Text>
+                )}
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
@@ -787,20 +802,22 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             renderPressureWashingServices(formData, estimateData, styles)
           }
 
-          {/* Travel Expenses */}
-          <View style={styles.lineItem}>
-            <View style={styles.lineItemContent}>
-              <Text style={styles.lineItemTitle}>Travel Expenses</Text>
-              <Text style={styles.lineItemDescription}>{formData.distanceFromOffice || 0} miles</Text>
+          {/* Travel Expenses - only show for jobs over 100 miles */}
+          {formData.distanceFromOffice > 100 && (
+            <View style={styles.lineItem}>
+              <View style={styles.lineItemContent}>
+                <Text style={styles.lineItemTitle}>Travel Expenses</Text>
+                <Text style={styles.lineItemDescription}>{formData.distanceFromOffice || 0} miles</Text>
+              </View>
+              <Text style={styles.lineItemAmount}>
+                {formatCurrency(
+                  estimateData.adjustedLineItems?.travelCost !== undefined 
+                    ? estimateData.adjustedLineItems.travelCost 
+                    : estimateData.travelCost
+                )}
+              </Text>
             </View>
-            <Text style={styles.lineItemAmount}>
-              {formatCurrency(
-                estimateData.adjustedLineItems?.travelCost !== undefined 
-                  ? estimateData.adjustedLineItems.travelCost 
-                  : estimateData.travelCost
-              )}
-            </Text>
-          </View>
+          )}
 
           {/* Overnight Accommodations if applicable */}
           {formData.stayingOvernight && (
