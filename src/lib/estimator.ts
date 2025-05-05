@@ -236,13 +236,14 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate display case cleaning cost if it's a jewelry store
   let displayCaseCost = 0;
   if (projectType === 'jewelry_store' && numberOfDisplayCases > 0) {
+    // Calculate the cost for tracking but don't add it to the final price
     displayCaseCost = numberOfDisplayCases * DISPLAY_CASE_CLEANING_COST;
   }
 
   // Apply urgency multiplier
   const urgencyMultiplier = URGENCY_MULTIPLIERS[urgencyLevel] || 1;
 
-  // Calculate total before markup
+  // Calculate total before markup - exclude display case cost for jewelry stores
   const totalBeforeMarkup = (
     basePrice +
     vctCost +
@@ -250,7 +251,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     overnightCost +
     pressureWashingCost +
     windowCleaningCost +
-    displayCaseCost
+    // Display case cost is not added to the total for jewelry stores
+    // It's tracked separately but considered included in the base price
+    0 // Explicitly set to 0 instead of displayCaseCost
   ) * urgencyMultiplier;
 
   // Calculate markup amount

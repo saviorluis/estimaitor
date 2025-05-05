@@ -888,13 +888,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Display Case Cleaning</Text>
                 <Text>{(formData.numberOfDisplayCases || 0)} display cases</Text>
+                <Text style={{fontSize: 9, marginTop: 3, fontStyle: 'italic'}}>
+                  Included in cleaning service - comprehensive interior and exterior glass cleaning
+                </Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.displayCaseCost !== undefined
-                    ? estimateData.adjustedLineItems.displayCaseCost
-                    : estimateData.displayCaseCost
-                )}</Text>
+                <Text>Included</Text>
               </View>
             </View>
           )}
