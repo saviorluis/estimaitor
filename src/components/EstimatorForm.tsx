@@ -264,14 +264,20 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <input
               type="number"
               {...register('squareFootage', { 
-                required: 'Square footage is required',
+                required: cleaningType !== 'window_cleaning_only' && cleaningType !== 'pressure_washing_only' ? 'Square footage is required' : false,
                 min: { value: 500, message: 'Minimum 500 sq ft' },
                 max: { value: 100000, message: 'Maximum 100,000 sq ft' }
               })}
               className="input-field"
+              disabled={cleaningType === 'window_cleaning_only' || cleaningType === 'pressure_washing_only'}
             />
             {errors.squareFootage && (
               <p className="text-red-500 text-xs mt-1">{errors.squareFootage.message}</p>
+            )}
+            {(cleaningType === 'window_cleaning_only' || cleaningType === 'pressure_washing_only') && (
+              <p className="text-xs text-amber-500 dark:text-amber-400 mt-1">
+                {cleaningType === 'window_cleaning_only' ? 'Square footage not applicable for window cleaning only services' : 'Square footage not applicable for pressure washing only services'}
+              </p>
             )}
           </div>
 
