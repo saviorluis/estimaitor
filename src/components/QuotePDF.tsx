@@ -887,9 +887,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Display Case Cleaning</Text>
-                <Text>{(formData.numberOfDisplayCases || 0)} display cases</Text>
-                <Text style={{fontSize: 9, marginTop: 3, fontStyle: 'italic'}}>
-                  Included in cleaning service - comprehensive interior and exterior glass cleaning
+                <Text>{(formData.numberOfDisplayCases || 0)} display case{formData.numberOfDisplayCases !== 1 ? 's' : ''}</Text>
+                <Text style={{fontSize: 9, marginTop: 3}}>
+                  Professional interior and exterior cleaning with specialized glass cleaners
                 </Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>

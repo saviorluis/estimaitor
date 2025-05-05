@@ -236,8 +236,17 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate display case cleaning cost if it's a jewelry store
   let displayCaseCost = 0;
   if (projectType === 'jewelry_store' && numberOfDisplayCases > 0) {
-    // Calculate the cost for tracking but don't add it to the final price
+    // Calculate the cost for internal tracking/reporting purposes
     displayCaseCost = numberOfDisplayCases * DISPLAY_CASE_CLEANING_COST;
+    
+    // For jewelry stores, we'll incorporate this cost into the base price
+    // so it appears "included" in the quote
+    if (cleaningType !== 'pressure_washing_only') {
+      basePrice += displayCaseCost;
+      
+      // Round base price to nearest $5 for a cleaner quote
+      basePrice = Math.ceil(basePrice / 5) * 5;
+    }
   }
 
   // Apply urgency multiplier

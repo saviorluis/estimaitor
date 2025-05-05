@@ -233,8 +233,7 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Interior and exterior cleaning with specialized glass cleaners\n" +
     "• Careful cleaning of display case tracks and locks\n" +
     "• Detailed cleaning of display lighting\n" +
-    "• Cleaning and sanitizing of display case shelving\n" +
-    "Cost per display case: $30 (includes interior and exterior cleaning)",
+    "• Cleaning and sanitizing of display case shelving",
     
   apartment: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas in units and common areas\n" +
