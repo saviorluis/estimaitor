@@ -71,7 +71,7 @@ export const HOTEL_COST_PER_NIGHT = 175;
 export const PER_DIEM_PER_DAY = 85;
 
 // Pressure washing cost per square foot
-export const PRESSURE_WASHING_COST_PER_SQFT = 0.40;
+export const PRESSURE_WASHING_COST_PER_SQFT = 0.25;
 
 // Pressure washing equipment rental cost per day
 export const PRESSURE_WASHING_EQUIPMENT_RENTAL = 180;

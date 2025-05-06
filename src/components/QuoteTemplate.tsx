@@ -7,6 +7,18 @@ import { pdf } from '@react-pdf/renderer';
 import QuotePDF from './QuotePDF';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
+// Define the calculateTotalPressureWashingArea function
+const calculateTotalPressureWashingArea = (formData: FormData): number => {
+  if (!formData.pressureWashingServices || !formData.pressureWashingServiceAreas) return 0;
+  
+  let totalArea = 0;
+  formData.pressureWashingServices.forEach(service => {
+    totalArea += formData.pressureWashingServiceAreas?.[service] || 0;
+  });
+  
+  return totalArea;
+};
+
 // Inline logo component to avoid import issues
 const CompanyLogo = ({ className = "" }: { className?: string }) => {
   return (
@@ -901,12 +913,34 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 {/* Pressure Washing if applicable */}
                 {formData.needsPressureWashing && (
                   <tr>
-                    <td className="border p-2">
+                    <td className="border p-2 print:border print:border-gray-300">
                       <div className="font-semibold">Pressure Washing Services</div>
-                      <div className="text-sm">{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</div>
-                      <div className="text-sm">Includes equipment rental and materials</div>
+                      <div className="text-sm">
+                        {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 
+                          ? `${calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft total (multiple service types)`
+                          : `${(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces`
+                        }
+                      </div>
+                      <div className="text-sm">Includes equipment rental, materials, and professional-grade cleaners</div>
+                      {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          <span className="italic">Service Types: </span>
+                          {formData.pressureWashingServices.map((service, i) => (
+                            <span key={service}>
+                              {service.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {i < formData.pressureWashingServices!.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        <span className="italic">Payment Terms: </span>
+                        {formData.projectType === 'warehouse' ? 'Net 30' : 
+                          ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? 'Net 10' : 
+                          'Payment on Invoice'}
+                      </div>
                     </td>
-                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
+                    <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
                   </tr>
                 )}
 

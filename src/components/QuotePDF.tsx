@@ -304,13 +304,14 @@ const renderPressureWashingServices = (
         <View style={[styles.tableCell, styles.descriptionCell]}>
           <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
           <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
-          <Text style={{fontSize: 9, marginTop: 5}}>
-            Service includes professional-grade cleaning solutions and equipment. Standard rates:
+          <Text style={{fontSize: 9, marginTop: 3}}>
+            Service includes professional-grade equipment, cleaning solutions, and labor.
+          </Text>
+          <Text style={{fontSize: 9, marginTop: 2}}>
+            Standard rates applied:
             {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})
-            {'\n'}• Roof Wash: ${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft
+            {'\n'}• Commercial: ${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.COMMERCIAL.minimum})
             {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
-            {'\n'}• Decks/Trex: ${PRESSURE_WASHING_RATES.DECK.rate}/sq ft
-            {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
           </Text>
           {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
             <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
@@ -318,6 +319,9 @@ const renderPressureWashingServices = (
             </Text>
           )}
           <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
+            Scope of Work: Professional pressure washing of exterior surfaces with appropriate cleaning solutions, removal of dirt, algae, mildew, and light staining.
+          </Text>
+          <Text style={{fontSize: 9, marginTop: 3, fontStyle: 'italic'}}>
             Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
               ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
               PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
@@ -343,6 +347,9 @@ const renderPressureWashingServices = (
         <View style={[styles.tableCell, styles.descriptionCell]}>
           <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
           <Text>{isPressureWashingOnly ? 'Comprehensive exterior cleaning for the following surfaces:' : 'Professional exterior cleaning services for the following areas:'}</Text>
+          <Text style={{fontSize: 8, marginTop: 3, color: '#444444'}}>
+            Total area: {calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft
+          </Text>
           {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
             <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
               Note: Price includes travel ({formData.distanceFromOffice} miles)
@@ -358,6 +365,11 @@ const renderPressureWashingServices = (
                 : estimateData.pressureWashingCost
             )}
           </Text>
+          {isPressureWashingOnly && (
+            <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>
+              {services.length > 1 ? '(See breakdown below)' : ''}
+            </Text>
+          )}
         </View>
       </View>
       
@@ -416,6 +428,15 @@ const renderPressureWashingServices = (
               <Text style={{fontSize: 10, fontWeight: 'bold', marginBottom: 2}}>{serviceDescription}</Text>
               <Text style={{fontSize: 9}}>{area.toLocaleString()} sq ft @ {serviceRate}</Text>
               <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>{scopeOfWork.split('\n')[0]}</Text>
+              
+              {/* Display full scope of work in collapsible section */}
+              <View style={{marginTop: 3, paddingLeft: 4}}>
+                {scopeOfWork.split('\n').slice(1).map((line, index) => (
+                  <Text key={index} style={{fontSize: 7, color: '#666666', marginBottom: 1}}>
+                    {line}
+                  </Text>
+                ))}
+              </View>
             </View>
             {/* Only show service cost in detailed view for pressure_washing_only type */}
             {isPressureWashingOnly && (
@@ -424,6 +445,16 @@ const renderPressureWashingServices = (
           </View>
         );
       })}
+      
+      {/* Add equipment rental note */}
+      {isPressureWashingOnly && (
+        <View style={{marginTop: 8, marginBottom: 4, marginLeft: 6}}>
+          <Text style={{fontSize: 8, fontStyle: 'italic', color: '#444444'}}>
+            Note: Price includes all necessary equipment rental and cleaning supplies.
+            {formData.distanceFromOffice > 0 && ` Travel (${formData.distanceFromOffice} miles) ${formData.distanceFromOffice <= 100 ? 'is included in the price.' : 'is charged separately.'}`}
+          </Text>
+        </View>
+      )}
       
       <Text style={{fontSize: 9, marginTop: 5, marginLeft: 10, fontStyle: 'italic'}}>
         Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
@@ -934,7 +965,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
           </View>
 
-          {/* Markup is now included in the line items, so we don't need to show it separately */}
+          {/* Breakdown of all costs for debugging */}
+          {formData.cleaningType === 'pressure_washing_only' && (
+            <View style={{padding: 5, marginTop: 2, borderTop: '1pt solid #CCCCCC'}}>
+              <Text style={{fontSize: 8, color: '#666666', fontStyle: 'italic'}}>
+                Note: All pressure washing services, equipment, and travel costs are included in the total price.
+              </Text>
+            </View>
+          )}
 
           {/* Sales Tax */}
           <View style={styles.row}>
