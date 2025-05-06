@@ -19,7 +19,8 @@ export type ProjectType =
   | 'dental_office'
   | 'pet_resort'
   | 'beauty_store'
-  | 'interactive_toy_store';
+  | 'interactive_toy_store'
+  | 'mailroom';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 

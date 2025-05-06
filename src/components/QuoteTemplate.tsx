@@ -458,6 +458,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       case 'kids_fitness': return 'Children\'s Fitness Center';
       case 'bakery': return 'Bakery';
       case 'interactive_toy_store': return 'Interactive Toy Store';
+      case 'mailroom': return 'Mailroom/Shipping Center';
       default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
     }
   };

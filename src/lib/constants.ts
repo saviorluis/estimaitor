@@ -25,7 +25,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   dental_office: 1.4,
   pet_resort: 1.4,
   beauty_store: 1.3,
-  interactive_toy_store: 1.45
+  interactive_toy_store: 1.45,
+  mailroom: 1.25
 };
 
 // Cleaning type multipliers
@@ -133,7 +134,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   dental_office: 380,  // Highly detailed cleaning requiring specialized protocols and disinfection
   pet_resort: 400,      // Thorough sanitization for animal areas and specialized cleaning
   beauty_store: 420,    // Detailed cleaning of product displays and testing stations
-  interactive_toy_store: 380    // Interactive play areas and complex environments require detailed cleaning
+  interactive_toy_store: 380,    // Interactive play areas and complex environments require detailed cleaning
+  mailroom: 520         // Specialized cleaning for shipping/mailing areas with focus on dust control
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -374,7 +376,20 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Sanitize all high-touch interactive elements and play stations\n" +
     "• Spot clean interior walls, displays, and themed decorations\n" +
     "• Empty all trash receptacles and replace liners\n" +
-    "• Special attention to sanitizing children's play areas and interactive installations"
+    "• Special attention to sanitizing children's play areas and interactive installations",
+
+  mailroom: "Final Cleaning includes:\n" +
+    "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
+    "• Dust and clean sorting stations, package shelves, and mailboxes\n" +
+    "• Clean and sanitize customer service counters and workstations\n" +
+    "• Spot clean interior windows and glass surfaces (full window service quoted separately)\n" +
+    "• Clean light fixtures and perform hi-lo dusting of package racks and shelving\n" +
+    "• Sanitize high-touch surfaces including scanners, scales, and POS equipment\n" +
+    "• Clean and sanitize bathroom facilities\n" +
+    "• Detail clean break rooms and employee areas\n" +
+    "• Clean shipping/mailing equipment exteriors and packaging stations\n" +
+    "• Empty all trash receptacles and replace liners\n" +
+    "• Special attention to removing tape residue, label backing, and packaging debris"
 };
 
 // Project type specific scopes of work
@@ -420,7 +435,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   dental_office: `${SCOPE_OF_WORK.dental_office}`,
   pet_resort: `${SCOPE_OF_WORK.pet_resort}`,
   beauty_store: `${SCOPE_OF_WORK.beauty_store}`,
-  interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`
+  interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`,
+  mailroom: `${SCOPE_OF_WORK.mailroom}`
 };
 
 // Pressure Washing Constants
