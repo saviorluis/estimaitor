@@ -20,7 +20,8 @@ export type ProjectType =
   | 'pet_resort'
   | 'beauty_store'
   | 'interactive_toy_store'
-  | 'mailroom';
+  | 'mailroom'
+  | 'church';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 

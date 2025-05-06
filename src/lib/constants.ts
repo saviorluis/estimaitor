@@ -26,7 +26,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   pet_resort: 1.4,
   beauty_store: 1.3,
   interactive_toy_store: 1.45,
-  mailroom: 1.25
+  mailroom: 1.25,
+  church: 1.35
 };
 
 // Cleaning type multipliers
@@ -135,7 +136,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   pet_resort: 400,      // Thorough sanitization for animal areas and specialized cleaning
   beauty_store: 420,    // Detailed cleaning of product displays and testing stations
   interactive_toy_store: 380,    // Interactive play areas and complex environments require detailed cleaning
-  mailroom: 520         // Specialized cleaning for shipping/mailing areas with focus on dust control
+  mailroom: 520,         // Specialized cleaning for shipping/mailing areas with focus on dust control
+  church: 430          // Large open spaces with detailed cleaning of pews, altars, and religious fixtures
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -389,7 +391,21 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Detail clean break rooms and employee areas\n" +
     "• Clean shipping/mailing equipment exteriors and packaging stations\n" +
     "• Empty all trash receptacles and replace liners\n" +
-    "• Special attention to removing tape residue, label backing, and packaging debris"
+    "• Special attention to removing tape residue, label backing, and packaging debris",
+
+  church: "Final Cleaning includes:\n" +
+    "• Sweep/vacuum/mop all flooring in sanctuary, narthex, and common areas\n" +
+    "• Clean and polish pews, altars, pulpits, and religious fixtures\n" +
+    "• Dust and clean all surfaces including choir areas and instrument sections\n" +
+    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
+    "• Clean light fixtures and perform hi-lo dusting of cathedral ceilings and high areas\n" +
+    "• Clean and sanitize all bathroom facilities\n" +
+    "• Detail clean fellowship halls and community spaces\n" +
+    "• Clean office areas and private pastoral spaces\n" +
+    "• Dust and clean all religious symbols, artwork, and decorative elements\n" +
+    "• Empty all trash receptacles and replace liners\n" +
+    "• Special attention to high-touch surfaces in children's ministry areas\n" +
+    "• Clean and sanitize kitchen/pantry areas used for communion and events"
 };
 
 // Project type specific scopes of work
@@ -436,7 +452,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   pet_resort: `${SCOPE_OF_WORK.pet_resort}`,
   beauty_store: `${SCOPE_OF_WORK.beauty_store}`,
   interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`,
-  mailroom: `${SCOPE_OF_WORK.mailroom}`
+  mailroom: `${SCOPE_OF_WORK.mailroom}`,
+  church: `${SCOPE_OF_WORK.church}`
 };
 
 // Pressure Washing Constants
