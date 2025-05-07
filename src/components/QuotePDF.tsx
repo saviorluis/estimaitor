@@ -509,6 +509,18 @@ const renderWindowCleaningServices = (
   );
 };
 
+// Add a helper for the cover page title
+const getCoverPageTitle = (cleaningType: string): string => {
+  switch (cleaningType) {
+    case 'pressure_washing_only':
+      return 'PRESSURE WASHING SERVICES';
+    case 'window_cleaning_only':
+      return 'WINDOW CLEANING SERVICES';
+    default:
+      return 'POST CONSTRUCTION CLEANING';
+  }
+};
+
 interface QuotePDFProps {
   estimateData: EstimateData & {
     // Add optional adjusted line item prices
@@ -637,7 +649,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               color: '#2563eb',
               textAlign: 'center'
             }}>
-              POST CONSTRUCTION CLEANING
+              {getCoverPageTitle(formData.cleaningType)}
             </Text>
             
             <Text style={{
