@@ -840,26 +840,46 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
           {/* Base Cleaning Service */}
           {formData.cleaningType !== 'pressure_washing_only' && (
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-                <Text style={{fontSize: 9, marginTop: 5}}>
-                  {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
-                </Text>
-                {formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
-                  <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
-                    Note: Price includes travel ({formData.distanceFromOffice} miles)
+            <>
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+                  <Text style={{fontSize: 9, marginTop: 5}}>
+                    {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
                   </Text>
-                )}
+                  {formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+                    <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
+                      Note: Price includes travel ({formData.distanceFromOffice} miles)
+                    </Text>
+                  )}
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency(
+                    estimateData.adjustedLineItems?.basePrice !== undefined 
+                      ? estimateData.adjustedLineItems.basePrice 
+                      : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+                  )}</Text>
+                </View>
               </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.basePrice !== undefined 
-                    ? estimateData.adjustedLineItems.basePrice 
-                    : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
-                )}</Text>
-              </View>
-            </View>
+              {/* Special room/area breakdown for church quotes */}
+              {formData.projectType === 'church' && (
+                <View style={{padding: 8, paddingLeft: 18, paddingBottom: 0}}>
+                  <Text style={{fontSize: 9, fontWeight: 'bold', marginBottom: 2}}>Areas Included:</Text>
+                  <Text style={{fontSize: 9}}>• Green Room</Text>
+                  <Text style={{fontSize: 9}}>• Religious Ed (6 split by age group: 4th, 5th, 3rd grade, 2nd grade, 2 nurseries, K-1)</Text>
+                  <Text style={{fontSize: 9}}>• Auditorium</Text>
+                  <Text style={{fontSize: 9}}>• Platform</Text>
+                  <Text style={{fontSize: 9}}>• Storage (5)</Text>
+                  <Text style={{fontSize: 9}}>• Kitchen</Text>
+                  <Text style={{fontSize: 9}}>• AV Control Room</Text>
+                  <Text style={{fontSize: 9}}>• Cafe</Text>
+                  <Text style={{fontSize: 9}}>• Restrooms (4)</Text>
+                  <Text style={{fontSize: 9}}>• 2 Assembly Areas</Text>
+                  <Text style={{fontSize: 9}}>• Broadcast</Text>
+                  <Text style={{fontSize: 9}}>• 4 Offices</Text>
+                </View>
+              )}
+            </>
           )}
 
           {/* VCT Flooring if applicable */}
