@@ -76,7 +76,6 @@ interface QuoteTemplateProps {
 const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData }) => {
   // State for custom markup percentage
   const [markupPercentage, setMarkupPercentage] = useState<number>(0);
-  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
   // State for quote counter
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
@@ -213,16 +212,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
   };
 
-  // Handle discount percentage change
-  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    const newValue = isNaN(value) ? 0 : value;
-    setDiscountPercentage(newValue);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('quoteDiscountPercentage', newValue.toString());
-    }
-  };
-
   // Handle quote counter increment
   const handleIncrementCounter = () => {
     const newCounter = incrementQuoteCounter();
@@ -310,13 +299,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       });
       
       // If markup percentage is 0, and there's no built-in markup, use original prices
-      if (markupPercentage === 0 && estimateData.markup === 0 && discountPercentage === 0) {
+      if (markupPercentage === 0 && estimateData.markup === 0) {
         setAdjustedPrices({});
         return;
       }
       
       // If there's no custom markup but there is built-in markup, we don't need to adjust
-      if (markupPercentage === 0 && estimateData.markup > 0 && discountPercentage === 0) {
+      if (markupPercentage === 0 && estimateData.markup > 0) {
         setAdjustedPrices({});
         return;
       }
@@ -332,23 +321,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         adjustedPrices[item.key] = item.value + itemMarkup;
       });
 
-      // Apply discount if any
-      let finalPrices = { ...adjustedPrices };
-      if (discountPercentage > 0) {
-        const discountAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) * (discountPercentage / 100);
-        // Distribute discount proportionally
-        Object.keys(finalPrices).forEach(key => {
-          const proportion = finalPrices[key] / Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
-          finalPrices[key] = finalPrices[key] - (discountAmount * proportion);
-        });
-      }
-      
       // Balance window cleaning pricing with base price
-      const balancedPrices = balancePricing(finalPrices, lineItems, totalBeforeMarkup);
+      const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
       if (Object.keys(balancedPrices).length > 0) {
         setAdjustedPrices(balancedPrices);
       } else {
-        setAdjustedPrices(finalPrices);
+        setAdjustedPrices(adjustedPrices);
       }
       
       // Log the final adjusted prices for debugging
@@ -361,7 +339,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     } catch (error) {
       console.error('Error calculating adjusted prices:', error);
     }
-  }, [estimateData, formData, markupPercentage, discountPercentage]);
+  }, [estimateData, formData, markupPercentage]);
 
   // Function to balance window cleaning pricing with base cleaning cost
   const balancePricing = (
@@ -684,13 +662,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         }
       });
 
-      // Pass discount percentage to PDF
-      adjustedEstimateData.discountPercentage = discountPercentage;
-
       const blob = await pdf(
-        <QuotePDF
-          estimateData={adjustedEstimateData}
-          formData={{ ...formData, discountPercentage }}
+        <QuotePDF 
+          estimateData={adjustedEstimateData} 
+          formData={formData} 
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
@@ -1359,35 +1334,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </div>
           <p className="text-xs text-gray-500 mt-2">
             This will adjust all prices proportionally to maintain the same relative pricing structure.
-          </p>
-        </div>
-        
-        {/* Discount Percentage Input */}
-        <div className="bg-green-50 p-4 rounded-lg mb-4 border border-green-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Discount (Percentage)
-          </label>
-          <div className="flex items-center">
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="1"
-              value={discountPercentage}
-              onChange={handleDiscountChange}
-              className="block w-24 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-            />
-            <span className="ml-2 text-gray-700">%</span>
-            <div className="ml-4 text-sm text-gray-600">
-              {discountPercentage > 0 ? (
-                <span>Applying {discountPercentage}% discount evenly across all line items</span>
-              ) : (
-                <span>No discount applied</span>
-              )}
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            This will reduce all prices proportionally to maintain the same relative pricing structure.
           </p>
         </div>
         

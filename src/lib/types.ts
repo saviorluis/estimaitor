@@ -62,7 +62,6 @@ export interface FormData {
   numberOfDisplayCases: number;
   clientName?: string;
   projectName?: string;
-  discountPercentage?: number;
 }
 
 export interface EstimateData {
@@ -90,7 +89,6 @@ export interface EstimateData {
   displayCaseCost: number;
   aiRecommendations: string[];
   adjustedLineItems?: {[key: string]: number};
-  discountPercentage?: number;
 }
 
 export interface AIRecommendationRequest {
