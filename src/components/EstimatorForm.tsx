@@ -973,6 +973,47 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           Calculate Estimate
         </button>
       </form>
+      <button
+        type="button"
+        className="btn-secondary w-full py-2 mt-2 text-base"
+        onClick={() => {
+          // Clear localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+          // Reset form to hardcoded defaults
+          reset({
+            projectType: 'office',
+            cleaningType: 'final',
+            squareFootage: 5000,
+            hasVCT: false,
+            distanceFromOffice: 20,
+            gasPrice: 3.50,
+            applyMarkup: false,
+            stayingOvernight: false,
+            numberOfNights: 1,
+            numberOfCleaners: 3,
+            urgencyLevel: 1,
+            needsPressureWashing: false,
+            pressureWashingArea: 0,
+            needsWindowCleaning: false,
+            chargeForWindowCleaning: false,
+            numberOfWindows: 0,
+            numberOfLargeWindows: 0,
+            numberOfHighAccessWindows: 0,
+            numberOfDisplayCases: 0,
+            pressureWashingServices: [],
+            pressureWashingServiceAreas: {},
+          });
+          setStayingOvernight(false);
+          setUrgencyLevel(1);
+          setNeedsPressureWashing(false);
+          setNeedsWindowCleaning(false);
+          setPressureWashingServices([]);
+        }}
+      >
+        Clear Entries
+      </button>
     </div>
   );
 } 
