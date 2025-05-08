@@ -296,16 +296,14 @@ const renderPressureWashingServices = (
   const services = formData.pressureWashingServices || [];
   const serviceAreas = formData.pressureWashingServiceAreas || {};
   const serviceDetails = estimateData.pressureWashingServiceDetails || {};
-  
-  // For pressure washing only quotes, we want to specifically format differently
   const isPressureWashingOnly = formData.cleaningType === 'pressure_washing_only';
-  
+
+  // If no detailed services, fallback to legacy display
   if (services.length === 0) {
-    // Traditional pressure washing display
     return (
       <View style={styles.tableRow}>
         <View style={[styles.tableCell, styles.descriptionCell]}>
-          <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
+          <Text style={styles.bold}>Pressure Washing Services</Text>
           <Text>{(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces</Text>
           <Text style={{fontSize: 9, marginTop: 3}}>
             Service includes professional-grade equipment, cleaning solutions, and labor.
@@ -315,19 +313,6 @@ const renderPressureWashingServices = (
             {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft
             {'\n'}• Commercial: ${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft
             {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
-          </Text>
-          {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
-            <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
-              Note: Price includes travel ({formData.distanceFromOffice} miles)
-            </Text>
-          )}
-          <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
-            Scope of Work: Professional pressure washing of exterior surfaces with appropriate cleaning solutions, removal of dirt, algae, mildew, and light staining.
-          </Text>
-          <Text style={{fontSize: 9, marginTop: 3, fontStyle: 'italic'}}>
-            Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
-              ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
-              PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
           </Text>
         </View>
         <View style={[styles.tableCell, styles.amountCell]}>
@@ -342,129 +327,54 @@ const renderPressureWashingServices = (
       </View>
     );
   }
-  
-  // Detailed pressure washing services display
+
+  // Itemized breakdown for all pressure washing quotes
+  let total = 0;
   return (
-    <>
-      <View style={styles.tableRow}>
-        <View style={[styles.tableCell, styles.descriptionCell]}>
-          <Text style={styles.bold}>{isPressureWashingOnly ? 'Exterior Pressure Washing Services' : 'Pressure Washing Services'}</Text>
-          <Text>{isPressureWashingOnly ? 'Comprehensive exterior cleaning for the following surfaces:' : 'Professional exterior cleaning services for the following areas:'}</Text>
-          <Text style={{fontSize: 8, marginTop: 3, color: '#444444'}}>
-            Total area: {calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft
-          </Text>
-          {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
-            <Text style={{fontSize: 8, marginTop: 3, fontStyle: 'italic', color: '#666666'}}>
-              Note: Price includes travel ({formData.distanceFromOffice} miles)
-            </Text>
-          )}
-        </View>
-        <View style={[styles.tableCell, styles.amountCell]}>
-          <Text>{isPressureWashingOnly ? 
-            formatCurrency(estimateData.basePrice) : 
-            formatCurrency(
-              estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
-                ? estimateData.adjustedLineItems.pressureWashingCost 
-                : estimateData.pressureWashingCost
-            )}
-          </Text>
-          {isPressureWashingOnly && (
-            <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>
-              {services.length > 1 ? '(See breakdown below)' : ''}
-            </Text>
-          )}
-        </View>
+    <View style={{marginBottom: 8}}>
+      <View style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#CCCCCC', backgroundColor: '#F0F0F0'}}>
+        <Text style={{width: '35%', fontWeight: 'bold', padding: 4}}>Service</Text>
+        <Text style={{width: '20%', fontWeight: 'bold', padding: 4, textAlign: 'right'}}>Area (sq ft)</Text>
+        <Text style={{width: '20%', fontWeight: 'bold', padding: 4, textAlign: 'right'}}>Rate ($/sq ft)</Text>
+        <Text style={{width: '25%', fontWeight: 'bold', padding: 4, textAlign: 'right'}}>Subtotal</Text>
       </View>
-      
-      {/* Individual pressure washing services */}
       {services.map((service: PressureWashingServiceType) => {
         const area = serviceAreas[service] || 0;
         const details = serviceDetails[service] || { area: 0, cost: 0 };
-        
         if (area <= 0) return null;
-        
-        // Service-specific scope content
-        let serviceDescription = '';
-        let serviceRate = '';
-        
+        let serviceLabel = '';
+        let rate = 0;
+        let min = undefined;
         switch(service) {
-          case 'soft_wash':
-            serviceDescription = 'Soft Wash (House/Building)';
-            serviceRate = `$${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft`;
-            break;
-          case 'roof_wash':
-            serviceDescription = 'Roof Washing';
-            serviceRate = `$${PRESSURE_WASHING_RATES.ROOF_WASH.rate}/sq ft`;
-            break;
-          case 'driveway':
-            serviceDescription = 'Driveway Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft`;
-            break;
-          case 'deck':
-            serviceDescription = 'Wooden Deck Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.DECK.rate}/sq ft`;
-            break;
-          case 'trex_deck':
-            serviceDescription = 'Trex/Composite Deck Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.TREX.rate}/sq ft`;
-            break;
-          case 'dumpster_corral':
-            serviceDescription = 'Dumpster Corral Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate}/sq ft`;
-            break;
-          case 'commercial':
-            serviceDescription = 'Commercial Surface Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft`;
-            break;
-          default:
-            serviceDescription = 'Custom Pressure Washing Service';
-            serviceRate = `Daily rate: $${PRESSURE_WASHING_RATES.DAILY_RATE}`;
+          case 'soft_wash': serviceLabel = 'Soft Wash'; rate = PRESSURE_WASHING_RATES.SOFT_WASH.rate; min = PRESSURE_WASHING_RATES.SOFT_WASH.minimum; break;
+          case 'roof_wash': serviceLabel = 'Roof Wash'; rate = PRESSURE_WASHING_RATES.ROOF_WASH.rate; break;
+          case 'driveway': serviceLabel = 'Driveway'; rate = PRESSURE_WASHING_RATES.DRIVEWAY.rate; break;
+          case 'deck': serviceLabel = 'Deck'; rate = PRESSURE_WASHING_RATES.DECK.rate; break;
+          case 'trex_deck': serviceLabel = 'Trex/Composite Deck'; rate = PRESSURE_WASHING_RATES.TREX.rate; break;
+          case 'dumpster_corral': serviceLabel = 'Dumpster Corral'; rate = PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate; min = PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum; break;
+          case 'commercial': serviceLabel = 'Commercial Surface'; rate = PRESSURE_WASHING_RATES.COMMERCIAL.rate; min = PRESSURE_WASHING_RATES.COMMERCIAL.minimum; break;
+          default: serviceLabel = 'Custom'; rate = PRESSURE_WASHING_RATES.DAILY_RATE; break;
         }
-        
-        // Get scope of work for this service
-        const scopeKey = service.toUpperCase() as keyof typeof PRESSURE_WASHING_SCOPE_OF_WORK;
-        const scopeOfWork = PRESSURE_WASHING_SCOPE_OF_WORK[scopeKey] || '';
-        
+        // Show minimum note if applied
+        const minApplied = min && details.cost < area * rate ? ` (Minimum applied)` : '';
+        total += details.cost;
         return (
-          <View style={styles.subRow} key={service}>
-            <View style={styles.subRowContent}>
-              <Text style={{fontSize: 10, fontWeight: 'bold', marginBottom: 2}}>{serviceDescription}</Text>
-              <Text style={{fontSize: 9}}>{area.toLocaleString()} sq ft @ {serviceRate}</Text>
-              <Text style={{fontSize: 8, marginTop: 3, color: '#666666'}}>{scopeOfWork.split('\n')[0]}</Text>
-              
-              {/* Display full scope of work in collapsible section */}
-              <View style={{marginTop: 3, paddingLeft: 4}}>
-                {scopeOfWork.split('\n').slice(1).map((line, index) => (
-                  <Text key={index} style={{fontSize: 7, color: '#666666', marginBottom: 1}}>
-                    {line}
-                  </Text>
-                ))}
-              </View>
-            </View>
-            {/* Only show service cost in detailed view for pressure_washing_only type */}
-            {isPressureWashingOnly && (
-              <Text style={{fontSize: 9, textAlign: 'right'}}>{formatCurrency(details.cost)}</Text>
-            )}
+          <View style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#EEEEEE'}} key={service}>
+            <Text style={{width: '35%', padding: 4}}>{serviceLabel}{minApplied}</Text>
+            <Text style={{width: '20%', padding: 4, textAlign: 'right'}}>{area.toLocaleString()}</Text>
+            <Text style={{width: '20%', padding: 4, textAlign: 'right'}}>{rate ? `$${rate.toFixed(2)}` : '-'}</Text>
+            <Text style={{width: '25%', padding: 4, textAlign: 'right'}}>{formatCurrency(details.cost)}</Text>
           </View>
         );
       })}
-      
-      {/* Add equipment rental note */}
-      {isPressureWashingOnly && (
-        <View style={{marginTop: 8, marginBottom: 4, marginLeft: 6}}>
-          <Text style={{fontSize: 8, fontStyle: 'italic', color: '#444444'}}>
-            Note: Price includes all necessary equipment rental and cleaning supplies.
-            {formData.distanceFromOffice > 0 && ` Travel (${formData.distanceFromOffice} miles) ${formData.distanceFromOffice <= 100 ? 'is included in the price.' : 'is charged separately.'}`}
-          </Text>
-        </View>
-      )}
-      
-      <Text style={{fontSize: 9, marginTop: 5, marginLeft: 10, fontStyle: 'italic'}}>
-        Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
-          ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
-          PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
+      <View style={{flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#CCCCCC', backgroundColor: '#E6F0FF'}}>
+        <Text style={{width: '75%', fontWeight: 'bold', padding: 4, textAlign: 'right'}}>Pressure Washing Subtotal</Text>
+        <Text style={{width: '25%', fontWeight: 'bold', padding: 4, textAlign: 'right'}}>{formatCurrency(total)}</Text>
+      </View>
+      <Text style={{fontSize: 8, marginTop: 4, color: '#444444'}}>
+        All pressure washing includes professional equipment, cleaning solutions, and labor. Rates and minimums per service apply as shown above.
       </Text>
-    </>
+    </View>
   );
 };
 
@@ -913,9 +823,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
           {/* Pressure Washing if applicable */}
-          {(formData.needsPressureWashing || formData.cleaningType === 'pressure_washing_only') && 
-            renderPressureWashingServices(formData, estimateData, styles)
-          }
+          {(formData.needsPressureWashing || formData.cleaningType === 'pressure_washing_only') && (
+            <View style={{width: '100%'}}>
+              {renderPressureWashingServices(formData, estimateData, styles)}
+            </View>
+          )}
 
           {/* Travel Expenses - only show for jobs over 100 miles */}
           {formData.distanceFromOffice > 100 && (
@@ -997,8 +909,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           {/* Subtotal - Use the adjusted subtotal that's calculated in handlePDFDownload */}
           <View style={[styles.row, styles.subtotalRow]}>
             <Text style={styles.subtotalText}>Subtotal</Text>
-            <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
+            <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup ?? 0)}</Text>
           </View>
+
+          {/* Discount row if applicable */}
+          {((estimateData.discountPercentage ?? formData.discountPercentage ?? 0) > 0) && (
+            <View style={styles.row}>
+              <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>
+                {(() => {
+                  const discount = estimateData.discountPercentage !== undefined ? estimateData.discountPercentage : (formData.discountPercentage !== undefined ? formData.discountPercentage : 0);
+                  return `Discount (${discount.toFixed(1)}%)`;
+                })()}
+              </Text>
+              <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>-
+                {formatCurrency(
+                  (estimateData.totalBeforeMarkup ?? 0) * ((estimateData.discountPercentage || formData.discountPercentage || 0) / 100)
+                )}
+              </Text>
+            </View>
+          )}
 
           {/* Breakdown of all costs for debugging */}
           {formData.cleaningType === 'pressure_washing_only' && (
@@ -1012,13 +941,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           {/* Sales Tax */}
           <View style={styles.row}>
             <Text>Sales Tax (7%)</Text>
-            <Text>{formatCurrency(estimateData.salesTax)}</Text>
+            <Text>{formatCurrency(
+              (((estimateData.totalBeforeMarkup ?? 0) - ((estimateData.discountPercentage || formData.discountPercentage || 0) / 100) * (estimateData.totalBeforeMarkup ?? 0))) * 0.07
+            )}</Text>
           </View>
 
           {/* Total */}
           <View style={[styles.row, styles.totalRow]}>
             <Text style={styles.totalText}>TOTAL</Text>
-            <Text style={styles.totalText}>{formatCurrency(estimateData.totalPrice)}</Text>
+            <Text style={styles.totalText}>{formatCurrency(
+              ((estimateData.totalBeforeMarkup ?? 0) - ((estimateData.discountPercentage || formData.discountPercentage || 0) / 100) * (estimateData.totalBeforeMarkup ?? 0)) * 1.07
+            )}</Text>
           </View>
         </View>
 
