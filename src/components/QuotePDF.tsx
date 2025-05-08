@@ -311,8 +311,8 @@ const renderPressureWashingServices = (
           </Text>
           <Text style={{fontSize: 9, marginTop: 2}}>
             Standard rates applied:
-            {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})
-            {'\n'}• Commercial: ${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft (min. ${PRESSURE_WASHING_RATES.COMMERCIAL.minimum})
+            {'\n'}• Soft Wash: ${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft
+            {'\n'}• Commercial: ${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft
             {'\n'}• Driveway: ${PRESSURE_WASHING_RATES.DRIVEWAY.rate}/sq ft
           </Text>
           {isPressureWashingOnly && formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
@@ -389,7 +389,7 @@ const renderPressureWashingServices = (
         switch(service) {
           case 'soft_wash':
             serviceDescription = 'Soft Wash (House/Building)';
-            serviceRate = `$${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.SOFT_WASH.minimum})`;
+            serviceRate = `$${PRESSURE_WASHING_RATES.SOFT_WASH.rate}/sq ft`;
             break;
           case 'roof_wash':
             serviceDescription = 'Roof Washing';
@@ -409,11 +409,11 @@ const renderPressureWashingServices = (
             break;
           case 'dumpster_corral':
             serviceDescription = 'Dumpster Corral Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.minimum})`;
+            serviceRate = `$${PRESSURE_WASHING_RATES.DUMPSTER_CORRAL.rate}/sq ft`;
             break;
           case 'commercial':
             serviceDescription = 'Commercial Surface Cleaning';
-            serviceRate = `$${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft (min. $${PRESSURE_WASHING_RATES.COMMERCIAL.minimum})`;
+            serviceRate = `$${PRESSURE_WASHING_RATES.COMMERCIAL.rate}/sq ft`;
             break;
           default:
             serviceDescription = 'Custom Pressure Washing Service';
