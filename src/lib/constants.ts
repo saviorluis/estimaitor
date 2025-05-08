@@ -27,7 +27,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   beauty_store: 1.3,
   interactive_toy_store: 1.45,
   mailroom: 1.25,
-  church: 1.35
+  church: 1.35,
+  residential: 1.0
 };
 
 // Cleaning type multipliers
@@ -137,7 +138,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   beauty_store: 420,    // Detailed cleaning of product displays and testing stations
   interactive_toy_store: 380,    // Interactive play areas and complex environments require detailed cleaning
   mailroom: 520,         // Specialized cleaning for shipping/mailing areas with focus on dust control
-  church: 430          // Large open spaces with detailed cleaning of pews, altars, and religious fixtures
+  church: 430,          // Large open spaces with detailed cleaning of pews, altars, and religious fixtures
+  residential: 500
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -405,7 +407,18 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Dust and clean all religious symbols, artwork, and decorative elements\n" +
     "• Empty all trash receptacles and replace liners\n" +
     "• Special attention to high-touch surfaces in children's ministry areas\n" +
-    "• Clean and sanitize kitchen/pantry areas used for communion and events"
+    "• Clean and sanitize kitchen/pantry areas used for communion and events",
+
+  residential: "Final Cleaning includes:\n" +
+    "• Sweep, vacuum, and mop all hard surface floors and stairs\n" +
+    "• Clean and sanitize bathrooms, kitchens, and laundry areas\n" +
+    "• Clean interior windows, sills, and tracks (full window service quoted separately)\n" +
+    "• Remove dust from all surfaces, baseboards, and trim\n" +
+    "• Clean light fixtures, switches, and outlets\n" +
+    "• Remove stickers and construction debris from all surfaces\n" +
+    "• Clean cabinets, closets, and storage areas\n" +
+    "• Detail clean all rooms, including bedrooms, living areas, and hallways\n" +
+    "• Final touch-up and inspection prior to client walk-through"
 };
 
 // Project type specific scopes of work
@@ -453,7 +466,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   beauty_store: `${SCOPE_OF_WORK.beauty_store}`,
   interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`,
   mailroom: `${SCOPE_OF_WORK.mailroom}`,
-  church: `${SCOPE_OF_WORK.church}`
+  church: `${SCOPE_OF_WORK.church}`,
+  residential: `${SCOPE_OF_WORK.residential}`
 };
 
 // Pressure Washing Constants

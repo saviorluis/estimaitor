@@ -21,7 +21,8 @@ export type ProjectType =
   | 'beauty_store'
   | 'interactive_toy_store'
   | 'mailroom'
-  | 'church';
+  | 'church'
+  | 'residential';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 
