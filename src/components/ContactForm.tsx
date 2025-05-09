@@ -157,6 +157,7 @@ const ContactForm = () => {
             <option value="grocery_store">Grocery Store</option>
             <option value="yoga_studio">Yoga Studio</option>
             <option value="kids_fitness">Children's Fitness Center</option>
+            <option value="car_wash">Car Wash Facility</option>
             <option value="other">Other</option>
           </select>
         </div>

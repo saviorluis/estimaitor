@@ -28,7 +28,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   mailroom: 1.25,
   church: 1.35,
-  residential: 1.0
+  residential: 1.0,
+  car_wash: 1.2
 };
 
 // Cleaning type multipliers
@@ -139,7 +140,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   interactive_toy_store: 380,    // Interactive play areas and complex environments require detailed cleaning
   mailroom: 520,         // Specialized cleaning for shipping/mailing areas with focus on dust control
   church: 430,          // Large open spaces with detailed cleaning of pews, altars, and religious fixtures
-  residential: 500
+  residential: 500,
+  car_wash: 500
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -418,7 +420,17 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Remove stickers and construction debris from all surfaces\n" +
     "• Clean cabinets, closets, and storage areas\n" +
     "• Detail clean all rooms, including bedrooms, living areas, and hallways\n" +
-    "• Final touch-up and inspection prior to client walk-through"
+    "• Final touch-up and inspection prior to client walk-through",
+
+  car_wash: "Car Wash Cleaning includes:\n" +
+    "• Pressure wash all exterior and interior bay surfaces\n" +
+    "• Clean and vacuum all customer and equipment areas\n" +
+    "• Remove trash and debris from all bays and vacuum stations\n" +
+    "• Clean and polish all glass, mirrors, and payment kiosks\n" +
+    "• Wipe down and sanitize all touchpoints (buttons, handles, hoses)\n" +
+    "• Clean and degrease equipment pads and pump areas\n" +
+    "• Inspect and clean signage and lighting fixtures\n" +
+    "• Final inspection for spot cleaning and detail work"
 };
 
 // Project type specific scopes of work
@@ -467,7 +479,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   interactive_toy_store: `${SCOPE_OF_WORK.interactive_toy_store}`,
   mailroom: `${SCOPE_OF_WORK.mailroom}`,
   church: `${SCOPE_OF_WORK.church}`,
-  residential: `${SCOPE_OF_WORK.residential}`
+  residential: `${SCOPE_OF_WORK.residential}`,
+  car_wash: `${SCOPE_OF_WORK.car_wash}`
 };
 
 // Pressure Washing Constants

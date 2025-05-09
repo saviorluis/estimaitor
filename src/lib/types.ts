@@ -22,7 +22,8 @@ export type ProjectType =
   | 'interactive_toy_store'
   | 'mailroom'
   | 'church'
-  | 'residential';
+  | 'residential'
+  | 'car_wash';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 
