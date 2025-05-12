@@ -1059,21 +1059,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       {/* Service Table - Conditionally render T&M placeholder */}
       {isTMMode ? (
         <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded">
-          <h3 className="text-lg font-semibold mb-4 border-b pb-1">Labor Breakdown</h3>
+          <h2 className="text-2xl font-bold text-blue-700 mb-2">Time &amp; Materials (T&amp;M) Quote</h2>
+          <p className="mb-4 text-gray-700">This quote is based on estimated labor hours and materials. Final invoice will reflect actual hours and materials used.</p>
+          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Labor Breakdown</h3>
           <table className="w-full border-collapse mb-6">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border p-2 text-left"># of Cleaners</th>
-                <th className="border p-2 text-left">Estimated Hours</th>
-                <th className="border p-2 text-left">Pay Rate (per hour)</th>
-                <th className="border p-2 text-right">Total Labor Cost</th>
+                <th className="border p-2 text-left"># Cleaners</th>
+                <th className="border p-2 text-left">Est. Hours</th>
+                <th className="border p-2 text-left">Rate/hr</th>
+                <th className="border p-2 text-right">Total Labor</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="border p-2">{formData.numberOfCleaners || 1}</td>
                 <td className="border p-2">{(() => {
-                  // Estimate hours: total sqft / (cleaners * 500 sqft/hr)
                   const cleaners = formData.numberOfCleaners || 1;
                   const hours = Math.ceil((formData.squareFootage || 0) / (cleaners * 500));
                   return hours;
@@ -1088,8 +1089,59 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               </tr>
             </tbody>
           </table>
-          <h4 className="text-md font-semibold mb-2">Materials &amp; Other Costs</h4>
-          <div className="text-gray-700 mb-2">(Materials &amp; other costs breakdown goes here.)</div>
+          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Materials &amp; Equipment</h3>
+          <table className="w-full border-collapse mb-6">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border p-2 text-left">Description</th>
+                <th className="border p-2 text-left">Qty</th>
+                <th className="border p-2 text-left">Unit Cost</th>
+                <th className="border p-2 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border p-2">Cleaning Supplies</td>
+                <td className="border p-2">1</td>
+                <td className="border p-2">$75.00</td>
+                <td className="border p-2 text-right">$75.00</td>
+              </tr>
+              <tr>
+                <td className="border p-2">Floor Machine Rental</td>
+                <td className="border p-2">1</td>
+                <td className="border p-2">$120.00</td>
+                <td className="border p-2 text-right">$120.00</td>
+              </tr>
+            </tbody>
+          </table>
+          {(() => {
+            const cleaners = formData.numberOfCleaners || 1;
+            const hours = Math.ceil((formData.squareFootage || 0) / (cleaners * 500));
+            const labor = cleaners * hours * 18;
+            const materials = 75 + 120;
+            const subtotal = labor + materials;
+            const markup = 0;
+            const total = subtotal + markup;
+            return (
+              <div className="mb-2">
+                <div className="flex justify-between text-md mb-1">
+                  <span className="font-semibold">Subtotal:</span>
+                  <span>${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+                <div className="flex justify-between text-md mb-1">
+                  <span className="font-semibold">Markup:</span>
+                  <span>${markup.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
+                  <span>Estimated Total:</span>
+                  <span>${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <div className="mt-4 text-sm italic text-gray-600">
+            This is a T&amp;M quote. Final invoice will reflect actual hours and materials used.
+          </div>
         </div>
       ) : (
         <div className="mb-8">
