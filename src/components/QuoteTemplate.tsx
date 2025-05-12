@@ -1059,8 +1059,37 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       {/* Service Table - Conditionally render T&M placeholder */}
       {isTMMode ? (
         <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded">
-          <h3 className="text-lg font-semibold mb-2 border-b pb-1">T&amp;M Breakdown</h3>
-          <p className="text-gray-700">T&amp;M Breakdown goes here.</p>
+          <h3 className="text-lg font-semibold mb-4 border-b pb-1">Labor Breakdown</h3>
+          <table className="w-full border-collapse mb-6">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border p-2 text-left"># of Cleaners</th>
+                <th className="border p-2 text-left">Estimated Hours</th>
+                <th className="border p-2 text-left">Pay Rate (per hour)</th>
+                <th className="border p-2 text-right">Total Labor Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border p-2">{formData.numberOfCleaners || 1}</td>
+                <td className="border p-2">{(() => {
+                  // Estimate hours: total sqft / (cleaners * 500 sqft/hr)
+                  const cleaners = formData.numberOfCleaners || 1;
+                  const hours = Math.ceil((formData.squareFootage || 0) / (cleaners * 500));
+                  return hours;
+                })()}</td>
+                <td className="border p-2">$18.00</td>
+                <td className="border p-2 text-right font-semibold">{(() => {
+                  const cleaners = formData.numberOfCleaners || 1;
+                  const hours = Math.ceil((formData.squareFootage || 0) / (cleaners * 500));
+                  const rate = 18;
+                  return `$${(cleaners * hours * rate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                })()}</td>
+              </tr>
+            </tbody>
+          </table>
+          <h4 className="text-md font-semibold mb-2">Materials &amp; Other Costs</h4>
+          <div className="text-gray-700 mb-2">(Materials &amp; other costs breakdown goes here.)</div>
         </div>
       ) : (
         <div className="mb-8">
