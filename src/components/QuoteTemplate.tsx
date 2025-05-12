@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatDate, formatCurrency, generateQuoteNumber, getQuoteCounter, incrementQuoteCounter } from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
@@ -81,7 +81,38 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // State for quote counter
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   const [showPDFModal, setShowPDFModal] = useState(false);
+  const [isTMMode, setIsTMMode] = useState(false);
   
+  // Move defaultQuoteInfo above useEffect
+  const defaultCompanyInfo = {
+    name: "Big Brother Property Solutions",
+    address: "1200 Eastchester Dr.",
+    city: "High Point, NC 27265",
+    phone: "(336) 624-7442",
+    email: "bids@bigbroprops.com",
+    website: "www.bigbrotherpropertysolutions.com"
+  };
+  const defaultClientInfo = {
+    name: '',
+    company: '',
+    address: '',
+    email: '',
+    phone: '',
+  };
+  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.\n2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.\n3. Scope: This quote covers only the services explicitly described.\n4. Additional Services: Any services not specified will be quoted separately.\n5. Access: Client must provide necessary access to the property.\n6. Utilities: Working electricity and water must be available on-site.\n7. Quote Validity: This quote is valid for 30 days from the date issued.`;
+  const defaultNotes = 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.';
+  function defaultQuoteInfo(formData?: FormData) {
+    return {
+      quoteNumber: generateQuoteNumber(),
+      date: formatDate(new Date()),
+      validUntil: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+      projectName: formData?.projectName || '',
+      projectAddress: (formData && 'projectAddress' in formData && (formData as any).projectAddress) ? (formData as any).projectAddress : '',
+      notes: defaultNotes,
+      terms: defaultTerms,
+    };
+  }
+
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
     return (
@@ -99,23 +130,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     // Only run this code on the client side
     if (typeof window !== 'undefined') {
       const savedCompanyInfo = localStorage.getItem('quoteCompanyInfo');
-      return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : {
-        name: "Big Brother Property Solutions",
-        address: "1200 Eastchester Dr.",
-        city: "High Point, NC 27265",
-        phone: "(336) 624-7442",
-        email: "bids@bigbroprops.com",
-        website: "www.bigbrotherpropertysolutions.com"
-      };
+      return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : defaultCompanyInfo;
     }
-    return {
-      name: "Big Brother Property Solutions",
-      address: "1200 Eastchester Dr.",
-      city: "High Point, NC 27265",
-      phone: "(336) 624-7442",
-      email: "bids@bigbroprops.com",
-      website: "www.bigbrotherpropertysolutions.com"
-    };
+    return defaultCompanyInfo;
   });
 
   // State to track if company info is being edited
@@ -126,42 +143,28 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     // Only run this code on the client side
     if (typeof window !== 'undefined') {
       const savedClientInfo = localStorage.getItem('quoteClientInfo');
-      return savedClientInfo ? JSON.parse(savedClientInfo) : {
-        name: '',
-        company: '',
-        address: '',
-        email: '',
-        phone: '',
-      };
+      return savedClientInfo ? JSON.parse(savedClientInfo) : defaultClientInfo;
     }
-    return {
-      name: '',
-      company: '',
-      address: '',
-      email: '',
-      phone: '',
-    };
+    return defaultClientInfo;
   });
-
-  // Default terms and conditions
-  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.
-2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
-3. Scope: This quote covers only the services explicitly described.
-4. Additional Services: Any services not specified will be quoted separately.
-5. Access: Client must provide necessary access to the property.
-6. Utilities: Working electricity and water must be available on-site.
-7. Quote Validity: This quote is valid for 30 days from the date issued.`;
 
   // Quote information state
-  const [quoteInfo, setQuoteInfo] = useState({
-    quoteNumber: generateQuoteNumber(),
-    date: formatDate(new Date()),
-    validUntil: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)), // 30 days from now
-    projectName: '',
-    projectAddress: '',
-    notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
-    terms: defaultTerms,
-  });
+  const [quoteInfo, setQuoteInfo] = useState(defaultQuoteInfo(formData));
+
+  // Add useEffect to reset info on new calculation
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setCompanyInfo(defaultCompanyInfo);
+    setClientInfo(defaultClientInfo);
+    setQuoteInfo(defaultQuoteInfo(formData));
+    setMarkupPercentage(0);
+    setAdjustedPrices({});
+    setQuoteCounter(getQuoteCounter());
+  }, [formData]);
 
   // Handle company information changes
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -682,6 +685,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
       {/* Print and Download Buttons - Hidden when printing */}
       <div className="flex justify-end mb-6 print:hidden">
+        <div className="mr-auto flex items-center">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={isTMMode}
+              onChange={e => setIsTMMode(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+            />
+            <span className="ml-2 text-sm text-gray-700">Show as T&amp;M Quote</span>
+          </label>
+        </div>
         <button
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
@@ -1041,6 +1055,206 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </div>
         </div>
       </div>
+
+      {/* Service Table - Conditionally render T&M placeholder */}
+      {isTMMode ? (
+        <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded">
+          <h3 className="text-lg font-semibold mb-2 border-b pb-1">T&amp;M Breakdown</h3>
+          <p className="text-gray-700">T&amp;M Breakdown goes here.</p>
+        </div>
+      ) : (
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-2 border-b pb-1">Service Details</h3>
+          {/* Scope of Work */}
+          <div className="mb-4 p-4 bg-gray-50 print:bg-white rounded">
+            <h4 className="font-semibold mb-2">Scope of Work</h4>
+            <p className="whitespace-pre-line text-sm">
+              {SCOPE_OF_WORK[formData.projectType] || ''} ({(formData.squareFootage || 0).toLocaleString()} sq ft)
+            </p>
+          </div>
+          <table className="w-full border-collapse print:border print:border-gray-300">
+            <thead>
+              <tr className="bg-gray-100 print:bg-gray-50">
+                <th className="border p-2 text-left print:font-bold">Description</th>
+                <th className="border p-2 text-right print:font-bold">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Base Cleaning Service */}
+              <tr>
+                <td className="border p-2 print:border print:border-gray-300">
+                  <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
+                  <div className="text-xs mt-1">
+                    {(SCOPE_OF_WORK[formData.projectType] || '').replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
+                  </div>
+                  {formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+                    <div className="text-xs italic text-gray-500 mt-1">Note: Price includes travel ({formData.distanceFromOffice} miles)</div>
+                  )}
+                  {formData.projectType === 'church' && (
+                    <div className="text-xs mt-2">
+                      <div className="font-bold">Areas Included:</div>
+                      <ul className="list-disc ml-4">
+                        <li>Green Room</li>
+                        <li>Religious Ed (6 split by age group: 4th, 5th, 3rd grade, 2nd grade, 2 nurseries, K-1)</li>
+                        <li>Auditorium</li>
+                        <li>Platform</li>
+                        <li>Storage (5)</li>
+                        <li>Kitchen</li>
+                        <li>AV Control Room</li>
+                        <li>Cafe</li>
+                        <li>Restrooms (4)</li>
+                        <li>2 Assembly Areas</li>
+                        <li>Broadcast</li>
+                        <li>4 Offices</li>
+                      </ul>
+                    </div>
+                  )}
+                </td>
+                <td className="border p-2 text-right print:border print:border-gray-300 font-semibold">
+                  {formatCurrency(getAdjustedPrice('basePrice', estimateData.basePrice || 0))}
+                </td>
+              </tr>
+              {/* VCT Flooring if applicable */}
+              {formData.hasVCT && (
+                <tr>
+                  <td className="border p-2 print:border print:border-gray-300">
+                    <div className="font-semibold">VCT Flooring Treatment</div>
+                    <div className="text-sm">Stripping, waxing, and buffing of vinyl composition tile</div>
+                  </td>
+                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}</td>
+                </tr>
+              )}
+              {/* Pressure Washing if applicable */}
+              {(formData.needsPressureWashing || formData.cleaningType === 'pressure_washing_only') && (
+                <tr>
+                  <td className="border p-2 print:border print:border-gray-300">
+                    <div className="font-semibold">Pressure Washing Services</div>
+                    <div className="text-sm">
+                      {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 
+                        ? `${calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft total (multiple service types)`
+                        : `${(formData.pressureWashingArea || 0).toLocaleString()} sq ft of exterior/concrete surfaces`
+                      }
+                    </div>
+                    <div className="text-sm">Includes equipment rental, materials, and professional-grade cleaners</div>
+                    {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        <span className="italic">Service Types: </span>
+                        {formData.pressureWashingServices.map((service, i) => (
+                          <span key={service}>
+                            {service.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            {i < formData.pressureWashingServices!.length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500 mt-1">
+                      <span className="italic">Payment Terms: </span>
+                      {formData.projectType === 'warehouse' ? 'Net 30' : 
+                        ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? 'Net 10' : 
+                        'Payment on Invoice'}
+                    </div>
+                  </td>
+                  <td className="border p-2 text-right print:border print:border-gray-300">{formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}</td>
+                </tr>
+              )}
+              {/* Travel Expenses - only show for jobs over 100 miles */}
+              {formData.distanceFromOffice > 100 && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Travel Expenses</div>
+                    <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
+                  </td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
+                </tr>
+              )}
+              {/* Overnight Accommodations if applicable */}
+              {formData.stayingOvernight && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Overnight Accommodations</div>
+                    <div className="text-sm">{formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members</div>
+                    <div className="text-sm">Includes hotel and per diem expenses</div>
+                  </td>
+                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('overnightCost', estimateData.overnightCost || 0))}</td>
+                </tr>
+              )}
+              {/* Urgency Adjustment if applicable */}
+              {estimateData.urgencyMultiplier > 1 && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Urgency Adjustment</div>
+                    <div className="text-sm">Priority scheduling (Level {formData.urgencyLevel}/10)</div>
+                  </td>
+                  <td className="border p-2 text-right">
+                    {formatCurrency(
+                      getAdjustedPrice('urgencyCost',
+                        (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+                          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+                        ((estimateData.urgencyMultiplier || 1) - 1)
+                      )
+                    )}
+                  </td>
+                </tr>
+              )}
+              {/* Window Cleaning if applicable */}
+              {(formData.needsWindowCleaning || formData.cleaningType === 'window_cleaning_only') && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Window Cleaning Services</div>
+                    <div className="text-sm">{(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows</div>
+                    <div className="text-sm">Includes all necessary equipment and cleaning solutions</div>
+                    {!formData.chargeForWindowCleaning && (
+                      <div className="text-sm italic text-gray-500">Window cleaning will be quoted separately</div>
+                    )}
+                  </td>
+                  <td className="border p-2 text-right">
+                    {formData.chargeForWindowCleaning ? formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0)) : 'Separate Quote'}
+                  </td>
+                </tr>
+              )}
+              {/* Display case cleaning for jewelry stores */}
+              {formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0 && (
+                <tr>
+                  <td className="border p-2">
+                    <div className="font-semibold">Display Case Cleaning</div>
+                    <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display case{formData.numberOfDisplayCases !== 1 ? 's' : ''}</div>
+                    <div className="text-xs mt-1">Professional interior and exterior cleaning with specialized glass cleaners</div>
+                  </td>
+                  <td className="border p-2 text-right">Included</td>
+                </tr>
+              )}
+              {/* Calculate adjusted subtotal */}
+              {(() => {
+                const subtotal = Object.keys(adjustedPrices).length > 0 
+                  ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                  : estimateData.totalBeforeMarkup;
+                const salesTax = subtotal * 0.07;
+                const total = subtotal + salesTax;
+                
+                return (
+                  <>
+                    {/* Subtotal */}
+                    <tr>
+                      <td className="border p-2 font-semibold">Subtotal</td>
+                      <td className="border p-2 text-right font-semibold">{formatCurrency(subtotal)}</td>
+                    </tr>
+                    {/* Sales Tax */}
+                    <tr>
+                      <td className="border p-2">Sales Tax (7%)</td>
+                      <td className="border p-2 text-right">{formatCurrency(salesTax)}</td>
+                    </tr>
+                    {/* Total */}
+                    <tr className="bg-blue-600 text-white">
+                      <td className="border p-2 font-bold">TOTAL</td>
+                      <td className="border p-2 text-right font-bold">{formatCurrency(total)}</td>
+                    </tr>
+                  </>
+                );
+              })()}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
