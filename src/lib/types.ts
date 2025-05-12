@@ -23,7 +23,8 @@ export type ProjectType =
   | 'mailroom'
   | 'church'
   | 'residential'
-  | 'car_wash';
+  | 'car_wash'
+  | 'construction_trailor';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 

@@ -29,7 +29,8 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   mailroom: 1.25,
   church: 1.35,
   residential: 1.0,
-  car_wash: 1.2
+  car_wash: 1.2,
+  construction_trailor: 1.1
 };
 
 // Cleaning type multipliers
@@ -141,7 +142,8 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   mailroom: 520,         // Specialized cleaning for shipping/mailing areas with focus on dust control
   church: 430,          // Large open spaces with detailed cleaning of pews, altars, and religious fixtures
   residential: 500,
-  car_wash: 500
+  car_wash: 500,
+  construction_trailor: 400
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -430,7 +432,9 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
     "• Wipe down and sanitize all touchpoints (buttons, handles, hoses)\n" +
     "• Clean and degrease equipment pads and pump areas\n" +
     "• Inspect and clean signage and lighting fixtures\n" +
-    "• Final inspection for spot cleaning and detail work"
+    "• Final inspection for spot cleaning and detail work",
+
+  construction_trailor: `• Clean and disinfect all surfaces, desks, and workstations\n• Sweep and mop floors\n• Clean restrooms and restock supplies\n• Empty trash and replace liners\n• Clean windows and glass surfaces\n• Sanitize high-touch areas (door handles, switches, etc.)`
 };
 
 // Project type specific scopes of work
@@ -480,7 +484,8 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   mailroom: `${SCOPE_OF_WORK.mailroom}`,
   church: `${SCOPE_OF_WORK.church}`,
   residential: `${SCOPE_OF_WORK.residential}`,
-  car_wash: `${SCOPE_OF_WORK.car_wash}`
+  car_wash: `${SCOPE_OF_WORK.car_wash}`,
+  construction_trailor: `${SCOPE_OF_WORK.construction_trailor}`
 };
 
 // Pressure Washing Constants

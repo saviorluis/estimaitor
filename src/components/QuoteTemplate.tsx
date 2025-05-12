@@ -1061,6 +1061,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded">
           <h2 className="text-2xl font-bold text-blue-700 mb-2">Time &amp; Materials (T&amp;M) Quote</h2>
           <p className="mb-4 text-gray-700">This quote is based on estimated labor hours and materials. Final invoice will reflect actual hours and materials used.</p>
+          <div className="mb-2 text-md text-gray-800">
+            <span className="font-semibold">Hourly Rate:</span> $18.00/hr<br />
+            <span className="font-semibold">Estimated Total Labor Hours:</span> {(() => {
+              const cleaners = formData.numberOfCleaners || 1;
+              return Math.ceil((formData.squareFootage || 0) / (cleaners * 500));
+            })()} hours
+          </div>
           <h3 className="text-lg font-semibold mb-2 border-b pb-1">Labor Breakdown</h3>
           <table className="w-full border-collapse mb-6">
             <thead>
