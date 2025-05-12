@@ -896,8 +896,33 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 <tr>
                   <td className="border p-2 print:border print:border-gray-300">
                     <div className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</div>
+                    <div className="text-xs mt-1">
+                      {(SCOPE_OF_WORK[formData.projectType] || '').replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
+                    </div>
+                    {formData.distanceFromOffice <= 100 && formData.distanceFromOffice > 0 && (
+                      <div className="text-xs italic text-gray-500 mt-1">Note: Price includes travel ({formData.distanceFromOffice} miles)</div>
+                    )}
+                    {formData.projectType === 'church' && (
+                      <div className="text-xs mt-2">
+                        <div className="font-bold">Areas Included:</div>
+                        <ul className="list-disc ml-4">
+                          <li>Green Room</li>
+                          <li>Religious Ed (6 split by age group: 4th, 5th, 3rd grade, 2nd grade, 2 nurseries, K-1)</li>
+                          <li>Auditorium</li>
+                          <li>Platform</li>
+                          <li>Storage (5)</li>
+                          <li>Kitchen</li>
+                          <li>AV Control Room</li>
+                          <li>Cafe</li>
+                          <li>Restrooms (4)</li>
+                          <li>2 Assembly Areas</li>
+                          <li>Broadcast</li>
+                          <li>4 Offices</li>
+                        </ul>
+                      </div>
+                    )}
                   </td>
-                  <td className="border p-2 text-right print:border print:border-gray-300">
+                  <td className="border p-2 text-right print:border print:border-gray-300 font-semibold">
                     {formatCurrency(getAdjustedPrice('basePrice', estimateData.basePrice || 0))}
                   </td>
                 </tr>
@@ -914,7 +939,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 )}
 
                 {/* Pressure Washing if applicable */}
-                {formData.needsPressureWashing && (
+                {(formData.needsPressureWashing || formData.cleaningType === 'pressure_washing_only') && (
                   <tr>
                     <td className="border p-2 print:border print:border-gray-300">
                       <div className="font-semibold">Pressure Washing Services</div>
@@ -947,14 +972,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   </tr>
                 )}
 
-                {/* Travel Expenses */}
-                <tr>
-                  <td className="border p-2">
-                    <div className="font-semibold">Travel Expenses</div>
-                    <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
-                  </td>
-                  <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
-                </tr>
+                {/* Travel Expenses - only show for jobs over 100 miles */}
+                {formData.distanceFromOffice > 100 && (
+                  <tr>
+                    <td className="border p-2">
+                      <div className="font-semibold">Travel Expenses</div>
+                      <div className="text-sm">{(formData.distanceFromOffice || 0)} miles</div>
+                    </td>
+                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}</td>
+                  </tr>
+                )}
 
                 {/* Overnight Accommodations if applicable */}
                 {formData.stayingOvernight && (
@@ -988,7 +1015,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 )}
 
                 {/* Window Cleaning if applicable */}
-                {formData.needsWindowCleaning && (
+                {(formData.needsWindowCleaning || formData.cleaningType === 'window_cleaning_only') && (
                   <tr>
                     <td className="border p-2">
                       <div className="font-semibold">Window Cleaning Services</div>
@@ -1009,9 +1036,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                   <tr>
                     <td className="border p-2">
                       <div className="font-semibold">Display Case Cleaning</div>
-                      <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display cases</div>
+                      <div className="text-sm">{(formData.numberOfDisplayCases || 0)} display case{formData.numberOfDisplayCases !== 1 ? 's' : ''}</div>
+                      <div className="text-xs mt-1">Professional interior and exterior cleaning with specialized glass cleaners</div>
                     </td>
-                    <td className="border p-2 text-right">{formatCurrency(getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0))}</td>
+                    <td className="border p-2 text-right">Included</td>
                   </tr>
                 )}
 
