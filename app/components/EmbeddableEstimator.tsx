@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import EstimateForm from '../../src/components/EstimateForm';
 import EstimateResult from '../../src/components/EstimateResult';
