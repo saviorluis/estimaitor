@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { FormData } from '@/src/lib/types';
+import { FormData } from '../lib/types';
 
 interface EstimateFormProps {
   onSubmit: (data: FormData) => void;

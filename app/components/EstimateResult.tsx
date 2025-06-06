@@ -1,6 +1,6 @@
 "use client";
 
-import { FormData, EstimateData } from '@/src/lib/types';
+import { FormData, EstimateData } from '../lib/types';
 
 interface EstimateResultProps {
   estimateData: EstimateData;

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import EstimateForm from './EstimateForm';
 import EstimateResult from './EstimateResult';
-import { FormData } from '@/src/lib/types';
-import { calculateEstimate } from '@/src/lib/estimator';
+import { FormData } from '../lib/types';
+import { calculateEstimate } from '../lib/estimator';
 
 interface EmbeddableEstimatorProps {
   initialTab?: 'commercial' | 'residential';
