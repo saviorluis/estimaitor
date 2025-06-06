@@ -520,6 +520,8 @@ function getProjectTypeTimeModifier(projectType: string): number {
       return 1.4; // Beauty stores require detailed cleaning of product displays
     case 'interactive_toy_store':
       return 1.6; // Interactive toy stores have complex play areas requiring thorough sanitization
+    case 'shell_building':
+      return 0.8; // Shell buildings are faster to clean due to minimal fixtures and open spaces
     case 'office':
     default:
       return 1.0; // Office is the baseline

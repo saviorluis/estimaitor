@@ -24,7 +24,8 @@ export type ProjectType =
   | 'church'
   | 'residential'
   | 'car_wash'
-  | 'construction_trailor';
+  | 'construction_trailor'
+  | 'shell_building';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
 
