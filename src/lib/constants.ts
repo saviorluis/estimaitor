@@ -31,7 +31,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   residential: 1.0,
   car_wash: 1.2,
   construction_trailor: 1.1,
-  shell_building: 0.9
+  shell_building: 0.7
 };
 
 // Cleaning type multipliers
@@ -145,7 +145,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   residential: 500,
   car_wash: 500,
   construction_trailor: 400,
-  shell_building: 800
+  shell_building: 1000
 };
 
 // Markup percentage (1.5x = 50% markup)
@@ -198,7 +198,15 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
   residential: 'Post-construction cleaning of ___ Sq Ft ___ residential property including living spaces and utility areas.',
   car_wash: 'Post-construction cleaning of ___ Sq Ft ___ car wash including wash bays and equipment rooms.',
   construction_trailor: 'Post-construction cleaning of ___ Sq Ft ___ construction trailer including office space and meeting areas.',
-  shell_building: 'Post-construction cleaning of ___ Sq Ft ___ shell building including concrete floors, restroom(s), and basic fixtures. Includes debris removal, surface cleaning, and sanitization of installed fixtures.'
+  shell_building: 'Post-construction cleaning of ___ Sq Ft ___ retail shell building. Includes:\n' +
+    '• Thorough cleaning of restroom fixtures and surfaces\n' +
+    '• Removal of construction debris and dust\n' +
+    '• Cleaning of concrete floors\n' +
+    '• Cleaning of any installed basic fixtures\n' +
+    '• Window and glass cleaning (if installed)\n' +
+    '• Sanitization of restroom facilities\n' +
+    '• Removal of construction labels and stickers\n' +
+    '• Basic dusting of exposed surfaces/ductwork'
 };
 
 // Project type specific scopes of work

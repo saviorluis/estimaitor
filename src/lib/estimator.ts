@@ -47,7 +47,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     numberOfDisplayCases
   } = formData;
 
-  // Ensure gasPrice is a number
+  // Ensure gasPrice is a number and use it in travel cost calculation
   const gasPrice = typeof rawGasPrice === 'string' ? parseFloat(rawGasPrice) : (rawGasPrice || 3.50);
 
   // Apply project type multiplier
@@ -56,22 +56,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Apply cleaning type multiplier
   const cleaningTypeMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
 
-  // Calculate travel cost (round trip)
-  const roundTripDistance = distanceFromOffice * 2; // Multiply by 2 for round trip
-  let travelCost = 0;
-
-  if (distanceFromOffice > 100) {
-    // For distant jobs (over 100 miles), show the travel cost but at a reduced rate
-    // Reduce the per-mile rate for distant jobs to balance pricing
-    travelCost = roundTripDistance * (TRAVEL_COST_PER_MILE * 0.65); // Reduced rate for long-distance
-    
-    // Round to a more even number for cleaner quotes
-    travelCost = Math.round(travelCost / 10) * 10;
-  } else {
-    // For nearby jobs, calculate travel cost but it will be distributed
-    // Instead of showing as separate item, we'll add it to the base price later
-    travelCost = 0; // Set to 0 as it won't appear as a line item
-  }
+  // Calculate travel cost (round trip) using gas price
+  const roundTripDistance = distanceFromOffice * 2;
+  const travelCost = roundTripDistance * TRAVEL_COST_PER_MILE * (gasPrice / 3.50); // Adjust travel cost based on current gas price
 
   // For pressure washing only service type, reset the base price
   let basePrice = 0;
@@ -120,7 +107,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate pressure washing cost
   let pressureWashingCost = 0;
-  const pressureWashingServiceDetails: Record<PressureWashingServiceType, {area: number, cost: number}> = {} as any;
+  const pressureWashingServiceDetails: Record<PressureWashingServiceType, { area: number; cost: number }> = {} as Record<PressureWashingServiceType, { area: number; cost: number }>;
   
   if (needsPressureWashing || cleaningType === 'pressure_washing_only') {
     if (pressureWashingServices && pressureWashingServices.length > 0 && pressureWashingServiceAreas) {
@@ -521,7 +508,7 @@ function getProjectTypeTimeModifier(projectType: string): number {
     case 'interactive_toy_store':
       return 1.6; // Interactive toy stores have complex play areas requiring thorough sanitization
     case 'shell_building':
-      return 0.8; // Shell buildings are faster to clean due to minimal fixtures and open spaces
+      return 0.6; // Shell buildings are much faster to clean due to minimal fixtures and mostly open space
     case 'office':
     default:
       return 1.0; // Office is the baseline
