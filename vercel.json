@@ -6,6 +6,15 @@
       "use": "@vercel/next"
     }
   ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "headers": {
+        "x-vercel-force-no-cache": "true"
+      }
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_VERCEL_ENV": "production"
   }
