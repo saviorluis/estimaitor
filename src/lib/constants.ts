@@ -257,7 +257,18 @@ export const PROJECT_SCOPES: Record<ProjectType, string> = {
   church: `${SCOPE_OF_WORK.church}`,
   residential: `${SCOPE_OF_WORK.residential}`,
   car_wash: `${SCOPE_OF_WORK.car_wash}`,
-  construction_trailor: `${SCOPE_OF_WORK.construction_trailor}`
+  construction_trailor: `${SCOPE_OF_WORK.construction_trailor}`,
+  shell_building: `
+    • Thorough cleaning and sanitization of restroom fixtures and surfaces
+    • Complete removal of construction debris and dust from all areas
+    • Deep cleaning of concrete floors and removal of any construction residue
+    • Cleaning and inspection of any installed basic fixtures
+    • Window and glass cleaning (if installed) including frame cleaning
+    • Detailed sanitization of all restroom facilities and fixtures
+    • Removal of all construction labels, stickers, and temporary markings
+    • Basic dusting and cleaning of exposed surfaces, ductwork, and ceiling areas
+    • Final inspection to ensure all areas meet post-construction standards
+  `
 };
 
 // Pressure Washing Constants
