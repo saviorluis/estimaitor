@@ -8,12 +8,16 @@ import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS, PRESSURE_WASHING_RA
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
+  savedFormData?: FormData | null;
 }
 
 // Storage key for saving form data
 const STORAGE_KEY = 'estimaitor_form_data';
 
-export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
+export default function EstimatorForm({
+  onEstimateCalculated,
+  savedFormData
+}: EstimatorFormProps) {
   const [stayingOvernight, setStayingOvernight] = useState(false);
   const [recommendedCleaners, setRecommendedCleaners] = useState(3);
   const [urgencyLevel, setUrgencyLevel] = useState(1);
