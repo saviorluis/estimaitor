@@ -70,15 +70,16 @@ export function calculateEstimate(formData: FormData): EstimateData {
     // Calculate normal base price for other cleaning types
     basePrice = squareFootage * BASE_RATE_PER_SQFT * projectTypeMultiplier * cleaningTypeMultiplier;
     
-    // For jobs within 100 miles, distribute travel cost into the base price
+    // For jobs within 100 miles, include travel cost in the base price
     if (distanceFromOffice <= 100) {
-      const nearbyTravelCost = roundTripDistance * TRAVEL_COST_PER_MILE;
-      basePrice += nearbyTravelCost;
-      
+      basePrice += travelCost;
       // Round the base price to a cleaner number
       basePrice = Math.ceil(basePrice / 5) * 5;
     }
   }
+
+  // Set travel cost to 0 if it's included in base price
+  let finalTravelCost = distanceFromOffice <= 100 ? 0 : travelCost;
 
   // Calculate VCT cost if applicable
   const vctCost = hasVCT ? squareFootage * VCT_COST_PER_SQFT : 0;
@@ -103,6 +104,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     }
     
     overnightCost = hotelCost + perDiemCost + vehicleCost;
+    
+    // For overnight stays, always show travel as a separate line item
+    finalTravelCost = travelCost;
   }
 
   // Calculate pressure washing cost
@@ -255,7 +259,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const totalBeforeMarkup = (
     basePrice +
     vctCost +
-    travelCost +
+    finalTravelCost +  // Use finalTravelCost instead of travelCost
     overnightCost +
     pressureWashingCost +
     windowCleaningCost +
@@ -381,7 +385,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     cleaningTypeMultiplier,
     projectTypeMultiplier,
     vctCost,
-    travelCost,
+    travelCost: finalTravelCost,  // Use finalTravelCost instead of travelCost
     overnightCost,
     urgencyMultiplier,
     totalBeforeMarkup,
