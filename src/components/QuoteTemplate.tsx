@@ -100,8 +100,48 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     email: '',
     phone: '',
   };
-  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.\n2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.\n3. Scope: This quote covers only the services explicitly described.\n4. Additional Services: Any services not specified will be quoted separately.\n5. Access: Client must provide necessary access to the property.\n6. Utilities: Working electricity and water must be available on-site.\n7. Quote Validity: This quote is valid for 30 days from the date issued.`;
-  const defaultNotes = 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.';
+  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.
+2. Cancellation and Rescheduling Policy: 
+   - A minimum of 48-hour notice is required for any cancellation or rescheduling.
+   - One free reschedule is permitted for construction delays if notified 48 hours in advance.
+   - Additional reschedules will result in a rescheduling fee of 25% of the quoted price.
+   - No-shows or day-of cancellations will be charged 50% of the quoted price.
+   - Multiple reschedules (more than 2) may result in contract termination.
+3. Scope: This quote covers only the services explicitly described.
+4. Additional Services: Any services not specified will be quoted separately.
+5. Access: Client must provide necessary access to the property.
+6. Utilities: Working electricity and water must be available on-site.
+7. Quote Validity: This quote is valid for 30 days from the date issued.
+8. Weather Conditions: For exterior services, we reserve the right to reschedule due to inclement weather without penalty.
+9. Minimum Service Fee: Cancellations after our team has been dispatched will incur a minimum service fee.
+10. Contract Termination: We reserve the right to terminate the contract for repeated cancellations or non-payment.`;
+
+  const defaultNotes = `This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.
+
+Confidentiality Statement:
+This proposal contains confidential and proprietary information belonging exclusively to Big Brother Property Solutions ("Company") and is submitted solely for the use of ${formData?.clientName || 'Customer'} ("Client") in evaluating our services and pricing estimate. By receiving this proposal:
+
+1. Confidential Information: All information contained herein, including but not limited to pricing, methodologies, techniques, equipment specifications, staffing details, and proprietary cleaning processes, is considered strictly confidential.
+
+2. Non-Disclosure: Client agrees not to disclose, reproduce, transmit, or share any part of this proposal with any third party without prior written consent from Big Brother Property Solutions.
+
+3. Limited Use: This information may only be used to evaluate this specific proposal and pricing estimate. Any other use is expressly prohibited.
+
+4. Intellectual Property: All concepts, techniques, and methodologies described remain the exclusive property of Big Brother Property Solutions.
+
+5. Data Protection: Each page of this proposal is subject to these confidentiality terms and should be treated as confidential information.
+
+6. Contract Award: If a contract is awarded to Big Brother Property Solutions, Client may only use or disclose information to the extent specified in the resulting contract.
+
+7. Independent Information: These restrictions do not limit Client's right to use information obtained independently from non-confidential sources.
+
+8. Content Creation and Documentation:
+   - Company regularly documents its work through photos and video content for quality assurance, training, and marketing purposes.
+   - By accepting this proposal, Client acknowledges and consents to photo/video documentation during service delivery.
+   - If Client has any restrictions or concerns regarding photo/video documentation, these must be communicated in writing prior to our team arriving on site.
+   - Failure to notify Company of documentation restrictions before service date may result in forfeiture of any rescheduling options.
+
+NOTICE: USE OR DISCLOSURE OF DATA CONTAINED IN THIS PROPOSAL IS SUBJECT TO THE ABOVE CONFIDENTIALITY TERMS.`;
   function defaultQuoteInfo(formData?: FormData) {
     return {
       quoteNumber: generateQuoteNumber(),
