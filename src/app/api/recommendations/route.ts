@@ -66,23 +66,20 @@ function generateRecommendations(data: AIRecommendationRequest): string[] {
   // Recommendations based on cleaning type
   switch (data.cleaningType) {
     case 'rough':
-      recommendations.push('Focus on debris removal and basic surface cleaning');
-      recommendations.push('Bring heavy-duty garbage bags and dumpster access may be needed');
+      recommendations.push('Plan for debris removal and basic surface cleaning');
+      recommendations.push('Focus on removing construction debris and dust');
       break;
     case 'final':
-      recommendations.push('Bring a variety of cleaning solutions for different surfaces');
       recommendations.push('Plan for detailed cleaning of all visible surfaces');
       break;
-    case 'rough_final':
-      recommendations.push('Prepare for a two-stage cleaning process with debris removal followed by detailed cleaning');
-      recommendations.push('Bring equipment for both rough cleaning and detailed final touches');
-      recommendations.push('Schedule proper inspection between the rough and final stages');
+    case 'light_touchup':
+      recommendations.push('Focus on quick refresh of visible areas');
+      recommendations.push('Prepare for light dusting and touch-up work');
       break;
     case 'rough_final_touchup':
-      recommendations.push('Prepare for a comprehensive three-stage cleaning process');
-      recommendations.push('Bring full range of equipment from heavy-duty to detail cleaning tools');
-      recommendations.push('Allow extra time for final inspection and touchup work');
-      recommendations.push('Consider splitting team members for different cleaning stages');
+      recommendations.push('Prepare for comprehensive cleaning process including rough clean, final clean, and touch-ups');
+      recommendations.push('Schedule proper inspection between each cleaning stage');
+      recommendations.push('Bring equipment for all cleaning stages from debris removal to final touches');
       break;
   }
   
