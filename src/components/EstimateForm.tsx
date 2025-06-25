@@ -95,9 +95,10 @@ export default function EstimateForm({
           onChange={handleChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         >
-          <option value="rough">Rough Clean</option>
-          <option value="final">Final Clean</option>
-          <option value="rough_final">Rough + Final Clean</option>
+          <option value="rough">Rough Clean (80% of standard rate)</option>
+          <option value="final">Final Clean (Standard rate)</option>
+          <option value="light_touchup">Light Touch-up Clean (60% of standard rate)</option>
+          <option value="touchup">Touch-up Clean (70% of standard rate)</option>
           <option value="rough_final_touchup">Complete Package (Rough + Final + Touch-up)</option>
           <option value="pressure_washing_only">Pressure Washing Only</option>
           <option value="window_cleaning_only">Window Cleaning Only</option>

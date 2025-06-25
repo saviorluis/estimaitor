@@ -251,7 +251,8 @@ export default function EstimatorForm({
           >
             <option value="rough">Rough Clean (80% of standard rate)</option>
             <option value="final">Final Clean (Standard rate)</option>
-            <option value="rough_final">Rough & Final Clean (120% of standard rate)</option>
+            <option value="light_touchup">Light Touch-up Clean (60% of standard rate)</option>
+            <option value="touchup">Touch-up Clean (70% of standard rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% of standard rate)</option>
             <option value="pressure_washing_only">Pressure Washing Only Service</option>
             <option value="window_cleaning_only">Window Cleaning Only Service</option>
