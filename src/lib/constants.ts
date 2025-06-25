@@ -36,9 +36,11 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
 
 // Cleaning type multipliers
 export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
+  post_construction: 1.0,
   rough: 0.8,
   final: 1.0,
-  rough_final: 1.2,
+  touchup: 0.7,
+  light_touchup: 0.6,
   rough_final_touchup: 1.45,
   pressure_washing_only: 1.0,
   window_cleaning_only: 1.0
@@ -46,9 +48,11 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
 
 // Cleaning type descriptions
 export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
+  post_construction: "Complete post-construction cleaning of all surfaces and areas (standard rate).",
   rough: "First stage cleaning that focuses on debris removal and basic surface cleaning (80% of standard rate).",
   final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
-  rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
+  touchup: "Touch-up service for previously cleaned areas (70% of standard rate).",
+  light_touchup: "Quick touch-up cleaning focusing on visible areas and light dusting (60% of standard rate).",
   rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate).",
   pressure_washing_only: "Specialized exterior pressure washing services only - no interior cleaning included. No minimum requirements - available for any area size.",
   window_cleaning_only: "Specialized window cleaning services only - no interior cleaning included. No minimum requirements - available for any number of windows."
@@ -56,9 +60,11 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
 
 // Cleaning type time multipliers (how much longer each type takes)
 export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
+  post_construction: 1.0,
   rough: 0.7,
   final: 1.0,
-  rough_final: 1.5,
+  touchup: 0.6,
+  light_touchup: 0.5,
   rough_final_touchup: 1.8,
   pressure_washing_only: 1.0,
   window_cleaning_only: 1.0

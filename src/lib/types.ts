@@ -27,7 +27,15 @@ export type ProjectType =
   | 'construction_trailor'
   | 'shell_building';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing_only' | 'window_cleaning_only';
+export type CleaningType = 
+  | 'post_construction'
+  | 'rough'
+  | 'final'
+  | 'touchup'
+  | 'light_touchup'
+  | 'rough_final_touchup'
+  | 'pressure_washing_only'
+  | 'window_cleaning_only';
 
 export type PressureWashingServiceType = 
   | 'soft_wash'

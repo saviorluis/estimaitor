@@ -243,6 +243,8 @@ const getCleaningTypeDisplay = (type: string): string => {
       return 'Rough & Final Clean';
     case 'rough_final_touchup':
       return 'Rough, Final & Touch-up Clean';
+    case 'light_touchup':
+      return 'Light Touch-up Clean';
     case 'pressure_washing_only':
       return 'Pressure Washing Services';
     case 'window_cleaning_only':
