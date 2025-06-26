@@ -79,6 +79,7 @@ export default function EstimatorForm({
     <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Type</label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Select the type of building or facility</p>
         <select
           name="projectType"
           value={formData.projectType}
@@ -102,6 +103,7 @@ export default function EstimatorForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Square Footage</label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter the total area to be cleaned</p>
         <input
           type="number"
           name="squareFootage"
@@ -114,6 +116,7 @@ export default function EstimatorForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Distance from Office (miles)</label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Distance from our office to the job site</p>
         <input
           type="number"
           name="distanceFromOffice"
@@ -126,6 +129,7 @@ export default function EstimatorForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Number of Cleaners</label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">How many cleaning staff needed</p>
         <input
           type="number"
           name="numberOfCleaners"
