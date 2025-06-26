@@ -120,3 +120,12 @@ export interface AIRecommendationRequest {
 export interface AIRecommendationResponse {
   recommendations: string[];
 }
+
+export interface CompanyInfo {
+  name: string;
+  address: string;
+  city: string;
+  phone: string;
+  email: string;
+  website: string;
+}
