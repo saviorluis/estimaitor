@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { pdf } from '@react-pdf/renderer';
+import { pdf, Document } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
@@ -58,15 +58,17 @@ export const generateDocumentPackage = async ({
 
     // Generate Quote PDF
     const quotePDFBlob = await pdf(
-      React.createElement(QuotePDF, {
-        estimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo,
-        showCoverPage: true,
-        documentType: "QUOTE"
-      })
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo,
+          showCoverPage: true,
+          documentType: "QUOTE"
+        })
+      )
     ).toBlob();
     folder.file('Quote.pdf', quotePDFBlob);
 
@@ -76,15 +78,17 @@ export const generateDocumentPackage = async ({
       quoteNumber: `WO-${quoteInfo.quoteNumber}`,
     };
     const workOrderBlob = await pdf(
-      React.createElement(QuotePDF, {
-        estimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo: workOrderQuoteInfo,
-        showCoverPage: false,
-        documentType: "WORK_ORDER"
-      })
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo: workOrderQuoteInfo,
+          showCoverPage: false,
+          documentType: "WORK_ORDER"
+        })
+      )
     ).toBlob();
     folder.file('Work_Order.pdf', workOrderBlob);
 
@@ -94,15 +98,17 @@ export const generateDocumentPackage = async ({
       quoteNumber: `PO-${quoteInfo.quoteNumber}`,
     };
     const purchaseOrderBlob = await pdf(
-      React.createElement(QuotePDF, {
-        estimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo: purchaseOrderQuoteInfo,
-        showCoverPage: false,
-        documentType: "PURCHASE_ORDER"
-      })
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo: purchaseOrderQuoteInfo,
+          showCoverPage: false,
+          documentType: "PURCHASE_ORDER"
+        })
+      )
     ).toBlob();
     folder.file('Purchase_Order.pdf', purchaseOrderBlob);
 
@@ -112,15 +118,17 @@ export const generateDocumentPackage = async ({
       quoteNumber: `CO-${quoteInfo.quoteNumber}`,
     };
     const changeOrderBlob = await pdf(
-      React.createElement(QuotePDF, {
-        estimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo: changeOrderQuoteInfo,
-        showCoverPage: false,
-        documentType: "CHANGE_ORDER"
-      })
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo: changeOrderQuoteInfo,
+          showCoverPage: false,
+          documentType: "CHANGE_ORDER"
+        })
+      )
     ).toBlob();
     folder.file('Change_Order.pdf', changeOrderBlob);
 
@@ -130,15 +138,17 @@ export const generateDocumentPackage = async ({
       quoteNumber: `INV-${quoteInfo.quoteNumber}`,
     };
     const invoiceBlob = await pdf(
-      React.createElement(QuotePDF, {
-        estimateData,
-        formData,
-        companyInfo,
-        clientInfo,
-        quoteInfo: invoiceQuoteInfo,
-        showCoverPage: false,
-        documentType: "INVOICE"
-      })
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo: invoiceQuoteInfo,
+          showCoverPage: false,
+          documentType: "INVOICE"
+        })
+      )
     ).toBlob();
     folder.file('Invoice.pdf', invoiceBlob);
 
