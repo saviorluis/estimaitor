@@ -7,6 +7,7 @@ import { pdf } from '@react-pdf/renderer';
 import QuotePDF from './QuotePDF';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 import { PDFViewer } from '@react-pdf/renderer';
+import { generateDocumentPackage } from '@/lib/documentGenerator';
 
 // Define the calculateTotalPressureWashingArea function
 const calculateTotalPressureWashingArea = (formData: FormData): number => {
@@ -114,34 +115,32 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 7. Quote Validity: This quote is valid for 30 days from the date issued.
 8. Weather Conditions: For exterior services, we reserve the right to reschedule due to inclement weather without penalty.
 9. Minimum Service Fee: Cancellations after our team has been dispatched will incur a minimum service fee.
-10. Contract Termination: We reserve the right to terminate the contract for repeated cancellations or non-payment.`;
+10. Contract Termination: We reserve the right to terminate the contract for repeated cancellations or non-payment.
+11. Workspace Requirements: 
+    - Our team requires adequate workspace to operate efficiently and safely.
+    - No more than two other contractors can be working in the same area simultaneously.
+    - We reserve the right to reschedule if workspace conditions are too crowded or unsafe.`;
 
   const defaultNotes = `This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.
 
-Confidentiality Statement:
-This proposal contains confidential and proprietary information belonging exclusively to Big Brother Property Solutions ("Company") and is submitted solely for the use of ${formData?.clientName || 'Customer'} ("Client") in evaluating our services and pricing estimate. By receiving this proposal:
+Additional Information:
+1. Service Documentation:
+   - We regularly document our work through photos and videos for quality assurance and training purposes.
+   - By accepting this proposal, you acknowledge and accept that we may take photos/videos during service.
+   - If you have any concerns about photo/video documentation, please inform us before the service date.
+   - Last-minute restrictions on documentation may affect our ability to reschedule.
 
-1. Confidential Information: All information contained herein, including but not limited to pricing, methodologies, techniques, equipment specifications, staffing details, and proprietary cleaning processes, is considered strictly confidential.
+2. Workspace Requirements:
+   - To ensure quality results and maintain safety standards, we need adequate space to work.
+   - We cannot work in areas where more than two other contractors are present.
+   - Overcrowded work areas may result in rescheduling at no additional fee.
+   - Please coordinate with other contractors to ensure proper spacing and timing.
 
-2. Non-Disclosure: Client agrees not to disclose, reproduce, transmit, or share any part of this proposal with any third party without prior written consent from Big Brother Property Solutions.
-
-3. Limited Use: This information may only be used to evaluate this specific proposal and pricing estimate. Any other use is expressly prohibited.
-
-4. Intellectual Property: All concepts, techniques, and methodologies described remain the exclusive property of Big Brother Property Solutions.
-
-5. Data Protection: Each page of this proposal is subject to these confidentiality terms and should be treated as confidential information.
-
-6. Contract Award: If a contract is awarded to Big Brother Property Solutions, Client may only use or disclose information to the extent specified in the resulting contract.
-
-7. Independent Information: These restrictions do not limit Client's right to use information obtained independently from non-confidential sources.
-
-8. Content Creation and Documentation:
-   - Company regularly documents its work through photos and video content for quality assurance, training, and marketing purposes.
-   - By accepting this proposal, Client acknowledges and consents to photo/video documentation during service delivery.
-   - If Client has any restrictions or concerns regarding photo/video documentation, these must be communicated in writing prior to our team arriving on site.
-   - Failure to notify Company of documentation restrictions before service date may result in forfeiture of any rescheduling options.
-
-NOTICE: USE OR DISCLOSURE OF DATA CONTAINED IN THIS PROPOSAL IS SUBJECT TO THE ABOVE CONFIDENTIALITY TERMS.`;
+3. General Service Notes:
+   - Our team will arrive with all necessary equipment and supplies.
+   - We prioritize safety and efficiency in all our operations.
+   - Clear communication about site conditions helps us deliver the best results.
+   - Any special requirements should be discussed before the service date.`;
   function defaultQuoteInfo(formData?: FormData) {
     return {
       quoteNumber: generateQuoteNumber(),
@@ -630,6 +629,22 @@ NOTICE: USE OR DISCLOSURE OF DATA CONTAINED IN THIS PROPOSAL IS SUBJECT TO THE A
       alert('There was an error generating the PDF. Falling back to print dialog.');
       // Fallback to print dialog if PDF generation fails
       handlePrint();
+    }
+  };
+
+  const handleDownloadPackage = async () => {
+    try {
+      const adjustedEstimateData = getAdjustedEstimateData(estimateData, formData, adjustedPrices);
+      await generateDocumentPackage({
+        estimateData: adjustedEstimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo
+      });
+    } catch (error) {
+      console.error('Error generating document package:', error);
+      alert('There was an error generating the document package. Please try again.');
     }
   };
 
@@ -1351,6 +1366,23 @@ NOTICE: USE OR DISCLOSURE OF DATA CONTAINED IN THIS PROPOSAL IS SUBJECT TO THE A
           </table>
         </div>
       )}
+
+      <div className="flex space-x-4">
+        <button
+          type="button"
+          onClick={handlePDFDownload}
+          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          Download PDF
+        </button>
+        <button
+          type="button"
+          onClick={handleDownloadPackage}
+          className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-500 dark:hover:bg-green-600"
+        >
+          Download Complete Package
+        </button>
+      </div>
     </div>
   );
 };
