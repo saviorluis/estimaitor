@@ -1,9 +1,18 @@
 import JSZip from 'jszip';
-import { pdf, Document } from '@react-pdf/renderer';
+import { pdf, Document, Font } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
+
+// Register fonts
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf', fontWeight: 'normal' },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf', fontWeight: 'bold' },
+  ],
+});
 
 interface CompanyInfo {
   name: string;
@@ -49,6 +58,8 @@ const generatePDF = async (
 ): Promise<Blob> => {
   try {
     const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
+
+    // Create the PDF document
     const pdfDoc = await pdf(
       React.createElement(Document, {}, 
         React.createElement(QuotePDF, {
@@ -79,6 +90,11 @@ export const generateDocumentPackage = async ({
   quoteInfo,
 }: DocumentGeneratorProps): Promise<void> => {
   try {
+    // Validate required data
+    if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
+      throw new Error('Missing required data for document generation');
+    }
+
     const zip = new JSZip();
     const projectName = quoteInfo.projectName.trim() || 'Project';
     const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_');
