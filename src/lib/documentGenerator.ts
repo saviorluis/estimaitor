@@ -40,6 +40,37 @@ interface DocumentGeneratorProps {
   quoteInfo: QuoteInfo;
 }
 
+type DocumentType = 'QUOTE' | 'WORK_ORDER' | 'PURCHASE_ORDER' | 'CHANGE_ORDER' | 'INVOICE';
+
+const generatePDF = async (
+  props: DocumentGeneratorProps,
+  documentType: DocumentType,
+  showCoverPage: boolean = false
+): Promise<Blob> => {
+  try {
+    const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
+    const pdfDoc = await pdf(
+      React.createElement(Document, {}, 
+        React.createElement(QuotePDF, {
+          estimateData,
+          formData,
+          companyInfo,
+          clientInfo,
+          quoteInfo,
+          showCoverPage,
+          documentType
+        })
+      )
+    ).toBlob();
+    
+    if (!pdfDoc) throw new Error(`Failed to generate ${documentType} PDF`);
+    return pdfDoc;
+  } catch (error) {
+    console.error(`Error generating ${documentType} PDF:`, error);
+    throw error;
+  }
+};
+
 export const generateDocumentPackage = async ({
   estimateData,
   formData,
@@ -56,107 +87,45 @@ export const generateDocumentPackage = async ({
     const folder = zip.folder(sanitizedProjectName);
     if (!folder) throw new Error('Failed to create ZIP folder');
 
-    // Generate Quote PDF
-    const quotePDFBlob = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo,
-          showCoverPage: true,
-          documentType: "QUOTE"
-        })
-      )
-    ).toBlob();
-    folder.file('Quote.pdf', quotePDFBlob);
+    // Define document configurations
+    const documents: Array<{ type: DocumentType; prefix: string; showCover: boolean }> = [
+      { type: 'QUOTE', prefix: '', showCover: true },
+      { type: 'WORK_ORDER', prefix: 'WO-', showCover: false },
+      { type: 'PURCHASE_ORDER', prefix: 'PO-', showCover: false },
+      { type: 'CHANGE_ORDER', prefix: 'CO-', showCover: false },
+      { type: 'INVOICE', prefix: 'INV-', showCover: false }
+    ];
 
-    // Generate Work Order PDF
-    const workOrderQuoteInfo = {
-      ...quoteInfo,
-      quoteNumber: `WO-${quoteInfo.quoteNumber}`,
-    };
-    const workOrderBlob = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo: workOrderQuoteInfo,
-          showCoverPage: false,
-          documentType: "WORK_ORDER"
-        })
-      )
-    ).toBlob();
-    folder.file('Work_Order.pdf', workOrderBlob);
+    // Generate all documents
+    for (const doc of documents) {
+      const modifiedQuoteInfo = {
+        ...quoteInfo,
+        quoteNumber: `${doc.prefix}${quoteInfo.quoteNumber}`,
+      };
 
-    // Generate Purchase Order PDF
-    const purchaseOrderQuoteInfo = {
-      ...quoteInfo,
-      quoteNumber: `PO-${quoteInfo.quoteNumber}`,
-    };
-    const purchaseOrderBlob = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
+      const pdfBlob = await generatePDF(
+        {
           estimateData,
           formData,
           companyInfo,
           clientInfo,
-          quoteInfo: purchaseOrderQuoteInfo,
-          showCoverPage: false,
-          documentType: "PURCHASE_ORDER"
-        })
-      )
-    ).toBlob();
-    folder.file('Purchase_Order.pdf', purchaseOrderBlob);
+          quoteInfo: modifiedQuoteInfo,
+        },
+        doc.type,
+        doc.showCover
+      );
 
-    // Generate Change Order PDF
-    const changeOrderQuoteInfo = {
-      ...quoteInfo,
-      quoteNumber: `CO-${quoteInfo.quoteNumber}`,
-    };
-    const changeOrderBlob = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo: changeOrderQuoteInfo,
-          showCoverPage: false,
-          documentType: "CHANGE_ORDER"
-        })
-      )
-    ).toBlob();
-    folder.file('Change_Order.pdf', changeOrderBlob);
-
-    // Generate Invoice PDF
-    const invoiceQuoteInfo = {
-      ...quoteInfo,
-      quoteNumber: `INV-${quoteInfo.quoteNumber}`,
-    };
-    const invoiceBlob = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo: invoiceQuoteInfo,
-          showCoverPage: false,
-          documentType: "INVOICE"
-        })
-      )
-    ).toBlob();
-    folder.file('Invoice.pdf', invoiceBlob);
+      const fileName = `${doc.type.replace('_', ' ')}.pdf`;
+      folder.file(fileName, pdfBlob);
+    }
 
     // Generate and download the ZIP file
     const zipBlob = await zip.generateAsync({ type: 'blob' });
+    if (!zipBlob) throw new Error('Failed to generate ZIP file');
+    
     saveAs(zipBlob, `${sanitizedProjectName}_Documents.zip`);
   } catch (error) {
     console.error('Error generating document package:', error);
-    throw error;
+    throw new Error(`Failed to generate document package: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }; 

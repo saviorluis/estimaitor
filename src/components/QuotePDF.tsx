@@ -700,355 +700,261 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   showCoverPage = false,
   documentType = 'QUOTE'
 }) => {
-  console.log('QuotePDF - Received adjustedLineItems:', estimateData.adjustedLineItems);
-  console.log('QuotePDF - Received estimateData:', estimateData);
-  
-  // Get the current quote counter value
-  const quoteCounter = getQuoteCounter();
-  
-  // Use absolute URLs for images
-  const logoPath = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/assets/logo.png`;
-  const coverPagePath = '/assets/cover-page-placeholder.jpg'; // Placeholder for the cover page
-  const capabilityStatementPath = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/BBPS Capability copy.png`;
-  
-  // Early return for undefined data
-  if (!estimateData || !formData) {
-    return (
-      <Document>
-        <Page size="A4" style={styles.page}>
-          <View style={{ padding: 30 }}>
-            <Text>Error: Quote data is not available.</Text>
-          </View>
-        </Page>
-      </Document>
-    );
+  // Get document-specific configuration
+  const docContent = getDocumentContent(documentType);
+  const docTitle = getDocumentTitle(documentType);
+  const docNotes = getDocumentNotes(documentType, quoteInfo.notes, companyInfo);
+  const showPricing = shouldShowPricing(documentType);
+
+  // Validate required props
+  if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
+    console.error('Missing required props in QuotePDF');
+    throw new Error('Missing required props in QuotePDF');
   }
-  
-  // Ensure all objects have default values to prevent rendering errors
-  const safeCompanyInfo = companyInfo || {
-    name: '', address: '', city: '', phone: '', email: '', website: ''
-  };
-  
-  const safeClientInfo = clientInfo || {
-    name: '', company: '', address: '', email: '', phone: ''
-  };
-  
-  const safeQuoteInfo = quoteInfo || {
-    quoteNumber: '', date: '', validUntil: '', projectName: '', 
-    projectAddress: '', notes: '', terms: ''
-  };
 
-  // Calculate totals for display in PDF
-  const adjustedLineItems = estimateData.adjustedLineItems || {};
-  const subtotal = Object.keys(adjustedLineItems).length > 0 
-    ? Object.values(adjustedLineItems).reduce((sum, price) => sum + price, 0)
-    : estimateData.totalBeforeMarkup;
-  
-  console.log('QuotePDF - Calculated subtotal:', subtotal);
-  console.log('QuotePDF - Using adjustedLineItems?', Object.keys(adjustedLineItems).length > 0);
-  
-  const salesTax = subtotal * 0.07;
-  const total = subtotal + salesTax;
-  
-  console.log('QuotePDF - Final values - Subtotal:', subtotal, 'Tax:', salesTax, 'Total:', total);
+  // Calculate totals
+  const subtotal = estimateData.totalBeforeMarkup;
+  const tax = estimateData.salesTax;
+  const total = estimateData.totalPrice;
 
-  const documentContent = getDocumentContent(documentType);
-
-  // Function to render logo with fallback
-  const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => (
-    <View style={containerStyle}>
-      <Image src={logoPath} style={imageStyle} />
-    </View>
-  );
+  const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+      const logoPath = `${baseUrl}/assets/logo.png`;
+      
+      return (
+        <View style={[styles.logoContainer, containerStyle]}>
+          <Image
+            src={logoPath}
+            style={[styles.logo, imageStyle]}
+          />
+        </View>
+      );
+    } catch (error) {
+      console.error('Error rendering logo:', error);
+      return <FallbackLogo />;
+    }
+  };
 
   return (
     <Document>
-      {/* First Cover Page - Proposal Details */}
       {showCoverPage && (
-        <Page size="A4" style={styles.page}>
-          <View style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 40
-          }}>
-            {/* Company Logo - Large size for cover */}
-            {renderLogo({
-              width: 350,
-              height: 175,
-              marginBottom: 40,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }, {
-              width: '100%',
-              objectFit: 'contain'
-            })}
-            
-            {/* Cover Title */}
-            <Text style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              marginBottom: 24,
-              color: '#2563eb',
-              textAlign: 'center'
-            }}>
+        <Page size="LETTER" style={styles.page}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            {renderLogo({ width: 300, height: 150 }, { maxWidth: 300, maxHeight: 150 })}
+            <Text style={[styles.title, { marginTop: 40, fontSize: 36, textAlign: 'center' }]}>
+              {docTitle}
+            </Text>
+            <Text style={[styles.subtitle, { marginTop: 20, textAlign: 'center', borderBottom: 'none' }]}>
               {getCoverPageTitle(formData.cleaningType)}
             </Text>
-            
-            <Text style={{
-              fontSize: 26,
-              fontWeight: 'bold',
-              marginBottom: 24,
-              color: '#2563eb',
-              textAlign: 'center'
-            }}>
-              PROPOSAL
-            </Text>
-            
-            <Text style={{
-              fontSize: 18,
-              marginBottom: 8,
-              textAlign: 'center'
-            }}>
+            <Text style={{ fontSize: 14, marginTop: 40, textAlign: 'center' }}>
               Prepared for:
             </Text>
-            
-            <Text style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              marginBottom: 40,
-              textAlign: 'center'
-            }}>
-              {safeClientInfo.company || safeClientInfo.name}
+            <Text style={[styles.companyName, { marginTop: 10, textAlign: 'center' }]}>
+              {clientInfo.company || clientInfo.name}
             </Text>
-            
-            {/* Project information */}
-            <View style={{
-              padding: 20,
-              backgroundColor: '#f0f9ff',
-              borderRadius: 5,
-              marginBottom: 40,
-              width: '80%',
-              alignItems: 'center'
-            }}>
-              <Text style={{
-                fontSize: 14,
-                marginBottom: 8,
-                textAlign: 'center'
-              }}>
-                Project: {safeQuoteInfo.projectName}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                marginBottom: 8,
-                textAlign: 'center'
-              }}>
-                Location: {safeQuoteInfo.projectAddress}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                textAlign: 'center'
-              }}>
-                Quote #: {safeQuoteInfo.quoteNumber}
-              </Text>
-            </View>
-            
-            {/* Contact Information */}
-            <View style={{
-              position: 'absolute',
-              bottom: 40,
-              left: 0,
-              right: 0,
-              textAlign: 'center'
-            }}>
-              <Text style={{
-                fontSize: 12,
-                color: '#333333',
-                fontWeight: 'bold',
-                marginBottom: 8
-              }}>
-                {safeCompanyInfo.name}
-              </Text>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666'
-              }}>
-                {safeCompanyInfo.phone} | {safeCompanyInfo.email}
-              </Text>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666'
-              }}>
-                {safeCompanyInfo.address}, {safeCompanyInfo.city}
-              </Text>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666',
-                marginTop: 4
-              }}>
-                {safeCompanyInfo.website}
-              </Text>
-            </View>
+            <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
+              {quoteInfo.projectName}
+            </Text>
+            <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
+              {quoteInfo.projectAddress}
+            </Text>
           </View>
         </Page>
       )}
 
-      {/* Second Cover Page - Capability Statement */}
-      {showCoverPage && (
-        <Page size="A4" style={styles.page}>
-          <View style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            width: '100%',
-            position: 'relative'
-          }}>
-            {/* Full-page capability statement image */}
-            <Image 
-              src={capabilityStatementPath} 
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain'
-              }} 
-            />
-          </View>
-        </Page>
-      )}
-
-      {/* Main Quote Page */}
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
+      <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
-          <View style={styles.companyInfo}>
-            <View style={styles.companyHeader}>
-              {renderLogo(styles.logoContainer, styles.logo)}
-              <View>
-                <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.city}</Text>
-                <Text style={styles.companyDetails}>Phone: {safeCompanyInfo.phone}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.email}</Text>
-              </View>
+          <View style={styles.companyHeader}>
+            {renderLogo()}
+            <View style={styles.companyInfo}>
+              <Text style={styles.companyName}>{companyInfo.name}</Text>
+              <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+              <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+              <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+              <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+              {companyInfo.website && (
+                <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+              )}
             </View>
           </View>
+
           <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>{getDocumentTitle(documentType)} #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDate}>Date: {safeQuoteInfo.date}</Text>
-            <Text style={styles.quoteExpiry}>Valid Until: {safeQuoteInfo.validUntil}</Text>
+            <Text style={styles.quoteTitle}>{docTitle}</Text>
+            <Text style={styles.quoteDetails}>#{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+            {documentType === 'QUOTE' && (
+              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+            )}
           </View>
         </View>
 
-        {/* Client and Project Information */}
+        {/* Client Information */}
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Client Information</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.name}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.company}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.address}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.email}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.phone}</Text>
-          </View>
-          <View style={styles.infoColumn}>
-            <Text style={styles.subtitle}>Project Information</Text>
-            <Text style={styles.infoValue}>{safeQuoteInfo.projectName}</Text>
-            <Text style={styles.infoValue}>{safeQuoteInfo.projectAddress}</Text>
-            <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-            {formData.cleaningType === 'pressure_washing_only' ? (
+            <Text style={styles.infoLabel}>Name:</Text>
+            <Text style={styles.infoValue}>{clientInfo.name}</Text>
+            {clientInfo.company && (
               <>
-                <Text style={styles.infoValue}>Service Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
-                {formData.pressureWashingServices && formData.pressureWashingServices.length > 0 ? (
-                  <Text style={styles.infoValue}>Total Area: {calculateTotalPressureWashingArea(formData).toLocaleString()} sq ft</Text>
-                ) : (
-                  <Text style={styles.infoValue}>Area: {(formData.pressureWashingArea || 0).toLocaleString()} sq ft</Text>
-                )}
-              </>
-            ) : formData.cleaningType === 'window_cleaning_only' ? (
-              <>
-                <Text style={styles.infoValue}>Service Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
-                <Text style={styles.infoValue}>Windows: {(formData.numberOfWindows || 0)} standard, {(formData.numberOfLargeWindows || 0)} large, {(formData.numberOfHighAccessWindows || 0)} high-access</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-                <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+                <Text style={styles.infoLabel}>Company:</Text>
+                <Text style={styles.infoValue}>{clientInfo.company}</Text>
               </>
             )}
+            <Text style={styles.infoLabel}>Address:</Text>
+            <Text style={styles.infoValue}>{clientInfo.address}</Text>
+            <Text style={styles.infoLabel}>Phone:</Text>
+            <Text style={styles.infoValue}>{clientInfo.phone}</Text>
+            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoValue}>{clientInfo.email}</Text>
+          </View>
+
+          <View style={styles.infoColumn}>
+            <Text style={styles.subtitle}>Project Information</Text>
+            <Text style={styles.infoLabel}>Project Name:</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
+            <Text style={styles.infoLabel}>Project Address:</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
           </View>
         </View>
 
-        {/* Scope of Work */}
+        {/* Services Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Scope of Work</Text>
-          {documentContent.showTeamSection && (
+          <Text style={styles.subtitle}>Services</Text>
+          {formData.cleaningType === 'pressure_washing_only' && renderPressureWashingServices(formData, estimateData, styles)}
+          {formData.cleaningType === 'window_cleaning_only' && renderWindowCleaningServices(formData, estimateData, styles)}
+          {formData.needsPressureWashing && formData.needsWindowCleaning && (
             <>
-              <Text style={styles.text}>Team Members Assigned:</Text>
-              <Text style={styles.text}>___________________________________</Text>
-              <Text style={styles.text}>Expected Start Time: _____________</Text>
-              <Text style={styles.text}>Expected Completion Time: _________</Text>
-              <Text style={styles.text}>{'\n'}Special Instructions:</Text>
+              {renderPressureWashingServices(formData, estimateData, styles)}
+              {renderWindowCleaningServices(formData, estimateData, styles)}
             </>
           )}
-          {/* ... existing scope of work content ... */}
         </View>
 
-        {/* Only show pricing sections for Quote, Change Order, and Invoice */}
-        {documentContent.showPricing && (
-          <>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Pricing Details</Text>
-              {/* ... existing pricing details ... */}
+        {/* Pricing Section - Only show if document type allows */}
+        {showPricing && (
+          <View style={styles.section}>
+            <View style={styles.table}>
+              <View style={[styles.tableRow, styles.subtotalRow]}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text style={styles.subtotalText}>Subtotal</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text style={styles.subtotalText}>{formatCurrency(subtotal)}</Text>
+                </View>
+              </View>
+              <View style={[styles.tableRow, styles.subtotalRow]}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text style={styles.subtotalText}>Tax (7%)</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text style={styles.subtotalText}>{formatCurrency(tax)}</Text>
+                </View>
+              </View>
+              <View style={[styles.tableRow, styles.totalRow]}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text style={styles.totalText}>Total</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text style={styles.totalText}>{formatCurrency(total)}</Text>
+                </View>
+              </View>
             </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Payment Summary</Text>
-              {/* ... existing payment summary ... */}
-            </View>
-          </>
+          </View>
         )}
 
         {/* Notes Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes</Text>
-          <Text style={styles.text}>{getDocumentNotes(documentType, safeQuoteInfo.notes, safeCompanyInfo)}</Text>
-        </View>
+        {docNotes && (
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Notes</Text>
+            <Text style={styles.notes}>{docNotes}</Text>
+          </View>
+        )}
+
+        {/* Terms Section */}
+        {quoteInfo.terms && (
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Terms & Conditions</Text>
+            <Text style={styles.terms}>{quoteInfo.terms}</Text>
+          </View>
+        )}
+
+        {/* Team Section - Only for Work Orders */}
+        {docContent.showTeamSection && (
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Team Assignment</Text>
+            <View style={styles.table}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <View style={[styles.tableCell, { width: '40%' }]}>
+                  <Text style={styles.bold}>Team Member</Text>
+                </View>
+                <View style={[styles.tableCell, { width: '30%' }]}>
+                  <Text style={styles.bold}>Role</Text>
+                </View>
+                <View style={[styles.tableCell, { width: '30%' }]}>
+                  <Text style={styles.bold}>Contact</Text>
+                </View>
+              </View>
+              {/* Add empty rows for manual team assignment */}
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={styles.tableRow}>
+                  <View style={[styles.tableCell, { width: '40%', height: 20 }]} />
+                  <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
+                  <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Completion Section - Only for Work Orders */}
+        {docContent.showCompletionSection && (
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Completion Verification</Text>
+            <View style={styles.table}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <View style={[styles.tableCell, { width: '50%' }]}>
+                  <Text style={styles.bold}>Task</Text>
+                </View>
+                <View style={[styles.tableCell, { width: '25%' }]}>
+                  <Text style={styles.bold}>Completed By</Text>
+                </View>
+                <View style={[styles.tableCell, { width: '25%' }]}>
+                  <Text style={styles.bold}>Date</Text>
+                </View>
+              </View>
+              {/* Add empty rows for completion tracking */}
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={styles.tableRow}>
+                  <View style={[styles.tableCell, { width: '50%', height: 20 }]} />
+                  <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
+                  <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Signature Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {documentContent.showCompletionSection ? 'Completion Sign-off' : 'Authorization'}
-          </Text>
-          {documentContent.showCompletionSection && (
-            <>
-              <Text style={styles.text}>Work Completed By:</Text>
-              <Text style={styles.text}>___________________________________</Text>
-              <Text style={styles.text}>Completion Date: _________________</Text>
-              <Text style={styles.text}>Time In: _________ Time Out: _________</Text>
-              <Text style={styles.text}>{'\n'}Client Verification:</Text>
-            </>
-          )}
-          <View style={styles.signatureBox}>
-            <Text style={styles.text}>Authorized By: _______________________</Text>
-            <Text style={styles.text}>Date: _______________________________</Text>
-            {documentContent.showCompletionSection && (
-              <Text style={styles.text}>Quality Check By: ____________________</Text>
-            )}
+        <View style={styles.signatureSection}>
+          <View style={styles.signatureColumn}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Client Signature</Text>
+            <Text style={styles.signatureLabel}>Date: _________________</Text>
+          </View>
+          <View style={styles.signatureColumn}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Company Representative</Text>
+            <Text style={styles.signatureLabel}>Date: _________________</Text>
           </View>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          {documentContent.showPaymentInstructions ? (
-            <Text style={styles.footerText}>
-              Please make check payable to: {safeCompanyInfo.name}{'\n'}
-              Mail to: {safeCompanyInfo.address}, {safeCompanyInfo.city}
-            </Text>
-          ) : (
-            <Text style={styles.footerText}>
-              {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}
-            </Text>
-          )}
+          <Text>
+            {companyInfo.name} | {companyInfo.address}, {companyInfo.city} | {companyInfo.phone} | {companyInfo.email}
+          </Text>
         </View>
       </Page>
     </Document>
