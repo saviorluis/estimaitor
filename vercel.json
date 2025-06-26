@@ -25,6 +25,7 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_VERCEL_ENV": "production"
+    "NEXT_PUBLIC_VERCEL_ENV": "production",
+    "NEXT_PUBLIC_BASE_URL": "https://estimaitor.vercel.app"
   }
 }

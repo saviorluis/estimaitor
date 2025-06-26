@@ -659,6 +659,38 @@ const getDocumentContent = (type: DocumentType = 'QUOTE'): {
   }
 };
 
+// Add fallback SVG logo component
+const FallbackLogo = () => (
+  <Svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%' }}>
+    <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+    <Text
+      x="100"
+      y="40"
+      style={{
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAnchor: 'middle',
+        fill: 'white',
+        dominantBaseline: 'middle',
+      }}
+    >
+      BBPS
+    </Text>
+    <Text
+      x="100"
+      y="60"
+      style={{
+        fontSize: 10,
+        textAnchor: 'middle',
+        fill: 'white',
+        dominantBaseline: 'middle',
+      }}
+    >
+      Big Brother Property Solutions
+    </Text>
+  </Svg>
+);
+
 const QuotePDF: React.FC<QuotePDFProps> = ({
   estimateData,
   formData,
@@ -674,10 +706,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   // Get the current quote counter value
   const quoteCounter = getQuoteCounter();
   
-  // Use a static path in the assets directory
-  const logoPath = '/assets/logo.png';  // This will always look in the public/assets directory
+  // Use absolute URLs for images
+  const logoPath = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/assets/logo.png`;
   const coverPagePath = '/assets/cover-page-placeholder.jpg'; // Placeholder for the cover page
-  const capabilityStatementPath = '/BBPS Capability copy.png'; // Capability statement image
+  const capabilityStatementPath = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/BBPS Capability copy.png`;
   
   // Early return for undefined data
   if (!estimateData || !formData) {
@@ -722,6 +754,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
   const documentContent = getDocumentContent(documentType);
 
+  // Function to render logo with fallback
+  const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => (
+    <View style={containerStyle}>
+      <Image src={logoPath} style={imageStyle} />
+    </View>
+  );
+
   return (
     <Document>
       {/* First Cover Page - Proposal Details */}
@@ -734,18 +773,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             padding: 40
           }}>
             {/* Company Logo - Large size for cover */}
-            <View style={{
+            {renderLogo({
               width: 350,
               height: 175,
               marginBottom: 40,
               alignItems: 'center',
               justifyContent: 'center'
-            }}>
-              <Image src={logoPath} style={{
-                width: '100%',
-                objectFit: 'contain'
-              }} />
-            </View>
+            }, {
+              width: '100%',
+              objectFit: 'contain'
+            })}
             
             {/* Cover Title */}
             <Text style={{
@@ -886,9 +923,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.header}>
           <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
-              <View style={styles.logoContainer}>
-                <Image src={logoPath} style={styles.logo} />
-              </View>
+              {renderLogo(styles.logoContainer, styles.logo)}
               <View>
                 <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
