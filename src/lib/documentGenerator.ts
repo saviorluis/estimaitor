@@ -1,10 +1,9 @@
 import JSZip from 'jszip';
 import { pdf } from '@react-pdf/renderer';
-import { Packer } from 'docx';
 import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
-import { generateQuoteDocx } from './docxGenerator';
 import QuotePDF from '@/components/QuotePDF';
+import React from 'react';
 
 interface CompanyInfo {
   name: string;
@@ -59,82 +58,89 @@ export const generateDocumentPackage = async ({
 
     // Generate Quote PDF
     const quotePDFBlob = await pdf(
-      <QuotePDF
-        estimateData={estimateData}
-        formData={formData}
-        companyInfo={companyInfo}
-        clientInfo={clientInfo}
-        quoteInfo={quoteInfo}
-        showCoverPage={true}
-      />
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo,
+        showCoverPage: true,
+        documentType: "QUOTE"
+      })
     ).toBlob();
     folder.file('Quote.pdf', quotePDFBlob);
 
-    // Generate Quote DOCX
-    const quoteDocxBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      quoteInfo
-    );
-    folder.file('Quote.docx', quoteDocxBlob);
-
-    // Generate Work Order (using the same template but with modified title and content)
+    // Generate Work Order PDF
     const workOrderQuoteInfo = {
       ...quoteInfo,
       quoteNumber: `WO-${quoteInfo.quoteNumber}`,
     };
-    const workOrderBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      workOrderQuoteInfo
-    );
-    folder.file('Work_Order.docx', workOrderBlob);
+    const workOrderBlob = await pdf(
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo: workOrderQuoteInfo,
+        showCoverPage: false,
+        documentType: "WORK_ORDER"
+      })
+    ).toBlob();
+    folder.file('Work_Order.pdf', workOrderBlob);
 
-    // Generate Purchase Order
+    // Generate Purchase Order PDF
     const purchaseOrderQuoteInfo = {
       ...quoteInfo,
       quoteNumber: `PO-${quoteInfo.quoteNumber}`,
     };
-    const purchaseOrderBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      purchaseOrderQuoteInfo
-    );
-    folder.file('Purchase_Order.docx', purchaseOrderBlob);
+    const purchaseOrderBlob = await pdf(
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo: purchaseOrderQuoteInfo,
+        showCoverPage: false,
+        documentType: "PURCHASE_ORDER"
+      })
+    ).toBlob();
+    folder.file('Purchase_Order.pdf', purchaseOrderBlob);
 
-    // Generate Change Order
+    // Generate Change Order PDF
     const changeOrderQuoteInfo = {
       ...quoteInfo,
       quoteNumber: `CO-${quoteInfo.quoteNumber}`,
     };
-    const changeOrderBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      changeOrderQuoteInfo
-    );
-    folder.file('Change_Order.docx', changeOrderBlob);
+    const changeOrderBlob = await pdf(
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo: changeOrderQuoteInfo,
+        showCoverPage: false,
+        documentType: "CHANGE_ORDER"
+      })
+    ).toBlob();
+    folder.file('Change_Order.pdf', changeOrderBlob);
 
-    // Generate Invoice
+    // Generate Invoice PDF
     const invoiceQuoteInfo = {
       ...quoteInfo,
       quoteNumber: `INV-${quoteInfo.quoteNumber}`,
     };
-    const invoiceBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      invoiceQuoteInfo
-    );
-    folder.file('Invoice.docx', invoiceBlob);
+    const invoiceBlob = await pdf(
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo: invoiceQuoteInfo,
+        showCoverPage: false,
+        documentType: "INVOICE"
+      })
+    ).toBlob();
+    folder.file('Invoice.pdf', invoiceBlob);
 
     // Generate and download the ZIP file
     const zipBlob = await zip.generateAsync({ type: 'blob' });

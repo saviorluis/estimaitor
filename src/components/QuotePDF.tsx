@@ -525,13 +525,10 @@ const getCoverPageTitle = (cleaningType: string): string => {
   }
 };
 
+type DocumentType = 'QUOTE' | 'WORK_ORDER' | 'PURCHASE_ORDER' | 'CHANGE_ORDER' | 'INVOICE';
+
 interface QuotePDFProps {
-  estimateData: EstimateData & {
-    // Add optional adjusted line item prices
-    adjustedLineItems?: {
-      [key: string]: number;
-    };
-  };
+  estimateData: EstimateData;
   formData: FormData;
   companyInfo: {
     name: string;
@@ -558,15 +555,32 @@ interface QuotePDFProps {
     terms: string;
   };
   showCoverPage?: boolean;
+  documentType?: DocumentType;
 }
 
-const QuotePDF: React.FC<QuotePDFProps> = ({ 
-  estimateData, 
-  formData, 
-  companyInfo, 
-  clientInfo, 
+const getDocumentTitle = (type: DocumentType = 'QUOTE'): string => {
+  switch (type) {
+    case 'WORK_ORDER':
+      return 'WORK ORDER';
+    case 'PURCHASE_ORDER':
+      return 'PURCHASE ORDER';
+    case 'CHANGE_ORDER':
+      return 'CHANGE ORDER';
+    case 'INVOICE':
+      return 'INVOICE';
+    default:
+      return 'QUOTE';
+  }
+};
+
+const QuotePDF: React.FC<QuotePDFProps> = ({
+  estimateData,
+  formData,
+  companyInfo,
+  clientInfo,
   quoteInfo,
-  showCoverPage = false
+  showCoverPage = false,
+  documentType = 'QUOTE'
 }) => {
   console.log('QuotePDF - Received adjustedLineItems:', estimateData.adjustedLineItems);
   console.log('QuotePDF - Received estimateData:', estimateData);
@@ -778,7 +792,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </Page>
       )}
 
-      {/* Main Quote Page (existing page) */}
+      {/* Main Quote Page */}
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
@@ -797,7 +811,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           </View>
           <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>QUOTE #{quoteCounter}</Text>
+            <Text style={styles.quoteTitle}>{getDocumentTitle(documentType)} #{quoteInfo.quoteNumber}</Text>
             <Text style={styles.quoteDate}>Date: {safeQuoteInfo.date}</Text>
             <Text style={styles.quoteExpiry}>Valid Until: {safeQuoteInfo.validUntil}</Text>
           </View>
