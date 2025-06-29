@@ -15,7 +15,7 @@ export default function EstimateForm({
   const [formData, setFormData] = useState<FormData>({
     projectType: 'office',
     cleaningType: 'rough',
-    squareFootage: 0,
+    squareFootage: undefined,
     hasVCT: false,
     distanceFromOffice: 0,
     gasPrice: 3.50,
@@ -112,7 +112,9 @@ export default function EstimateForm({
           name="squareFootage"
           value={formData.squareFootage}
           onChange={handleChange}
-          min="0"
+          min="1"
+          required
+          placeholder="Enter square footage"
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
       </div>

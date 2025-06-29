@@ -50,7 +50,7 @@ export type PressureWashingServiceType =
 export interface FormData {
   projectType: ProjectType;
   cleaningType: CleaningType;
-  squareFootage: number;
+  squareFootage: number | undefined;
   hasVCT: boolean;
   distanceFromOffice: number;
   gasPrice: number;

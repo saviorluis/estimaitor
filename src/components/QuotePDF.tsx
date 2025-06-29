@@ -693,7 +693,7 @@ const validatePDFData = (props: QuotePDFProps): void => {
   if (!formData) throw new Error('Form data is required for PDF generation');
   if (!formData.cleaningType) throw new Error('Cleaning type is required for PDF generation');
   if (!formData.projectType) throw new Error('Project type is required for PDF generation');
-  if (typeof formData.squareFootage !== 'number') throw new Error('Square footage is required for PDF generation');
+  if (!formData.squareFootage || formData.squareFootage <= 0) throw new Error('Please enter a valid square footage greater than 0');
 
   // Validate company info
   if (!companyInfo) throw new Error('Company information is required for PDF generation');
