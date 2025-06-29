@@ -4,17 +4,6 @@ import { EstimateData, FormData, PressureWashingServiceType, CompanyInfo } from 
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, PRESSURE_WASHING_SCOPE_OF_WORK } from '@/lib/constants';
 
-// Register fonts
-Font.register({
-  family: 'Roboto',
-  fonts: [
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf', fontWeight: 'normal' },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf', fontWeight: 'bold' },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-italic-webfont.ttf', fontWeight: 'normal', fontStyle: 'italic' },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bolditalic-webfont.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-  ],
-});
-
 // Create styles
 const styles = StyleSheet.create({
   page: {
@@ -691,6 +680,38 @@ const FallbackLogo = () => (
   </Svg>
 );
 
+const validatePDFData = (props: QuotePDFProps): void => {
+  const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
+
+  // Validate estimate data
+  if (!estimateData) throw new Error('Estimate data is required for PDF generation');
+  if (typeof estimateData.basePrice !== 'number') throw new Error('Base price is required for PDF generation');
+
+  // Validate form data
+  if (!formData) throw new Error('Form data is required for PDF generation');
+  if (!formData.cleaningType) throw new Error('Cleaning type is required for PDF generation');
+  if (!formData.projectType) throw new Error('Project type is required for PDF generation');
+  if (typeof formData.squareFootage !== 'number') throw new Error('Square footage is required for PDF generation');
+
+  // Validate company info
+  if (!companyInfo) throw new Error('Company information is required for PDF generation');
+  if (!companyInfo.name) throw new Error('Company name is required for PDF generation');
+  if (!companyInfo.address) throw new Error('Company address is required for PDF generation');
+  if (!companyInfo.phone) throw new Error('Company phone is required for PDF generation');
+
+  // Validate client info
+  if (!clientInfo) throw new Error('Client information is required for PDF generation');
+  if (!clientInfo.name) throw new Error('Client name is required for PDF generation');
+  if (!clientInfo.company) throw new Error('Client company is required for PDF generation');
+  if (!clientInfo.address) throw new Error('Client address is required for PDF generation');
+
+  // Validate quote info
+  if (!quoteInfo) throw new Error('Quote information is required for PDF generation');
+  if (!quoteInfo.quoteNumber) throw new Error('Quote number is required for PDF generation');
+  if (!quoteInfo.projectName) throw new Error('Project name is required for PDF generation');
+  if (!quoteInfo.projectAddress) throw new Error('Project address is required for PDF generation');
+};
+
 const QuotePDF: React.FC<QuotePDFProps> = ({
   estimateData,
   formData,
@@ -700,265 +721,265 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   showCoverPage = false,
   documentType = 'QUOTE'
 }) => {
-  // Get document-specific configuration
-  const docContent = getDocumentContent(documentType);
-  const docTitle = getDocumentTitle(documentType);
-  const docNotes = getDocumentNotes(documentType, quoteInfo.notes, companyInfo);
-  const showPricing = shouldShowPricing(documentType);
+  try {
+    // Validate all required data
+    validatePDFData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
 
-  // Validate required props
-  if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
-    console.error('Missing required props in QuotePDF');
-    throw new Error('Missing required props in QuotePDF');
-  }
+    // Get document content configuration
+    const docContent = getDocumentContent(documentType);
+    const docTitle = getDocumentTitle(documentType);
+    const docNotes = getDocumentNotes(documentType, quoteInfo.notes, companyInfo);
 
-  // Calculate totals
-  const subtotal = estimateData.totalBeforeMarkup;
-  const tax = estimateData.salesTax;
-  const total = estimateData.totalPrice;
+    // Calculate totals
+    const subtotal = estimateData.totalBeforeMarkup || 0;
+    const salesTax = subtotal * 0.07;
+    const total = subtotal + salesTax;
 
-  const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-      const logoPath = `${baseUrl}/assets/logo.png`;
-      
-      return (
-        <View style={[styles.logoContainer, containerStyle]}>
-          <Image
-            src={logoPath}
-            style={[styles.logo, imageStyle]}
-          />
-        </View>
-      );
-    } catch (error) {
-      console.error('Error rendering logo:', error);
-      return <FallbackLogo />;
-    }
-  };
-
-  return (
-    <Document>
-      {showCoverPage && (
-        <Page size="LETTER" style={styles.page}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {renderLogo({ width: 300, height: 150 }, { maxWidth: 300, maxHeight: 150 })}
-            <Text style={[styles.title, { marginTop: 40, fontSize: 36, textAlign: 'center' }]}>
-              {docTitle}
-            </Text>
-            <Text style={[styles.subtitle, { marginTop: 20, textAlign: 'center', borderBottom: 'none' }]}>
-              {getCoverPageTitle(formData.cleaningType)}
-            </Text>
-            <Text style={{ fontSize: 14, marginTop: 40, textAlign: 'center' }}>
-              Prepared for:
-            </Text>
-            <Text style={[styles.companyName, { marginTop: 10, textAlign: 'center' }]}>
-              {clientInfo.company || clientInfo.name}
-            </Text>
-            <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
-              {quoteInfo.projectName}
-            </Text>
-            <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
-              {quoteInfo.projectAddress}
-            </Text>
+    const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => {
+      try {
+        const logoPath = '/assets/logo.png';
+        
+        return (
+          <View style={[styles.logoContainer, containerStyle]}>
+            <Image
+              src={logoPath}
+              style={[styles.logo, imageStyle]}
+            />
           </View>
-        </Page>
-      )}
+        );
+      } catch (error) {
+        console.error('Error rendering logo:', error);
+        return <FallbackLogo />;
+      }
+    };
 
-      <Page size="LETTER" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.companyHeader}>
-            {renderLogo()}
-            <View style={styles.companyInfo}>
-              <Text style={styles.companyName}>{companyInfo.name}</Text>
-              <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-              <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-              <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
-              <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-              {companyInfo.website && (
-                <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+    return (
+      <Document>
+        {showCoverPage && (
+          <Page size="LETTER" style={styles.page}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              {renderLogo({ width: 300, height: 150 }, { maxWidth: 300, maxHeight: 150 })}
+              <Text style={[styles.title, { marginTop: 40, fontSize: 36, textAlign: 'center' }]}>
+                {docTitle}
+              </Text>
+              <Text style={[styles.subtitle, { marginTop: 20, textAlign: 'center', borderBottom: 'none' }]}>
+                {getCoverPageTitle(formData.cleaningType)}
+              </Text>
+              <Text style={{ fontSize: 14, marginTop: 40, textAlign: 'center' }}>
+                Prepared for:
+              </Text>
+              <Text style={[styles.companyName, { marginTop: 10, textAlign: 'center' }]}>
+                {clientInfo.company || clientInfo.name}
+              </Text>
+              <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
+                {quoteInfo.projectName}
+              </Text>
+              <Text style={{ fontSize: 12, marginTop: 5, textAlign: 'center' }}>
+                {quoteInfo.projectAddress}
+              </Text>
+            </View>
+          </Page>
+        )}
+
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.header}>
+            <View style={styles.companyHeader}>
+              {renderLogo()}
+              <View style={styles.companyInfo}>
+                <Text style={styles.companyName}>{companyInfo.name}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+                {companyInfo.website && (
+                  <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.quoteInfo}>
+              <Text style={styles.quoteTitle}>{docTitle}</Text>
+              <Text style={styles.quoteDetails}>#{quoteInfo.quoteNumber}</Text>
+              <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+              {documentType === 'QUOTE' && (
+                <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
               )}
             </View>
           </View>
 
-          <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>{docTitle}</Text>
-            <Text style={styles.quoteDetails}>#{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-            {documentType === 'QUOTE' && (
-              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
-            )}
-          </View>
-        </View>
+          {/* Client Information */}
+          <View style={styles.infoGrid}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.subtitle}>Client Information</Text>
+              <Text style={styles.infoLabel}>Name:</Text>
+              <Text style={styles.infoValue}>{clientInfo.name}</Text>
+              {clientInfo.company && (
+                <>
+                  <Text style={styles.infoLabel}>Company:</Text>
+                  <Text style={styles.infoValue}>{clientInfo.company}</Text>
+                </>
+              )}
+              <Text style={styles.infoLabel}>Address:</Text>
+              <Text style={styles.infoValue}>{clientInfo.address}</Text>
+              <Text style={styles.infoLabel}>Phone:</Text>
+              <Text style={styles.infoValue}>{clientInfo.phone}</Text>
+              <Text style={styles.infoLabel}>Email:</Text>
+              <Text style={styles.infoValue}>{clientInfo.email}</Text>
+            </View>
 
-        {/* Client Information */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoColumn}>
-            <Text style={styles.subtitle}>Client Information</Text>
-            <Text style={styles.infoLabel}>Name:</Text>
-            <Text style={styles.infoValue}>{clientInfo.name}</Text>
-            {clientInfo.company && (
+            <View style={styles.infoColumn}>
+              <Text style={styles.subtitle}>Project Information</Text>
+              <Text style={styles.infoLabel}>Project Name:</Text>
+              <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
+              <Text style={styles.infoLabel}>Project Address:</Text>
+              <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
+            </View>
+          </View>
+
+          {/* Services Section */}
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Services</Text>
+            {formData.cleaningType === 'pressure_washing_only' && renderPressureWashingServices(formData, estimateData, styles)}
+            {formData.cleaningType === 'window_cleaning_only' && renderWindowCleaningServices(formData, estimateData, styles)}
+            {formData.needsPressureWashing && formData.needsWindowCleaning && (
               <>
-                <Text style={styles.infoLabel}>Company:</Text>
-                <Text style={styles.infoValue}>{clientInfo.company}</Text>
+                {renderPressureWashingServices(formData, estimateData, styles)}
+                {renderWindowCleaningServices(formData, estimateData, styles)}
               </>
             )}
-            <Text style={styles.infoLabel}>Address:</Text>
-            <Text style={styles.infoValue}>{clientInfo.address}</Text>
-            <Text style={styles.infoLabel}>Phone:</Text>
-            <Text style={styles.infoValue}>{clientInfo.phone}</Text>
-            <Text style={styles.infoLabel}>Email:</Text>
-            <Text style={styles.infoValue}>{clientInfo.email}</Text>
           </View>
 
-          <View style={styles.infoColumn}>
-            <Text style={styles.subtitle}>Project Information</Text>
-            <Text style={styles.infoLabel}>Project Name:</Text>
-            <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
-            <Text style={styles.infoLabel}>Project Address:</Text>
-            <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
-          </View>
-        </View>
-
-        {/* Services Section */}
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>Services</Text>
-          {formData.cleaningType === 'pressure_washing_only' && renderPressureWashingServices(formData, estimateData, styles)}
-          {formData.cleaningType === 'window_cleaning_only' && renderWindowCleaningServices(formData, estimateData, styles)}
-          {formData.needsPressureWashing && formData.needsWindowCleaning && (
-            <>
-              {renderPressureWashingServices(formData, estimateData, styles)}
-              {renderWindowCleaningServices(formData, estimateData, styles)}
-            </>
+          {/* Pricing Section - Only show if document type allows */}
+          {docContent.showPricing && (
+            <View style={styles.section}>
+              <View style={styles.table}>
+                <View style={[styles.tableRow, styles.subtotalRow]}>
+                  <View style={[styles.tableCell, styles.descriptionCell]}>
+                    <Text style={styles.subtotalText}>Subtotal</Text>
+                  </View>
+                  <View style={[styles.tableCell, styles.amountCell]}>
+                    <Text style={styles.subtotalText}>{formatCurrency(subtotal)}</Text>
+                  </View>
+                </View>
+                <View style={[styles.tableRow, styles.subtotalRow]}>
+                  <View style={[styles.tableCell, styles.descriptionCell]}>
+                    <Text style={styles.subtotalText}>Tax (7%)</Text>
+                  </View>
+                  <View style={[styles.tableCell, styles.amountCell]}>
+                    <Text style={styles.subtotalText}>{formatCurrency(salesTax)}</Text>
+                  </View>
+                </View>
+                <View style={[styles.tableRow, styles.totalRow]}>
+                  <View style={[styles.tableCell, styles.descriptionCell]}>
+                    <Text style={styles.totalText}>Total</Text>
+                  </View>
+                  <View style={[styles.tableCell, styles.amountCell]}>
+                    <Text style={styles.totalText}>{formatCurrency(total)}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
           )}
-        </View>
 
-        {/* Pricing Section - Only show if document type allows */}
-        {showPricing && (
-          <View style={styles.section}>
-            <View style={styles.table}>
-              <View style={[styles.tableRow, styles.subtotalRow]}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text style={styles.subtotalText}>Subtotal</Text>
+          {/* Notes Section */}
+          {docNotes && (
+            <View style={styles.section}>
+              <Text style={styles.subtitle}>Notes</Text>
+              <Text style={styles.notes}>{docNotes}</Text>
+            </View>
+          )}
+
+          {/* Terms Section */}
+          {quoteInfo.terms && (
+            <View style={styles.section}>
+              <Text style={styles.subtitle}>Terms & Conditions</Text>
+              <Text style={styles.terms}>{quoteInfo.terms}</Text>
+            </View>
+          )}
+
+          {/* Team Section - Only for Work Orders */}
+          {docContent.showTeamSection && (
+            <View style={styles.section}>
+              <Text style={styles.subtitle}>Team Assignment</Text>
+              <View style={styles.table}>
+                <View style={[styles.tableRow, styles.tableHeader]}>
+                  <View style={[styles.tableCell, { width: '40%' }]}>
+                    <Text style={styles.bold}>Team Member</Text>
+                  </View>
+                  <View style={[styles.tableCell, { width: '30%' }]}>
+                    <Text style={styles.bold}>Role</Text>
+                  </View>
+                  <View style={[styles.tableCell, { width: '30%' }]}>
+                    <Text style={styles.bold}>Contact</Text>
+                  </View>
                 </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text style={styles.subtotalText}>{formatCurrency(subtotal)}</Text>
-                </View>
-              </View>
-              <View style={[styles.tableRow, styles.subtotalRow]}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text style={styles.subtotalText}>Tax (7%)</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text style={styles.subtotalText}>{formatCurrency(tax)}</Text>
-                </View>
-              </View>
-              <View style={[styles.tableRow, styles.totalRow]}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text style={styles.totalText}>Total</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text style={styles.totalText}>{formatCurrency(total)}</Text>
-                </View>
+                {/* Add empty rows for manual team assignment */}
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.tableRow}>
+                    <View style={[styles.tableCell, { width: '40%', height: 20 }]} />
+                    <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
+                    <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
+                  </View>
+                ))}
               </View>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Notes Section */}
-        {docNotes && (
-          <View style={styles.section}>
-            <Text style={styles.subtitle}>Notes</Text>
-            <Text style={styles.notes}>{docNotes}</Text>
-          </View>
-        )}
-
-        {/* Terms Section */}
-        {quoteInfo.terms && (
-          <View style={styles.section}>
-            <Text style={styles.subtitle}>Terms & Conditions</Text>
-            <Text style={styles.terms}>{quoteInfo.terms}</Text>
-          </View>
-        )}
-
-        {/* Team Section - Only for Work Orders */}
-        {docContent.showTeamSection && (
-          <View style={styles.section}>
-            <Text style={styles.subtitle}>Team Assignment</Text>
-            <View style={styles.table}>
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <View style={[styles.tableCell, { width: '40%' }]}>
-                  <Text style={styles.bold}>Team Member</Text>
+          {/* Completion Section - Only for Work Orders */}
+          {docContent.showCompletionSection && (
+            <View style={styles.section}>
+              <Text style={styles.subtitle}>Completion Verification</Text>
+              <View style={styles.table}>
+                <View style={[styles.tableRow, styles.tableHeader]}>
+                  <View style={[styles.tableCell, { width: '50%' }]}>
+                    <Text style={styles.bold}>Task</Text>
+                  </View>
+                  <View style={[styles.tableCell, { width: '25%' }]}>
+                    <Text style={styles.bold}>Completed By</Text>
+                  </View>
+                  <View style={[styles.tableCell, { width: '25%' }]}>
+                    <Text style={styles.bold}>Date</Text>
+                  </View>
                 </View>
-                <View style={[styles.tableCell, { width: '30%' }]}>
-                  <Text style={styles.bold}>Role</Text>
-                </View>
-                <View style={[styles.tableCell, { width: '30%' }]}>
-                  <Text style={styles.bold}>Contact</Text>
-                </View>
+                {/* Add empty rows for completion tracking */}
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.tableRow}>
+                    <View style={[styles.tableCell, { width: '50%', height: 20 }]} />
+                    <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
+                    <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
+                  </View>
+                ))}
               </View>
-              {/* Add empty rows for manual team assignment */}
-              {[1, 2, 3].map((i) => (
-                <View key={i} style={styles.tableRow}>
-                  <View style={[styles.tableCell, { width: '40%', height: 20 }]} />
-                  <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
-                  <View style={[styles.tableCell, { width: '30%', height: 20 }]} />
-                </View>
-              ))}
+            </View>
+          )}
+
+          {/* Signature Section */}
+          <View style={styles.signatureSection}>
+            <View style={styles.signatureColumn}>
+              <View style={styles.signatureLine} />
+              <Text style={styles.signatureLabel}>Client Signature</Text>
+              <Text style={styles.signatureLabel}>Date: _________________</Text>
+            </View>
+            <View style={styles.signatureColumn}>
+              <View style={styles.signatureLine} />
+              <Text style={styles.signatureLabel}>Company Representative</Text>
+              <Text style={styles.signatureLabel}>Date: _________________</Text>
             </View>
           </View>
-        )}
 
-        {/* Completion Section - Only for Work Orders */}
-        {docContent.showCompletionSection && (
-          <View style={styles.section}>
-            <Text style={styles.subtitle}>Completion Verification</Text>
-            <View style={styles.table}>
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <View style={[styles.tableCell, { width: '50%' }]}>
-                  <Text style={styles.bold}>Task</Text>
-                </View>
-                <View style={[styles.tableCell, { width: '25%' }]}>
-                  <Text style={styles.bold}>Completed By</Text>
-                </View>
-                <View style={[styles.tableCell, { width: '25%' }]}>
-                  <Text style={styles.bold}>Date</Text>
-                </View>
-              </View>
-              {/* Add empty rows for completion tracking */}
-              {[1, 2, 3].map((i) => (
-                <View key={i} style={styles.tableRow}>
-                  <View style={[styles.tableCell, { width: '50%', height: 20 }]} />
-                  <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
-                  <View style={[styles.tableCell, { width: '25%', height: 20 }]} />
-                </View>
-              ))}
-            </View>
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text>
+              {companyInfo.name} | {companyInfo.address}, {companyInfo.city} | {companyInfo.phone} | {companyInfo.email}
+            </Text>
           </View>
-        )}
-
-        {/* Signature Section */}
-        <View style={styles.signatureSection}>
-          <View style={styles.signatureColumn}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Client Signature</Text>
-            <Text style={styles.signatureLabel}>Date: _________________</Text>
-          </View>
-          <View style={styles.signatureColumn}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Company Representative</Text>
-            <Text style={styles.signatureLabel}>Date: _________________</Text>
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>
-            {companyInfo.name} | {companyInfo.address}, {companyInfo.city} | {companyInfo.phone} | {companyInfo.email}
-          </Text>
-        </View>
-      </Page>
-    </Document>
-  );
+        </Page>
+      </Document>
+    );
+  } catch (error) {
+    console.error('Error in QuotePDF component:', error);
+    throw new Error(`Failed to generate PDF document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };
 
 export default QuotePDF;

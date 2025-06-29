@@ -5,14 +5,47 @@ import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
 
-// Register fonts
-Font.register({
-  family: 'Roboto',
-  fonts: [
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf', fontWeight: 'normal' },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf', fontWeight: 'bold' },
-  ],
-});
+// Font registration function
+const registerFonts = async () => {
+  try {
+    // Check if fonts are already registered
+    if (Font.getRegisteredFontFamilies().includes('Roboto')) {
+      console.log('Fonts already registered');
+      return;
+    }
+
+    // Register fonts
+    Font.register({
+      family: 'Roboto',
+      fonts: [
+        { 
+          src: '/fonts/roboto-regular-webfont.ttf',
+          fontWeight: 'normal',
+          fontStyle: 'normal'
+        },
+        { 
+          src: '/fonts/roboto-bold-webfont.ttf',
+          fontWeight: 'bold',
+          fontStyle: 'normal'
+        },
+        { 
+          src: '/fonts/roboto-italic-webfont.ttf',
+          fontWeight: 'normal',
+          fontStyle: 'italic'
+        },
+        { 
+          src: '/fonts/roboto-bolditalic-webfont.ttf',
+          fontWeight: 'bold',
+          fontStyle: 'italic'
+        }
+      ],
+    });
+    console.log('Fonts registered successfully');
+  } catch (error) {
+    console.error('Error registering fonts:', error);
+    throw new Error(`Failed to register fonts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
 
 interface CompanyInfo {
   name: string;
@@ -51,13 +84,53 @@ interface DocumentGeneratorProps {
 
 type DocumentType = 'QUOTE' | 'WORK_ORDER' | 'PURCHASE_ORDER' | 'CHANGE_ORDER' | 'INVOICE';
 
+const validateDocumentData = (props: DocumentGeneratorProps): void => {
+  const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
+
+  if (!estimateData) throw new Error('Estimate data is required');
+  if (!formData) throw new Error('Form data is required');
+  if (!companyInfo) throw new Error('Company information is required');
+  if (!clientInfo) throw new Error('Client information is required');
+  if (!quoteInfo) throw new Error('Quote information is required');
+
+  // Validate company info
+  if (!companyInfo.name) throw new Error('Company name is required');
+  if (!companyInfo.address) throw new Error('Company address is required');
+  if (!companyInfo.phone) throw new Error('Company phone is required');
+
+  // Validate client info
+  if (!clientInfo.name) throw new Error('Client name is required');
+  if (!clientInfo.company) throw new Error('Client company is required');
+  if (!clientInfo.address) throw new Error('Client address is required');
+
+  // Validate quote info
+  if (!quoteInfo.quoteNumber) throw new Error('Quote number is required');
+  if (!quoteInfo.projectName) throw new Error('Project name is required');
+  if (!quoteInfo.projectAddress) throw new Error('Project address is required');
+};
+
 const generatePDF = async (
   props: DocumentGeneratorProps,
   documentType: DocumentType,
   showCoverPage: boolean = false
 ): Promise<Blob> => {
   try {
+    console.log(`Starting PDF generation for ${documentType}...`);
+    
+    // Register fonts before generating PDF
+    await registerFonts();
+    
     const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
+
+    console.log('Creating PDF document with props:', {
+      documentType,
+      showCoverPage,
+      hasEstimateData: !!estimateData,
+      hasFormData: !!formData,
+      hasCompanyInfo: !!companyInfo,
+      hasClientInfo: !!clientInfo,
+      hasQuoteInfo: !!quoteInfo
+    });
 
     // Create the PDF document
     const pdfDoc = await pdf(
@@ -74,11 +147,20 @@ const generatePDF = async (
       )
     ).toBlob();
     
-    if (!pdfDoc) throw new Error(`Failed to generate ${documentType} PDF`);
+    if (!pdfDoc) {
+      console.error(`Failed to generate ${documentType} PDF: PDF blob is null`);
+      throw new Error(`Failed to generate ${documentType} PDF: PDF blob is null`);
+    }
+
+    console.log(`Successfully generated ${documentType} PDF`);
     return pdfDoc;
   } catch (error) {
     console.error(`Error generating ${documentType} PDF:`, error);
-    throw error;
+    console.error('Error details:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    throw new Error(`Failed to generate ${documentType} PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -90,10 +172,8 @@ export const generateDocumentPackage = async ({
   quoteInfo,
 }: DocumentGeneratorProps): Promise<void> => {
   try {
-    // Validate required data
-    if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
-      throw new Error('Missing required data for document generation');
-    }
+    // Validate all required data
+    validateDocumentData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
 
     const zip = new JSZip();
     const projectName = quoteInfo.projectName.trim() || 'Project';
@@ -114,25 +194,30 @@ export const generateDocumentPackage = async ({
 
     // Generate all documents
     for (const doc of documents) {
-      const modifiedQuoteInfo = {
-        ...quoteInfo,
-        quoteNumber: `${doc.prefix}${quoteInfo.quoteNumber}`,
-      };
+      try {
+        const modifiedQuoteInfo = {
+          ...quoteInfo,
+          quoteNumber: `${doc.prefix}${quoteInfo.quoteNumber}`,
+        };
 
-      const pdfBlob = await generatePDF(
-        {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo: modifiedQuoteInfo,
-        },
-        doc.type,
-        doc.showCover
-      );
+        const pdfBlob = await generatePDF(
+          {
+            estimateData,
+            formData,
+            companyInfo,
+            clientInfo,
+            quoteInfo: modifiedQuoteInfo,
+          },
+          doc.type,
+          doc.showCover
+        );
 
-      const fileName = `${doc.type.replace('_', ' ')}.pdf`;
-      folder.file(fileName, pdfBlob);
+        const fileName = `${doc.type.replace('_', ' ')}.pdf`;
+        folder.file(fileName, pdfBlob);
+      } catch (error) {
+        console.error(`Error generating ${doc.type}:`, error);
+        throw new Error(`Failed to generate ${doc.type}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     }
 
     // Generate and download the ZIP file
