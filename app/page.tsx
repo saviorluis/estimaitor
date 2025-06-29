@@ -17,7 +17,7 @@ interface PastEntry {
   clientName: string;
   projectName: string;
   projectType: string;
-  squareFootage: number;
+  squareFootage: number | undefined;
   totalPrice: number;
   estimateData: EstimateData;
   formData: FormData;
@@ -181,7 +181,7 @@ export default function Home() {
                       <td className="py-2 px-4">{entry.clientName}</td>
                       <td className="py-2 px-4">{entry.projectName}</td>
                       <td className="py-2 px-4">{entry.projectType.replace('_', ' ')}</td>
-                      <td className="py-2 px-4 text-right">{entry.squareFootage.toLocaleString()}</td>
+                      <td className="py-2 px-4 text-right">{entry.squareFootage?.toLocaleString()}</td>
                       <td className="py-2 px-4 text-right">${entry.totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                       <td className="py-2 px-4 flex justify-center space-x-2">
                         <button 

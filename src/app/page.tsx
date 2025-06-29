@@ -59,22 +59,24 @@ export default function Home() {
     setEstimateData(data);
     setFormData(formValues);
     
-    // Save to past entries
-    const newEntry: PastEntry = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleString(),
-      clientName: formValues.clientName || 'Unnamed Client',
-      projectName: formValues.projectName || 'Unnamed Project',
-      projectType: formValues.projectType,
-      squareFootage: formValues.squareFootage,
-      totalPrice: data.totalPrice,
-      estimateData: data,
-      formData: formValues
-    };
-    
-    const updatedEntries = [newEntry, ...pastEntries].slice(0, 20); // Keep only the 20 most recent entries
-    setPastEntries(updatedEntries);
-    localStorage.setItem(PAST_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    // Only save to past entries if we have a valid square footage
+    if (formValues.squareFootage && formValues.squareFootage > 0) {
+      const newEntry: PastEntry = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleString(),
+        clientName: formValues.clientName || 'Unnamed Client',
+        projectName: formValues.projectName || 'Unnamed Project',
+        projectType: formValues.projectType,
+        squareFootage: formValues.squareFootage,
+        totalPrice: data.totalPrice,
+        estimateData: data,
+        formData: formValues
+      };
+      
+      const updatedEntries = [newEntry, ...pastEntries].slice(0, 20); // Keep only the 20 most recent entries
+      setPastEntries(updatedEntries);
+      localStorage.setItem(PAST_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    }
   };
 
   // Function to clear saved data
