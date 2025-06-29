@@ -4,6 +4,8 @@ import { EstimateData, FormData, PressureWashingServiceType, CompanyInfo } from 
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, PRESSURE_WASHING_SCOPE_OF_WORK } from '@/lib/constants';
 
+// Register fonts is now handled in documentGenerator.ts
+
 // Create styles
 const styles = StyleSheet.create({
   page: {

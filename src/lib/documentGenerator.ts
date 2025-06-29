@@ -14,33 +14,34 @@ const registerFonts = async () => {
       return;
     }
 
-    // Register fonts
+    // Register fonts with absolute URLs
+    const baseUrl = window.location.origin;
     Font.register({
       family: 'Roboto',
       fonts: [
         { 
-          src: '/fonts/roboto-regular-webfont.ttf',
+          src: `${baseUrl}/fonts/roboto-regular-webfont.ttf`,
           fontWeight: 'normal',
           fontStyle: 'normal'
         },
         { 
-          src: '/fonts/roboto-bold-webfont.ttf',
+          src: `${baseUrl}/fonts/roboto-bold-webfont.ttf`,
           fontWeight: 'bold',
           fontStyle: 'normal'
         },
         { 
-          src: '/fonts/roboto-italic-webfont.ttf',
+          src: `${baseUrl}/fonts/roboto-italic-webfont.ttf`,
           fontWeight: 'normal',
           fontStyle: 'italic'
         },
         { 
-          src: '/fonts/roboto-bolditalic-webfont.ttf',
+          src: `${baseUrl}/fonts/roboto-bolditalic-webfont.ttf`,
           fontWeight: 'bold',
           fontStyle: 'italic'
         }
       ],
     });
-    console.log('Fonts registered successfully');
+    console.log('Fonts registered successfully with base URL:', baseUrl);
   } catch (error) {
     console.error('Error registering fonts:', error);
     throw new Error(`Failed to register fonts: ${error instanceof Error ? error.message : 'Unknown error'}`);
