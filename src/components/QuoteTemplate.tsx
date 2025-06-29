@@ -222,18 +222,25 @@ Additional Information:
     }
   };
 
-  // Handle client information changes
+  // Client information handling
   const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log('Updating client info:', name, value);
+    
     const updatedClientInfo = {
       ...clientInfo,
-      [name]: value
+      [name]: value.trim()
     };
+    
+    console.log('Updated client info:', updatedClientInfo);
     setClientInfo(updatedClientInfo);
     
     // Save to localStorage
-    if (typeof window !== 'undefined') {
+    try {
       localStorage.setItem('quoteClientInfo', JSON.stringify(updatedClientInfo));
+      console.log('Saved client info to localStorage');
+    } catch (error) {
+      console.error('Error saving client info to localStorage:', error);
     }
   };
 
@@ -634,7 +641,65 @@ Additional Information:
 
   const handleDownloadPackage = async () => {
     try {
+      // Validate required data
+      console.log('Starting document package generation...');
+      console.log('Client Info:', {
+        name: clientInfo.name,
+        company: clientInfo.company,
+        address: clientInfo.address,
+        email: clientInfo.email,
+        phone: clientInfo.phone
+      });
+      console.log('Company Info:', companyInfo);
+      console.log('Quote Info:', quoteInfo);
+      console.log('Form Data:', formData);
+      console.log('Estimate Data:', estimateData);
+
+      if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
+        console.error('Missing required data:', {
+          hasEstimateData: !!estimateData,
+          hasFormData: !!formData,
+          hasCompanyInfo: !!companyInfo,
+          hasClientInfo: !!clientInfo,
+          hasQuoteInfo: !!quoteInfo
+        });
+        throw new Error('Missing required data for document package generation');
+      }
+
+      // Additional validation for client info
+      if (!clientInfo.name || !clientInfo.company || !clientInfo.address) {
+        console.error('Missing required client information:', {
+          name: clientInfo.name,
+          company: clientInfo.company,
+          address: clientInfo.address
+        });
+        throw new Error('Please fill out all required client information (Name, Company, and Address)');
+      }
+
+      // Show loading state
+      const button = document.getElementById('download-package-btn');
+      if (button) {
+        button.textContent = 'Generating Package...';
+        button.setAttribute('disabled', 'true');
+      }
+
+      // Get adjusted estimate data
+      console.log('Getting adjusted estimate data...');
       const adjustedEstimateData = getAdjustedEstimateData(estimateData, formData, adjustedPrices);
+      console.log('Adjusted estimate data:', adjustedEstimateData);
+
+      // Save client info to localStorage before generating package
+      localStorage.setItem('quoteClientInfo', JSON.stringify(clientInfo));
+
+      // Generate and download the package
+      console.log('Generating document package with data:', {
+        estimateData: adjustedEstimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo
+      });
+
       await generateDocumentPackage({
         estimateData: adjustedEstimateData,
         formData,
@@ -642,9 +707,34 @@ Additional Information:
         clientInfo,
         quoteInfo
       });
+      console.log('Document package generated successfully');
+
+      // Reset button state
+      if (button) {
+        button.textContent = 'Download Complete Package';
+        button.removeAttribute('disabled');
+      }
     } catch (error) {
       console.error('Error generating document package:', error);
-      alert('There was an error generating the document package. Please try again.');
+      console.error('Error details:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        clientInfo,
+        companyInfo,
+        quoteInfo,
+        hasEstimateData: !!estimateData,
+        hasFormData: !!formData
+      });
+
+      // Show a more detailed error message to the user
+      alert(`Error generating document package: ${error instanceof Error ? error.message : 'Unknown error'}\n\nPlease check that all required information is filled out.`);
+
+      // Reset button state on error
+      const button = document.getElementById('download-package-btn');
+      if (button) {
+        button.textContent = 'Download Complete Package';
+        button.removeAttribute('disabled');
+      }
     }
   };
 
@@ -1377,6 +1467,7 @@ Additional Information:
         </button>
         <button
           type="button"
+          id="download-package-btn"
           onClick={handleDownloadPackage}
           className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-500 dark:hover:bg-green-600"
         >

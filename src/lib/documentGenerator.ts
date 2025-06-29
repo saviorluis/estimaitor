@@ -87,6 +87,14 @@ type DocumentType = 'QUOTE' | 'WORK_ORDER' | 'PURCHASE_ORDER' | 'CHANGE_ORDER' |
 const validateDocumentData = (props: DocumentGeneratorProps): void => {
   const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
 
+  console.log('Validating document data with:', {
+    clientInfo,
+    companyInfo,
+    quoteInfo,
+    hasEstimateData: !!estimateData,
+    hasFormData: !!formData
+  });
+
   if (!estimateData) throw new Error('Estimate data is required');
   if (!formData) throw new Error('Form data is required');
   if (!companyInfo) throw new Error('Company information is required');
@@ -99,9 +107,19 @@ const validateDocumentData = (props: DocumentGeneratorProps): void => {
   if (!companyInfo.phone) throw new Error('Company phone is required');
 
   // Validate client info
-  if (!clientInfo.name) throw new Error('Client name is required');
-  if (!clientInfo.company) throw new Error('Client company is required');
-  if (!clientInfo.address) throw new Error('Client address is required');
+  console.log('Validating client info:', clientInfo);
+  if (!clientInfo.name || clientInfo.name.trim() === '') {
+    console.error('Client name is missing or empty');
+    throw new Error('Client name is required');
+  }
+  if (!clientInfo.company || clientInfo.company.trim() === '') {
+    console.error('Client company is missing or empty');
+    throw new Error('Client company is required');
+  }
+  if (!clientInfo.address || clientInfo.address.trim() === '') {
+    console.error('Client address is missing or empty');
+    throw new Error('Client address is required');
+  }
 
   // Validate quote info
   if (!quoteInfo.quoteNumber) throw new Error('Quote number is required');
@@ -172,6 +190,14 @@ export const generateDocumentPackage = async ({
   quoteInfo,
 }: DocumentGeneratorProps): Promise<void> => {
   try {
+    console.log('Starting document package generation with:', {
+      clientInfo,
+      companyInfo,
+      quoteInfo,
+      hasEstimateData: !!estimateData,
+      hasFormData: !!formData
+    });
+
     // Validate all required data
     validateDocumentData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
 
