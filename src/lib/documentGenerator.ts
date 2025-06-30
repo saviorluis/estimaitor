@@ -123,6 +123,11 @@ const generatePDF = async (
     
     const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
 
+    // Validate input data
+    if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
+      throw new Error('Missing required data for PDF generation');
+    }
+
     console.log('Creating PDF document with props:', {
       documentType,
       showCoverPage,
@@ -146,14 +151,18 @@ const generatePDF = async (
       })
     );
 
-    // Generate PDF directly as blob
-    const pdfBlob = await pdf(doc).toBlob();
-    if (!pdfBlob) {
-      throw new Error(`Failed to generate ${documentType} PDF`);
+    // Create PDF instance and generate
+    const instance = pdf();
+    await instance.updateContainer(doc);
+
+    // Generate the final blob
+    const blob = await instance.toBlob();
+    if (!blob) {
+      throw new Error('Failed to generate PDF blob');
     }
 
     console.log(`Successfully generated ${documentType} PDF`);
-    return pdfBlob;
+    return blob;
   } catch (error) {
     console.error(`Error generating ${documentType} PDF:`, error);
     console.error('Error details:', {
@@ -172,77 +181,36 @@ export const generateDocumentPackage = async ({
   quoteInfo,
 }: DocumentGeneratorProps): Promise<void> => {
   try {
-    console.log('Starting document package generation with:', {
-      clientInfo,
-      companyInfo,
-      quoteInfo,
-      hasEstimateData: !!estimateData,
-      hasFormData: !!formData
-    });
+    console.log('Starting document package generation...');
 
     // Validate all required data
     validateDocumentData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
 
-    const zip = new JSZip();
-    const projectName = quoteInfo.projectName.trim() || 'Project';
-    const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9]/g, '_');
-    
-    // Create folder for the project
-    const folder = zip.folder(sanitizedProjectName);
-    if (!folder) throw new Error('Failed to create ZIP folder');
+    // For now, let's focus on generating just the quote
+    console.log('Generating quote document...');
+    const pdfBlob = await generatePDF(
+      {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo,
+      },
+      'QUOTE',
+      true // Show cover page for quote
+    );
 
-    // Define document configurations
-    const documents: Array<{ type: DocumentType; prefix: string; showCover: boolean }> = [
-      { type: 'QUOTE', prefix: '', showCover: true },
-      { type: 'WORK_ORDER', prefix: 'WO-', showCover: false },
-      { type: 'PURCHASE_ORDER', prefix: 'PO-', showCover: false },
-      { type: 'CHANGE_ORDER', prefix: 'CO-', showCover: false },
-      { type: 'INVOICE', prefix: 'INV-', showCover: false }
-    ];
-
-    // Generate all documents
-    for (const doc of documents) {
-      try {
-        console.log(`Generating ${doc.type} document...`);
-        
-        const modifiedQuoteInfo = {
-          ...quoteInfo,
-          quoteNumber: `${doc.prefix}${quoteInfo.quoteNumber}`,
-        };
-
-        const pdfBlob = await generatePDF(
-          {
-            estimateData,
-            formData,
-            companyInfo,
-            clientInfo,
-            quoteInfo: modifiedQuoteInfo,
-          },
-          doc.type,
-          doc.showCover
-        );
-
-        if (!pdfBlob) {
-          throw new Error(`Generated PDF blob is null for ${doc.type}`);
-        }
-
-        const fileName = `${doc.type.replace('_', ' ')}.pdf`;
-        console.log(`Adding ${fileName} to ZIP...`);
-        folder.file(fileName, pdfBlob);
-      } catch (error) {
-        console.error(`Error generating ${doc.type}:`, error);
-        throw new Error(`Failed to generate ${doc.type}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
+    if (!pdfBlob) {
+      throw new Error('Failed to generate quote PDF');
     }
 
-    // Generate and download the ZIP file
-    console.log('Generating ZIP file...');
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    if (!zipBlob) throw new Error('Failed to generate ZIP file');
+    // Save the PDF directly
+    const sanitizedProjectName = quoteInfo.projectName.trim().replace(/[^a-zA-Z0-9]/g, '_') || 'Project';
+    const fileName = `${sanitizedProjectName}_Quote.pdf`;
     
-    console.log('Saving ZIP file...');
-    saveAs(zipBlob, `${sanitizedProjectName}_Documents.zip`);
-    console.log('Document package generation completed successfully');
+    console.log('Saving quote PDF...');
+    saveAs(pdfBlob, fileName);
+    console.log('Quote generation completed successfully');
   } catch (error) {
     console.error('Error generating document package:', error);
     throw new Error(`Failed to generate document package: ${error instanceof Error ? error.message : 'Unknown error'}`);
