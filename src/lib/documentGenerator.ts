@@ -4,49 +4,34 @@ import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
+import { fonts } from './fonts';
 
-// Font registration function
-const registerFonts = async () => {
-  try {
-    // Check if fonts are already registered
-    if (Font.getRegisteredFontFamilies().includes('Roboto')) {
-      console.log('Fonts already registered');
-      return;
+// Register fonts statically
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    {
+      src: fonts.regular,
+      fontWeight: 'normal',
+      fontStyle: 'normal'
+    },
+    {
+      src: fonts.bold,
+      fontWeight: 'bold',
+      fontStyle: 'normal'
+    },
+    {
+      src: fonts.italic,
+      fontWeight: 'normal',
+      fontStyle: 'italic'
+    },
+    {
+      src: fonts.boldItalic,
+      fontWeight: 'bold',
+      fontStyle: 'italic'
     }
-
-    // Register fonts with absolute URLs
-    const baseUrl = window.location.origin;
-    Font.register({
-      family: 'Roboto',
-      fonts: [
-        { 
-          src: `${baseUrl}/fonts/roboto-regular-webfont.ttf`,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
-        },
-        { 
-          src: `${baseUrl}/fonts/roboto-bold-webfont.ttf`,
-          fontWeight: 'bold',
-          fontStyle: 'normal'
-        },
-        { 
-          src: `${baseUrl}/fonts/roboto-italic-webfont.ttf`,
-          fontWeight: 'normal',
-          fontStyle: 'italic'
-        },
-        { 
-          src: `${baseUrl}/fonts/roboto-bolditalic-webfont.ttf`,
-          fontWeight: 'bold',
-          fontStyle: 'italic'
-        }
-      ],
-    });
-    console.log('Fonts registered successfully with base URL:', baseUrl);
-  } catch (error) {
-    console.error('Error registering fonts:', error);
-    throw new Error(`Failed to register fonts: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
+  ]
+});
 
 interface CompanyInfo {
   name: string;
@@ -135,9 +120,6 @@ const generatePDF = async (
 ): Promise<Blob> => {
   try {
     console.log(`Starting PDF generation for ${documentType}...`);
-    
-    // Register fonts before generating PDF
-    await registerFonts();
     
     const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
 
