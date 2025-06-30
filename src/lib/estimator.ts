@@ -26,7 +26,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const {
     projectType,
     cleaningType,
-    squareFootage,
+    squareFootage: rawSquareFootage,
     hasVCT,
     distanceFromOffice,
     gasPrice: rawGasPrice,
@@ -49,6 +49,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Ensure gasPrice is a number and use it in travel cost calculation
   const gasPrice = typeof rawGasPrice === 'string' ? parseFloat(rawGasPrice) : (rawGasPrice || 3.50);
+
+  // Ensure squareFootage is a number
+  const squareFootage = rawSquareFootage || 0;
 
   // Apply project type multiplier
   const projectTypeMultiplier = PROJECT_TYPE_MULTIPLIERS[projectType];
