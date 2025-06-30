@@ -134,27 +134,26 @@ const generatePDF = async (
     });
 
     // Create the PDF document
-    const pdfDoc = await pdf(
-      React.createElement(Document, {}, 
-        React.createElement(QuotePDF, {
-          estimateData,
-          formData,
-          companyInfo,
-          clientInfo,
-          quoteInfo,
-          showCoverPage,
-          documentType
-        })
-      )
-    ).toBlob();
-    
-    if (!pdfDoc) {
-      console.error(`Failed to generate ${documentType} PDF: PDF blob is null`);
-      throw new Error(`Failed to generate ${documentType} PDF: PDF blob is null`);
+    const doc = React.createElement(Document, {}, 
+      React.createElement(QuotePDF, {
+        estimateData,
+        formData,
+        companyInfo,
+        clientInfo,
+        quoteInfo,
+        showCoverPage,
+        documentType
+      })
+    );
+
+    // Generate PDF directly as blob
+    const pdfBlob = await pdf(doc).toBlob();
+    if (!pdfBlob) {
+      throw new Error(`Failed to generate ${documentType} PDF`);
     }
 
     console.log(`Successfully generated ${documentType} PDF`);
-    return pdfDoc;
+    return pdfBlob;
   } catch (error) {
     console.error(`Error generating ${documentType} PDF:`, error);
     console.error('Error details:', {
@@ -204,6 +203,8 @@ export const generateDocumentPackage = async ({
     // Generate all documents
     for (const doc of documents) {
       try {
+        console.log(`Generating ${doc.type} document...`);
+        
         const modifiedQuoteInfo = {
           ...quoteInfo,
           quoteNumber: `${doc.prefix}${quoteInfo.quoteNumber}`,
@@ -221,7 +222,12 @@ export const generateDocumentPackage = async ({
           doc.showCover
         );
 
+        if (!pdfBlob) {
+          throw new Error(`Generated PDF blob is null for ${doc.type}`);
+        }
+
         const fileName = `${doc.type.replace('_', ' ')}.pdf`;
+        console.log(`Adding ${fileName} to ZIP...`);
         folder.file(fileName, pdfBlob);
       } catch (error) {
         console.error(`Error generating ${doc.type}:`, error);
@@ -230,10 +236,13 @@ export const generateDocumentPackage = async ({
     }
 
     // Generate and download the ZIP file
+    console.log('Generating ZIP file...');
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     if (!zipBlob) throw new Error('Failed to generate ZIP file');
     
+    console.log('Saving ZIP file...');
     saveAs(zipBlob, `${sanitizedProjectName}_Documents.zip`);
+    console.log('Document package generation completed successfully');
   } catch (error) {
     console.error('Error generating document package:', error);
     throw new Error(`Failed to generate document package: ${error instanceof Error ? error.message : 'Unknown error'}`);
