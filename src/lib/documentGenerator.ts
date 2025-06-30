@@ -151,9 +151,11 @@ const generatePDF = async (
       })
     );
 
-    // Create PDF instance and generate
-    const instance = pdf();
-    await instance.updateContainer(doc);
+    // Initialize PDF instance with proper WASM loading
+    const instance = pdf(doc);
+    if (!instance) {
+      throw new Error('Failed to initialize PDF instance');
+    }
 
     // Generate the final blob
     const blob = await instance.toBlob();
