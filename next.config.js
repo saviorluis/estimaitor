@@ -13,6 +13,11 @@ const nextConfig = {
         filename: 'static/fonts/[name][ext]'
       }
     });
+    // Add WASM support
+    config.experiments = {
+      asyncWebAssembly: true,
+      layers: true,
+    };
     return config;
   },
   async headers() {
@@ -48,8 +53,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/fonts/:path*',
-        destination: '/fonts/:path*'
+        source: '/static/fonts/:path*',
+        destination: '/static/fonts/:path*'
       }
     ];
   }

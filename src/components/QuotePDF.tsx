@@ -3,8 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font, Image, Svg, Rect, G, Path
 import { EstimateData, FormData, PressureWashingServiceType, CompanyInfo } from '@/lib/types';
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, PRESSURE_WASHING_SCOPE_OF_WORK } from '@/lib/constants';
-
-// Register fonts is now handled in documentGenerator.ts
+import { fonts } from '@/lib/fonts';
 
 // Create styles
 const styles = StyleSheet.create({
@@ -650,37 +649,38 @@ const getDocumentContent = (type: DocumentType = 'QUOTE'): {
   }
 };
 
-// Add fallback SVG logo component
-const FallbackLogo = () => (
-  <Svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%' }}>
-    <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-    <Text
-      x="100"
-      y="40"
-      style={{
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAnchor: 'middle',
-        fill: 'white',
-        dominantBaseline: 'middle',
-      }}
-    >
-      BBPS
-    </Text>
-    <Text
-      x="100"
-      y="60"
-      style={{
-        fontSize: 10,
-        textAnchor: 'middle',
-        fill: 'white',
-        dominantBaseline: 'middle',
-      }}
-    >
-      Big Brother Property Solutions
-    </Text>
-  </Svg>
-);
+const renderLogo = (containerStyle: any = {}, imageStyle: any = {}, name: string) => {
+  try {
+    return (
+      <View style={[styles.logoContainer, containerStyle]}>
+        <Svg viewBox="0 0 200 100" style={[styles.logo, imageStyle]}>
+          <G>
+            <Path d="M0 8 H200 V92 H0 Z" fill="#2563eb" />
+            <Text
+              x="100"
+              y="50"
+              style={{
+                fontFamily: 'Roboto',
+                fontSize: 16,
+                textAnchor: 'middle',
+                fill: 'white'
+              }}
+            >
+              {name}
+            </Text>
+          </G>
+        </Svg>
+      </View>
+    );
+  } catch (error) {
+    console.error('Error rendering logo:', error);
+    return (
+      <View style={[styles.logoContainer, containerStyle]}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{name}</Text>
+      </View>
+    );
+  }
+};
 
 const validatePDFData = (props: QuotePDFProps): void => {
   const { estimateData, formData, companyInfo, clientInfo, quoteInfo } = props;
@@ -737,30 +737,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     const salesTax = subtotal * 0.07;
     const total = subtotal + salesTax;
 
-    const renderLogo = (containerStyle: any = {}, imageStyle: any = {}) => {
-      try {
-        const logoPath = '/assets/logo.png';
-        
-        return (
-          <View style={[styles.logoContainer, containerStyle]}>
-            <Image
-              src={logoPath}
-              style={[styles.logo, imageStyle]}
-            />
-          </View>
-        );
-      } catch (error) {
-        console.error('Error rendering logo:', error);
-        return <FallbackLogo />;
-      }
-    };
-
     return (
       <Document>
         {showCoverPage && (
           <Page size="LETTER" style={styles.page}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              {renderLogo({ width: 300, height: 150 }, { maxWidth: 300, maxHeight: 150 })}
+              {renderLogo({ width: 300, height: 150 }, { maxWidth: 300, maxHeight: 150 }, companyInfo.name)}
               <Text style={[styles.title, { marginTop: 40, fontSize: 36, textAlign: 'center' }]}>
                 {docTitle}
               </Text>
@@ -786,7 +768,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.header}>
             <View style={styles.companyHeader}>
-              {renderLogo()}
+              {renderLogo({}, {}, companyInfo.name)}
               <View style={styles.companyInfo}>
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.address}</Text>
