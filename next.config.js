@@ -10,7 +10,7 @@ const nextConfig = {
       test: /\.(ttf|woff|woff2)$/,
       type: 'asset/resource',
       generator: {
-        filename: 'static/fonts/[name][ext]'
+        filename: 'fonts/[name][ext]'
       }
     });
     // Add WASM support
@@ -33,7 +33,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data: blob:",
               "img-src 'self' data: blob:",
-              "connect-src 'self' data: blob:",
+              "connect-src 'self' https: data: blob: 'unsafe-eval'",
               "worker-src 'self' blob:",
               "frame-src 'self'",
               "media-src 'self'",
@@ -53,7 +53,7 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/static/fonts/:path*',
+        source: '/fonts/:path*',
         destination: '/static/fonts/:path*'
       }
     ];
