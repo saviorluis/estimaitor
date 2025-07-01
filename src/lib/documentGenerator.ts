@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
-import { fonts } from './fonts';
+import { fonts, fontConfig } from './fonts';
 import { generateQuoteDocx } from './docxGenerator';
 
 // Register fonts with absolute URLs
@@ -209,27 +209,47 @@ const validateDocumentData = (props: DocumentGeneratorProps): void => {
 
 const initializeFonts = async (): Promise<void> => {
   try {
-    // Verify fonts exist
-    for (const [key, path] of Object.entries(fonts)) {
-      try {
-        const response = await fetch(path);
-        if (!response.ok) throw new Error(`Font file not found: ${path}`);
-      } catch (e: unknown) {
-        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
-        throw new Error(`Failed to load font ${key}: ${errorMessage}`);
-      }
+    // First, check if fonts are already registered
+    const registeredFonts = Font.getRegisteredFontFamilies();
+    if (registeredFonts.includes('Roboto')) {
+      console.log('Fonts already registered, skipping initialization');
+      return;
     }
 
-    // Register fonts only once
+    // Register fonts using the static asset paths
     await Font.register({
       family: 'Roboto',
       fonts: [
-        { src: fonts.regular, fontWeight: 'normal', fontStyle: 'normal' },
-        { src: fonts.bold, fontWeight: 'bold', fontStyle: 'normal' },
-        { src: fonts.italic, fontWeight: 'normal', fontStyle: 'italic' },
-        { src: fonts.boldItalic, fontWeight: 'bold', fontStyle: 'italic' }
+        {
+          src: fonts.regular,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
+        },
+        {
+          src: fonts.bold,
+          fontWeight: 'bold',
+          fontStyle: 'normal'
+        },
+        {
+          src: fonts.italic,
+          fontWeight: 'normal',
+          fontStyle: 'italic'
+        },
+        {
+          src: fonts.boldItalic,
+          fontWeight: 'bold',
+          fontStyle: 'italic'
+        }
       ]
     });
+
+    // Verify fonts were registered
+    const updatedFonts = Font.getRegisteredFontFamilies();
+    if (!updatedFonts.includes('Roboto')) {
+      throw new Error('Font registration failed - Roboto not found in registered fonts');
+    }
+
+    console.log('Fonts initialized successfully');
   } catch (error: unknown) {
     console.error('Error initializing fonts:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

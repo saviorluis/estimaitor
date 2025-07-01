@@ -13,9 +13,20 @@ const nextConfig = {
       use: ['@svgr/webpack'],
     });
     config.module.rules.push({
-      test: /\.(woff|woff2|eot|ttf|otf)$/,
+      test: /\.(ttf|woff|woff2)$/,
       type: 'asset/resource',
     });
+    // Add WASM support
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+      layers: true,
+    };
+    // Ensure proper WASM loading
+    config.output = {
+      ...config.output,
+      webassemblyModuleFilename: 'static/wasm/[modulehash].wasm',
+    };
     config.resolve.fallback = { fs: false, path: false };
     return config;
   },
@@ -30,38 +41,13 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-          {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: data: blob: 'unsafe-inline'; worker-src 'self' blob: data:; child-src 'self' blob: data:; frame-src 'self' data:; object-src 'self' data:; manifest-src 'self';"
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
-      },
-      {
-        source: '/fonts/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
+            value: "default-src 'self'; connect-src 'self' https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline';"
+          }
         ],
       },
     ];
-  },
+  }
 };
 
 module.exports = withPWA(nextConfig); 
