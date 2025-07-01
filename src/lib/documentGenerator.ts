@@ -5,33 +5,127 @@ import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
 import { fonts } from './fonts';
+import { generateQuoteDocx } from './docxGenerator';
 
-// Register fonts statically
+// Register fonts with absolute URLs
 Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: fonts.regular,
+      src: `/fonts/roboto-regular-webfont.ttf`,
       fontWeight: 'normal',
       fontStyle: 'normal'
     },
     {
-      src: fonts.bold,
+      src: `/fonts/roboto-bold-webfont.ttf`,
       fontWeight: 'bold',
       fontStyle: 'normal'
     },
     {
-      src: fonts.italic,
+      src: `/fonts/roboto-italic-webfont.ttf`,
       fontWeight: 'normal',
       fontStyle: 'italic'
     },
     {
-      src: fonts.boldItalic,
+      src: `/fonts/roboto-bolditalic-webfont.ttf`,
       fontWeight: 'bold',
       fontStyle: 'italic'
     }
   ]
 });
+
+// Add a function to ensure WASM is loaded
+const ensureWASMLoaded = async (): Promise<void> => {
+  const maxAttempts = 10;
+  const attemptInterval = 500; // ms
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      // Try to create a simple test document to verify WASM is ready
+      const testDoc = React.createElement(Document, {}, []);
+      const instance = pdf(testDoc);
+      await instance.toBlob();
+      return; // Success
+    } catch (e) {
+      if (attempt === maxAttempts) {
+        throw new Error('Failed to initialize WASM after multiple attempts');
+      }
+      await new Promise(resolve => setTimeout(resolve, attemptInterval));
+    }
+  }
+};
+
+// Add a function to create PDF instance with retries
+const createPDFInstance = async (doc: React.ReactElement): Promise<any> => {
+  let retries = 3;
+  let lastError = null;
+
+  while (retries > 0) {
+    try {
+      // Create a new instance each time
+      const instance = pdf(doc);
+      
+      // Verify the instance is valid
+      if (!instance || typeof instance.toBlob !== 'function') {
+        throw new Error('Invalid PDF instance created');
+      }
+
+      // Test if the instance can be used
+      await instance.toBlob();
+      
+      return instance;
+    } catch (e) {
+      console.warn(`PDF instance creation failed, ${retries - 1} retries left:`, e);
+      lastError = e;
+      retries--;
+      if (retries === 0) throw lastError;
+      // Add increasing delay between retries
+      await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
+    }
+  }
+
+  throw new Error('Failed to create valid PDF instance after multiple attempts');
+};
+
+// Add a function to generate PDF blob with retries
+const generatePDFBlob = async (instance: any): Promise<Blob> => {
+  let retries = 3;
+  let lastError = null;
+  let blob = null;
+
+  while (retries > 0) {
+    try {
+      // Verify instance is still valid
+      if (!instance || typeof instance.toBlob !== 'function') {
+        throw new Error('Invalid PDF instance provided to blob generation');
+      }
+
+      // Generate blob with timeout protection
+      const blobPromise = instance.toBlob();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PDF blob generation timed out')), 30000)
+      );
+
+      blob = await Promise.race([blobPromise, timeoutPromise]);
+
+      // Verify blob is valid
+      if (!(blob instanceof Blob)) {
+        throw new Error('Generated blob is not valid');
+      }
+
+      return blob;
+    } catch (e) {
+      console.warn(`PDF blob generation failed, ${retries - 1} retries left:`, e);
+      lastError = e;
+      retries--;
+      if (retries === 0) throw lastError;
+      // Add increasing delay between retries
+      await new Promise(resolve => setTimeout(resolve, (4 - retries) * 1000));
+    }
+  }
+
+  throw new Error('Failed to generate valid PDF blob after multiple attempts');
+};
 
 interface CompanyInfo {
   name: string;
@@ -113,11 +207,42 @@ const validateDocumentData = (props: DocumentGeneratorProps): void => {
   if (!quoteInfo.projectAddress) throw new Error('Project address is required');
 };
 
+const initializeFonts = async (): Promise<void> => {
+  try {
+    // Verify fonts exist
+    for (const [key, path] of Object.entries(fonts)) {
+      try {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(`Font file not found: ${path}`);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        throw new Error(`Failed to load font ${key}: ${errorMessage}`);
+      }
+    }
+
+    // Register fonts only once
+    await Font.register({
+      family: 'Roboto',
+      fonts: [
+        { src: fonts.regular, fontWeight: 'normal', fontStyle: 'normal' },
+        { src: fonts.bold, fontWeight: 'bold', fontStyle: 'normal' },
+        { src: fonts.italic, fontWeight: 'normal', fontStyle: 'italic' },
+        { src: fonts.boldItalic, fontWeight: 'bold', fontStyle: 'italic' }
+      ]
+    });
+  } catch (error: unknown) {
+    console.error('Error initializing fonts:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to initialize fonts: ${errorMessage}`);
+  }
+};
+
 const generatePDF = async (
   props: DocumentGeneratorProps,
   documentType: DocumentType,
   showCoverPage: boolean = false
 ): Promise<Blob> => {
+  let instance = null;
   try {
     console.log(`Starting PDF generation for ${documentType}...`);
     
@@ -127,6 +252,10 @@ const generatePDF = async (
     if (!estimateData || !formData || !companyInfo || !clientInfo || !quoteInfo) {
       throw new Error('Missing required data for PDF generation');
     }
+
+    // Initialize WASM and fonts
+    await ensureWASMLoaded();
+    await initializeFonts();
 
     console.log('Creating PDF document with props:', {
       documentType,
@@ -138,8 +267,12 @@ const generatePDF = async (
       hasQuoteInfo: !!quoteInfo
     });
 
-    // Create the PDF document
-    const doc = React.createElement(Document, {}, 
+    // Create the PDF document with explicit styles
+    const doc = React.createElement(Document, { 
+      creator: 'EstimAItor',
+      producer: 'EstimAItor PDF Generator',
+      language: 'en-US'
+    }, 
       React.createElement(QuotePDF, {
         estimateData,
         formData,
@@ -151,27 +284,32 @@ const generatePDF = async (
       })
     );
 
-    // Initialize PDF instance with proper WASM loading
-    const instance = pdf(doc);
+    // Initialize PDF instance with retries
+    console.log('Initializing PDF instance...');
+    instance = await createPDFInstance(doc);
+    
     if (!instance) {
-      throw new Error('Failed to initialize PDF instance');
+      throw new Error('Failed to create PDF instance');
     }
 
-    // Generate the final blob
-    const blob = await instance.toBlob();
-    if (!blob) {
-      throw new Error('Failed to generate PDF blob');
-    }
+    // Generate the final blob with retries
+    console.log('Generating PDF blob...');
+    const blob = await generatePDFBlob(instance);
 
     console.log(`Successfully generated ${documentType} PDF`);
     return blob;
   } catch (error) {
     console.error(`Error generating ${documentType} PDF:`, error);
-    console.error('Error details:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    throw new Error(`Failed to generate ${documentType} PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
+  } finally {
+    // Cleanup
+    if (instance && typeof instance.cleanup === 'function') {
+      try {
+        await instance.cleanup();
+      } catch (e) {
+        console.warn('Error during PDF instance cleanup:', e);
+      }
+    }
   }
 };
 
@@ -188,8 +326,11 @@ export const generateDocumentPackage = async ({
     // Validate all required data
     validateDocumentData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
 
-    // For now, let's focus on generating just the quote
-    console.log('Generating quote document...');
+    // Create new ZIP file
+    const zip = new JSZip();
+    
+    // Generate PDF with retries
+    console.log('Generating PDF document...');
     const pdfBlob = await generatePDF(
       {
         estimateData,
@@ -203,16 +344,42 @@ export const generateDocumentPackage = async ({
     );
 
     if (!pdfBlob) {
-      throw new Error('Failed to generate quote PDF');
+      throw new Error('Failed to generate PDF document');
     }
 
-    // Save the PDF directly
+    // Generate DOCX with retries
+    console.log('Generating DOCX document...');
+    const docxBlob = await generateQuoteDocx(
+      estimateData,
+      formData,
+      companyInfo,
+      clientInfo,
+      quoteInfo
+    );
+
+    if (!docxBlob) {
+      throw new Error('Failed to generate DOCX document');
+    }
+
+    // Add files to ZIP
     const sanitizedProjectName = quoteInfo.projectName.trim().replace(/[^a-zA-Z0-9]/g, '_') || 'Project';
-    const fileName = `${sanitizedProjectName}_Quote.pdf`;
+    zip.file(`${sanitizedProjectName}_Quote.pdf`, pdfBlob);
+    zip.file(`${sanitizedProjectName}_Quote.docx`, docxBlob);
     
-    console.log('Saving quote PDF...');
-    saveAs(pdfBlob, fileName);
-    console.log('Quote generation completed successfully');
+    // Generate and save ZIP
+    console.log('Creating ZIP archive...');
+    const zipBlob = await zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: {
+        level: 9
+      }
+    });
+
+    console.log('Saving document package...');
+    saveAs(zipBlob, `${sanitizedProjectName}_Documents.zip`);
+    
+    console.log('Document package generated successfully');
   } catch (error) {
     console.error('Error generating document package:', error);
     throw new Error(`Failed to generate document package: ${error instanceof Error ? error.message : 'Unknown error'}`);
