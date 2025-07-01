@@ -7,7 +7,7 @@ const getFontPath = (fontName: string): string => {
     return path.join(process.cwd(), 'public', 'static', 'fonts', fontName);
   }
   // Browser environment - use relative path
-  return `/fonts/${fontName}`;
+  return `/static/fonts/${fontName}`;
 };
 
 // Font paths for PDF generation

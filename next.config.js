@@ -10,7 +10,7 @@ const nextConfig = {
       test: /\.(ttf|woff|woff2)$/,
       type: 'asset/resource',
       generator: {
-        filename: 'fonts/[name][ext]'
+        filename: 'static/fonts/[name][ext]'
       }
     });
     // Add WASM support
