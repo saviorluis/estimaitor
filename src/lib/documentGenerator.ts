@@ -1,33 +1,42 @@
-import JSZip from 'jszip';
 import { pdf, Document, Font } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import { EstimateData, FormData } from './types';
 import QuotePDF from '@/components/QuotePDF';
 import React from 'react';
 import { fonts, fontConfig } from './fonts';
-import { generateQuoteDocx } from './docxGenerator';
+import path from 'path';
 
-// Register fonts with absolute URLs
+// Function to get font path based on environment
+const getFontPath = (fontName: string): string => {
+  if (typeof window === 'undefined') {
+    // Server environment - use absolute path
+    return path.join(process.cwd(), 'public', 'static', 'fonts', fontName);
+  }
+  // Browser environment - use relative path
+  return `/fonts/${fontName}`;
+};
+
+// Register fonts with environment-aware paths
 Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: `/fonts/roboto-regular-webfont.ttf`,
+      src: getFontPath('roboto-regular-webfont.ttf'),
       fontWeight: 'normal',
       fontStyle: 'normal'
     },
     {
-      src: `/fonts/roboto-bold-webfont.ttf`,
+      src: getFontPath('roboto-bold-webfont.ttf'),
       fontWeight: 'bold',
       fontStyle: 'normal'
     },
     {
-      src: `/fonts/roboto-italic-webfont.ttf`,
+      src: getFontPath('roboto-italic-webfont.ttf'),
       fontWeight: 'normal',
       fontStyle: 'italic'
     },
     {
-      src: `/fonts/roboto-bolditalic-webfont.ttf`,
+      src: getFontPath('roboto-bolditalic-webfont.ttf'),
       fontWeight: 'bold',
       fontStyle: 'italic'
     }
@@ -339,15 +348,12 @@ export const generateDocumentPackage = async ({
   companyInfo,
   clientInfo,
   quoteInfo,
-}: DocumentGeneratorProps): Promise<void> => {
+}: DocumentGeneratorProps): Promise<{ blob: Blob; filename: string }> => {
   try {
     console.log('Starting document package generation...');
 
     // Validate all required data
     validateDocumentData({ estimateData, formData, companyInfo, clientInfo, quoteInfo });
-
-    // Create new ZIP file
-    const zip = new JSZip();
     
     // Generate PDF with retries
     console.log('Generating PDF document...');
@@ -367,41 +373,17 @@ export const generateDocumentPackage = async ({
       throw new Error('Failed to generate PDF document');
     }
 
-    // Generate DOCX with retries
-    console.log('Generating DOCX document...');
-    const docxBlob = await generateQuoteDocx(
-      estimateData,
-      formData,
-      companyInfo,
-      clientInfo,
-      quoteInfo
-    );
-
-    if (!docxBlob) {
-      throw new Error('Failed to generate DOCX document');
-    }
-
-    // Add files to ZIP
+    // Create filename
     const sanitizedProjectName = quoteInfo.projectName.trim().replace(/[^a-zA-Z0-9]/g, '_') || 'Project';
-    zip.file(`${sanitizedProjectName}_Quote.pdf`, pdfBlob);
-    zip.file(`${sanitizedProjectName}_Quote.docx`, docxBlob);
+    const filename = `${sanitizedProjectName}_Quote.pdf`;
     
-    // Generate and save ZIP
-    console.log('Creating ZIP archive...');
-    const zipBlob = await zip.generateAsync({
-      type: "blob",
-      compression: "DEFLATE",
-      compressionOptions: {
-        level: 9
-      }
-    });
-
-    console.log('Saving document package...');
-    saveAs(zipBlob, `${sanitizedProjectName}_Documents.zip`);
-    
-    console.log('Document package generated successfully');
-  } catch (error) {
-    console.error('Error generating document package:', error);
-    throw new Error(`Failed to generate document package: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return {
+      blob: pdfBlob,
+      filename
+    };
+  } catch (error: unknown) {
+    console.error('Error generating documents:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate document package: ${errorMessage}`);
   }
 }; 
