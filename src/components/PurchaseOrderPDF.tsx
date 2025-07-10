@@ -51,6 +51,19 @@ const styles = StyleSheet.create({
     objectFit: 'contain',
     objectPosition: 'left top',
   },
+  poInfo: {
+    width: '50%',
+    alignItems: 'flex-end',
+  },
+  poTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#0066CC',
+  },
+  poDetails: {
+    fontSize: 10,
+    marginBottom: 3,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -73,43 +86,13 @@ const styles = StyleSheet.create({
   projectInfo: {
     marginBottom: 10,
   },
-  scopeOfWork: {
-    marginTop: 10,
-  },
-  bulletPoint: {
-    marginBottom: 8,
-    paddingLeft: 15,
-  },
   infoText: {
-    marginBottom: 5,
     fontSize: 10,
+    marginBottom: 5,
   },
   divider: {
     borderBottom: '1pt solid #e5e7eb',
     marginVertical: 15,
-  },
-  feesSection: {
-    backgroundColor: '#f3f4f6',
-    padding: 10,
-    borderRadius: 4,
-    marginTop: 5,
-  },
-  feeItem: {
-    marginBottom: 8,
-    paddingLeft: 15,
-  },
-  feeTitle: {
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  feeDescription: {
-    fontSize: 10,
-    color: '#4b5563',
-  },
-  warningText: {
-    color: '#dc2626',
-    fontSize: 11,
-    fontWeight: 'bold',
   },
   handwrittenField: {
     borderBottom: '1pt solid #000',
@@ -121,12 +104,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#4b5563',
     marginBottom: 2,
-  },
-  cleanerInfoSection: {
-    marginTop: 10,
-    backgroundColor: '#f8fafc',
-    padding: 10,
-    borderRadius: 4,
   },
   amountSection: {
     marginTop: 15,
@@ -182,18 +159,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginBottom: 3,
   },
-  workOrderInfo: {
-    width: '50%',
-    alignItems: 'flex-end',
+  scopeOfWork: {
+    marginTop: 10,
   },
-  workOrderTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0066CC',
-  },
-  workOrderDetails: {
-    fontSize: 10,
-    marginBottom: 3,
+  bulletPoint: {
+    marginBottom: 8,
+    paddingLeft: 15,
   },
   infoGrid: {
     flexDirection: 'row',
@@ -205,10 +176,11 @@ const styles = StyleSheet.create({
   cleanerInfo: {
     fontSize: 10,
     marginBottom: 3,
+    color: '#4b5563',
   },
 });
 
-interface WorkOrderPDFProps {
+interface PurchaseOrderPDFProps {
   estimateData: EstimateData;
   formData: FormData;
   companyInfo: {
@@ -227,7 +199,7 @@ interface WorkOrderPDFProps {
   };
 }
 
-const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
+const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
   estimateData,
   formData,
   companyInfo,
@@ -266,9 +238,9 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
               </View>
             </View>
           </View>
-          <View style={styles.workOrderInfo}>
-            <Text style={styles.workOrderTitle}>WORK ORDER #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.workOrderDetails}>Date: {formatDate(new Date())}</Text>
+          <View style={styles.poInfo}>
+            <Text style={styles.poTitle}>PURCHASE ORDER #{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.poDetails}>Date: {formatDate(new Date())}</Text>
           </View>
         </View>
 
@@ -309,58 +281,10 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
 
         {/* Amount Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Amount</Text>
+          <Text style={styles.sectionTitle}>Purchase Amount</Text>
           <View style={styles.amountSection}>
             <Text style={styles.dollarSign}>$</Text>
             <View style={styles.handwrittenField} />
-          </View>
-        </View>
-
-        {/* Fees Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Important Fee Information</Text>
-          <View style={styles.feesSection}>
-            {/* Late Arrival Fee */}
-            <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Late Arrival Fee</Text>
-              <Text style={styles.feeDescription}>
-                • If crew arrives more than 30 minutes late to the jobsite: $75/hour deduction from total invoice
-              </Text>
-              <Text style={styles.feeDescription}>
-                • If crew arrives more than 1 hour late: $100/hour deduction from total invoice
-              </Text>
-              <Text style={styles.warningText}>
-                Note: Crew must notify supervisor immediately of any potential delays
-              </Text>
-            </View>
-
-            {/* Involvement Fee */}
-            <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Supervisor Involvement Fee</Text>
-              <Text style={styles.feeDescription}>
-                • If supervisor's presence is required on-site due to crew performance issues: $150/hour charge to responsible crew members
-              </Text>
-              <Text style={styles.feeDescription}>
-                • This fee covers travel time and on-site supervision time
-              </Text>
-              <Text style={styles.warningText}>
-                Note: This fee will be deducted from crew payment if supervisor intervention is necessary
-              </Text>
-            </View>
-
-            {/* Materials Fee */}
-            <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Materials Fee</Text>
-              <Text style={styles.feeDescription}>
-                • Additional charges will apply if supervisor needs to provide cleaning materials or equipment
-              </Text>
-              <Text style={styles.feeDescription}>
-                • Material fees are determined case by case based on type and quantity needed
-              </Text>
-              <Text style={styles.warningText}>
-                Note: Material fees will be discussed and agreed upon before the start of work
-              </Text>
-            </View>
           </View>
         </View>
 
@@ -378,7 +302,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
         {/* Signature Section */}
         <View style={styles.signatureSection}>
           <View style={styles.signatureBlock}>
-            <Text style={styles.sectionTitle}>Supervisor</Text>
+            <Text style={styles.sectionTitle}>Owner Approval</Text>
             <View style={styles.signatureLine} />
             <Text style={styles.signatureLabel}>Signature</Text>
             <View style={styles.dateField}>
@@ -388,7 +312,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
           </View>
           
           <View style={styles.signatureBlock}>
-            <Text style={styles.sectionTitle}>Cleaner</Text>
+            <Text style={styles.sectionTitle}>Supervisor Approval</Text>
             <View style={styles.signatureLine} />
             <Text style={styles.signatureLabel}>Signature</Text>
             <View style={styles.dateField}>
@@ -407,4 +331,4 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   );
 };
 
-export default WorkOrderPDF; 
+export default PurchaseOrderPDF; 
