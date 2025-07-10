@@ -2,6 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
+import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -26,6 +27,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 30,
+    alignItems: 'flex-start',
   },
   companyInfo: {
     width: '50%',
@@ -61,9 +63,6 @@ const styles = StyleSheet.create({
   invoiceInfo: {
     width: '50%',
     alignItems: 'flex-end',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
   },
   invoiceTitle: {
     fontSize: 24,
@@ -90,14 +89,11 @@ const styles = StyleSheet.create({
   infoGrid: {
     flexDirection: 'row',
     marginBottom: 20,
+    alignItems: 'flex-start',
   },
   infoColumn: {
     width: '50%',
-  },
-  infoLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginBottom: 2,
+    paddingRight: 15,
   },
   infoValue: {
     fontSize: 10,
@@ -124,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   descriptionCell: {
-    width: '40%',
+    width: '75%',
     borderRightWidth: 1,
     borderRightColor: '#CCCCCC',
   },
@@ -143,6 +139,17 @@ const styles = StyleSheet.create({
   amountCell: {
     width: '25%',
     textAlign: 'right',
+  },
+  scopeText: {
+    fontSize: 9,
+    marginTop: 5,
+    color: '#666666',
+  },
+  scopeItem: {
+    fontSize: 9,
+    marginLeft: 10,
+    marginTop: 2,
+    color: '#666666',
   },
   subtotalRow: {
     backgroundColor: '#F8FAFC',
@@ -269,6 +276,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
     }
   };
 
+  // Get scope of work based on project type and split into array
+  const scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
+  const scopeOfWork = scopeOfWorkText
+    .split('\n')
+    .filter(line => line.trim())
+    .map(line => line.replace('• ', '').trim());
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
@@ -331,6 +345,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontSize: 9, marginTop: 5 }}>
                   {formData.squareFootage.toLocaleString()} sq ft
                 </Text>
+                <Text style={styles.scopeText}>Scope of Work:</Text>
+                {scopeOfWork.map((item, index) => (
+                  <Text key={index} style={styles.scopeItem}>• {item}</Text>
+                ))}
+                {(estimateData.windowCount || 0) > 0 && (
+                  <Text style={styles.scopeItem}>• {estimateData.windowCount} windows included in cleaning scope</Text>
+                )}
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(estimateData.totalPrice)}</Text>
