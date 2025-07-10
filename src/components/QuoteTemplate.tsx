@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import WorkOrderPDF from './WorkOrderPDF';
+import PurchaseOrderPDF from './PurchaseOrderPDF';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -505,7 +506,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       const zip = new JSZip();
       
-      // Generate Quote PDF
+      // Generate Quote PDF with cover page and capability statement
       const quoteBlob = await pdf(
         <QuotePDF
           estimateData={estimateData}
@@ -515,6 +516,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
           showCoverPage={true}
+          includeCapabilityStatement={true}
         />
       ).toBlob();
       zip.file("quote.pdf", quoteBlob);
@@ -530,10 +532,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       ).toBlob();
       zip.file("work_order.pdf", workOrderBlob);
 
-      // Add capability statement
-      const capabilityResponse = await fetch('/assets/Real Capability.png');
-      const capabilityBlob = await capabilityResponse.blob();
-      zip.file("capability_statement.png", capabilityBlob);
+      // Generate Purchase Order PDF
+      const purchaseOrderBlob = await pdf(
+        <PurchaseOrderPDF
+          estimateData={estimateData}
+          formData={formData}
+          companyInfo={companyInfo}
+          quoteInfo={quoteInfo}
+        />
+      ).toBlob();
+      zip.file("purchase_order.pdf", purchaseOrderBlob);
 
       // Add reference sheet
       const referenceResponse = await fetch('/BBPS Capability copy.png');

@@ -256,7 +256,6 @@ const formatValue = (value: string | number | undefined | null, defaultValue: st
 
 interface QuotePDFProps {
   estimateData: EstimateData & {
-    // Add optional adjusted line item prices
     adjustedLineItems?: {
       [key: string]: number;
     };
@@ -286,203 +285,90 @@ interface QuotePDFProps {
     notes: string;
     terms: string;
   };
-  showCoverPage?: boolean;
+  adjustedPrices: {[key: string]: number};
 }
 
-const QuotePDF: React.FC<QuotePDFProps> = ({ 
-  estimateData, 
-  formData, 
-  companyInfo, 
-  clientInfo, 
+const QuotePDF: React.FC<QuotePDFProps> = ({
+  estimateData,
+  formData,
+  companyInfo,
+  clientInfo,
   quoteInfo,
-  showCoverPage = false
+  adjustedPrices
 }) => {
-  // Get the current quote counter value
-  const quoteCounter = getQuoteCounter();
-  
-  // Use a static path in the assets directory
-  const logoPath = '/assets/logo.png';  // This will always look in the public/assets directory
-  const coverPagePath = '/assets/cover-page-placeholder.jpg'; // Placeholder for the cover page
-  
-  // Early return for undefined data
-  if (!estimateData || !formData) {
-    return (
-      <Document>
-        <Page size="A4" style={styles.page}>
-          <View style={{ padding: 30 }}>
-            <Text>Error: Quote data is not available.</Text>
-          </View>
-        </Page>
-      </Document>
-    );
-  }
-  
-  // Ensure all objects have default values to prevent rendering errors
-  const safeCompanyInfo = companyInfo || {
-    name: '', address: '', city: '', phone: '', email: '', website: ''
-  };
-  
-  const safeClientInfo = clientInfo || {
-    name: '', company: '', address: '', email: '', phone: ''
-  };
-  
-  const safeQuoteInfo = quoteInfo || {
-    quoteNumber: '', date: '', validUntil: '', projectName: '', 
-    projectAddress: '', notes: '', terms: ''
-  };
-
-    return (
+  return (
     <Document>
-      {/* Optional Cover Page */}
-      {showCoverPage && (
-        <Page size="A4" style={styles.page}>
-          <View style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            padding: 20
-          }}>
-            {/* Company Logo - Larger size for cover */}
-            <View style={{
-              width: 250,
-              height: 125,
-              marginBottom: 20
-            }}>
-              <Image src={logoPath} style={{
-                maxWidth: '100%',
-                maxHeight: '100%'
-              }} />
-      </View>
-            
-            {/* Cover Title */}
-            <Text style={{
-              fontSize: 24,
-              fontWeight: 'bold',
-              marginBottom: 10,
-              color: '#2563eb'
-            }}>
-              CLEANING SERVICE PROPOSAL
-            </Text>
-            
-            <Text style={{
-              fontSize: 16,
-              marginBottom: 5
-            }}>
-              Prepared for:
-            </Text>
-            
-            <Text style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              marginBottom: 20
-            }}>
-              {safeClientInfo.company || safeClientInfo.name}
-            </Text>
-            
-            {/* Placeholder for cover image */}
-            <View style={{
-              width: '100%',
-              height: 300,
-              marginBottom: 20,
-              border: '1pt solid #cccccc'
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: '#666666',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}>
-                Cover Image Placeholder
-              </Text>
+      {/* Cover Page */}
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <View style={styles.companyInfo}>
+            <View style={styles.companyHeader}>
+              <View style={styles.logoContainer}>
+                <Image src="/assets/logo.png" style={styles.logo} />
+              </View>
             </View>
-            
-            {/* Company Capability Statement */}
-            <View style={{
-              padding: 15,
-              backgroundColor: '#f8fafc',
-              borderRadius: 5,
-              marginBottom: 20
-            }}>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: 'bold',
-                marginBottom: 10
-              }}>
-                COMPANY CAPABILITY STATEMENT
-              </Text>
-              
-              <Text style={{
-                fontSize: 10,
-                marginBottom: 10
-              }}>
-                {safeCompanyInfo.name} is a premier commercial cleaning service specializing in post-construction, 
-                medical facilities, retail spaces, and office environments. With over a decade of experience, 
-                our professional team delivers exceptional results using state-of-the-art equipment and eco-friendly cleaning solutions.
-              </Text>
-              
-              <Text style={{
-                fontSize: 10
-              }}>
-                We are fully licensed, bonded, and insured, with a focus on reliability, attention to detail, and client satisfaction.
-                Our dedicated team undergoes rigorous training to ensure the highest standards of cleaning excellence.
-              </Text>
+            <Text style={styles.companyName}>{companyInfo.name}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+            <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+            <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+            <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+          </View>
+          <View style={styles.quoteInfo}>
+            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+          </View>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.title}>Professional Cleaning Services Quote</Text>
+          <Text style={styles.subtitle}>Project Information</Text>
+          <View style={styles.infoGrid}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Project Name:</Text>
+              <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
+              <Text style={styles.infoLabel}>Project Address:</Text>
+              <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
             </View>
-            
-            {/* Contact Information */}
-            <View style={{
-              position: 'absolute',
-              bottom: 30,
-              left: 0,
-              right: 0,
-              textAlign: 'center'
-            }}>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666'
-              }}>
-                {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}
-              </Text>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666'
-              }}>
-                {safeCompanyInfo.address}, {safeCompanyInfo.city}
-              </Text>
-              <Text style={{
-                fontSize: 10,
-                color: '#666666'
-              }}>
-                {safeCompanyInfo.website}
-              </Text>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Client:</Text>
+              <Text style={styles.infoValue}>{clientInfo.name}</Text>
+              <Text style={styles.infoValue}>{clientInfo.company}</Text>
+              <Text style={styles.infoValue}>{clientInfo.address}</Text>
+              <Text style={styles.infoValue}>Phone: {clientInfo.phone}</Text>
+              <Text style={styles.infoValue}>Email: {clientInfo.email}</Text>
             </View>
-            </View>
-          </Page>
-        )}
+          </View>
+        </View>
+      </Page>
 
-      {/* Main Quote Page (existing page) */}
-      <Page size="A4" style={styles.page}>
+      {/* Capability Statement Page */}
+      <Page size="LETTER" style={styles.page}>
+        <Image src="/assets/Real Capability.png" style={{ width: '100%', height: 'auto' }} />
+      </Page>
+
+      {/* Quote Details Page */}
+      <Page size="LETTER" style={styles.page}>
         {/* Header */}
           <View style={styles.header}>
               <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
-                <Image src={logoPath} style={styles.logo} />
+                <Image src="/assets/logo.png" style={styles.logo} />
               </View>
               <View>
-                <Text style={styles.companyName}>{safeCompanyInfo.name}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.address}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.city}</Text>
-                <Text style={styles.companyDetails}>Phone: {safeCompanyInfo.phone}</Text>
-                <Text style={styles.companyDetails}>{safeCompanyInfo.email}</Text>
+                <Text style={styles.companyName}>{companyInfo.name}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
             </View>
             </View>
           </View>
             <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>QUOTE #{quoteCounter}</Text>
-            <Text style={styles.quoteDate}>Date: {safeQuoteInfo.date}</Text>
-            <Text style={styles.quoteExpiry}>Valid Until: {safeQuoteInfo.validUntil}</Text>
+            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+            <Text style={styles.quoteExpiry}>Valid Until: {quoteInfo.validUntil}</Text>
             </View>
           </View>
 
@@ -490,16 +376,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.infoGrid}>
             <View style={styles.infoColumn}>
               <Text style={styles.subtitle}>Client Information</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.name}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.company}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.address}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.email}</Text>
-            <Text style={styles.infoValue}>{safeClientInfo.phone}</Text>
+            <Text style={styles.infoValue}>{clientInfo.name}</Text>
+            <Text style={styles.infoValue}>{clientInfo.company}</Text>
+            <Text style={styles.infoValue}>{clientInfo.address}</Text>
+            <Text style={styles.infoValue}>Phone: {clientInfo.phone}</Text>
+            <Text style={styles.infoValue}>Email: {clientInfo.email}</Text>
             </View>
             <View style={styles.infoColumn}>
               <Text style={styles.subtitle}>Project Information</Text>
-            <Text style={styles.infoValue}>{safeQuoteInfo.projectName}</Text>
-            <Text style={styles.infoValue}>{safeQuoteInfo.projectAddress}</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
             <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
             <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
             <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
@@ -529,8 +415,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   </View>
                   <View style={[styles.tableCell, styles.amountCell]}>
               <Text>{formatCurrency(
-                estimateData.adjustedLineItems?.basePrice !== undefined 
-                  ? estimateData.adjustedLineItems.basePrice 
+                estimateData.adjustedLineItems?.basePrice !== undefined
+                  ? estimateData.adjustedLineItems.basePrice
                   : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
               )}</Text>
                   </View>
@@ -545,8 +431,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   </View>
                   <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.vctCost !== undefined 
-                    ? estimateData.adjustedLineItems.vctCost 
+                  estimateData.adjustedLineItems?.vctCost !== undefined
+                    ? estimateData.adjustedLineItems.vctCost
                     : estimateData.vctCost
                 )}</Text>
                   </View>
@@ -568,15 +454,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
                 </Text>
                 <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
-                  Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL : 
-                    ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL : 
+                  Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL :
+                    ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL :
                     PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
                 </Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.pressureWashingCost !== undefined 
-                    ? estimateData.adjustedLineItems.pressureWashingCost 
+                  estimateData.adjustedLineItems?.pressureWashingCost !== undefined
+                    ? estimateData.adjustedLineItems.pressureWashingCost
                     : estimateData.pressureWashingCost
                 )}</Text>
               </View>
@@ -591,8 +477,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
             <Text style={styles.lineItemAmount}>
               {formatCurrency(
-                estimateData.adjustedLineItems?.travelCost !== undefined 
-                  ? estimateData.adjustedLineItems.travelCost 
+                estimateData.adjustedLineItems?.travelCost !== undefined
+                  ? estimateData.adjustedLineItems.travelCost
                   : estimateData.travelCost
               )}
             </Text>
@@ -608,8 +494,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
-                  estimateData.adjustedLineItems?.overnightCost !== undefined 
-                    ? estimateData.adjustedLineItems.overnightCost 
+                  estimateData.adjustedLineItems?.overnightCost !== undefined
+                    ? estimateData.adjustedLineItems.overnightCost
                     : estimateData.overnightCost
                 )}</Text>
               </View>
@@ -629,7 +515,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     estimateData.adjustedLineItems?.urgencyCost !== undefined
                       ? estimateData.adjustedLineItems.urgencyCost
                       : ((estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier) +
-                        estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) * 
+                        estimateData.vctCost + estimateData.travelCost + estimateData.overnightCost + estimateData.pressureWashingCost) *
                         (estimateData.urgencyMultiplier - 1)
                   )}
                 </Text>
@@ -728,13 +614,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
           <View style={styles.infoColumn}>
             <Text style={styles.subtitle}>Additional Information</Text>
-            <Text style={styles.notes}>{safeQuoteInfo.notes}</Text>
+            <Text style={styles.notes}>{quoteInfo.notes}</Text>
           </View>
         </View>
 
         {/* Terms & Conditions */}
         <Text style={styles.subtitle}>Terms & Conditions</Text>
-        <Text style={styles.terms}>{safeQuoteInfo.terms}</Text>
+        <Text style={styles.terms}>{quoteInfo.terms}</Text>
 
           {/* Signature Section */}
           <View style={styles.signatureSection}>
@@ -756,7 +642,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
           {/* Footer */}
           <View style={styles.footer}>
-          <Text>Thank you for your business! | {safeCompanyInfo.name} | {safeCompanyInfo.phone} | {safeCompanyInfo.email}</Text>
+          <Text>Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</Text>
           <Text style={{marginTop: 5, fontStyle: 'italic'}}>
             All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
             </Text>
