@@ -463,6 +463,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
+          adjustedPrices={adjustedPrices}
         />
       ).toBlob();
       
