@@ -131,10 +131,25 @@ const styles = StyleSheet.create({
   amountSection: {
     marginTop: 15,
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#f0f7ff',
     padding: 10,
     borderRadius: 4,
+  },
+  amountField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 20,
+  },
+  startDateField: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  dateLabel: {
+    fontSize: 11,
+    color: '#4b5563',
+    marginBottom: 5,
   },
   dollarSign: {
     marginRight: 5,
@@ -185,11 +200,15 @@ const styles = StyleSheet.create({
   workOrderInfo: {
     width: '50%',
     alignItems: 'flex-end',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   workOrderTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#0066CC',
+    marginBottom: 5,
   },
   workOrderDetails: {
     fontSize: 10,
@@ -220,7 +239,6 @@ interface WorkOrderPDFProps {
     website: string;
   };
   quoteInfo: {
-    quoteNumber: string;
     projectName: string;
     projectAddress: string;
     notes: string;
@@ -267,8 +285,8 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             </View>
           </View>
           <View style={styles.workOrderInfo}>
-            <Text style={styles.workOrderTitle}>WORK ORDER #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.workOrderDetails}>Date: {formatDate(new Date())}</Text>
+            <Text style={styles.workOrderTitle}>Work Order</Text>
+            <Text style={styles.companyName}>{companyInfo.name}</Text>
           </View>
         </View>
 
@@ -311,8 +329,14 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Amount</Text>
           <View style={styles.amountSection}>
-            <Text style={styles.dollarSign}>$</Text>
-            <View style={styles.handwrittenField} />
+            <View style={styles.amountField}>
+              <Text style={styles.dollarSign}>$</Text>
+              <View style={styles.handwrittenField} />
+            </View>
+            <View style={styles.startDateField}>
+              <Text style={styles.dateLabel}>Start Date:</Text>
+              <View style={styles.handwrittenField} />
+            </View>
           </View>
         </View>
 

@@ -54,11 +54,15 @@ const styles = StyleSheet.create({
   poInfo: {
     width: '50%',
     alignItems: 'flex-end',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
   poTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#0066CC',
+    marginBottom: 5,
   },
   poDetails: {
     fontSize: 10,
@@ -192,7 +196,6 @@ interface PurchaseOrderPDFProps {
     website: string;
   };
   quoteInfo: {
-    quoteNumber: string;
     projectName: string;
     projectAddress: string;
     notes: string;
@@ -239,8 +242,8 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
             </View>
           </View>
           <View style={styles.poInfo}>
-            <Text style={styles.poTitle}>PURCHASE ORDER #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.poDetails}>Date: {formatDate(new Date())}</Text>
+            <Text style={styles.poTitle}>Purchase Order</Text>
+            <Text style={styles.companyName}>{companyInfo.name}</Text>
           </View>
         </View>
 
