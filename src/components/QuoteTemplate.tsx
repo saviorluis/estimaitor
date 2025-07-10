@@ -4,7 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatDate, formatCurrency, generateQuoteNumber, getQuoteCounter, incrementQuoteCounter } from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
+import WorkOrderPDF from './WorkOrderPDF';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -69,7 +72,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   // State for showing cover page in PDF
   const [showCoverPage, setShowCoverPage] = useState<boolean>(false);
-  
+
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
     return (
@@ -215,52 +218,52 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (!estimateData) return;
 
     // Get all the line items
-    const lineItems = [
-      {
-        key: 'basePrice',
+      const lineItems = [
+        {
+          key: 'basePrice',
         value: (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)
+        }
+      ];
+
+      if (formData.hasVCT) {
+        lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
       }
-    ];
 
-    if (formData.hasVCT) {
-      lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
-    }
+      if (formData.needsPressureWashing) {
+        lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
+      }
 
-    if (formData.needsPressureWashing) {
-      lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
-    }
+      lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
 
-    lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
+      if (formData.stayingOvernight) {
+        lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
+      }
 
-    if (formData.stayingOvernight) {
-      lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
-    }
+      if (estimateData.urgencyMultiplier > 1) {
+        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
+          ((estimateData.urgencyMultiplier || 1) - 1);
+        lineItems.push({ key: 'urgencyCost', value: urgencyCost });
+      }
 
-    if (estimateData.urgencyMultiplier > 1) {
-      const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-        ((estimateData.urgencyMultiplier || 1) - 1);
-      lineItems.push({ key: 'urgencyCost', value: urgencyCost });
-    }
-
-    if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
-      lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
-    }
+      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+        lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
+      }
 
     // Display case cleaning for jewelry stores
-    if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-      lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
-    }
+      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
+        lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
+      }
 
     // Calculate total before markup
     const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
-    
+      
     // If markup percentage is 0, and there's no built-in markup, use original prices
     if (markupPercentage === 0 && estimateData.markup === 0) {
-      setAdjustedPrices({});
-      return;
-    }
-    
+        setAdjustedPrices({});
+        return;
+      }
+
     // If there's no custom markup but there is built-in markup, we don't need to adjust
     if (markupPercentage === 0 && estimateData.markup > 0) {
       setAdjustedPrices({});
@@ -271,20 +274,20 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     const markupAmount = totalBeforeMarkup * (markupPercentage / 100);
     
     // Distribute markup proportionally
-    const adjustedPrices: {[key: string]: number} = {};
-    lineItems.forEach(item => {
+      const adjustedPrices: {[key: string]: number} = {};
+      lineItems.forEach(item => {
       const proportion = item.value / totalBeforeMarkup;
       const itemMarkup = markupAmount * proportion;
       adjustedPrices[item.key] = item.value + itemMarkup;
-    });
+      });
 
-    // Balance window cleaning pricing with base price
+      // Balance window cleaning pricing with base price
     const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
-    if (Object.keys(balancedPrices).length > 0) {
-      setAdjustedPrices(balancedPrices);
-    } else {
-      setAdjustedPrices(adjustedPrices);
-    }
+      if (Object.keys(balancedPrices).length > 0) {
+        setAdjustedPrices(balancedPrices);
+      } else {
+        setAdjustedPrices(adjustedPrices);
+      }
   }, [estimateData, formData, markupPercentage]);
 
   // Function to balance window cleaning pricing with base cleaning cost
@@ -425,29 +428,29 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       
       // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const adjustedEstimateData = {...estimateData};
-      
-      // Calculate subtotal EXACTLY as shown in the browser preview
+    
+    // Calculate subtotal EXACTLY as shown in the browser preview
       // This is a direct copy of the calculation used in the print view
-      const subtotal = Object.keys(adjustedPrices).length > 0 
-        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-        : estimateData.totalBeforeMarkup;
-      
-      // Calculate sales tax 
-      const salesTax = subtotal * 0.07;
-      
+    const subtotal = Object.keys(adjustedPrices).length > 0 
+      ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+      : estimateData.totalBeforeMarkup;
+    
+    // Calculate sales tax 
+    const salesTax = subtotal * 0.07;
+    
       // Set all the values for the PDF
-      adjustedEstimateData.totalBeforeMarkup = subtotal;
+    adjustedEstimateData.totalBeforeMarkup = subtotal;
       // Set markup to 0 since we're distributing it across the line items
       adjustedEstimateData.markup = 0;
-      adjustedEstimateData.salesTax = salesTax;
-      adjustedEstimateData.totalPrice = subtotal + salesTax;
-      
-      // Add adjusted line items to the estimate data
-      if (Object.keys(adjustedPrices).length > 0) {
-        adjustedEstimateData.adjustedLineItems = adjustedPrices;
-      } else {
+    adjustedEstimateData.salesTax = salesTax;
+    adjustedEstimateData.totalPrice = subtotal + salesTax;
+    
+    // Add adjusted line items to the estimate data
+    if (Object.keys(adjustedPrices).length > 0) {
+      adjustedEstimateData.adjustedLineItems = adjustedPrices;
+    } else {
         // Ensure the base price includes the cleaning type multiplier
-        adjustedEstimateData.adjustedLineItems = {
+      adjustedEstimateData.adjustedLineItems = {
           basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
         };
       }
@@ -459,12 +462,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
-          showCoverPage={showCoverPage}
+          showCoverPage={false} // Always false now
         />
       ).toBlob();
       
       console.log('PDF blob created successfully');
-      
+
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       console.log('Created URL for blob:', url);
@@ -498,6 +501,55 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
   };
 
+  // Handle ZIP package download
+  const handlePackageDownload = async () => {
+    try {
+      // Generate the quote PDF blob
+      const quotePdfBlob = await pdf(
+        <QuotePDF
+          estimateData={estimateData}
+          formData={formData}
+          companyInfo={companyInfo}
+          clientInfo={clientInfo}
+          quoteInfo={quoteInfo}
+          showCoverPage={showCoverPage} // Use the toggle state for quote
+        />
+      ).toBlob();
+
+      // Generate the work order PDF blob
+      const workOrderPdfBlob = await pdf(
+        <WorkOrderPDF
+          estimateData={estimateData}
+          formData={formData}
+          companyInfo={companyInfo}
+          quoteInfo={quoteInfo}
+        />
+      ).toBlob();
+
+      // Create a new ZIP file
+      const zip = new JSZip();
+
+      // Add PDFs to the ZIP
+      zip.file('quote.pdf', quotePdfBlob);
+      zip.file('work_order.pdf', workOrderPdfBlob);
+
+      // Generate filename based on project info
+      const projectName = quoteInfo.projectName.trim() || 'Quote';
+      const projectLocation = quoteInfo.projectAddress.trim() || '';
+      const fileName = projectName && projectLocation 
+        ? `${projectName} ${projectLocation} Package.zip`
+        : `Quote-${quoteInfo.quoteNumber}-Package.zip`;
+
+      // Generate and save the ZIP file
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      saveAs(zipBlob, fileName);
+
+    } catch (error) {
+      console.error('Error generating document package:', error);
+      alert('There was an error generating the document package. Please try again.');
+    }
+  };
+
   useEffect(() => {
     // Add a class to the body when component mounts for print-specific CSS
     document.body.classList.add('quote-print-ready');
@@ -520,7 +572,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               onChange={(e) => setShowCoverPage(e.target.checked)}
               className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
             />
-            <span className="ml-2 text-sm text-gray-700">Include cover page</span>
+            <span className="ml-2 text-sm text-gray-700">Include cover page in quote</span>
           </label>
         </div>
         
@@ -528,7 +580,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           onClick={handlePrint}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
         >
-          Print Quote
+          Print Preview
         </button>
 
         <button
@@ -536,6 +588,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
         >
           Save as PDF
+        </button>
+
+        <button
+          onClick={handlePackageDownload}
+          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
+        >
+          Download Package
         </button>
       </div>
 
@@ -554,7 +613,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="flex">
           {editingCompanyInfo ? (
             <div className="grid grid-cols-2 gap-4 w-full">
-              <div>
+          <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
                 <input
                   type="text"
@@ -771,12 +830,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
             <div className="ml-4 text-sm text-gray-600">
               Current Quote #: <span className="font-semibold">{quoteCounter}</span>
-            </div>
-          </div>
+        </div>
+      </div>
           <p className="text-xs text-gray-500 mt-2">
             Quote counter starts from 121 and will be remembered between sessions.
           </p>
-        </div>
+    </div>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -1005,7 +1064,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 const subtotal = Object.keys(adjustedPrices).length > 0 
                   ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
                   : estimateData.totalBeforeMarkup;
-                return (
+  return (
                   <>
                     {/* Subtotal */}
                     <tr>
@@ -1034,7 +1093,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           <div className="mt-2 text-sm italic text-gray-600">
             <p>Note: All prices include professional-grade cleaning supplies, equipment, and labor costs.</p>
           </div>
-        </div>
+      </div>
 
         {/* Project Timeline and Additional Information */}
         <div className="grid grid-cols-2 gap-8 mb-8">
