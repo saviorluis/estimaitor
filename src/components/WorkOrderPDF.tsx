@@ -286,7 +286,6 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
           </View>
           <View style={styles.workOrderInfo}>
             <Text style={styles.workOrderTitle}>Work Order</Text>
-            <Text style={styles.companyName}>{companyInfo.name}</Text>
           </View>
         </View>
 
@@ -318,7 +317,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             {scopeOfWork.map((item: string, index: number) => (
               <Text key={index} style={styles.bulletPoint}>• {item}</Text>
             ))}
-            <Text style={styles.bulletPoint}>• Windows are included in the cleaning scope</Text>
+            <Text style={styles.bulletPoint}>• {estimateData.windowCount || 0} windows are included in the cleaning scope</Text>
           </View>
         </View>
 

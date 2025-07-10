@@ -561,11 +561,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       ).toBlob();
       zip.file("invoice.pdf", invoiceBlob);
 
-      // Add reference sheet
-      const referenceResponse = await fetch('/BBPS Capability copy.png');
-      const referenceBlob = await referenceResponse.blob();
-      zip.file("reference_sheet.png", referenceBlob);
-
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
       const fileName = `BBPS_Quote_Package_${quoteInfo.quoteNumber}.zip`;

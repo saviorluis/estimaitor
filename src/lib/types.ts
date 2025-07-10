@@ -64,6 +64,7 @@ export interface EstimateData {
   displayCaseCost: number;
   aiRecommendations: string[];
   adjustedLineItems?: {[key: string]: number};
+  windowCount?: number;
 }
 
 export interface AIRecommendationRequest {

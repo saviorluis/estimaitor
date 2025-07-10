@@ -298,60 +298,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   return (
     <Document>
-      {/* Cover Page */}
+      {/* Cover Page with Quote Details */}
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.companyInfo}>
-            <View style={styles.companyHeader}>
-              <View style={styles.logoContainer}>
-                <Image src="/assets/logo.png" style={styles.logo} />
-              </View>
-            </View>
-            <Text style={styles.companyName}>{companyInfo.name}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-            <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
-            <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-            <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
-          </View>
-          <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
-          </View>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.title}>Professional Cleaning Services Quote</Text>
-          <Text style={styles.subtitle}>Project Information</Text>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Project Name:</Text>
-              <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
-              <Text style={styles.infoLabel}>Project Address:</Text>
-              <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
-            </View>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Client:</Text>
-              <Text style={styles.infoValue}>{clientInfo.name}</Text>
-              <Text style={styles.infoValue}>{clientInfo.company}</Text>
-              <Text style={styles.infoValue}>{clientInfo.address}</Text>
-              <Text style={styles.infoValue}>Phone: {clientInfo.phone}</Text>
-              <Text style={styles.infoValue}>Email: {clientInfo.email}</Text>
-            </View>
-          </View>
-        </View>
-      </Page>
-
-      {/* Capability Statement Page */}
-      <Page size="LETTER" style={styles.page}>
-        <Image src="/assets/Real Capability.png" style={{ width: '100%', height: 'auto' }} />
-      </Page>
-
-      {/* Quote Details Page */}
-      <Page size="LETTER" style={styles.page}>
-        {/* Header */}
-          <View style={styles.header}>
-              <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
                 <Image src="/assets/logo.png" style={styles.logo} />
@@ -362,81 +312,82 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={styles.companyDetails}>{companyInfo.city}</Text>
                 <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
                 <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-            </View>
+                <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+              </View>
             </View>
           </View>
-            <View style={styles.quoteInfo}>
+          <View style={styles.quoteInfo}>
             <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
             <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-            <Text style={styles.quoteExpiry}>Valid Until: {quoteInfo.validUntil}</Text>
-            </View>
+            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
           </View>
+        </View>
 
         {/* Client and Project Information */}
-          <View style={styles.infoGrid}>
-            <View style={styles.infoColumn}>
-              <Text style={styles.subtitle}>Client Information</Text>
+        <View style={styles.infoGrid}>
+          <View style={styles.infoColumn}>
+            <Text style={styles.subtitle}>Client Information</Text>
             <Text style={styles.infoValue}>{clientInfo.name}</Text>
             <Text style={styles.infoValue}>{clientInfo.company}</Text>
             <Text style={styles.infoValue}>{clientInfo.address}</Text>
             <Text style={styles.infoValue}>Phone: {clientInfo.phone}</Text>
             <Text style={styles.infoValue}>Email: {clientInfo.email}</Text>
-            </View>
-            <View style={styles.infoColumn}>
-              <Text style={styles.subtitle}>Project Information</Text>
+          </View>
+          <View style={styles.infoColumn}>
+            <Text style={styles.subtitle}>Project Information</Text>
             <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
             <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
             <Text style={styles.infoValue}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
             <Text style={styles.infoValue}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
             <Text style={styles.infoValue}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
-            </View>
           </View>
+        </View>
 
         {/* Service Details Table */}
         <Text style={styles.subtitle}>Service Details</Text>
-              <View style={styles.table}>
+        <View style={styles.table}>
           {/* Table Header */}
           <View style={[styles.tableRow, styles.tableHeader]}>
-                  <View style={[styles.tableCell, styles.descriptionCell]}>
+            <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>Description</Text>
-                  </View>
-                  <View style={[styles.tableCell, styles.amountCell]}>
+            </View>
+            <View style={[styles.tableCell, styles.amountCell]}>
               <Text style={styles.bold}>Amount</Text>
-                  </View>
-                </View>
+            </View>
+          </View>
 
           {/* Base Cleaning Service */}
           <View style={styles.tableRow}>
-                  <View style={[styles.tableCell, styles.descriptionCell]}>
+            <View style={[styles.tableCell, styles.descriptionCell]}>
               <Text style={styles.bold}>{getCleaningTypeDisplay(formData.cleaningType)} - {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
               <Text style={{fontSize: 9, marginTop: 5}}>
                 {PROJECT_SCOPES[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || `Final Cleaning of ${(formData.squareFootage || 0).toLocaleString()} Sq Ft includes standard cleaning services`}
               </Text>
-                  </View>
-                  <View style={[styles.tableCell, styles.amountCell]}>
+            </View>
+            <View style={[styles.tableCell, styles.amountCell]}>
               <Text>{formatCurrency(
                 estimateData.adjustedLineItems?.basePrice !== undefined
                   ? estimateData.adjustedLineItems.basePrice
                   : estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
               )}</Text>
-                  </View>
-                </View>
+            </View>
+          </View>
 
           {/* VCT Flooring if applicable */}
           {formData.hasVCT && (
             <View style={styles.tableRow}>
-                  <View style={[styles.tableCell, styles.descriptionCell]}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>VCT Flooring Treatment</Text>
                 <Text>Stripping, waxing, and buffing of vinyl composition tile</Text>
-                  </View>
-                  <View style={[styles.tableCell, styles.amountCell]}>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
                   estimateData.adjustedLineItems?.vctCost !== undefined
                     ? estimateData.adjustedLineItems.vctCost
                     : estimateData.vctCost
                 )}</Text>
-                  </View>
-                </View>
+              </View>
+            </View>
           )}
 
           {/* Pressure Washing if applicable */}
@@ -508,7 +459,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Urgency Adjustment</Text>
                 <Text>Priority scheduling (Level {formData.urgencyLevel}/10)</Text>
-                  </View>
+              </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>
                   {formatCurrency(
@@ -519,8 +470,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                         (estimateData.urgencyMultiplier - 1)
                   )}
                 </Text>
-                  </View>
-                  </View>
+              </View>
+            </View>
           )}
 
           {/* Window Cleaning if applicable */}
@@ -536,7 +487,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 {!formData.chargeForWindowCleaning && (
                   <Text style={{fontStyle: 'italic', color: '#666666'}}>Window cleaning will be quoted separately</Text>
                 )}
-                </View>
+              </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formData.chargeForWindowCleaning ? formatCurrency(
                   estimateData.adjustedLineItems?.windowCleaningCost !== undefined
@@ -553,22 +504,22 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={styles.bold}>Display Case Cleaning</Text>
                 <Text>{(formData.numberOfDisplayCases || 0)} display cases</Text>
-                  </View>
+              </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>{formatCurrency(
                   estimateData.adjustedLineItems?.displayCaseCost !== undefined
                     ? estimateData.adjustedLineItems.displayCaseCost
                     : estimateData.displayCaseCost
                 )}</Text>
-                  </View>
-                  </View>
+              </View>
+            </View>
           )}
 
           {/* Subtotal - Use the adjusted subtotal that's calculated in handlePDFDownload */}
           <View style={[styles.row, styles.subtotalRow]}>
             <Text style={styles.subtotalText}>Subtotal</Text>
             <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
-                </View>
+          </View>
 
           {/* Markup is now included in the line items, so we don't need to show it separately */}
 
@@ -576,14 +527,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.row}>
             <Text>Sales Tax (7%)</Text>
             <Text>{formatCurrency(estimateData.salesTax)}</Text>
-                  </View>
+          </View>
 
           {/* Total */}
           <View style={[styles.row, styles.totalRow]}>
             <Text style={styles.totalText}>TOTAL</Text>
             <Text style={styles.totalText}>{formatCurrency(estimateData.totalPrice)}</Text>
-              </View>
-            </View>
+          </View>
+        </View>
 
         {/* Replace markup note with general note */}
         <View style={{marginTop: 5, marginBottom: 10}}>
@@ -648,8 +599,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </Text>
           </View>
         </Page>
-      </Document>
-    );
+
+      {/* Capability Statement Page */}
+      <Page size="LETTER" style={styles.page}>
+        <Image 
+          src="/assets/Real Capability.png" 
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            objectFit: 'contain'
+          }} 
+        />
+      </Page>
+    </Document>
+  );
 };
 
 export default QuotePDF;

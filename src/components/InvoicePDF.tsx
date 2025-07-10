@@ -251,124 +251,112 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   quoteInfo,
   invoiceInfo,
 }) => {
-  const total = estimateData.basePrice;
-  
+  const logoPath = '/assets/logo.png';
+
+  // Get cleaning type display
+  const getCleaningTypeDisplay = (type: string): string => {
+    switch (type) {
+      case 'rough':
+        return 'Rough Clean';
+      case 'final':
+        return 'Final Clean';
+      case 'rough_final':
+        return 'Rough & Final Clean';
+      case 'rough_final_touchup':
+        return 'Rough, Final & Touch-up Clean';
+      default:
+        return type.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+  };
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
+        {/* Header with Logo and Company Info */}
         <View style={styles.header}>
           <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
-                <Image src="/assets/logo.png" style={styles.logo} />
+                <Image src={logoPath} style={styles.logo} />
+              </View>
+              <View>
+                <Text style={styles.companyName}>{companyInfo.name}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.address}, Ste. 203</Text>
+                <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.email}</Text>
               </View>
             </View>
-            <Text style={styles.companyName}>{companyInfo.name}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-            <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
-            <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-            <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
           </View>
           <View style={styles.invoiceInfo}>
             <Text style={styles.invoiceTitle}>INVOICE</Text>
-            <Text style={styles.invoiceDetails}>Invoice #: {invoiceInfo.invoiceNumber}</Text>
             <Text style={styles.invoiceDetails}>Date: {invoiceInfo.date}</Text>
             <Text style={styles.invoiceDetails}>Due Date: {invoiceInfo.dueDate}</Text>
-            <Text style={styles.invoiceDetails}>Terms: {invoiceInfo.paymentTerms}</Text>
+            <Text style={styles.invoiceDetails}>Quote Reference: #{quoteInfo.quoteNumber}</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bill To</Text>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
-              <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
-              <Text style={styles.infoValue}>Quote Reference: #{quoteInfo.quoteNumber}</Text>
-            </View>
+        {/* Bill To and Project Information */}
+        <View style={styles.infoGrid}>
+          <View style={styles.infoColumn}>
+            <Text style={styles.sectionTitle}>Bill To</Text>
+            <Text style={styles.infoValue}>{companyInfo.name}</Text>
+            <Text style={styles.infoValue}>{companyInfo.address}, Ste. 203</Text>
+            <Text style={styles.infoValue}>{companyInfo.city}</Text>
+            <Text style={styles.infoValue}>Phone: {companyInfo.phone}</Text>
+            <Text style={styles.infoValue}>Email: {companyInfo.email}</Text>
+          </View>
+          <View style={styles.infoColumn}>
+            <Text style={styles.sectionTitle}>Project Location</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
+            <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
           </View>
         </View>
 
+        {/* Service Details Table */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Services</Text>
           <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeader]}>
-              <View style={styles.descriptionCell}>
-                <Text style={styles.tableCell}>Description</Text>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text>Description</Text>
               </View>
-              <View style={styles.quantityCell}>
-                <Text style={styles.tableCell}>Quantity</Text>
-              </View>
-              <View style={styles.rateCell}>
-                <Text style={styles.tableCell}>Rate</Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={styles.tableCell}>Amount</Text>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>Amount</Text>
               </View>
             </View>
             <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={styles.tableCell}>Professional Cleaning Services</Text>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
+                <Text style={{ fontSize: 9, marginTop: 5 }}>
+                  {formData.squareFootage.toLocaleString()} sq ft
+                </Text>
               </View>
-              <View style={styles.quantityCell}>
-                <Text style={styles.tableCell}>1</Text>
-              </View>
-              <View style={styles.rateCell}>
-                <Text style={styles.tableCell}>{formatCurrency(total)}</Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={styles.tableCell}>{formatCurrency(total)}</Text>
-              </View>
-            </View>
-            <View style={[styles.tableRow, styles.subtotalRow]}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, styles.bold]}>Subtotal</Text>
-              </View>
-              <View style={styles.quantityCell}>
-                <Text style={styles.tableCell}></Text>
-              </View>
-              <View style={styles.rateCell}>
-                <Text style={styles.tableCell}></Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, styles.bold]}>{formatCurrency(total)}</Text>
-              </View>
-            </View>
-            <View style={[styles.tableRow, styles.totalRow]}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, styles.bold]}>Total</Text>
-              </View>
-              <View style={styles.quantityCell}>
-                <Text style={styles.tableCell}></Text>
-              </View>
-              <View style={styles.rateCell}>
-                <Text style={styles.tableCell}></Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, styles.bold]}>{formatCurrency(total)}</Text>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency(estimateData.totalPrice)}</Text>
               </View>
             </View>
           </View>
         </View>
 
+        {/* Payment Information */}
         <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>Payment Instructions</Text>
-          <Text style={styles.paymentPreferred}>Preferred Payment Method: Check by Mail</Text>
+          <Text style={styles.paymentTitle}>Payment Information</Text>
           <Text style={styles.paymentDetails}>Please make checks payable to: {companyInfo.name}</Text>
-          <Text style={styles.paymentDetails}>Mail to: {companyInfo.address}, {companyInfo.city}</Text>
-          <Text style={styles.paymentDetails}>Include invoice number ({invoiceInfo.invoiceNumber}) with payment</Text>
-          <Text style={styles.paymentDetails}>Payment Terms: {invoiceInfo.paymentTerms}</Text>
+          <Text style={styles.paymentDetails}>Mail to: {companyInfo.address}, Ste. 203</Text>
+          <Text style={styles.paymentDetails}>{companyInfo.city}</Text>
+          <Text style={styles.paymentPreferred}>Payment Terms: {invoiceInfo.paymentTerms}</Text>
         </View>
 
+        {/* Balance Due Box */}
         <View style={styles.balanceDueBox}>
-          <Text style={styles.balanceDueText}>BALANCE DUE</Text>
-          <Text style={styles.balanceDueAmount}>{formatCurrency(total)}</Text>
+          <Text style={styles.balanceDueText}>Balance Due</Text>
+          <Text style={styles.balanceDueAmount}>{formatCurrency(estimateData.totalPrice)}</Text>
         </View>
 
+        {/* Footer */}
         <View style={styles.footer}>
-          <Text>Thank you for your business!</Text>
-          <Text>{companyInfo.name} | {companyInfo.address}, {companyInfo.city} | {companyInfo.phone}</Text>
+          <Text>{companyInfo.name} | {companyInfo.phone} | {companyInfo.email}</Text>
         </View>
       </Page>
     </Document>
