@@ -507,6 +507,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       const zip = new JSZip();
       
+      // Extract just the number from quote number (e.g., "2025" from "Q-2025")
+      const quoteNumberOnly = quoteInfo.quoteNumber.split('-')[1] || quoteInfo.quoteNumber;
+
       // Generate Quote PDF
       const quoteBlob = await pdf(
         <QuotePDF
@@ -559,7 +562,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           invoiceInfo={invoiceInfo}
         />
       ).toBlob();
-      zip.file(`${quoteInfo.quoteNumber} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);
+      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);
 
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
@@ -567,7 +570,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const addressParts = quoteInfo.projectAddress.split(',').map(part => part.trim());
       const city = addressParts[addressParts.length - 2] || '';
       const state = addressParts[addressParts.length - 1] || '';
-      const fileName = `${quoteInfo.quoteNumber} ${quoteInfo.projectName} ${city}, ${state}.zip`;
+      const fileName = `${quoteNumberOnly} ${quoteInfo.projectName} ${city}, ${state}.zip`;
       saveAs(content, fileName);
 
       // Increment the quote counter after successful generation
