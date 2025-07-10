@@ -296,9 +296,74 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   quoteInfo,
   adjustedPrices
 }) => {
+  const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
+
   return (
     <Document>
-      {/* Cover Page with Quote Details */}
+      {/* Cover Page */}
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.companyHeader}>
+          <View style={styles.logoContainer}>
+            <Image src="/assets/logo.png" style={styles.logo} />
+          </View>
+        </View>
+        <View style={{ marginTop: 40 }}>
+          <Text style={[styles.title, { textAlign: 'center' }]}>
+            Commercial Cleaning Proposal
+          </Text>
+          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 20 }]}>
+            Prepared for:
+          </Text>
+          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
+            {clientInfo.name}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {clientInfo.company}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {clientInfo.address}
+          </Text>
+        </View>
+        <View style={{ marginTop: 'auto', marginBottom: 40 }}>
+          <Text style={[styles.companyName, { textAlign: 'center' }]}>
+            Prepared by:
+          </Text>
+          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
+            {companyInfo.name}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {companyInfo.address}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {companyInfo.city}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {companyInfo.phone}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {companyInfo.email}
+          </Text>
+          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
+            {companyInfo.website}
+          </Text>
+        </View>
+      </Page>
+
+      {/* Capability Statement Page */}
+      <Page size="LETTER" style={styles.page}>
+        <View style={{ width: '100%', height: '100%' }}>
+          <Image
+            src="/images/Real Capability.png"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
+        </View>
+      </Page>
+
+      {/* Quote Details Page */}
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.companyInfo}>
@@ -599,20 +664,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </Text>
           </View>
         </Page>
-
-      {/* Capability Statement Page */}
-      <Page size="LETTER" style={styles.page}>
-        <Image 
-          src="/assets/Real Capability.png" 
-          style={{ 
-            width: '100%', 
-            height: '100%',
-            objectFit: 'contain'
-          }} 
-        />
-      </Page>
-    </Document>
-  );
-};
+      </Document>
+    );
+  };
 
 export default QuotePDF;
