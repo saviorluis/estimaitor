@@ -9,6 +9,7 @@ import { saveAs } from 'file-saver';
 import QuotePDF from './QuotePDF';
 import WorkOrderPDF from './WorkOrderPDF';
 import PurchaseOrderPDF from './PurchaseOrderPDF';
+import InvoicePDF from './InvoicePDF';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -506,7 +507,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       const zip = new JSZip();
       
-      // Generate Quote PDF with cover page and capability statement
+      // Generate Quote PDF
       const quoteBlob = await pdf(
         <QuotePDF
           estimateData={estimateData}
@@ -515,8 +516,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
-          showCoverPage={true}
-          includeCapabilityStatement={true}
         />
       ).toBlob();
       zip.file("quote.pdf", quoteBlob);
@@ -542,6 +541,25 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         />
       ).toBlob();
       zip.file("purchase_order.pdf", purchaseOrderBlob);
+
+      // Generate Invoice PDF
+      const invoiceInfo = {
+        invoiceNumber: quoteInfo.quoteNumber, // You might want to generate a separate invoice number
+        date: formatDate(new Date()),
+        dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
+        paymentTerms: "Net 15 - Payment due within 15 days of invoice date",
+      };
+
+      const invoiceBlob = await pdf(
+        <InvoicePDF
+          estimateData={estimateData}
+          formData={formData}
+          companyInfo={companyInfo}
+          quoteInfo={quoteInfo}
+          invoiceInfo={invoiceInfo}
+        />
+      ).toBlob();
+      zip.file("invoice.pdf", invoiceBlob);
 
       // Add reference sheet
       const referenceResponse = await fetch('/BBPS Capability copy.png');
