@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   companyInfo: {
     width: '50%',
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#0066CC',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   invoiceDetails: {
     fontSize: 10,
@@ -120,41 +120,67 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
   },
   tableCell: {
-    padding: 5,
+    padding: 8,
     fontSize: 10,
   },
   descriptionCell: {
-    width: '70%',
+    width: '40%',
     borderRightWidth: 1,
     borderRightColor: '#CCCCCC',
   },
+  quantityCell: {
+    width: '15%',
+    borderRightWidth: 1,
+    borderRightColor: '#CCCCCC',
+    textAlign: 'center',
+  },
+  rateCell: {
+    width: '20%',
+    borderRightWidth: 1,
+    borderRightColor: '#CCCCCC',
+    textAlign: 'right',
+  },
   amountCell: {
-    width: '30%',
+    width: '25%',
     textAlign: 'right',
   },
   subtotalRow: {
-    backgroundColor: '#F0F0F0',
-    marginTop: 5,
+    backgroundColor: '#F8FAFC',
+    borderTopWidth: 2,
+    borderTopColor: '#1e40af',
   },
   totalRow: {
     backgroundColor: '#E6F0FF',
-    marginTop: 5,
+    borderTopWidth: 2,
+    borderTopColor: '#1e40af',
+    marginTop: 2,
   },
   paymentSection: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: 30,
+    padding: 15,
     backgroundColor: '#f8fafc',
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   paymentTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
     color: '#1e40af',
   },
   paymentDetails: {
     fontSize: 10,
-    marginBottom: 3,
+    marginBottom: 5,
+  },
+  paymentPreferred: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: 5,
+    backgroundColor: '#E6F0FF',
+    padding: 5,
+    borderRadius: 2,
   },
   footer: {
     position: 'absolute',
@@ -164,6 +190,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 8,
     color: '#666666',
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    paddingTop: 10,
+  },
+  balanceDueBox: {
+    position: 'absolute',
+    right: 30,
+    bottom: 100,
+    padding: 15,
+    backgroundColor: '#1e40af',
+    borderRadius: 4,
+    width: 200,
+  },
+  balanceDueText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  balanceDueAmount: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 });
 
@@ -199,6 +251,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   quoteInfo,
   invoiceInfo,
 }) => {
+  const total = estimateData.basePrice;
+  
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
@@ -217,24 +271,21 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
           </View>
           <View style={styles.invoiceInfo}>
-            <Text style={styles.invoiceTitle}>Invoice</Text>
-            <Text style={styles.companyName}>{companyInfo.name}</Text>
+            <Text style={styles.invoiceTitle}>INVOICE</Text>
             <Text style={styles.invoiceDetails}>Invoice #: {invoiceInfo.invoiceNumber}</Text>
             <Text style={styles.invoiceDetails}>Date: {invoiceInfo.date}</Text>
             <Text style={styles.invoiceDetails}>Due Date: {invoiceInfo.dueDate}</Text>
+            <Text style={styles.invoiceDetails}>Terms: {invoiceInfo.paymentTerms}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Project Information</Text>
+          <Text style={styles.sectionTitle}>Bill To</Text>
           <View style={styles.infoGrid}>
             <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Project Name:</Text>
               <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
-              <Text style={styles.infoLabel}>Project Address:</Text>
               <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
-              <Text style={styles.infoLabel}>Quote Reference:</Text>
-              <Text style={styles.infoValue}>#{quoteInfo.quoteNumber}</Text>
+              <Text style={styles.infoValue}>Quote Reference: #{quoteInfo.quoteNumber}</Text>
             </View>
           </View>
         </View>
@@ -246,6 +297,12 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <View style={styles.descriptionCell}>
                 <Text style={styles.tableCell}>Description</Text>
               </View>
+              <View style={styles.quantityCell}>
+                <Text style={styles.tableCell}>Quantity</Text>
+              </View>
+              <View style={styles.rateCell}>
+                <Text style={styles.tableCell}>Rate</Text>
+              </View>
               <View style={styles.amountCell}>
                 <Text style={styles.tableCell}>Amount</Text>
               </View>
@@ -254,18 +311,59 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               <View style={styles.descriptionCell}>
                 <Text style={styles.tableCell}>Professional Cleaning Services</Text>
               </View>
+              <View style={styles.quantityCell}>
+                <Text style={styles.tableCell}>1</Text>
+              </View>
+              <View style={styles.rateCell}>
+                <Text style={styles.tableCell}>{formatCurrency(total)}</Text>
+              </View>
               <View style={styles.amountCell}>
-                <Text style={styles.tableCell}>{formatCurrency(estimateData.basePrice)}</Text>
+                <Text style={styles.tableCell}>{formatCurrency(total)}</Text>
+              </View>
+            </View>
+            <View style={[styles.tableRow, styles.subtotalRow]}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, styles.bold]}>Subtotal</Text>
+              </View>
+              <View style={styles.quantityCell}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.rateCell}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, styles.bold]}>{formatCurrency(total)}</Text>
+              </View>
+            </View>
+            <View style={[styles.tableRow, styles.totalRow]}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, styles.bold]}>Total</Text>
+              </View>
+              <View style={styles.quantityCell}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.rateCell}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, styles.bold]}>{formatCurrency(total)}</Text>
               </View>
             </View>
           </View>
         </View>
 
         <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>Payment Information</Text>
+          <Text style={styles.paymentTitle}>Payment Instructions</Text>
+          <Text style={styles.paymentPreferred}>Preferred Payment Method: Check by Mail</Text>
+          <Text style={styles.paymentDetails}>Please make checks payable to: {companyInfo.name}</Text>
+          <Text style={styles.paymentDetails}>Mail to: {companyInfo.address}, {companyInfo.city}</Text>
+          <Text style={styles.paymentDetails}>Include invoice number ({invoiceInfo.invoiceNumber}) with payment</Text>
           <Text style={styles.paymentDetails}>Payment Terms: {invoiceInfo.paymentTerms}</Text>
-          <Text style={styles.paymentDetails}>Please include invoice number with payment</Text>
-          <Text style={styles.paymentDetails}>Make checks payable to: {companyInfo.name}</Text>
+        </View>
+
+        <View style={styles.balanceDueBox}>
+          <Text style={styles.balanceDueText}>BALANCE DUE</Text>
+          <Text style={styles.balanceDueAmount}>{formatCurrency(total)}</Text>
         </View>
 
         <View style={styles.footer}>
