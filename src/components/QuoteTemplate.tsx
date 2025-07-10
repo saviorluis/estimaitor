@@ -529,7 +529,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
         />
       ).toBlob();
-      zip.file("work_order.pdf", workOrderBlob);
+      zip.file(`${quoteInfo.projectName} Work Order.pdf`, workOrderBlob);
 
       // Generate Purchase Order PDF
       const purchaseOrderBlob = await pdf(
@@ -540,11 +540,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
         />
       ).toBlob();
-      zip.file("purchase_order.pdf", purchaseOrderBlob);
+      zip.file(`${quoteInfo.projectName} Purchase Order.pdf`, purchaseOrderBlob);
 
       // Generate Invoice PDF
       const invoiceInfo = {
-        invoiceNumber: quoteInfo.quoteNumber, // You might want to generate a separate invoice number
+        invoiceNumber: quoteInfo.quoteNumber,
         date: formatDate(new Date()),
         dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
         paymentTerms: "Net 15 - Payment due within 15 days of invoice date",
@@ -559,11 +559,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           invoiceInfo={invoiceInfo}
         />
       ).toBlob();
-      zip.file("invoice.pdf", invoiceBlob);
+      zip.file(`${quoteInfo.quoteNumber} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);
 
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
-      const fileName = `BBPS_Quote_Package_${quoteInfo.quoteNumber}.zip`;
+      // Extract city and state from the project address
+      const addressParts = quoteInfo.projectAddress.split(',').map(part => part.trim());
+      const city = addressParts[addressParts.length - 2] || '';
+      const state = addressParts[addressParts.length - 1] || '';
+      const fileName = `${quoteInfo.quoteNumber} ${quoteInfo.projectName} ${city}, ${state}.zip`;
       saveAs(content, fileName);
 
       // Increment the quote counter after successful generation
