@@ -313,13 +313,14 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
 
         {/* Scope of Work */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Work Description</Text>
+          <Text style={styles.sectionTitle}>Scope of Work</Text>
           <View style={styles.scopeOfWork}>
-            {scopeOfWork.map((item: string, index: number) => (
-              <View key={index} style={styles.bulletPoint}>
-                <Text>• {item}</Text>
-              </View>
-            ))}
+            {Array.isArray(SCOPE_OF_WORK[formData.cleaningType]) 
+              ? SCOPE_OF_WORK[formData.cleaningType].map((item: string, index: number) => (
+                  <Text key={index} style={styles.bulletPoint}>• {item}</Text>
+                ))
+              : null}
+            <Text style={styles.bulletPoint}>• Windows are included in the cleaning scope</Text>
           </View>
         </View>
 

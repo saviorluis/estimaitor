@@ -70,8 +70,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
   // State for quote counter
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
-  // State for showing cover page in PDF
-  const [showCoverPage, setShowCoverPage] = useState<boolean>(false);
+  // Remove the showCoverPage state since it's always true for quotes
 
   // Early return if data isn't fully loaded
   if (!estimateData || !formData) {
@@ -504,20 +503,24 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Handle ZIP package download
   const handlePackageDownload = async () => {
     try {
-      // Generate the quote PDF blob
-      const quotePdfBlob = await pdf(
+      const zip = new JSZip();
+      
+      // Generate Quote PDF
+      const quoteBlob = await pdf(
         <QuotePDF
           estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
-          showCoverPage={showCoverPage} // Use the toggle state for quote
+          adjustedPrices={adjustedPrices}
+          showCoverPage={true}
         />
       ).toBlob();
+      zip.file("quote.pdf", quoteBlob);
 
-      // Generate the work order PDF blob
-      const workOrderPdfBlob = await pdf(
+      // Generate Work Order PDF
+      const workOrderBlob = await pdf(
         <WorkOrderPDF
           estimateData={estimateData}
           formData={formData}
@@ -525,28 +528,28 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
         />
       ).toBlob();
+      zip.file("work_order.pdf", workOrderBlob);
 
-      // Create a new ZIP file
-      const zip = new JSZip();
+      // Add capability statement
+      const capabilityResponse = await fetch('/assets/Real Capability.png');
+      const capabilityBlob = await capabilityResponse.blob();
+      zip.file("capability_statement.png", capabilityBlob);
 
-      // Add PDFs to the ZIP
-      zip.file('quote.pdf', quotePdfBlob);
-      zip.file('work_order.pdf', workOrderPdfBlob);
+      // Add reference sheet
+      const referenceResponse = await fetch('/BBPS Capability copy.png');
+      const referenceBlob = await referenceResponse.blob();
+      zip.file("reference_sheet.png", referenceBlob);
 
-      // Generate filename based on project info
-      const projectName = quoteInfo.projectName.trim() || 'Quote';
-      const projectLocation = quoteInfo.projectAddress.trim() || '';
-      const fileName = projectName && projectLocation 
-        ? `${projectName} ${projectLocation} Package.zip`
-        : `Quote-${quoteInfo.quoteNumber}-Package.zip`;
+      // Generate and save the zip file
+      const content = await zip.generateAsync({ type: "blob" });
+      const fileName = `BBPS_Quote_Package_${quoteInfo.quoteNumber}.zip`;
+      saveAs(content, fileName);
 
-      // Generate and save the ZIP file
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      saveAs(zipBlob, fileName);
-
+      // Increment the quote counter after successful generation
+      handleIncrementCounter();
     } catch (error) {
-      console.error('Error generating document package:', error);
-      alert('There was an error generating the document package. Please try again.');
+      console.error('Error generating package:', error);
+      alert('Error generating document package. Please try again.');
     }
   };
 
@@ -562,40 +565,23 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
-      {/* Print and Download Buttons - Hidden when printing */}
-      <div className="flex justify-end mb-6 print:hidden">
-        <div className="mr-auto flex items-center">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              checked={showCoverPage}
-              onChange={(e) => setShowCoverPage(e.target.checked)}
-              className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
-            />
-            <span className="ml-2 text-sm text-gray-700">Include cover page in quote</span>
-          </label>
+      {/* Remove the cover page toggle button */}
+      <div className="flex justify-between items-center mb-6 print:hidden">
+        <h2 className="text-2xl font-bold text-gray-800">Quote Details</h2>
+        <div className="space-x-4">
+          <button
+            onClick={handlePDFDownload}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Download PDF
+          </button>
+          <button
+            onClick={handlePackageDownload}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+          >
+            Download Package
+          </button>
         </div>
-        
-        <button
-          onClick={handlePrint}
-          className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition"
-        >
-          Print Preview
-        </button>
-
-        <button
-          onClick={handlePDFDownload}
-          className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600 transition"
-        >
-          Save as PDF
-        </button>
-
-        <button
-          onClick={handlePackageDownload}
-          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition"
-        >
-          Download Package
-        </button>
       </div>
 
       {/* Your Company Information - Hidden when printing */}
