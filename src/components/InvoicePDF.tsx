@@ -163,12 +163,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   paymentSection: {
-    marginTop: 30,
+    marginTop: 20,
     padding: 15,
     backgroundColor: '#f8fafc',
     borderRadius: 4,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    width: '50%',
   },
   paymentTitle: {
     fontSize: 12,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   balanceDueBox: {
     position: 'absolute',
     right: 30,
-    bottom: 100,
+    top: 520,
     padding: 15,
     backgroundColor: '#1e40af',
     borderRadius: 4,

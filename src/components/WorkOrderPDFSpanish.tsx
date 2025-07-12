@@ -34,7 +34,8 @@ const styles = StyleSheet.create({
   companyHeader: {
     flexDirection: 'row',
     marginBottom: 8,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   logoContainer: {
     width: 150,
@@ -42,14 +43,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginBottom: 0,
     display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logo: {
     maxWidth: '100%',
     maxHeight: '100%',
     objectFit: 'contain',
-    objectPosition: 'left top',
+    objectPosition: 'center',
   },
   title: {
     fontSize: 24,
@@ -245,7 +246,7 @@ interface WorkOrderPDFProps {
   };
 }
 
-const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
+const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
   estimateData,
   formData,
   companyInfo,
@@ -281,13 +282,13 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.address}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>Teléfono: {companyInfo.phone}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.email}</Text>
               </View>
             </View>
           </View>
           <View style={styles.workOrderInfo}>
-            <Text style={styles.workOrderTitle}>Work Order</Text>
+            <Text style={styles.workOrderTitle}>Orden de Trabajo</Text>
           </View>
         </View>
 
@@ -295,18 +296,19 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
         <View style={styles.infoGrid}>
           {/* Project Information */}
           <View style={styles.infoColumn}>
-            <Text style={styles.sectionTitle}>Project Details</Text>
-            <Text style={styles.infoText}>Project Name: {quoteInfo.projectName}</Text>
-            <Text style={styles.infoText}>Location: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.infoText}>Project Type: {formData.projectType.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</Text>
+            <Text style={styles.sectionTitle}>Detalles del Proyecto</Text>
+            <Text style={styles.infoText}>Nombre del Proyecto: {quoteInfo.projectName}</Text>
+            <Text style={styles.infoText}>Ubicación: {quoteInfo.projectAddress}</Text>
+            <Text style={styles.infoText}>Tipo de Proyecto: {formData.projectType.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</Text>
+            <Text style={styles.infoText}>Área Total: {formData.squareFootage} pies cuadrados</Text>
           </View>
 
           {/* Cleaner Information */}
           <View style={styles.infoColumn}>
-            <Text style={styles.sectionTitle}>Cleaner Information</Text>
-            <Text style={styles.cleanerInfo}>Name: _____________________________</Text>
-            <Text style={styles.cleanerInfo}>Phone: _____________________________</Text>
-            <Text style={styles.cleanerInfo}>Email: _____________________________</Text>
+            <Text style={styles.sectionTitle}>Información del Limpiador</Text>
+            <Text style={styles.cleanerInfo}>Nombre: _____________________________</Text>
+            <Text style={styles.cleanerInfo}>Teléfono: _____________________________</Text>
+            <Text style={styles.cleanerInfo}>Correo: _____________________________</Text>
           </View>
         </View>
 
@@ -314,13 +316,13 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
 
         {/* Scope of Work */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Scope of Work</Text>
+          <Text style={styles.sectionTitle}>Alcance del Trabajo</Text>
           <View style={styles.scopeOfWork}>
             {scopeOfWork.map((item: string, index: number) => (
               <Text key={index} style={styles.bulletPoint}>• {item}</Text>
             ))}
             {(formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows) > 0 && (
-              <Text style={styles.bulletPoint}>• Clean {formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} windows</Text>
+              <Text style={styles.bulletPoint}>• Limpiar {formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} ventanas</Text>
             )}
           </View>
         </View>
@@ -330,21 +332,21 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
         {/* Notes */}
         {quoteInfo.notes && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Additional Notes</Text>
+            <Text style={styles.sectionTitle}>Notas Adicionales</Text>
             <Text style={styles.infoText}>{quoteInfo.notes}</Text>
           </View>
         )}
 
         {/* Amount Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Amount</Text>
+          <Text style={styles.sectionTitle}>Monto</Text>
           <View style={styles.amountSection}>
             <View style={styles.amountField}>
               <Text style={styles.dollarSign}>$</Text>
               <View style={styles.handwrittenField} />
             </View>
             <View style={styles.startDateField}>
-              <Text style={styles.dateLabel}>Start Date:</Text>
+              <Text style={styles.dateLabel}>Fecha de Inicio:</Text>
               <View style={styles.handwrittenField} />
             </View>
           </View>
@@ -352,47 +354,47 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
 
         {/* Fees Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Important Fee Information</Text>
+          <Text style={styles.sectionTitle}>Información Importante sobre Tarifas</Text>
           <View style={styles.feesSection}>
             {/* Late Arrival Fee */}
             <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Late Arrival Fee</Text>
+              <Text style={styles.feeTitle}>Cargo por Llegada Tardía</Text>
               <Text style={styles.feeDescription}>
-                • If crew arrives more than 30 minutes late to the jobsite: $75/hour deduction from total invoice
+                • Si el equipo llega más de 30 minutos tarde al sitio de trabajo: $75/hora de deducción de la factura total
               </Text>
               <Text style={styles.feeDescription}>
-                • If crew arrives more than 1 hour late: $100/hour deduction from total invoice
+                • Si el equipo llega más de 1 hora tarde: $100/hora de deducción de la factura total
               </Text>
               <Text style={styles.warningText}>
-                Note: Crew must notify supervisor immediately of any potential delays
+                Nota: El equipo debe notificar al supervisor inmediatamente de cualquier retraso potencial
               </Text>
             </View>
 
             {/* Involvement Fee */}
             <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Supervisor Involvement Fee</Text>
+              <Text style={styles.feeTitle}>Cargo por Intervención del Supervisor</Text>
               <Text style={styles.feeDescription}>
-                • If supervisor's presence is required on-site due to crew performance issues: $150/hour charge to responsible crew members
+                • Si se requiere la presencia del supervisor en el sitio debido a problemas de desempeño del equipo: $150/hora cargo a los miembros del equipo responsables
               </Text>
               <Text style={styles.feeDescription}>
-                • This fee covers travel time and on-site supervision time
+                • Esta tarifa cubre el tiempo de viaje y el tiempo de supervisión en el sitio
               </Text>
               <Text style={styles.warningText}>
-                Note: This fee will be deducted from crew payment if supervisor intervention is necessary
+                Nota: Esta tarifa se deducirá del pago del equipo si es necesaria la intervención del supervisor
               </Text>
             </View>
 
             {/* Materials Fee */}
             <View style={styles.feeItem}>
-              <Text style={styles.feeTitle}>Materials Fee</Text>
+              <Text style={styles.feeTitle}>Cargo por Materiales</Text>
               <Text style={styles.feeDescription}>
-                • Additional charges will apply if supervisor needs to provide cleaning materials or equipment
+                • Se aplicarán cargos adicionales si el supervisor necesita proporcionar materiales o equipos de limpieza
               </Text>
               <Text style={styles.feeDescription}>
-                • Material fees are determined case by case based on type and quantity needed
+                • Los cargos por materiales se determinan caso por caso según el tipo y la cantidad necesaria
               </Text>
               <Text style={styles.warningText}>
-                Note: Material fees will be discussed and agreed upon before the start of work
+                Nota: Los cargos por materiales se discutirán y acordarán antes del inicio del trabajo
               </Text>
             </View>
           </View>
@@ -403,19 +405,19 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
           <View style={styles.signatureBlock}>
             <Text style={styles.sectionTitle}>Supervisor</Text>
             <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Signature</Text>
+            <Text style={styles.signatureLabel}>Firma</Text>
             <View style={styles.dateField}>
-              <Text style={styles.fieldLabel}>Date:</Text>
+              <Text style={styles.fieldLabel}>Fecha:</Text>
               <View style={styles.handwrittenField} />
             </View>
           </View>
           
           <View style={styles.signatureBlock}>
-            <Text style={styles.sectionTitle}>Cleaner</Text>
+            <Text style={styles.sectionTitle}>Limpiador</Text>
             <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Signature</Text>
+            <Text style={styles.signatureLabel}>Firma</Text>
             <View style={styles.dateField}>
-              <Text style={styles.fieldLabel}>Date:</Text>
+              <Text style={styles.fieldLabel}>Fecha:</Text>
               <View style={styles.handwrittenField} />
             </View>
           </View>
@@ -430,4 +432,4 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   );
 };
 
-export default WorkOrderPDF; 
+export default WorkOrderPDFSpanish; 

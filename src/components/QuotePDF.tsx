@@ -180,19 +180,20 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginBottom: 0,
     display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   logo: {
     maxWidth: '100%',
     maxHeight: '100%',
     objectFit: 'contain',
-    objectPosition: 'left top'
+    objectPosition: 'center'
   },
   companyHeader: {
     flexDirection: 'row',
     marginBottom: 8,
-    alignItems: 'flex-start'
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   },
   quoteDate: {
     fontSize: 10,
@@ -353,7 +354,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={{ width: '100%', height: '100%' }}>
           <Image
-            src="/images/Real Capability.png"
+            src={process.env.NODE_ENV === 'development' ? '/public/images/Real Capability.png' : '/images/Real Capability.png'}
             style={{
               width: '100%',
               height: '100%',

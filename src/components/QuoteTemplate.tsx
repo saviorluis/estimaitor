@@ -11,6 +11,7 @@ import WorkOrderPDF from './WorkOrderPDF';
 import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
+import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -524,7 +525,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       ).toBlob();
       zip.file("quote.pdf", quoteBlob);
 
-      // Generate Work Order PDF
+      // Generate Work Order PDF (English)
       const workOrderBlob = await pdf(
         <WorkOrderPDF
           estimateData={estimateData}
@@ -534,6 +535,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         />
       ).toBlob();
       zip.file(`${quoteInfo.projectName} Work Order.pdf`, workOrderBlob);
+
+      // Generate Work Order PDF (Spanish)
+      const workOrderSpanishBlob = await pdf(
+        <WorkOrderPDFSpanish
+          estimateData={estimateData}
+          formData={formData}
+          companyInfo={companyInfo}
+          quoteInfo={quoteInfo}
+        />
+      ).toBlob();
+      zip.file(`${quoteInfo.projectName} Work Order Spanish.pdf`, workOrderSpanishBlob);
 
       // Generate Purchase Order PDF
       const purchaseOrderBlob = await pdf(
@@ -581,7 +593,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           changeOrderInfo={changeOrderInfo}
         />
       ).toBlob();
-      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Change Order.pdf`, changeOrderBlob);
+      zip.file(`${quoteInfo.projectName} Change Order.pdf`, changeOrderBlob);
 
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
