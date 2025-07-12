@@ -126,7 +126,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Apply urgency multiplier
   const urgencyMultiplier = URGENCY_MULTIPLIERS[urgencyLevel] || 1;
 
-  // Calculate total before markup
+  // Use adjusted values for total calculation
   const totalBeforeMarkup = (
     basePrice +
     vctCost +

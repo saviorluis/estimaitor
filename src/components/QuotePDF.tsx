@@ -580,13 +580,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           )}
 
-          {/* Subtotal - Use the adjusted subtotal that's calculated in handlePDFDownload */}
-          <View style={[styles.row, styles.subtotalRow]}>
-            <Text style={styles.subtotalText}>Subtotal</Text>
-            <Text style={styles.subtotalText}>{formatCurrency(estimateData.totalBeforeMarkup)}</Text>
-          </View>
-
-          {/* Markup is now included in the line items, so we don't need to show it separately */}
+          {/* Add markup if applicable */}
+          {estimateData.markup > 0 && (
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={styles.bold}>Additional Supplies & Equipment</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency(estimateData.markup)}</Text>
+              </View>
+            </View>
+          )}
 
           {/* Sales Tax */}
           <View style={styles.row}>
