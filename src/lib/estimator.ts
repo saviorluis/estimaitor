@@ -61,10 +61,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate travel cost (round trip)
   const roundTripDistance = distanceFromOffice * 2; // Multiply by 2 for round trip
-  // Use different rates based on distance
-  const travelCost = distanceFromOffice < 80 
-    ? roundTripDistance * TRAVEL_COST_PER_MILE.SHORT_DISTANCE 
-    : roundTripDistance * TRAVEL_COST_PER_MILE.LONG_DISTANCE;
+  const rate = distanceFromOffice < 80 ? TRAVEL_COST_PER_MILE.SHORT_DISTANCE : TRAVEL_COST_PER_MILE.LONG_DISTANCE;
+  const travelCost = roundTripDistance * rate;
 
   // Calculate overnight cost if applicable
   let overnightCost = 0;
@@ -76,12 +74,12 @@ export function calculateEstimate(formData: FormData): EstimateData {
     // Calculate per diem for meals and incidentals
     const perDiemCost = numberOfCleaners * PER_DIEM_PER_DAY * numberOfNights;
     
-    // Calculate additional vehicle costs when more than 2 cleaners
-    // Each vehicle can transport 2-3 people, so we need additional vehicles for larger teams
+    // Calculate additional vehicle costs for teams larger than 2 people
     let vehicleCost = 0;
     if (numberOfCleaners > 2) {
       const additionalVehicles = Math.ceil(numberOfCleaners / 3) - 1; // First vehicle already accounted for
-      const additionalMileageCost = additionalVehicles * roundTripDistance * TRAVEL_COST_PER_MILE;
+      const rate = distanceFromOffice < 80 ? TRAVEL_COST_PER_MILE.SHORT_DISTANCE : TRAVEL_COST_PER_MILE.LONG_DISTANCE;
+      const additionalMileageCost = additionalVehicles * roundTripDistance * rate;
       vehicleCost = additionalMileageCost;
     }
     
