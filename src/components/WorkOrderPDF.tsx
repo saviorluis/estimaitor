@@ -260,12 +260,14 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
 
   // Get scope of work based on project type and split into array
   const scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
+  const totalWindows = (formData.numberOfWindows || 0) + (formData.numberOfLargeWindows || 0) + (formData.numberOfHighAccessWindows || 0);
   const scopeOfWork = scopeOfWorkText
     .split('\n')
     .filter(line => line.trim())
     .map(line => line.replace('• ', '').trim())
     .map(line => line.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`))
-    .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName));
+    .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName))
+    .map(line => line.replace('___WINDOW_COUNT___', totalWindows.toString()));
 
   return (
     <Document>

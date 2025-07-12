@@ -61,8 +61,10 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate travel cost (round trip)
   const roundTripDistance = distanceFromOffice * 2; // Multiply by 2 for round trip
-  // Use a fixed rate per mile that already accounts for gas, wear and tear
-  const travelCost = roundTripDistance * TRAVEL_COST_PER_MILE;
+  // Use different rates based on distance
+  const travelCost = distanceFromOffice < 80 
+    ? roundTripDistance * TRAVEL_COST_PER_MILE.SHORT_DISTANCE 
+    : roundTripDistance * TRAVEL_COST_PER_MILE.LONG_DISTANCE;
 
   // Calculate overnight cost if applicable
   let overnightCost = 0;

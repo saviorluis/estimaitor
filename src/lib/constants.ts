@@ -54,7 +54,13 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
 export const VCT_COST_PER_SQFT = 0.15;
 
 // Travel cost per mile (accounting for round trip)
-export const TRAVEL_COST_PER_MILE = 0.75; // Updated business mileage rate
+export const TRAVEL_COST_PER_MILE: {
+  SHORT_DISTANCE: number;
+  LONG_DISTANCE: number;
+} = {
+  SHORT_DISTANCE: 0.35, // For trips under 80 miles (one way)
+  LONG_DISTANCE: 0.75  // For trips 80 miles or more (one way)
+};
 
 // Hotel cost per night per room
 export const HOTEL_COST_PER_NIGHT = 175;
@@ -151,193 +157,273 @@ export const DISPLAY_CASE_TIME_PER_UNIT = 0.6; // Hours per display case
 export const SCOPE_OF_WORK: { [key: string]: string } = {
   restaurant: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and deep clean kitchen areas\n" +
-    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
-    "• Clean/sanitize bathrooms\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean/sanitize bathrooms and ensure all fixtures are spotless\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Degrease and sanitize kitchen surfaces, hoods, and equipment areas\n" +
     "• Clean and sanitize food preparation surfaces and dining areas\n" +
     "• Detail clean bar areas and beverage stations\n" +
-    "• Clean and polish all stainless steel surfaces",
+    "• Clean and polish all stainless steel surfaces\n" +
+    "• Clean and sanitize walk-in coolers/freezers (exterior)\n" +
+    "• Detail clean host stations and waiting areas\n" +
+    "• Clean and sanitize all door handles and high-touch surfaces\n" +
+    "• Empty and clean all trash receptacles",
 
   medical: "Final Cleaning includes:\n" +
     "• Sweep/mop/sanitize all hard surface floors with hospital-grade disinfectants\n" +
-    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
-    "• Sanitize all bathrooms\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Sanitize all bathrooms with medical-grade cleaners\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Sanitize all medical equipment surfaces and patient areas\n" +
     "• Detail clean and disinfect exam rooms and waiting areas\n" +
     "• Clean and sanitize reception areas and nurse stations\n" +
-    "• Special attention to high-touch surfaces with medical-grade cleaners",
+    "• Special attention to high-touch surfaces with medical-grade cleaners\n" +
+    "• Clean and sanitize laboratory areas\n" +
+    "• Disinfect all medical waste containers\n" +
+    "• Clean and sanitize staff break rooms and locker areas\n" +
+    "• Empty and sanitize all trash receptacles",
 
   office: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
-    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
-    "• Clean bathrooms\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean and sanitize break rooms and kitchen areas\n" +
     "• Detail clean conference rooms and reception areas\n" +
     "• Clean workstations and common areas\n" +
-    "• Dust and clean all office furniture and equipment",
+    "• Dust and clean all office furniture and equipment\n" +
+    "• Clean and sanitize door handles and light switches\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean interior glass partitions and doors\n" +
+    "• Vacuum all upholstered furniture",
 
   retail: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean display areas\n" +
-    "• Spot clean entrance glass (full window service quoted separately)\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Detail clean fitting rooms and customer areas\n" +
     "• Clean and sanitize checkout counters and service desks\n" +
     "• Clean display cases and shelving units\n" +
-    "• Special attention to customer-facing areas and displays",
+    "• Special attention to customer-facing areas and displays\n" +
+    "• Clean and sanitize door handles and high-touch surfaces\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean break rooms and employee areas\n" +
+    "• Dust and clean all merchandise displays",
 
   industrial: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean work areas\n" +
-    "• Spot clean accessible windows and skylights (full window service quoted separately)\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean and degrease machinery areas (external surfaces only)\n" +
     "• Clean break rooms and bathroom facilities\n" +
     "• Detail clean offices and meeting rooms\n" +
-    "• Clean warehouse racking and storage areas as accessible",
+    "• Clean warehouse racking and storage areas as accessible\n" +
+    "• Clean and sanitize locker rooms\n" +
+    "• Clean and degrease shop floors\n" +
+    "• Clean and sanitize all safety equipment stations\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and organize maintenance areas",
 
   educational: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean classroom spaces\n" +
-    "• Spot clean interior glass surfaces (full window service quoted separately)\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Sanitize desks, chairs, and educational equipment\n" +
     "• Deep clean cafeteria and food service areas\n" +
     "• Clean gymnasium and recreational spaces\n" +
-    "• Detail clean administrative offices and common areas",
+    "• Detail clean administrative offices and common areas\n" +
+    "• Clean and sanitize water fountains\n" +
+    "• Clean and sanitize locker rooms\n" +
+    "• Clean library and study areas\n" +
+    "• Empty and clean all trash receptacles",
 
   hotel: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
-    "• Spot clean interior glass surfaces (full window service quoted separately)\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Detail clean guest rooms and corridors\n" +
     "• Clean and sanitize all bathroom facilities\n" +
     "• Clean lobby, reception, and common areas\n" +
-    "• Detail clean conference rooms and business centers",
+    "• Detail clean conference rooms and business centers\n" +
+    "• Clean and sanitize fitness center equipment\n" +
+    "• Clean pool area and amenities\n" +
+    "• Clean and organize housekeeping areas\n" +
+    "• Empty and clean all trash receptacles",
 
   jewelry_store: "Final Cleaning includes:\n" +
     "• Professional cleaning of all glass display cases (interior and exterior)\n" +
-    "• Basic cleaning of mirrors and interior glass surfaces (full window service quoted separately)\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Meticulous dusting and polishing of display case lighting fixtures\n" +
     "• Detailed cleaning of customer consultation areas and seating\n" +
     "• Thorough cleaning of security fixtures and entrance areas\n" +
     "• Premium floor care with attention to high-end flooring materials\n" +
+    "• Clean and polish all mirrors and glass surfaces\n" +
+    "• Detail clean staff areas and workshops\n" +
+    "• Clean and sanitize all door handles and surfaces\n" +
+    "• Empty and clean all trash receptacles\n" +
     "\nDisplay Cases:\n" +
     "• Interior and exterior cleaning with specialized glass cleaners\n" +
     "• Careful cleaning of display case tracks and locks\n" +
     "• Detailed cleaning of display lighting\n" +
-    "• Cleaning and sanitizing of display case shelving\n" +
-    "Cost per display case: $30 (includes interior and exterior cleaning)",
-    
+    "• Cleaning and sanitizing of display case shelving",
+
   apartment: "Final Cleaning includes:\n" +
-    "• Sweep/mop all hard surface floors and vacuum carpeted areas in units and common areas\n" +
-    "• Spot clean common area windows and entrances (full window service quoted separately)\n" +
-    "• Clean light fixtures and perform hi-lo dusting throughout the property\n" +
+    "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Detail clean lobbies, mailrooms, and other shared spaces\n" +
     "• Clean and sanitize common area restrooms and laundry facilities\n" +
     "• Clean fitness centers and amenity spaces\n" +
-    "• Dust and clean all accessible surfaces in common areas",
-    
+    "• Clean and sanitize elevators and stairwells\n" +
+    "• Clean outdoor common areas and entrances\n" +
+    "• Clean and organize maintenance areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and railings",
+
   warehouse: "Final Cleaning includes:\n" +
     "• Sweep/dust mop warehouse floors and clean office areas\n" +
-    "• Spot clean entrance areas (full window service quoted separately)\n" +
-    "• Clean light fixtures and perform hi-lo dusting of accessible areas\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean break rooms and bathroom facilities\n" +
     "• Detail clean offices and meeting rooms\n" +
     "• Clean accessible warehouse racking and storage areas\n" +
-    "• Special attention to loading dock and receiving areas",
-    
+    "• Clean and organize shipping/receiving areas\n" +
+    "• Clean and sanitize equipment charging stations\n" +
+    "• Clean and degrease maintenance areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and high-touch surfaces",
+
   dormitory: "Final Cleaning includes:\n" +
-    "• Sweep/mop all hard surface floors and vacuum carpeted areas in rooms and common spaces\n" +
-    "• Spot clean common area glass and entrances (full window service quoted separately)\n" +
-    "• Clean light fixtures and perform hi-lo dusting throughout the facility\n" +
+    "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Sanitize shared bathroom facilities and shower areas\n" +
     "• Detail clean lounges, study areas, and communal kitchens\n" +
     "• Clean and sanitize laundry facilities\n" +
-    "• Special attention to high-touch surfaces in all common areas",
+    "• Clean and sanitize vending areas\n" +
+    "• Clean and organize storage rooms\n" +
+    "• Clean and sanitize elevators and stairwells\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and railings",
 
-  grocery_store: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop all hard-surface floors including aisles, checkout lanes, and back areas; clean walls and baseboards; clean and wipe-down all light fixtures; clean and disinfect restrooms; clean and wipe-down shelving, display cases (exterior), and refrigerated units (exterior); deep clean and sanitize high-traffic areas, entrances, and customer service desks; clean and sanitize produce, deli, bakery, and meat department areas (surfaces, sinks, non-food contact areas); spot clean storefront windows and doors (full window service quoted separately); clean break rooms and employee areas; properly clean trash receptacles and surrounding areas; clean and sanitize shopping carts and baskets area.",
+  grocery_store: "Final Cleaning includes:\n" +
+    "• Sweep/scrub/mop all hard surface floors including aisles and checkout lanes\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Clean and sanitize shopping carts and baskets\n" +
+    "• Clean and sanitize checkout areas and service counters\n" +
+    "• Clean and sanitize deli, bakery, and meat department areas\n" +
+    "• Clean and sanitize produce department fixtures\n" +
+    "• Clean refrigerated cases and freezer doors\n" +
+    "• Clean and organize stockroom and storage areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and high-touch surfaces",
 
-  yoga_studio: `
-    • Dust and clean all surfaces, including yoga equipment storage areas and props
-    • Vacuum and mop studio floors with appropriate cleaning solutions safe for yoga mats
-    • Clean and sanitize changing rooms, lockers, and shower facilities
-    • Empty all trash receptacles and replace liners
-    • Clean and sanitize water stations and common areas
-    • Dust light fixtures and ceiling fans
-    • Clean and sanitize bathroom facilities
-    • Wipe down reception desk and lobby area
-    • Sanitize yoga mats and props storage areas
-  `,
+  yoga_studio: "Final Cleaning includes:\n" +
+    "• Sweep/mop studio floors with yoga mat-safe cleaners\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and ceiling fans\n" +
+    "• Clean and sanitize changing rooms and shower areas\n" +
+    "• Clean and sanitize yoga equipment and props\n" +
+    "• Clean reception area and retail displays\n" +
+    "• Clean and organize storage areas\n" +
+    "• Clean and sanitize water stations\n" +
+    "• Clean mirrors and glass surfaces\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and high-touch surfaces",
 
-  kids_fitness: `
-    • Clean and sanitize all gym equipment and play structures
-    • Vacuum and mop all floor areas with child-safe cleaning solutions
-    • Sanitize mats, padding, and soft play areas
-    • Dust and wipe down all surfaces, including cubbies and storage areas
-    • Clean and sanitize bathroom facilities
-    • Empty all trash receptacles and replace liners
-    • Clean and sanitize water fountains
-    • Wipe down reception desk and parent waiting areas
-    • Special attention to sanitizing high-touch areas and equipment
-    • Clean and organize equipment storage areas
-  `,
+  kids_fitness: "Final Cleaning includes:\n" +
+    "• Clean and sanitize all gym equipment and play structures\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Sanitize mats, padding, and soft play areas\n" +
+    "• Clean and sanitize cubbies and storage areas\n" +
+    "• Clean and sanitize water fountains\n" +
+    "• Clean reception and parent waiting areas\n" +
+    "• Clean and sanitize party rooms\n" +
+    "• Clean and organize equipment storage\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Special attention to sanitizing high-touch play equipment",
 
-  fast_food: "Final Cleaning of ___ Sq Ft ___ includes: Hi-lo dust; sweep, scrub, and mop hard-surface floors throughout the building; clean walls and baseboards from floor to ceiling; clean and wipe-down all light fixtures, can lights, and menu boards; remove all mud from grout; wipe-down and dust partitions; clean and wipe-down cabinets (inside and out); wipe-down and dust all surfaces; clean kitchen, clean and wipe-down all equipment in store; clean and wipe-down all kitchen equipment inside and out; wipe-down and polish all stainless steel (including behind equipment); clean and wipe-down all stainless end-caps, corner guards, and trim; spot clean storefront windows and doors (full window service quoted separately); remove protective plastic coating on equipment, cabinets, and dining room furniture; clean tables and chairs; clean all equipment in restrooms; clean, sanitize, and disinfect restrooms; wipe-down, polish, and sanitize restroom fixtures; deep clean and disinfect all food preparation surfaces, countertops, and service areas; clean and disinfect all dining area surfaces, including tables, chairs, and booths; properly clean trash receptacles and surrounding areas.",
+  fast_food: "Final Cleaning includes:\n" +
+    "• Sweep/scrub/mop all hard surface floors\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and menu boards\n" +
+    "• Deep clean and degrease kitchen equipment\n" +
+    "• Clean and sanitize food prep areas\n" +
+    "• Clean and sanitize dining areas and furniture\n" +
+    "• Clean and polish all stainless steel surfaces\n" +
+    "• Clean and sanitize drive-thru areas\n" +
+    "• Clean and organize storage areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Clean and sanitize door handles and high-touch surfaces",
 
   bakery: "Final Cleaning includes:\n" +
-    "• Sweep/mop/sanitize all hard surface floors with food-safe cleaners\n" +
-    "• Spot clean entrance glass (full window service quoted separately)\n" +
-    "• Clean and sanitize all food preparation surfaces and equipment\n" +
-    "• Clean and polish all stainless steel surfaces and bakery display cases\n" +
-    "• Deep clean ovens, mixers, and specialized bakery equipment (external surfaces)\n" +
-    "• Clean and sanitize customer service areas and café seating\n" +
-    "• Dust and clean all light fixtures and perform hi-lo dusting\n" +
-    "• Detail clean and sanitize storage areas and shelving\n" +
-    "• Clean and sanitize bathroom facilities\n" +
-    "• Empty all trash receptacles and replace liners\n" +
-    "• Clean and sanitize employee break areas\n" +
-    "• Special attention to removing flour and other bakery ingredients from surfaces",
+    "• Sweep/mop/sanitize floors with food-safe cleaners\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Clean and sanitize food prep surfaces and equipment\n" +
+    "• Clean and polish display cases and counters\n" +
+    "• Deep clean ovens and baking equipment (exterior)\n" +
+    "• Clean and sanitize café seating areas\n" +
+    "• Clean and organize storage areas\n" +
+    "• Clean and sanitize dish washing areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Special attention to flour and ingredient residue",
 
   pet_resort: "Final Cleaning includes:\n" +
-    "• Sweep/mop/sanitize all hard surface floors with pet-safe cleaners\n" +
-    "• Spot clean interior windows and glass (full window service quoted separately)\n" +
-    "• Clean and sanitize all bathroom facilities\n" +
+    "• Sweep/mop/sanitize floors with pet-safe cleaners\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
-    "• Sanitize and deep clean animal boarding areas and kennels\n" +
-    "• Clean and disinfect play areas and pet runs\n" +
-    "• Detail clean grooming stations and bathing facilities\n" +
-    "• Sanitize reception areas and waiting rooms\n" +
-    "• Clean and disinfect feeding stations and food prep areas\n" +
-    "• Special attention to odor control and pet hair removal",
+    "• Deep clean and sanitize kennels and runs\n" +
+    "• Clean and sanitize play areas and equipment\n" +
+    "• Clean and sanitize grooming stations\n" +
+    "• Clean and sanitize reception and waiting areas\n" +
+    "• Clean and sanitize food prep areas\n" +
+    "• Clean and organize storage areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Special attention to pet hair and odor control",
 
   beauty_store: "Final Cleaning includes:\n" +
-    "• Sweep/mop all hard surface floors and deep clean retail areas\n" +
-    "• Spot clean interior windows and mirrors (full window service quoted separately)\n" +
-    "• Clean and sanitize all bathroom facilities\n" +
+    "• Sweep/mop all hard surface floors\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
-    "• Detail clean product display shelves and cosmetic testing stations\n" +
-    "• Sanitize makeup testing areas and applicators\n" +
-    "• Clean and polish glass display cases and countertops\n" +
-    "• Dust and clean all retail fixtures and shelving\n" +
-    "• Detail clean checkout counters and service areas\n" +
-    "• Clean and sanitize employee break rooms and back-of-house areas\n" +
-    "• Special attention to makeup residue and product spills",
+    "• Clean and sanitize product displays\n" +
+    "• Clean and sanitize makeup testing stations\n" +
+    "• Clean and polish mirrors and glass surfaces\n" +
+    "• Clean and sanitize salon stations if applicable\n" +
+    "• Clean and organize stockroom\n" +
+    "• Clean and sanitize break rooms\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Special attention to makeup and product residue",
 
   interactive_toy_store: "Final Cleaning includes:\n" +
-    "• Mascot Area: Deep clean costume storage, sanitize mascot props and photo zones\n" +
-    "• Hallways: Sweep/mop all hallway floors, clean themed walls and interactive elements\n" +
-    "• Retail A: Dust and clean merchandise displays, clean product shelving, sanitize interactive demos\n" +
-    "• Retail B: Vacuum carpeted play areas, sanitize toys and activity stations, clean countertops\n" +
-    "• Stockroom: Organize and clean storage areas, sweep/mop floors, dust inventory shelving\n" +
-    "• Bathrooms: Deep clean and sanitize all toilet facilities, refill soap dispensers, clean mirrors\n" +
-    "• Office: Dust and clean workstations, sanitize shared equipment, clean floors\n" +
-    "• Janitor Area: Organize cleaning supplies, sanitize mop sinks, clean equipment storage\n" +
-    "• Clean light fixtures and perform hi-lo dusting throughout all areas\n" +
-    "• Sanitize all high-touch interactive elements and play stations\n" +
-    "• Spot clean interior walls, displays, and themed decorations\n" +
-    "• Empty all trash receptacles and replace liners\n" +
-    "• Special attention to sanitizing children's play areas and interactive installations"
+    "• Sweep/mop all hard surface floors\n" +
+    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
+    "• Clean and sanitize all bathrooms\n" +
+    "• Clean light fixtures and perform hi-lo dusting\n" +
+    "• Clean and sanitize interactive play areas\n" +
+    "• Clean and sanitize demonstration stations\n" +
+    "• Clean and organize merchandise displays\n" +
+    "• Clean and sanitize party/event rooms\n" +
+    "• Clean and organize stockroom\n" +
+    "• Clean mascot storage and prep areas\n" +
+    "• Empty and clean all trash receptacles\n" +
+    "• Special attention to high-touch interactive elements"
 };
 
 // Project type specific scopes of work
