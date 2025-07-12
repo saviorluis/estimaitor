@@ -260,28 +260,23 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
   }
 
   // Get scope of work based on project type and split into array
+  const totalWindows = (formData.numberOfWindows || 0) + (formData.numberOfLargeWindows || 0) + (formData.numberOfHighAccessWindows || 0);
   const scopeOfWorkText = "La Limpieza Final incluye:\n" +
     "• Barrer/trapear todos los pisos de superficie dura y aspirar áreas alfombradas\n" +
-    "• Limpiar ventanas interiores/exteriores (___WINDOW_COUNT___ ventanas)\n" +
-    "• Limpiar y desinfectar todos los baños\n" +
+    "• Limpiar ventanas interiores/exteriores\n" +
+    "• Limpiar baños\n" +
     "• Limpiar accesorios de iluminación y realizar limpieza de polvo en altura\n" +
     "• Limpiar y desinfectar salas de descanso y áreas de cocina\n" +
     "• Limpieza detallada de salas de conferencias y áreas de recepción\n" +
     "• Limpiar estaciones de trabajo y áreas comunes\n" +
-    "• Desempolvar y limpiar todos los muebles y equipos de oficina\n" +
-    "• Limpiar y desinfectar manijas de puertas e interruptores de luz\n" +
-    "• Vaciar y limpiar todos los contenedores de basura\n" +
-    "• Limpiar particiones y puertas de vidrio interiores\n" +
-    "• Aspirar todos los muebles tapizados";
+    "• Desempolvar y limpiar todos los muebles y equipos de oficina";
 
-  const totalWindows = (formData.numberOfWindows || 0) + (formData.numberOfLargeWindows || 0) + (formData.numberOfHighAccessWindows || 0);
   const scopeOfWork = scopeOfWorkText
     .split('\n')
     .filter(line => line.trim())
     .map(line => line.replace('• ', '').trim())
-    .map(line => line.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} pies cuadrados`))
-    .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName))
-    .map(line => line.replace('___WINDOW_COUNT___', totalWindows.toString()));
+    .map(line => line.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`))
+    .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName));
 
   return (
     <Document>

@@ -185,17 +185,13 @@ export const SCOPE_OF_WORK: { [key: string]: string } = {
 
   office: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and vacuum carpeted areas\n" +
-    "• Clean interior/exterior windows (___WINDOW_COUNT___ windows)\n" +
-    "• Clean and sanitize all bathrooms\n" +
+    "• Clean interior/exterior windows\n" +
+    "• Clean bathrooms\n" +
     "• Clean light fixtures and perform hi-lo dusting\n" +
     "• Clean and sanitize break rooms and kitchen areas\n" +
     "• Detail clean conference rooms and reception areas\n" +
     "• Clean workstations and common areas\n" +
-    "• Dust and clean all office furniture and equipment\n" +
-    "• Clean and sanitize door handles and light switches\n" +
-    "• Empty and clean all trash receptacles\n" +
-    "• Clean interior glass partitions and doors\n" +
-    "• Vacuum all upholstered furniture",
+    "• Dust and clean all office furniture and equipment",
 
   retail: "Final Cleaning includes:\n" +
     "• Sweep/mop all hard surface floors and clean display areas\n" +
