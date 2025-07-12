@@ -10,6 +10,7 @@ import QuotePDF from './QuotePDF';
 import WorkOrderPDF from './WorkOrderPDF';
 import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
+import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
@@ -563,6 +564,24 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         />
       ).toBlob();
       zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);
+
+      // Generate Change Order PDF
+      const changeOrderInfo = {
+        orderNumber: quoteInfo.quoteNumber,
+        date: formatDate(new Date()),
+        projectName: quoteInfo.projectName,
+        projectAddress: quoteInfo.projectAddress,
+      };
+
+      const changeOrderBlob = await pdf(
+        <ChangeOrderPDF
+          formData={formData}
+          companyInfo={companyInfo}
+          clientInfo={clientInfo}
+          changeOrderInfo={changeOrderInfo}
+        />
+      ).toBlob();
+      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Change Order.pdf`, changeOrderBlob);
 
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
