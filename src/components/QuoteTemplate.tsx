@@ -155,7 +155,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     projectAddress: '',
     notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
     terms: defaultTerms,
+    total: 0 // Initialize total
   });
+
+  // Update total when estimate changes
+  useEffect(() => {
+    setQuoteInfo(prev => ({
+      ...prev,
+      total: estimateData.totalPrice
+    }));
+  }, [estimateData.totalPrice]);
 
   // Handle company information changes
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
