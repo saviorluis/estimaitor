@@ -267,8 +267,13 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
     .map(line => line.replace('• ', '').trim())
     .map(line => line.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`))
     .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName))
-    .map(line => line.replace('___WINDOW_COUNT___', totalWindows.toString()))
-    .filter(line => !line.toLowerCase().includes('clean ___window_count___ windows')); // Remove the redundant window count line
+    .map(line => {
+      if (line.includes('___WINDOW_COUNT___')) {
+        return totalWindows > 0 ? line.replace('___WINDOW_COUNT___', totalWindows.toString()) : '';
+      }
+      return line;
+    })
+    .filter(line => line); // Remove empty lines
 
   return (
     <Document>

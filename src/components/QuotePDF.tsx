@@ -181,11 +181,12 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignSelf: 'center'
   },
   logo: {
-    maxWidth: '100%',
-    maxHeight: '100%',
+    width: 'auto',
+    height: '100%',
     objectFit: 'contain',
     objectPosition: 'center'
   },
