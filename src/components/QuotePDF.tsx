@@ -175,26 +175,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   logoContainer: {
-    width: 150,
-    height: 75,
-    marginRight: 12,
-    marginBottom: 0,
+    width: 200,
+    height: 100,
+    marginBottom: 20,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center'
+    justifyContent: 'center'
   },
   logo: {
-    width: 'auto',
+    width: '100%',
     height: '100%',
-    objectFit: 'contain',
-    objectPosition: 'center'
+    objectFit: 'contain'
   },
   companyHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginBottom: 8,
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'center',
+    width: '100%'
   },
   quoteDate: {
     fontSize: 10,

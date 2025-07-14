@@ -327,9 +327,6 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             {scopeOfWork.map((item: string, index: number) => (
               <Text key={index} style={styles.bulletPoint}>• {item}</Text>
             ))}
-            {(formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows) > 0 && (
-              <Text style={styles.bulletPoint}>• Clean {formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} windows</Text>
-            )}
           </View>
         </View>
 
