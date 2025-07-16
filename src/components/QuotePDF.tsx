@@ -489,7 +489,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   {'\n'}• Custom jobs: Daily rate ${PRESSURE_WASHING_RATES.DAILY_RATE}
                 </Text>
                 <Text style={{fontSize: 9, marginTop: 5, fontStyle: 'italic'}}>
-                  Payment Terms: {formData.projectType === 'warehouse' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL :
+                  Payment Terms: {formData.projectType === 'industrial' ? PRESSURE_WASHING_PAYMENT_TERMS.INDUSTRIAL :
                     ['restaurant', 'medical', 'office', 'retail', 'educational', 'hotel', 'jewelry_store'].includes(formData.projectType) ? PRESSURE_WASHING_PAYMENT_TERMS.COMMERCIAL :
                     PRESSURE_WASHING_PAYMENT_TERMS.RESIDENTIAL}
                 </Text>
