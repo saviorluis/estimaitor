@@ -42,7 +42,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 30,  // Increased margin to create more space before logo
+    textAlign: 'center'
   },
   subtitle: {
     fontSize: 18,
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 200,
     height: 100,
-    marginBottom: 20,
+    marginBottom: 30,  // Increased margin to create more space after logo
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
@@ -189,10 +190,10 @@ const styles = StyleSheet.create({
   },
   companyHeader: {
     flexDirection: 'column',
-    marginBottom: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%'
+    width: '100%',
+    marginBottom: 30  // Increased margin to create more space
   },
   quoteDate: {
     fontSize: 10,
@@ -300,20 +301,38 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
   return (
     <Document>
-      {/* Cover Page */}
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
+          <Text style={styles.title}>Commercial Cleaning Proposal</Text>
           <View style={styles.logoContainer}>
-            <Image src="/assets/logo.png" style={styles.logo} />
+            <Svg viewBox="0 0 200 80">
+              <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
+              <Text
+                x={100}
+                y={40}
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  textAnchor: 'middle',
+                  fill: 'white',
+                }}
+              >
+                BBPS
+              </Text>
+              <Text
+                x={100}
+                y={60}
+                style={{
+                  fontSize: 10,
+                  textAnchor: 'middle',
+                  fill: 'white',
+                }}
+              >
+                Big Brother Property Solutions
+              </Text>
+            </Svg>
           </View>
-        </View>
-        <View style={{ marginTop: 40 }}>
-          <Text style={[styles.title, { textAlign: 'center' }]}>
-            Commercial Cleaning Proposal
-          </Text>
-          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 20 }]}>
-            Prepared for:
-          </Text>
+          <Text style={styles.subtitle}>Prepared For:</Text>
           <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
             {clientInfo.name}
           </Text>
