@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS } from '@/lib/constants';
 import QuoteTemplate from './QuoteTemplate';
+import AIRecommendations from './AIRecommendations';
+import LoadingSpinner from './LoadingSpinner';
+import CapabilityStatement from './CapabilityStatement';
 
 interface EstimateResultProps {
   estimateData: EstimateData;
@@ -124,26 +127,24 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
   }
 
   return (
-    <div>
+    <div className="space-y-8">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white border-b pb-2">Estimate Results</h2>
       
-      <div className="mb-8">
-        <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-lg shadow-lg p-6 text-white">
-          <h3 className="text-xl font-semibold mb-2">Total Estimate</h3>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-4xl font-bold">{formatCurrency(estimateData.totalPrice)}</p>
-              <p className="text-sm opacity-80">
-                {formatCurrency(estimateData.pricePerSquareFoot)} per sq ft
-              </p>
-            </div>
-            <button 
-              onClick={toggleQuote} 
-              className="bg-white text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
-            >
-              Generate Quote
-            </button>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+        <h3 className="text-lg font-medium mb-3 text-gray-800 dark:text-white">Total Estimate</h3>
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-4xl font-bold">{formatCurrency(estimateData.totalPrice)}</p>
+            <p className="text-sm opacity-80">
+              {formatCurrency(estimateData.pricePerSquareFoot)} per sq ft
+            </p>
           </div>
+          <button 
+            onClick={toggleQuote} 
+            className="bg-white text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
+          >
+            Generate Quote
+          </button>
         </div>
       </div>
 
@@ -255,7 +256,11 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 mb-4">
+      {/* Capability Statement */}
+      <CapabilityStatement formData={formData} />
+
+      {/* AI Recommendations */}
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <h3 className="text-lg font-medium mb-3 text-gray-800 dark:text-white">AI Recommendations</h3>
         {isLoading ? (
           <div className="flex justify-center items-center py-4">
@@ -268,6 +273,23 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
             ))}
           </ul>
         )}
+      </div>
+
+      {/* Quote Generation */}
+      {showQuote && (
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+          <QuoteTemplate estimateData={estimateData} formData={formData} />
+        </div>
+      )}
+
+      {/* Generate Quote Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setShowQuote(!showQuote)}
+          className="bg-white text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
+        >
+          {showQuote ? 'Hide Quote' : 'Generate Quote'}
+        </button>
       </div>
     </div>
   );

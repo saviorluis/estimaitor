@@ -1,23 +1,21 @@
 export type ProjectType = 
   | 'restaurant'
+  | 'fast_food'
   | 'medical'
-  | 'office'
   | 'retail'
+  | 'office'
   | 'industrial'
   | 'educational'
   | 'hotel'
   | 'jewelry_store'
-  | 'apartment'
-  | 'warehouse'
-  | 'dormitory'
   | 'grocery_store'
   | 'yoga_studio'
   | 'kids_fitness'
-  | 'fast_food'
   | 'bakery'
-  | 'pet_resort'
-  | 'beauty_store'
-  | 'interactive_toy_store';
+  | 'interactive_toy_store'
+  | 'church'
+  | 'arcade'
+  | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup';
 
