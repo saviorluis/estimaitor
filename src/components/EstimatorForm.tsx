@@ -239,10 +239,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        {/* Square Footage */}
+        {/* Building Square Footage */}
         <div>
           <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Square Footage
+            🏢 Building Size - Total Square Footage
           </label>
           <input
             id="squareFootage"
@@ -250,13 +250,16 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             min="100"
             max="1000000"
             {...register('squareFootage', { 
-              required: 'Square footage is required',
+              required: 'Building square footage is required',
               min: { value: 100, message: 'Minimum 100 sq ft' },
               max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
             })}
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-            placeholder="Enter square footage"
+            placeholder="Enter total building square footage for interior cleaning"
           />
+          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+            This is the total interior space to be cleaned (offices, hallways, bathrooms, etc.)
+          </p>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Recommended cleaners: {recommendedCleaners}
           </p>
@@ -481,11 +484,11 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 )}
               </div>
 
-              {/* Area Input (hide for daily rate) */}
+              {/* Pressure Washing Area Input (hide for daily rate) */}
               {watch('pressureWashingType') !== 'daily_rate' && (
                 <div>
                   <label htmlFor="pressureWashingArea" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    Area to Clean (sq ft)
+                    🚿 Pressure Washing Area (sq ft)
                   </label>
                   <input
                     id="pressureWashingArea"
@@ -493,13 +496,16 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     min="0"
                     max="100000"
                     {...register('pressureWashingArea', { 
-                      required: needsPressureWashing && watch('pressureWashingType') !== 'daily_rate' ? 'Area is required for selected service type' : false,
+                      required: needsPressureWashing && watch('pressureWashingType') !== 'daily_rate' ? 'Pressure washing area is required' : false,
                       min: { value: 0, message: 'Area cannot be negative' },
                       max: { value: 100000, message: 'Maximum 100,000 sq ft' }
                     })}
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Enter area in square feet"
+                    placeholder="Enter exterior/concrete area to pressure wash (separate from building size above)"
                   />
+                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                    ⚠️ This is separate from building size - enter only the exterior surfaces to be pressure washed (sidewalks, driveways, building exterior, etc.)
+                  </p>
                   {errors.pressureWashingArea && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingArea.message}</p>
                   )}
