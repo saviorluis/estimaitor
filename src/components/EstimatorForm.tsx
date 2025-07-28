@@ -460,10 +460,61 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <div className="space-y-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
               <h4 className="font-medium text-gray-900 dark:text-gray-100">Pressure Washing Details</h4>
               
+              {/* Surfaces to be Pressure Washed */}
+              <div>
+                <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
+                  🎯 Select Surfaces to Pressure Wash
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🏢 Building Exterior</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🚶 Sidewalks/Walkways</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🚗 Parking Lot/Driveway</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🚚 Loading Dock</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🚪 Entryways</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🏠 Roof/Gutters</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🪑 Outdoor Seating</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span>🗑️ Dumpster Area</span>
+                  </label>
+                </div>
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    placeholder="Other surfaces (specify)"
+                    className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Select all surfaces that need pressure washing to help estimate total area and service requirements
+                </p>
+              </div>
+
               {/* Pressure Washing Type */}
               <div>
                 <label htmlFor="pressureWashingType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Service Type
+                  Service Type & Pricing
                 </label>
                 <select
                   id="pressureWashingType"
