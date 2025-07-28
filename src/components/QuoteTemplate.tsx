@@ -380,6 +380,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       case 'final': return 'Final Clean';
       case 'rough_final': return 'Rough & Final Clean';
       case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
+      case 'pressure_washing': return 'Pressure Washing Services';
       default: return type;
     }
   };

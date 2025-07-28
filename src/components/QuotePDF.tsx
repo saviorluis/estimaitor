@@ -307,6 +307,7 @@ const getCleaningTypeDisplay = (type: string): string => {
     case 'final': return 'Final Clean';
     case 'rough_final': return 'Rough & Final Clean';
     case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
+    case 'pressure_washing': return 'Pressure Washing Services';
     default: return type;
   }
 };
@@ -421,12 +422,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Image src="/assets/logo.png" style={styles.logo} />
           </View>
           
-          <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
-            POST CONSTRUCTION
-          </Text>
-          <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
-            CLEANING PROPOSAL
-          </Text>
+          {formData.cleaningType === 'pressure_washing' ? (
+            <>
+              <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
+                PRESSURE WASHING
+              </Text>
+              <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
+                SERVICES PROPOSAL
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
+                POST CONSTRUCTION
+              </Text>
+              <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
+                CLEANING PROPOSAL
+              </Text>
+            </>
+          )}
           
           <Text style={[styles.subtitle, { marginTop: 20, marginBottom: 10 }]}>Prepared for:</Text>
           <Text style={[styles.clientName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>

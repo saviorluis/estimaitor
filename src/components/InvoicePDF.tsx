@@ -273,6 +273,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
         return 'Rough & Final Clean';
       case 'rough_final_touchup':
         return 'Rough, Final & Touch-up Clean';
+      case 'pressure_washing':
+        return 'Pressure Washing Services';
       default:
         return type.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
