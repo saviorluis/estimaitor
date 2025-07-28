@@ -267,6 +267,37 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
+  clientName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  projectInfo: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  quoteNumber: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  contactLine: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  addressLine: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  websiteLine: {
+    fontSize: 11,
+    textAlign: 'center',
+  },
 });
 
 // Get cleaning type display name
@@ -389,35 +420,41 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.logoContainer}>
             <Image src="/assets/logo.png" style={styles.logo} />
           </View>
-          <Text style={[styles.subtitle, { marginTop: 40 }]}>Prepared For:</Text>
-          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
-            {clientInfo.name}
+          
+          <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
+            POST CONSTRUCTION
           </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {clientInfo.company}
+          <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
+            CLEANING PROPOSAL
           </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {clientInfo.address}
+          
+          <Text style={[styles.subtitle, { marginTop: 20, marginBottom: 10 }]}>Prepared for:</Text>
+          <Text style={[styles.clientName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
+            {clientInfo.company || clientInfo.name}
           </Text>
-        </View>
-        <View style={{ marginTop: 'auto', marginBottom: 40 }}>
-          <Text style={[styles.companyName, { textAlign: 'center' }]}>
-            Prepared by:
+          
+          <Text style={[styles.projectInfo, { fontSize: 12, textAlign: 'center', marginBottom: 3 }]}>
+            Project: {quoteInfo.projectName}
           </Text>
-          <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
+          <Text style={[styles.projectInfo, { fontSize: 12, textAlign: 'center', marginBottom: 15 }]}>
+            Location: {quoteInfo.projectAddress}
+          </Text>
+          
+          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }]}>
+            Quote #: {quoteInfo.quoteNumber}
+          </Text>
+          
+          <Text style={[styles.companyName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
             {companyInfo.name}
           </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {companyInfo.address}
+          <Text style={[styles.contactLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+            {companyInfo.phone} | {companyInfo.email}
           </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {companyInfo.city}
+          <Text style={[styles.addressLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+            {companyInfo.address}, {companyInfo.city}
           </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {companyInfo.phone}
-          </Text>
-          <Text style={[styles.companyDetails, { textAlign: 'center' }]}>
-            {companyInfo.email}
+          <Text style={[styles.websiteLine, { fontSize: 11, textAlign: 'center' }]}>
+            {companyInfo.website}
           </Text>
         </View>
       </Page>
