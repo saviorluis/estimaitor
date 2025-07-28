@@ -728,7 +728,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             • Additional services outside of scope will be billed separately{'\n'}
             • Quote valid for 30 days from issue date{'\n'}
             • All work performed to industry standards{'\n'}
-            • Proof of insurance available upon request
+            • Proof of insurance available upon request{'\n'}
+            • If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip
           </Text>
         </View>
 

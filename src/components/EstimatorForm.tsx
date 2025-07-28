@@ -616,6 +616,17 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           </div>
         )}
 
+        {/* Business Protection */}
+        <div className="border-t pt-4">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+            <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-3">Reschedule/Site Access Policy</h4>
+            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+              If we are required to reschedule due to the site not being ready or poor planning on the client's end, 
+              a minimum fee of <strong>$250</strong> will be charged for the return trip.
+            </p>
+          </div>
+        </div>
+
         {/* Submit Button */}
         <button
           type="submit"

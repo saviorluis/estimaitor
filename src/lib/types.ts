@@ -92,6 +92,7 @@ export interface EstimateData {
   // Time and Metrics
   estimatedHours: number;
   pricePerSquareFoot: number;
+  timeToCompleteInDays: number;
   
   // AI and Optional Data
   aiRecommendations: string[];

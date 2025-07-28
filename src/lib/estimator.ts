@@ -166,10 +166,7 @@ function calculateWindowCleaningCost(
   return result;
 }
 
-function calculateDisplayCaseCost(
-  projectType: ProjectType,
-  numberOfDisplayCases: number
-): number {
+function calculateDisplayCaseCost(projectType: ProjectType, numberOfDisplayCases: number): number {
   if (projectType !== 'jewelry_store' || numberOfDisplayCases <= 0) return 0;
 
   const cacheKey = generateCacheKey('displayCase', numberOfDisplayCases);
@@ -404,6 +401,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     totalPrice,
     estimatedHours,
     pricePerSquareFoot,
+    timeToCompleteInDays: Math.ceil(estimatedHours / 8), // Assuming 8-hour work days
     pressureWashingCost,
     windowCleaningCost,
     displayCaseCost,

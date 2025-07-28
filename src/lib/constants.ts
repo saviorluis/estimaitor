@@ -159,6 +159,15 @@ export function getTravelRate(distance: number): number {
     : TRAVEL_COST_PER_MILE.LONG_DISTANCE;
 }
 
+// ===================== BUSINESS PROTECTION =====================
+
+// Reschedule/Site Access Policy
+export const RESCHEDULE_POLICY = {
+  MINIMUM_FEE: 250,
+  DESCRIPTION: 'If we are required to reschedule due to the site not being ready or poor planning on the client\'s end, a minimum fee of $250 will be charged for the return trip.',
+  POLICY_TITLE: 'Reschedule/Site Access Policy'
+} as const;
+
 // ===================== PRESSURE WASHING ADVANCED RATES =====================
 
 export const PRESSURE_WASHING_RATES = {
