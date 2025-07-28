@@ -528,6 +528,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={styles.lineItem}>
               <View style={styles.lineItemContent}>
                 <Text style={styles.lineItemTitle}>VCT Flooring Treatment</Text>
+                <Text style={styles.lineItemDescription}>
+                  {(formData.vctSquareFootage || 0).toLocaleString()} sq ft of VCT flooring
+                </Text>
                 <Text style={styles.lineItemDescription}>Vinyl Composition Tile floor cleaning and maintenance</Text>
               </View>
               <Text style={styles.lineItemAmount}>

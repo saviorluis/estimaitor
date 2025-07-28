@@ -31,6 +31,7 @@ export interface FormData {
   
   // Basic Options
   hasVCT: boolean;
+  vctSquareFootage: number;
   distanceFromOffice: number;
   gasPrice: number;
   applyMarkup: boolean;

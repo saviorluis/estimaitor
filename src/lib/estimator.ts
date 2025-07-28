@@ -304,6 +304,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     cleaningType,
     squareFootage,
     hasVCT,
+    vctSquareFootage,
     distanceFromOffice,
     gasPrice: rawGasPrice,
     applyMarkup,
@@ -331,7 +332,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate all cost components
   const basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
-  const vctCost = hasVCT ? squareFootage * VCT_COST_PER_SQFT : 0;
+  const vctCost = hasVCT ? (vctSquareFootage || 0) * VCT_COST_PER_SQFT : 0;
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea);

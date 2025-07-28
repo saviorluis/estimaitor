@@ -176,7 +176,9 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
 
             {estimateData.vctCost > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">VCT Flooring</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  VCT Flooring ({(formData.vctSquareFootage || 0).toLocaleString()} sq ft)
+                </span>
                 <span className="text-gray-800 dark:text-gray-200">
                   {formatCurrency(estimateData.vctCost)}
                 </span>

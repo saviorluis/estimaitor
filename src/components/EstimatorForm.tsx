@@ -35,6 +35,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     cleaningType: 'final' as CleaningType,
     squareFootage: 5000,
     hasVCT: false,
+    vctSquareFootage: 0,
     distanceFromOffice: 20,
     gasPrice: 3.50,
     applyMarkup: false,
@@ -262,16 +263,42 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
         </div>
 
         {/* VCT Flooring */}
-        <div className="flex items-center space-x-3">
-          <input
-            id="hasVCT"
-            type="checkbox"
-            {...register('hasVCT')}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-          />
-          <label htmlFor="hasVCT" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Has VCT Flooring (+$0.15/sq ft)
-          </label>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3">
+            <input
+              id="hasVCT"
+              type="checkbox"
+              {...register('hasVCT')}
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+            />
+            <label htmlFor="hasVCT" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Has VCT Flooring (+$0.15/sq ft)
+            </label>
+          </div>
+          
+          {watch('hasVCT') && (
+            <div>
+              <label htmlFor="vctSquareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                VCT Square Footage
+              </label>
+              <input
+                id="vctSquareFootage"
+                type="number"
+                min="0"
+                max="1000000"
+                {...register('vctSquareFootage', { 
+                  required: watch('hasVCT') ? 'VCT square footage is required when VCT is selected' : false,
+                  min: { value: 0, message: 'VCT square footage cannot be negative' },
+                  max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                })}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="Enter VCT square footage"
+              />
+              {errors.vctSquareFootage && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vctSquareFootage.message}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Distance and Gas Price */}
