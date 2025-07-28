@@ -46,6 +46,12 @@ export interface FormData {
   
   // Specialty Services
   needsPressureWashing: boolean;
+  pressureWashingServices: {
+    type: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate';
+    area: number;
+    description?: string;
+  }[];
+  // Legacy fields for backward compatibility
   pressureWashingArea: number;
   pressureWashingType: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate';
   needsWindowCleaning: boolean;

@@ -15,6 +15,11 @@ const STORAGE_KEY = 'estimaitor_form_data';
 
 export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pwServices, setPwServices] = useState<{
+    type: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate';
+    area: number;
+    description?: string;
+  }[]>([]);
 
   // Get saved form data from localStorage (memoized)
   const getSavedFormData = useCallback((): Partial<FormData> => {
@@ -44,6 +49,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     numberOfCleaners: 3,
     urgencyLevel: 1,
     needsPressureWashing: false,
+    pressureWashingServices: [],
     pressureWashingArea: 0,
     pressureWashingType: 'soft_wash' as 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate',
     needsWindowCleaning: false,
@@ -59,6 +65,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     defaultValues
   });
+
+
 
   // Watch form values
   const formValues = watch();
@@ -511,57 +519,104 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 </p>
               </div>
 
-              {/* Pressure Washing Type */}
+              {/* Multiple Pressure Washing Services */}
               <div>
-                <label htmlFor="pressureWashingType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Service Type & Pricing
-                </label>
-                <select
-                  id="pressureWashingType"
-                  {...register('pressureWashingType', { 
-                    required: needsPressureWashing ? 'Pressure washing type is required' : false
-                  })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select service type</option>
-                  <option value="soft_wash">Soft Wash - $0.18/sq ft (min $235)</option>
-                  <option value="roof_wash">Roof Wash - $0.50/sq ft</option>
-                  <option value="driveway">Driveway Cleaning - $0.20/sq ft</option>
-                  <option value="deck">Deck/Trex Cleaning - $1.00/sq ft</option>
-                  <option value="daily_rate">Custom/Daily Rate - $1,800/day</option>
-                </select>
-                {errors.pressureWashingType && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingType.message}</p>
-                )}
-              </div>
-
-              {/* Pressure Washing Area Input (hide for daily rate) */}
-              {watch('pressureWashingType') !== 'daily_rate' && (
-                <div>
-                  <label htmlFor="pressureWashingArea" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    🚿 Pressure Washing Area (sq ft)
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    💧 Pressure Washing Services
                   </label>
-                  <input
-                    id="pressureWashingArea"
-                    type="number"
-                    min="0"
-                    max="100000"
-                    {...register('pressureWashingArea', { 
-                      required: needsPressureWashing && watch('pressureWashingType') !== 'daily_rate' ? 'Pressure washing area is required' : false,
-                      min: { value: 0, message: 'Area cannot be negative' },
-                      max: { value: 100000, message: 'Maximum 100,000 sq ft' }
-                    })}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Enter exterior/concrete area to pressure wash (separate from building size above)"
-                  />
-                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
-                    ⚠️ This is separate from building size - enter only the exterior surfaces to be pressure washed (sidewalks, driveways, building exterior, etc.)
-                  </p>
-                  {errors.pressureWashingArea && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingArea.message}</p>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setPwServices([...pwServices, { type: 'soft_wash', area: 0, description: '' }])}
+                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                  >
+                    + Add Service
+                  </button>
                 </div>
-              )}
+                
+                {pwServices.length === 0 && (
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Click "Add Service" to add pressure washing services
+                    </p>
+                  </div>
+                )}
+                
+                {pwServices.map((service, index) => (
+                  <div key={index} className="mb-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-medium text-gray-900 dark:text-gray-100">Service #{index + 1}</h5>
+                      <button
+                        type="button"
+                        onClick={() => setPwServices(pwServices.filter((_, i) => i !== index))}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
+                          Service Type
+                        </label>
+                        <select
+                          value={service.type}
+                          onChange={(e) => {
+                            const newServices = [...pwServices];
+                            newServices[index].type = e.target.value as any;
+                            setPwServices(newServices);
+                          }}
+                          className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                        >
+                          <option value="soft_wash">Soft Wash - $0.18/sq ft (min $235)</option>
+                          <option value="roof_wash">Roof Wash - $0.50/sq ft</option>
+                          <option value="driveway">Driveway Cleaning - $0.20/sq ft</option>
+                          <option value="deck">Deck/Trex Cleaning - $1.00/sq ft</option>
+                          <option value="daily_rate">Custom/Daily Rate - $1,800/day</option>
+                        </select>
+                      </div>
+                      
+                      {service.type !== 'daily_rate' && (
+                        <div>
+                          <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
+                            Area (sq ft)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={service.area}
+                            onChange={(e) => {
+                              const newServices = [...pwServices];
+                              newServices[index].area = parseInt(e.target.value) || 0;
+                              setPwServices(newServices);
+                            }}
+                            className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                            placeholder="Enter area"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className={service.type === 'daily_rate' ? 'md:col-span-2' : 'md:col-span-2'}>
+                        <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
+                          Description (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={service.description || ''}
+                          onChange={(e) => {
+                            const newServices = [...pwServices];
+                            newServices[index].description = e.target.value;
+                            setPwServices(newServices);
+                          }}
+                          className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                          placeholder="e.g., parking lot, building exterior, etc."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {/* Service Information */}
               <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
