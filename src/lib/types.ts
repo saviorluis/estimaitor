@@ -17,6 +17,7 @@ export type ProjectType =
   | 'interactive_toy_store'
   | 'church'
   | 'arcade'
+  | 'pressure_washing'
   | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup';
@@ -47,6 +48,7 @@ export interface FormData {
   // Specialty Services
   needsPressureWashing: boolean;
   pressureWashingArea: number;
+  pressureWashingType: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate';
   needsWindowCleaning: boolean;
   chargeForWindowCleaning: boolean;
   

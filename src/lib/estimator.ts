@@ -8,12 +8,13 @@ import {
   getTravelRate,
   HOTEL_COST_PER_NIGHT,
   PER_DIEM_PER_DAY,
-  URGENCY_MULTIPLIERS,
   PRESSURE_WASHING,
+  PRESSURE_WASHING_RATES,
   WINDOW_CLEANING,
   DISPLAY_CASE,
   SALES_TAX_RATE,
-  MARKUP_PERCENTAGE
+  MARKUP_PERCENTAGE,
+  URGENCY_MULTIPLIERS
 } from './constants';
 
 // ===================== CALCULATION CACHE =====================
@@ -99,25 +100,39 @@ function calculateOvernightCost(
 
 function calculatePressureWashingCost(
   needsPressureWashing: boolean,
-  pressureWashingArea: number
+  pressureWashingArea: number,
+  pressureWashingType: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate'
 ): number {
-  if (!needsPressureWashing || pressureWashingArea <= 0) return 0;
+  if (!needsPressureWashing) return 0;
 
-  const cacheKey = generateCacheKey('pressureWashing', pressureWashingArea);
+  const cacheKey = generateCacheKey('pressureWashing', pressureWashingArea, pressureWashingType);
   
   if (calculationCache.has(cacheKey)) {
     return calculationCache.get(cacheKey)!;
   }
 
-  // Area cost
-  const areaCost = pressureWashingArea * PRESSURE_WASHING.COST_PER_SQFT;
+  let result = 0;
+
+  switch (pressureWashingType) {
+    case 'soft_wash':
+      result = Math.max(pressureWashingArea * PRESSURE_WASHING_RATES.SOFT_WASH.rate, PRESSURE_WASHING_RATES.SOFT_WASH.minimum);
+      break;
+    case 'roof_wash':
+      result = pressureWashingArea * PRESSURE_WASHING_RATES.ROOF_WASH.rate;
+      break;
+    case 'driveway':
+      result = pressureWashingArea * PRESSURE_WASHING_RATES.DRIVEWAY.rate;
+      break;
+    case 'deck':
+      result = pressureWashingArea * PRESSURE_WASHING_RATES.DECK.rate;
+      break;
+    case 'daily_rate':
+      result = PRESSURE_WASHING_RATES.DAILY_RATE;
+      break;
+    default:
+      result = 0;
+  }
   
-  // Equipment rental cost
-  const hoursNeeded = pressureWashingArea / PRESSURE_WASHING.PRODUCTIVITY_SQFT_PER_HOUR;
-  const daysNeeded = Math.ceil(hoursNeeded / PRESSURE_WASHING.WORK_HOURS_PER_DAY);
-  const equipmentCost = PRESSURE_WASHING.EQUIPMENT_RENTAL_PER_DAY * daysNeeded;
-  
-  const result = areaCost + equipmentCost;
   calculationCache.set(cacheKey, result);
   return result;
 }
@@ -187,6 +202,7 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   church: 1.2,
   arcade: 1.3,
+  pressure_washing: 1.0,
   other: 1.0
 } as const;
 
@@ -314,6 +330,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     urgencyLevel,
     needsPressureWashing,
     pressureWashingArea,
+    pressureWashingType,
     needsWindowCleaning,
     chargeForWindowCleaning,
     numberOfWindows = 0,
@@ -335,7 +352,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const vctCost = hasVCT ? (vctSquareFootage || 0) * VCT_COST_PER_SQFT : 0;
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
-  const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea);
+  const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
   const windowCleaningCost = calculateWindowCleaningCost(
     needsWindowCleaning,
     chargeForWindowCleaning,

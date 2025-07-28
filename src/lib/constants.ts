@@ -17,10 +17,10 @@ export const MARKUP_PERCENTAGE = 0.5;
 // ===================== PROJECT TYPE MULTIPLIERS =====================
 
 export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
-  restaurant: 1.3,
-  fast_food: 1.3,
-  medical: 1.4,
-  retail: 1.2,
+  restaurant: 1.5,
+  fast_food: 1.2,
+  medical: 1.6,
+  retail: 1.0,
   office: 1.0,
   industrial: 1.3,
   educational: 1.25,
@@ -33,6 +33,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   church: 1.2,
   arcade: 1.3,
+  pressure_washing: 1.0,
   other: 1.0
 } as const;
 
@@ -126,6 +127,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   interactive_toy_store: 380,
   church: 500,
   arcade: 450,
+  pressure_washing: 500,
   other: 500
 } as const;
 
@@ -323,6 +325,13 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Special attention to high-traffic gaming zones
 • Clean break rooms and employee areas
 • Clean seating and refreshment areas`),
+
+  pressure_washing: createScopeTemplate(`
+• Professional pressure washing of specified surfaces
+• Pre-treatment with appropriate cleaning chemicals
+• Surface-specific pressure and temperature settings
+• Proper wastewater containment and disposal
+• Post-cleaning inspection and touch-ups`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

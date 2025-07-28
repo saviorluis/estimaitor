@@ -45,6 +45,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     urgencyLevel: 1,
     needsPressureWashing: false,
     pressureWashingArea: 0,
+    pressureWashingType: 'soft_wash' as 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate',
     needsWindowCleaning: false,
     chargeForWindowCleaning: false,
     numberOfWindows: 0,
@@ -204,6 +205,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="interactive_toy_store">Interactive Toy Store</option>
             <option value="church">Church</option>
             <option value="arcade">Arcade</option>
+            <option value="pressure_washing">Pressure Washing</option>
             <option value="other">Other</option>
           </select>
           {errors.projectType && (
@@ -442,25 +444,71 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           </div>
           
           {needsPressureWashing && (
-            <div>
-              <label htmlFor="pressureWashingArea" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Pressure Washing Area (sq ft)
-              </label>
-              <input
-                id="pressureWashingArea"
-                type="number"
-                min="0"
-                max="100000"
-                {...register('pressureWashingArea', { 
-                  min: { value: 0, message: 'Area cannot be negative' },
-                  max: { value: 100000, message: 'Maximum 100,000 sq ft' }
-                })}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                placeholder="Enter pressure washing area"
-              />
-              {errors.pressureWashingArea && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingArea.message}</p>
+            <div className="space-y-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">Pressure Washing Details</h4>
+              
+              {/* Pressure Washing Type */}
+              <div>
+                <label htmlFor="pressureWashingType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Service Type
+                </label>
+                <select
+                  id="pressureWashingType"
+                  {...register('pressureWashingType', { 
+                    required: needsPressureWashing ? 'Pressure washing type is required' : false
+                  })}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select service type</option>
+                  <option value="soft_wash">Soft Wash - $0.18/sq ft (min $235)</option>
+                  <option value="roof_wash">Roof Wash - $0.50/sq ft</option>
+                  <option value="driveway">Driveway Cleaning - $0.20/sq ft</option>
+                  <option value="deck">Deck/Trex Cleaning - $1.00/sq ft</option>
+                  <option value="daily_rate">Custom/Daily Rate - $1,800/day</option>
+                </select>
+                {errors.pressureWashingType && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingType.message}</p>
+                )}
+              </div>
+
+              {/* Area Input (hide for daily rate) */}
+              {watch('pressureWashingType') !== 'daily_rate' && (
+                <div>
+                  <label htmlFor="pressureWashingArea" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    Area to Clean (sq ft)
+                  </label>
+                  <input
+                    id="pressureWashingArea"
+                    type="number"
+                    min="0"
+                    max="100000"
+                    {...register('pressureWashingArea', { 
+                      required: needsPressureWashing && watch('pressureWashingType') !== 'daily_rate' ? 'Area is required for selected service type' : false,
+                      min: { value: 0, message: 'Area cannot be negative' },
+                      max: { value: 100000, message: 'Maximum 100,000 sq ft' }
+                    })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Enter area in square feet"
+                  />
+                  {errors.pressureWashingArea && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingArea.message}</p>
+                  )}
+                </div>
               )}
+
+              {/* Service Information */}
+              <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Service Includes:</h5>
+                <ul className="space-y-1">
+                  <li>• Professional pressure washing equipment</li>
+                  <li>• Specialized cleaning chemicals as needed</li>
+                  <li>• Surface-appropriate cleaning methods</li>
+                  <li>• Proper waste water management</li>
+                  {watch('pressureWashingType') === 'daily_rate' && (
+                    <li>• Full day service with complete crew</li>
+                  )}
+                </ul>
+              </div>
             </div>
           )}
         </div>
