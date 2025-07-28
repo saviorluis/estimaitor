@@ -801,15 +801,29 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       <div className="mb-6 print:hidden">
         <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project and Quote Details</h3>
         
-        {/* Markup Percentage Input */}
+        {/* Price Adjustment Controls */}
         <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price Adjustment (Markup Percentage)
+            💰 Price Adjustment Controls
           </label>
+          
+          {/* Built-in Professional Markup Display */}
+          <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-green-800 font-medium">✅ Professional Markup (Built-in)</span>
+              <span className="text-sm text-green-700 font-semibold">30%</span>
+            </div>
+            <p className="text-xs text-green-600 mt-1">
+              All estimates automatically include 30% professional markup covering overhead, insurance, and profit margins.
+            </p>
+          </div>
+          
+          {/* Additional Adjustment Controls */}
           <div className="flex items-center">
+            <label className="text-sm font-medium text-gray-700 mr-3">Additional Adjustment:</label>
             <input
               type="number"
-              min="0"
+              min="-50"
               max="100"
               step="1"
               value={markupPercentage}
@@ -819,14 +833,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <span className="ml-2 text-gray-700">%</span>
             <div className="ml-4 text-sm text-gray-600">
               {markupPercentage > 0 ? (
-                <span>Adding {markupPercentage}% markup evenly distributed across all line items</span>
+                <span className="text-blue-700">+{markupPercentage}% increase</span>
+              ) : markupPercentage < 0 ? (
+                <span className="text-orange-700">{markupPercentage}% discount</span>
               ) : (
-                <span>No markup applied</span>
+                <span className="text-gray-600">No additional adjustment</span>
               )}
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            This will adjust all prices proportionally to maintain the same relative pricing structure.
+            Use positive values to increase prices further, or negative values to provide discounts while maintaining profitability.
           </p>
         </div>
         

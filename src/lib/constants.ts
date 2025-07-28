@@ -12,7 +12,7 @@ export const VCT_COST_PER_SQFT = 0.15;
 export const SALES_TAX_RATE = 0.07;
 
 // Markup percentage (50% markup = 0.5)
-export const MARKUP_PERCENTAGE = 0.5;
+export const MARKUP_PERCENTAGE = 0.3; // 30% professional markup
 
 // ===================== PROJECT TYPE MULTIPLIERS =====================
 

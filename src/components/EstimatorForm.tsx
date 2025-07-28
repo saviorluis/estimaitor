@@ -43,7 +43,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     vctSquareFootage: 0,
     distanceFromOffice: 20,
     gasPrice: 3.50,
-    applyMarkup: false,
+    applyMarkup: true, // Always apply 30% professional markup
     stayingOvernight: false,
     numberOfNights: 1,
     numberOfCleaners: 3,

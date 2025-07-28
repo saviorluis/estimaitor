@@ -368,7 +368,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
     pressureWashingCost + windowCleaningCost + displayCaseCost
   ) * urgencyMultiplier;
 
-  const markupAmount = applyMarkup ? totalBeforeMarkup * MARKUP_PERCENTAGE : 0;
+  // Always apply 30% professional markup
+  const markupAmount = totalBeforeMarkup * MARKUP_PERCENTAGE;
   const totalWithMarkup = totalBeforeMarkup + markupAmount;
   const salesTax = totalWithMarkup * SALES_TAX_RATE;
   const totalPrice = totalWithMarkup + salesTax;
