@@ -367,7 +367,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
           <View style={{ width: '100%' }}>
             <Text style={styles.sectionTitle}>Payment Information</Text>
             <Text>Please make checks payable to: {companyInfo.name}</Text>
-            <Text style={{ marginTop: 5 }}>{companyInfo.address}</Text>
+            <Text style={{ marginTop: 5 }}>{companyInfo.address}, Ste 203</Text>
             <Text>{companyInfo.city}</Text>
           </View>
         </View>

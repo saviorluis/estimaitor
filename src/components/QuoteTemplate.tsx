@@ -18,38 +18,12 @@ import { SCOPE_OF_WORK } from '@/lib/constants';
 const CompanyLogo = ({ className = "" }: { className?: string }) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="100%"
-        height="100%"
-        viewBox="0 0 200 80"
-        className="w-full h-full"
-      >
-        <rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-        <text
-          x="100"
-          y="40"
-          fontFamily="Arial, sans-serif"
-          fontSize="24"
-          fontWeight="bold"
-          textAnchor="middle"
-          fill="white"
-          dominantBaseline="middle"
-        >
-          BBPS
-        </text>
-        <text
-          x="100"
-          y="60"
-          fontFamily="Arial, sans-serif"
-          fontSize="10"
-          textAnchor="middle"
-          fill="white"
-          dominantBaseline="middle"
-        >
-          Big Brother Property Solutions
-        </text>
-      </svg>
+      <img 
+        src="/assets/logo.png" 
+        alt="BBPS Logo"
+        className="w-full h-full object-contain"
+        style={{ maxWidth: '100%', maxHeight: '100%' }}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, Image, Svg, Rect, G, Path } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency, getQuoteCounter } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
@@ -387,32 +387,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
           <View style={styles.logoContainer}>
-            <Svg viewBox="0 0 200 80">
-              <Rect x="0" y="0" width="200" height="80" fill="#2563eb" rx="8" ry="8" />
-              <Text
-                x={100}
-                y={40}
-                style={{
-                  fontSize: 24,
-                  fontWeight: 'bold',
-                  textAnchor: 'middle',
-                  fill: 'white',
-                }}
-              >
-                BBPS
-              </Text>
-              <Text
-                x={100}
-                y={60}
-                style={{
-                  fontSize: 10,
-                  textAnchor: 'middle',
-                  fill: 'white',
-                }}
-              >
-                Big Brother Property Solutions
-              </Text>
-            </Svg>
+            <Image src="/assets/logo.png" style={styles.logo} />
           </View>
           <Text style={[styles.subtitle, { marginTop: 40 }]}>Prepared For:</Text>
           <Text style={[styles.companyName, { textAlign: 'center', marginTop: 10 }]}>
