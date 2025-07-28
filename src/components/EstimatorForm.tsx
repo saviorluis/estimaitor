@@ -541,21 +541,6 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           </div>
         )}
 
-        {/* Markup */}
-        <div className="border-t pt-4">
-          <div className="flex items-center space-x-3">
-            <input
-              id="applyMarkup"
-              type="checkbox"
-              {...register('applyMarkup')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-            />
-            <label htmlFor="applyMarkup" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Apply 50% Markup
-            </label>
-          </div>
-        </div>
-
         {/* Submit Button */}
         <button
           type="submit"

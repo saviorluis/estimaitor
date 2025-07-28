@@ -4,9 +4,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS } from '@/lib/constants';
 import QuoteTemplate from './QuoteTemplate';
-import AIRecommendations from './AIRecommendations';
-import LoadingSpinner from './LoadingSpinner';
-import CapabilityStatement from './CapabilityStatement';
 
 interface EstimateResultProps {
   estimateData: EstimateData;
@@ -287,9 +284,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
         </div>
       </div>
 
-      {/* AI Recommendations */}
-      <AIRecommendations formData={formData} />
-
       {/* Quote Template */}
       {showQuote && (
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
@@ -301,9 +295,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
           <QuoteTemplate estimateData={estimateData} formData={formData} />
         </div>
       )}
-
-             {/* Capability Statement */}
-       <CapabilityStatement formData={formData} />
     </div>
   );
 }
