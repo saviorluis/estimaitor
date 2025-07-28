@@ -218,7 +218,7 @@ export function sanitizeFormData(data: Partial<FormData>): Partial<FormData> {
   // Copy boolean fields
   const booleanFields: Array<keyof FormData> = [
     'hasVCT', 'applyMarkup', 'stayingOvernight', 'needsPressureWashing',
-    'needsWindowCleaning', 'chargeForWindowCleaning'
+    'needsWindowCleaning'
   ];
 
   booleanFields.forEach(field => {

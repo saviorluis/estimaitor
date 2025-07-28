@@ -53,7 +53,6 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     pressureWashingArea: 0,
     pressureWashingType: 'soft_wash' as 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate',
     needsWindowCleaning: false,
-    chargeForWindowCleaning: false,
     numberOfWindows: 0,
     numberOfLargeWindows: 0,
     numberOfHighAccessWindows: 0,
@@ -651,17 +650,6 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           
           {needsWindowCleaning && (
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <input
-                  id="chargeForWindowCleaning"
-                  type="checkbox"
-                  {...register('chargeForWindowCleaning')}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                />
-                <label htmlFor="chargeForWindowCleaning" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Charge for Window Cleaning
-                </label>
-              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>

@@ -1050,17 +1050,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
                   new TextRun("Includes all necessary equipment and cleaning solutions"),
                 ],
               }),
-              ...(formData.chargeForWindowCleaning ? [] : [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Window cleaning will be quoted separately",
-                      italics: true,
-                      color: "888888",
-                    }),
-                  ],
-                }),
-              ]),
+
             ],
           }),
           new TableCell({
@@ -1068,9 +1058,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
-                  new TextRun(formData.chargeForWindowCleaning ?
-                    formatCurrency(estimateData.windowCleaningCost) :
-                    "Separate Quote"),
+                  new TextRun(formatCurrency(estimateData.windowCleaningCost)),
                 ],
               }),
             ],

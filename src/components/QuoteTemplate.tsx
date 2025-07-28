@@ -233,7 +233,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         lineItems.push({ key: 'urgencyCost', value: urgencyCost });
       }
 
-      if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+      if (formData.needsWindowCleaning) {
         lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
       }
 
@@ -290,7 +290,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     const windowCleaning = lineItems.find(item => item.key === 'windowCleaningCost');
     
     // Only balance if both exist and window cleaning is being charged
-    if (basePrice && windowCleaning && windowCleaning.value > 0 && formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+    if (basePrice && windowCleaning && windowCleaning.value > 0 && formData.needsWindowCleaning) {
       // Only apply if markup has been applied
       if (markupPercentage > 0) {
         // Calculate original markup for window cleaning
@@ -358,7 +358,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
     
     // Window cleaning
-    if (formData.needsWindowCleaning && formData.chargeForWindowCleaning) {
+    if (formData.needsWindowCleaning) {
       subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
     }
     

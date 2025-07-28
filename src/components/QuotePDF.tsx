@@ -598,18 +598,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={styles.lineItemDescription}>
                   Includes all necessary equipment and cleaning solutions
                 </Text>
-                {!formData.chargeForWindowCleaning && (
-                  <Text style={[styles.lineItemDescription, {fontStyle: 'italic', color: '#666666'}]}>
-                    Window cleaning will be quoted separately
-                  </Text>
-                )}
               </View>
               <Text style={styles.lineItemAmount}>
-                {formData.chargeForWindowCleaning ? formatCurrency(
+                {formatCurrency(
                   estimateData.adjustedLineItems?.windowCleaningCost !== undefined
                     ? estimateData.adjustedLineItems.windowCleaningCost
                     : estimateData.windowCleaningCost
-                ) : 'Separate Quote'}
+                )}
               </Text>
             </View>
           )}

@@ -143,12 +143,11 @@ function calculatePressureWashingCost(
 
 function calculateWindowCleaningCost(
   needsWindowCleaning: boolean,
-  chargeForWindowCleaning: boolean,
   numberOfWindows: number = 0,
   numberOfLargeWindows: number = 0,
   numberOfHighAccessWindows: number = 0
 ): number {
-  if (!needsWindowCleaning || !chargeForWindowCleaning) return 0;
+  if (!needsWindowCleaning) return 0;
 
   const cacheKey = generateCacheKey(
     'windowCleaning',
@@ -332,7 +331,6 @@ export function calculateEstimate(formData: FormData): EstimateData {
     pressureWashingArea,
     pressureWashingType,
     needsWindowCleaning,
-    chargeForWindowCleaning,
     numberOfWindows = 0,
     numberOfLargeWindows = 0,
     numberOfHighAccessWindows = 0,
@@ -355,7 +353,6 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
   const windowCleaningCost = calculateWindowCleaningCost(
     needsWindowCleaning,
-    chargeForWindowCleaning,
     numberOfWindows,
     numberOfLargeWindows,
     numberOfHighAccessWindows

@@ -55,7 +55,6 @@ export interface FormData {
   pressureWashingArea: number;
   pressureWashingType: 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate';
   needsWindowCleaning: boolean;
-  chargeForWindowCleaning: boolean;
   
   // Window Details
   numberOfWindows: number;
