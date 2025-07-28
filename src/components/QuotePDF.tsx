@@ -614,15 +614,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           )}
 
-          {/* Travel Expenses - NOW AFTER WINDOW CLEANING */}
+          {/* Travel Expenses */}
           <View style={styles.lineItem}>
             <View style={styles.lineItemContent}>
               <Text style={styles.lineItemTitle}>Travel Expenses</Text>
               <Text style={styles.lineItemDescription}>
-                {formData.distanceFromOffice || 0} miles • ~{Math.round(((formData.distanceFromOffice || 0) / 60) * 10) / 10} hours drive time
-              </Text>
-              <Text style={styles.lineItemDescription}>
-                Hourly-based fee: {(formData.distanceFromOffice || 0) <= 60 ? '$100 base fee (≤1 hour)' : `$${100 + Math.ceil(((formData.distanceFromOffice || 0) / 60) - 1) * 100} (${Math.ceil((formData.distanceFromOffice || 0) / 60)} hours)`}
+                Travel to project location ({formData.distanceFromOffice || 0} miles from our facility)
               </Text>
             </View>
             <Text style={styles.lineItemAmount}>
@@ -643,10 +640,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
                 </Text>
                 <Text style={styles.lineItemDescription}>
-                  Includes: Hotel ({Math.ceil(formData.numberOfCleaners / 2)} rooms), Per diem ($90/person/day), Coordination
-                </Text>
-                <Text style={styles.lineItemDescription}>
-                  Hotel rate with markup: ${Math.round(150 * 1.20)}/night • Per diem with markup: $90/person/day
+                  Includes hotel accommodations ({Math.ceil(formData.numberOfCleaners / 2)} rooms), meals & incidentals, and coordination
                 </Text>
               </View>
               <Text style={styles.lineItemAmount}>
@@ -781,7 +775,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             • Insurance & Bonding: $2M general liability, workers compensation, and bonding certificates available{'\n'}
             • Quality Standards: All work performed to ISSA and industry standards with quality assurance inspections{'\n'}
             • Site Access Policy: If reschedule required due to site conditions or poor planning, minimum $250 return trip fee applies{'\n'}
-            • Travel Fee Structure: Hourly-based rates - $100 within 1 hour, +$100 per additional hour{'\n'}
+
             • Project Coordination: Dedicated project manager assigned for seamless integration with your construction schedule
           </Text>
         </View>
