@@ -33,7 +33,6 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   church: 1.2,
   arcade: 1.3,
-  pressure_washing: 1.0,
   other: 1.0
 } as const;
 
@@ -43,21 +42,24 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
   final: 1.0,
   rough_final: 1.2,
-  rough_final_touchup: 1.45
+  rough_final_touchup: 1.45,
+  pressure_washing: 1.0
 } as const;
 
 export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
   final: 1.0,
   rough_final: 1.5,
-  rough_final_touchup: 1.8
+  rough_final_touchup: 1.8,
+  pressure_washing: 1.0
 } as const;
 
 export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
   rough: "First stage cleaning that focuses on debris removal and basic surface cleaning (80% of standard rate).",
   final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
   rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
-  rough_final_touchup: "Comprehensive package including rough clean, final clean, and touchup service (145% of standard rate)."
+  rough_final_touchup: "Complete three-stage process: rough, final, and touch-up clean (145% of standard rate).",
+  pressure_washing: "Professional pressure washing services with appropriate equipment and chemicals (standard rate)."
 } as const;
 
 // ===================== TRAVEL AND LOGISTICS =====================
@@ -127,7 +129,6 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   interactive_toy_store: 380,
   church: 500,
   arcade: 450,
-  pressure_washing: 500,
   other: 500
 } as const;
 
@@ -325,13 +326,6 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Special attention to high-traffic gaming zones
 • Clean break rooms and employee areas
 • Clean seating and refreshment areas`),
-
-  pressure_washing: createScopeTemplate(`
-• Professional pressure washing of specified surfaces
-• Pre-treatment with appropriate cleaning chemicals
-• Surface-specific pressure and temperature settings
-• Proper wastewater containment and disposal
-• Post-cleaning inspection and touch-ups`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

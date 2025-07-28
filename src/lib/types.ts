@@ -17,10 +17,9 @@ export type ProjectType =
   | 'interactive_toy_store'
   | 'church'
   | 'arcade'
-  | 'pressure_washing'
   | 'other';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup';
+export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing';
 
 // ===================== FORM DATA INTERFACE =====================
 

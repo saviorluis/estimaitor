@@ -205,7 +205,6 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="interactive_toy_store">Interactive Toy Store</option>
             <option value="church">Church</option>
             <option value="arcade">Arcade</option>
-            <option value="pressure_washing">Pressure Washing</option>
             <option value="other">Other</option>
           </select>
           {errors.projectType && (
@@ -227,6 +226,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="final">Final Clean (Standard rate)</option>
             <option value="rough_final">Rough & Final Clean (120% rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
+            <option value="pressure_washing">Pressure Washing (Standard rate)</option>
           </select>
           {formValues.cleaningType && (
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

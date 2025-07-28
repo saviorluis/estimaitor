@@ -202,7 +202,6 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   church: 1.2,
   arcade: 1.3,
-  pressure_washing: 1.0,
   other: 1.0
 } as const;
 
