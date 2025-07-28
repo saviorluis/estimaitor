@@ -369,21 +369,26 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             <Text>Please make checks payable to: {companyInfo.name}</Text>
             <Text style={{ marginTop: 5 }}>{companyInfo.address}</Text>
             <Text>{companyInfo.city}</Text>
-            <Text style={{ marginTop: 10 }}>For questions regarding this invoice:</Text>
-            <Text>{companyInfo.email}</Text>
-            <Text>{companyInfo.phone}</Text>
           </View>
+        </View>
+
+        {/* Contact Information */}
+        <View style={[styles.section, { marginTop: 10 }]}>
+          <Text style={{ marginTop: 10 }}>For questions regarding this invoice:</Text>
+          <Text>{companyInfo.email}</Text>
+          <Text>{companyInfo.phone}</Text>
         </View>
 
         {/* Balance Due Box */}
         <View style={{
           position: 'absolute',
-          top: 520,
+          bottom: 40,
           right: 0,
           backgroundColor: '#f0f0f0',
           padding: 10,
           width: 200,
-          borderRadius: 5
+          borderRadius: 5,
+          border: '1px solid #d0d0d0'
         }}>
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Balance Due:</Text>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>${estimateData.totalPrice.toLocaleString()}</Text>

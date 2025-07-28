@@ -141,21 +141,21 @@ const ContactForm = () => {
           >
             <option value="">Select a project type</option>
             <option value="restaurant">Restaurant</option>
-            <option value="fast_food">Fast Food Restaurant</option>
-            <option value="bakery">Bakery</option>
+            <option value="fast_food">Fast Food</option>
             <option value="medical">Medical Facility</option>
-            <option value="office">Office Space</option>
             <option value="retail">Retail Space</option>
+            <option value="office">Office Space</option>
             <option value="industrial">Industrial Space</option>
             <option value="educational">Educational Facility</option>
             <option value="hotel">Hotel</option>
             <option value="jewelry_store">Jewelry Store</option>
-            <option value="apartment">Apartment Complex</option>
-            <option value="warehouse">Warehouse</option>
-            <option value="dormitory">Dormitory</option>
             <option value="grocery_store">Grocery Store</option>
             <option value="yoga_studio">Yoga Studio</option>
-            <option value="kids_fitness">Children's Fitness Center</option>
+            <option value="kids_fitness">Kids Fitness Center</option>
+            <option value="bakery">Bakery</option>
+            <option value="interactive_toy_store">Interactive Toy Store</option>
+            <option value="church">Church</option>
+            <option value="arcade">Arcade</option>
             <option value="other">Other</option>
           </select>
         </div>
