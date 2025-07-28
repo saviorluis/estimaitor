@@ -183,6 +183,15 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </div>
             )}
 
+            {estimateData.windowCleaningCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Window Cleaning</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.windowCleaningCost)}
+                </span>
+              </div>
+            )}
+
             {estimateData.travelCost > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Travel Cost</span>
@@ -206,15 +215,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 <span className="text-gray-600 dark:text-gray-400">Pressure Washing</span>
                 <span className="text-gray-800 dark:text-gray-200">
                   {formatCurrency(estimateData.pressureWashingCost)}
-                </span>
-              </div>
-            )}
-
-            {estimateData.windowCleaningCost > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Window Cleaning</span>
-                <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.windowCleaningCost)}
                 </span>
               </div>
             )}
