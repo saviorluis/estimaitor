@@ -118,7 +118,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 4. Additional Services: Any services not specified will be quoted separately.
 5. Access: Client must provide necessary access to the property.
 6. Utilities: Working electricity and water must be available on-site.
-7. Quote Validity: This quote is valid for 30 days from the date issued.`;
+7. Quote Validity: This quote is valid for 30 days from the date issued.
+8. Reschedule/Site Access Policy: If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip.`;
 
   // Quote information state
   const [quoteInfo, setQuoteInfo] = useState({

@@ -25,7 +25,7 @@ interface PastEntry {
 }
 
 // App modes
-export type AppMode = 'pro' | 'customer' | 'contractor';
+export type AppMode = 'pro' | 'simple' | 'contract';
 
 interface ModeConfig {
   title: string;
@@ -43,19 +43,19 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
     color: 'from-indigo-600 to-indigo-800',
     features: ['Detailed cost breakdowns', 'Markup controls', 'AI recommendations', 'Professional quotes', 'All calculation options']
   },
-  customer: {
-    title: 'Customer Mode',
-    subtitle: 'Simple Estimate for Website Visitors',
-    description: 'Streamlined interface for customers to get quick, accurate estimates on your website.',
+  simple: {
+    title: 'Simple Reference Mode',
+    subtitle: 'Quick Price Estimates & Budget Planning',
+    description: 'Streamlined calculator for customers and contractors to get fast, accurate ballpark estimates for budgeting and validation.',
     color: 'from-green-600 to-green-800',
-    features: ['Simple inputs', 'Instant estimates', 'Lead capture', 'Professional presentation', 'Contact integration']
+    features: ['Quick inputs', 'Instant estimates', 'Budget validation', 'Lead capture', 'Professional presentation']
   },
-  contractor: {
-    title: 'Contractor Mode',
-    subtitle: 'Quick Price Reference Tool',
-    description: 'Fast ballpark estimates for general contractors to validate bids and plan budgets.',
-    color: 'from-orange-600 to-orange-800',
-    features: ['Minimal inputs', 'Quick estimates', 'Price validation', 'Budget planning', 'Comparison mode']
+  contract: {
+    title: 'Janitorial Contract Generator',
+    subtitle: 'Recurring Service Contract Creation',
+    description: 'Specialized tool for creating ongoing janitorial service contracts with recurring pricing, service schedules, and maintenance agreements.',
+    color: 'from-purple-600 to-purple-800',
+    features: ['Contract templates', 'Recurring schedules', 'Service level agreements', 'Maintenance contracts', 'Annual pricing']
   }
 };
 
@@ -87,7 +87,7 @@ export default function Home() {
         setPastEntries(JSON.parse(savedEntries));
       }
 
-      if (savedMode && ['pro', 'customer', 'contractor'].includes(savedMode)) {
+      if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
         setCurrentMode(savedMode);
       }
     } catch (error) {
@@ -267,20 +267,72 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="card h-full">
-            <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+            {currentMode === 'contract' ? (
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Janitorial Contract Generator</h2>
+                <div className="space-y-6">
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                    <h3 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">🚧 Coming Soon!</h3>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">
+                      The Janitorial Contract Generator is currently under development. This feature will include:
+                    </p>
+                    <ul className="mt-3 text-sm text-purple-700 dark:text-purple-300 space-y-1">
+                      <li>• Recurring service scheduling (daily, weekly, monthly)</li>
+                      <li>• Multi-year contract pricing with escalations</li>
+                      <li>• Service level agreement templates</li>
+                      <li>• Maintenance and deep cleaning add-ons</li>
+                      <li>• Automatic contract renewal options</li>
+                      <li>• Custom service specifications</li>
+                    </ul>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                      For now, please use Professional Mode for detailed estimates or Simple Reference Mode for quick pricing.
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      <button 
+                        onClick={() => handleModeSwitch('pro')}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors text-sm"
+                      >
+                        Switch to Professional Mode
+                      </button>
+                      <button 
+                        onClick={() => handleModeSwitch('simple')}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
+                      >
+                        Switch to Simple Reference
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+            )}
           </div>
           
-          {estimateData && formData ? (
+          {estimateData && formData && currentMode !== 'contract' ? (
             <div className="card h-full">
               <EstimateResult estimateData={estimateData} formData={formData} />
             </div>
           ) : (
             <div className="card h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
               <div className="text-center p-8">
-                <h2 className="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">No Estimate Yet</h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  Fill out the form to generate a detailed estimate for your commercial cleaning project.
-                </p>
+                {currentMode === 'contract' ? (
+                  <>
+                    <h2 className="text-2xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Contract Generator Preview</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Once developed, this panel will show contract previews, recurring schedules, and pricing summaries.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">No Estimate Yet</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Fill out the form to generate a detailed estimate for your commercial cleaning project.
+                    </p>
+                  </>
+                )}
                 <div className="p-4 bg-indigo-50 dark:bg-slate-700 rounded-lg">
                   <p className="text-sm text-indigo-800 dark:text-indigo-200">
                     Your estimates are automatically saved and will be available when you return.

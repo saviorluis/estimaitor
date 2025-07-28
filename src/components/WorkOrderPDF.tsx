@@ -400,6 +400,31 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
                 Note: Material fees will be discussed and agreed upon before the start of work
               </Text>
             </View>
+
+            {/* Overnight Accommodations - Only show if staying overnight */}
+            {formData.stayingOvernight && (
+              <View style={styles.feeItem}>
+                <Text style={styles.feeTitle}>Overnight Accommodations & Payment</Text>
+                <Text style={styles.feeDescription}>
+                  • Hotel accommodations provided: 2 cleaners per room arrangement
+                </Text>
+                <Text style={styles.feeDescription}>
+                  • Per diem allowance: $90 per person per day (covers meals and incidentals)
+                </Text>
+                <Text style={styles.feeDescription}>
+                  • Per diem is paid upfront before travel departure
+                </Text>
+                <Text style={styles.feeDescription}>
+                  • Hotel bills are paid directly by company - no out-of-pocket expenses for crew
+                </Text>
+                <Text style={styles.feeDescription}>
+                  • Overnight duration: {formData.numberOfNights} night(s) for {formData.numberOfCleaners} crew member(s)
+                </Text>
+                <Text style={styles.warningText}>
+                  Note: Per diem is for approved business expenses only. Receipts may be required for reimbursement verification.
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 

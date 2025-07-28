@@ -62,6 +62,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
 
   // Watch form values
   const formValues = watch();
+  const watchedDistance = watch('distanceFromOffice');
   const {
     squareFootage,
     stayingOvernight,
@@ -324,6 +325,15 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             />
             {errors.distanceFromOffice && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.distanceFromOffice.message}</p>
+            )}
+            {/* Travel Time and Cost Display */}
+            {watchedDistance > 0 && (
+              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Drive time: ~{Math.round((watchedDistance / 60) * 10) / 10} hours | 
+                  Travel fee: ${watchedDistance <= 60 ? 100 : 100 + Math.ceil((watchedDistance / 60) - 1) * 100}
+                </p>
+              </div>
             )}
           </div>
           <div>
@@ -616,16 +626,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           </div>
         )}
 
-        {/* Business Protection */}
-        <div className="border-t pt-4">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
-            <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-3">Reschedule/Site Access Policy</h4>
-            <p className="text-sm text-yellow-700 dark:text-yellow-300">
-              If we are required to reschedule due to the site not being ready or poor planning on the client's end, 
-              a minimum fee of <strong>$250</strong> will be charged for the return trip.
-            </p>
-          </div>
-        </div>
+
 
         {/* Submit Button */}
         <button

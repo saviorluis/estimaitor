@@ -298,6 +298,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: 'center',
   },
+  summaryBox: {
+    backgroundColor: '#f8f9fa',
+    border: '1px solid #e9ecef',
+    borderRadius: 4,
+    padding: 12,
+    marginHorizontal: 20,
+  },
+  summaryTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  summaryText: {
+    fontSize: 9,
+    color: '#34495e',
+    lineHeight: 1.4,
+    textAlign: 'center',
+  },
 });
 
 // Get cleaning type display name
@@ -454,6 +474,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             Location: {quoteInfo.projectAddress}
           </Text>
           
+          {/* Professional Summary Box */}
+          <View style={[styles.summaryBox, { marginTop: 15, marginBottom: 15 }]}>
+            <Text style={styles.summaryTitle}>Why Choose Our Professional Cleaning Services?</Text>
+            <Text style={styles.summaryText}>
+              ✓ Licensed & Insured ($2M coverage) • ✓ Specialized in post-construction cleaning{'\n'}
+              ✓ Industry-standard equipment & eco-friendly solutions • ✓ Experienced with commercial timelines{'\n'}
+              ✓ Quality assurance inspections • ✓ Contractor-friendly payment terms
+            </Text>
+          </View>
+          
           <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }]}>
             Quote #: {quoteInfo.quoteNumber}
           </Text>
@@ -588,7 +618,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={styles.lineItem}>
             <View style={styles.lineItemContent}>
               <Text style={styles.lineItemTitle}>Travel Expenses</Text>
-              <Text style={styles.lineItemDescription}>{formData.distanceFromOffice || 0} miles</Text>
+              <Text style={styles.lineItemDescription}>
+                {formData.distanceFromOffice || 0} miles • ~{Math.round(((formData.distanceFromOffice || 0) / 60) * 10) / 10} hours drive time
+              </Text>
+              <Text style={styles.lineItemDescription}>
+                Hourly-based fee: {(formData.distanceFromOffice || 0) <= 60 ? '$100 base fee (≤1 hour)' : `$${100 + Math.ceil(((formData.distanceFromOffice || 0) / 60) - 1) * 100} (${Math.ceil((formData.distanceFromOffice || 0) / 60)} hours)`}
+              </Text>
             </View>
             <Text style={styles.lineItemAmount}>
               {formatCurrency(
@@ -607,7 +642,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={styles.lineItemDescription}>
                   {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
                 </Text>
-                <Text style={styles.lineItemDescription}>Includes hotel and per diem expenses</Text>
+                <Text style={styles.lineItemDescription}>
+                  Includes: Hotel ({Math.ceil(formData.numberOfCleaners / 2)} rooms), Per diem ($90/person/day), Coordination
+                </Text>
+                <Text style={styles.lineItemDescription}>
+                  Hotel rate with markup: ${Math.round(150 * 1.20)}/night • Per diem with markup: $90/person/day
+                </Text>
               </View>
               <Text style={styles.lineItemAmount}>
                 {formatCurrency(
@@ -712,9 +752,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         </View>
 
+        {/* Value Proposition for Contractors */}
+        <View style={[styles.section, { marginTop: 25 }]}>
+          <Text style={styles.sectionTitle}>Partnership Benefits</Text>
+          <Text style={styles.termsText}>
+            🏗️ Construction-Specialized: Deep understanding of post-construction cleaning requirements and timelines{'\n'}
+            📋 Seamless Integration: Dedicated project coordination ensures no delays to your construction schedule{'\n'}
+            💰 Contractor Benefits: Net 30 payment terms, volume discounts available, and transparent pricing structure{'\n'}
+            📞 24/7 Support: Direct project manager contact for real-time updates and immediate issue resolution
+          </Text>
+        </View>
+
         {/* Scope of Work */}
-        <View style={[styles.section, { marginTop: 30 }]}>
-          <Text style={styles.sectionTitle}>Scope of Work</Text>
+        <View style={[styles.section, { marginTop: 20 }]}>
+          <Text style={styles.sectionTitle}>Detailed Scope of Work</Text>
           <Text style={styles.scopeText}>
             {getScopeOfWork(formData)}
           </Text>
@@ -722,14 +773,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
         {/* Terms and Conditions */}
         <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Terms & Conditions</Text>
+          <Text style={styles.sectionTitle}>Professional Terms & Conditions</Text>
           <Text style={styles.termsText}>
-            • Payment is due within 30 days of completion{'\n'}
-            • Additional services outside of scope will be billed separately{'\n'}
-            • Quote valid for 30 days from issue date{'\n'}
-            • All work performed to industry standards{'\n'}
-            • Proof of insurance available upon request{'\n'}
-            • If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip
+            • Payment Terms: Net 30 days from completion - contractor-friendly payment schedule{'\n'}
+            • Change Orders: Additional services require written authorization and will be billed at agreed rates{'\n'}
+            • Quote Validity: 30 days from issue date - allows ample time for project planning{'\n'}
+            • Insurance & Bonding: $2M general liability, workers compensation, and bonding certificates available{'\n'}
+            • Quality Standards: All work performed to ISSA and industry standards with quality assurance inspections{'\n'}
+            • Site Access Policy: If reschedule required due to site conditions or poor planning, minimum $250 return trip fee applies{'\n'}
+            • Travel Fee Structure: Hourly-based rates - $100 within 1 hour, +$100 per additional hour{'\n'}
+            • Project Coordination: Dedicated project manager assigned for seamless integration with your construction schedule
           </Text>
         </View>
 

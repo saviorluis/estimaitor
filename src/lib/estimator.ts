@@ -6,6 +6,8 @@ import {
   CLEANING_TYPE_TIME_MULTIPLIERS,
   VCT_COST_PER_SQFT,
   getTravelRate,
+  calculateHourlyTravelFee,
+  getDriveTimeHours,
   HOTEL_COST_PER_NIGHT,
   PER_DIEM_PER_DAY,
   PRESSURE_WASHING,
@@ -55,9 +57,8 @@ function calculateTravelCost(distanceFromOffice: number): number {
     return calculationCache.get(cacheKey)!;
   }
 
-  const roundTripDistance = distanceFromOffice * 2;
-  const rate = getTravelRate(distanceFromOffice);
-  const result = roundTripDistance * rate;
+  // Use new hourly-based travel fee structure
+  const result = calculateHourlyTravelFee(distanceFromOffice);
   
   calculationCache.set(cacheKey, result);
   return result;
@@ -77,23 +78,26 @@ function calculateOvernightCost(
     return calculationCache.get(cacheKey)!;
   }
 
-  // Hotel cost (2 people per room)
+  // Hotel cost (2 people per room, with proper markup already applied)
   const hotelRooms = Math.ceil(numberOfCleaners / 2);
   const hotelCost = hotelRooms * HOTEL_COST_PER_NIGHT * numberOfNights;
   
-  // Per diem cost
+  // Per diem cost (per person, with markup already applied)
   const perDiemCost = numberOfCleaners * PER_DIEM_PER_DAY * numberOfNights;
   
-  // Additional vehicle costs for teams larger than 2
-  let vehicleCost = 0;
+  // Additional vehicle costs for teams larger than 2 (using new hourly travel fee)
+  let additionalVehicleCost = 0;
   if (numberOfCleaners > 2) {
     const additionalVehicles = Math.ceil(numberOfCleaners / 3) - 1;
-    const roundTripDistance = distanceFromOffice * 2;
-    const rate = getTravelRate(distanceFromOffice);
-    vehicleCost = additionalVehicles * roundTripDistance * rate;
+    // Each additional vehicle needs the same travel fee
+    additionalVehicleCost = additionalVehicles * calculateHourlyTravelFee(distanceFromOffice);
   }
   
-  const result = hotelCost + perDiemCost + vehicleCost;
+  // Administrative fee for overnight coordination (5% of total costs)
+  const subtotal = hotelCost + perDiemCost + additionalVehicleCost;
+  const coordinationFee = subtotal * 0.05;
+  
+  const result = subtotal + coordinationFee;
   calculationCache.set(cacheKey, result);
   return result;
 }

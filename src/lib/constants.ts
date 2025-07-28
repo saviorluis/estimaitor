@@ -64,15 +64,35 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
 
 // ===================== TRAVEL AND LOGISTICS =====================
 
-export const TRAVEL_COST_PER_MILE = {
-  SHORT_DISTANCE: 0.35, // For trips under 80 miles (one way)
-  LONG_DISTANCE: 0.75   // For trips 80 miles or more (one way)
+// New hourly-based travel fee structure
+export const TRAVEL_FEES = {
+  BASE_FEE: 100, // Within 1 hour: $100
+  HOURLY_INCREMENT: 100, // Add $100 for each additional hour
+  AVERAGE_SPEED_MPH: 60 // Average driving speed for time calculations
 } as const;
 
-export const DISTANCE_THRESHOLD = 80; // Miles threshold for travel rate
+// Legacy constants (kept for backward compatibility during transition)
+export const TRAVEL_COST_PER_MILE = {
+  SHORT_DISTANCE: 0.35, 
+  LONG_DISTANCE: 0.75   
+} as const;
 
-export const HOTEL_COST_PER_NIGHT = 175;
-export const PER_DIEM_PER_DAY = 85;
+export const DISTANCE_THRESHOLD = 80; 
+
+// ===================== OVERNIGHT COSTS WITH PROPER MARKUPS =====================
+
+// Base costs (actual vendor rates)
+export const BASE_COSTS = {
+  HOTEL_RATE_PER_NIGHT: 150, // Actual hotel cost
+  PER_DIEM_RATE_PER_DAY: 75  // Base per diem allowance
+} as const;
+
+// Business markups for travel expenses
+export const TRAVEL_MARKUP = 0.20; // 20% markup on travel expenses
+
+// Final costs with markup applied
+export const HOTEL_COST_PER_NIGHT = Math.round(BASE_COSTS.HOTEL_RATE_PER_NIGHT * (1 + TRAVEL_MARKUP)); // $180
+export const PER_DIEM_PER_DAY = Math.round(BASE_COSTS.PER_DIEM_RATE_PER_DAY * (1 + TRAVEL_MARKUP)); // $90
 export const AVERAGE_MPG = 25;
 
 // ===================== URGENCY MULTIPLIERS =====================
@@ -152,7 +172,25 @@ export function getRecommendedCleaners(squareFootage: number): number {
   return 15;
 }
 
-// Optimized travel rate calculation
+// Convert distance to drive time in hours (one way)
+export function getDriveTimeHours(distanceMiles: number): number {
+  return distanceMiles / TRAVEL_FEES.AVERAGE_SPEED_MPH;
+}
+
+// Calculate hourly-based travel fee
+export function calculateHourlyTravelFee(distanceMiles: number): number {
+  const driveTimeHours = getDriveTimeHours(distanceMiles);
+  
+  if (driveTimeHours <= 1) {
+    return TRAVEL_FEES.BASE_FEE;
+  }
+  
+  // Round up to next hour for billing purposes
+  const totalHours = Math.ceil(driveTimeHours);
+  return TRAVEL_FEES.BASE_FEE + ((totalHours - 1) * TRAVEL_FEES.HOURLY_INCREMENT);
+}
+
+// Legacy function (kept for backward compatibility)
 export function getTravelRate(distance: number): number {
   return distance < DISTANCE_THRESHOLD 
     ? TRAVEL_COST_PER_MILE.SHORT_DISTANCE 
