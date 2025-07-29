@@ -21,7 +21,7 @@ interface SimpleFormData {
   projectName?: string;
 }
 
-// Location-based defaults and pricing (Home Base: 1300 Eastchester Dr, High Point, NC)
+// Location-based defaults and pricing (Home Base: 1200 Eastchester Dr, High Point, NC)
 const LOCATION_CONFIGS = {
   // Distance from office based on state/region
   'NC': { distance: 15, gasPrice: 3.50, description: 'North Carolina (Home Base - High Point)' },

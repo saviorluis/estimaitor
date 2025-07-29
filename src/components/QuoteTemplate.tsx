@@ -69,7 +69,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const savedCompanyInfo = localStorage.getItem('quoteCompanyInfo');
       return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : {
         name: "Big Brother Property Solutions",
-        address: "1300 Eastchester Dr.",
+        address: "1200 Eastchester Dr.",
         city: "High Point, NC 27265",
         phone: "(336) 624-7442",
         email: "bids@bigbroprops.com",
@@ -78,7 +78,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
     return {
       name: "Big Brother Property Solutions",
-      address: "1300 Eastchester Dr.",
+      address: "1200 Eastchester Dr.",
       city: "High Point, NC 27265",
       phone: "(336) 624-7442",
       email: "bids@bigbroprops.com",
