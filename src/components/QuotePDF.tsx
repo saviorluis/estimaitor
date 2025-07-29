@@ -579,27 +579,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           )}
 
-          {/* Window Cleaning Services - MOVED BEFORE TRAVEL */}
-          {formData.needsWindowCleaning && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Window Cleaning Services</Text>
-                <Text style={styles.lineItemDescription}>
-                  {(formData.numberOfWindows || 0)} standard windows, {(formData.numberOfLargeWindows || 0)} large windows, {(formData.numberOfHighAccessWindows || 0)} high-access windows
-                </Text>
-                <Text style={styles.lineItemDescription}>
-                  Includes all necessary equipment and cleaning solutions
-                </Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.windowCleaningCost !== undefined
-                    ? estimateData.adjustedLineItems.windowCleaningCost
-                    : estimateData.windowCleaningCost
-                )}
-              </Text>
-            </View>
-          )}
+
 
           {/* Travel Expenses */}
           <View style={styles.lineItem}>
