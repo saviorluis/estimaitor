@@ -380,6 +380,26 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
     setIsLoaded(true);
   }, [getSavedFormData, reset]);
 
+  // Handle service frequency changes to auto-set service days
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    if (formValues.serviceFrequency === 'daily') {
+      setValue('serviceDays', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
+    } else if (formValues.serviceDays.length === 5 && 
+               formValues.serviceDays.includes('monday') && 
+               formValues.serviceDays.includes('friday')) {
+      // If switching from daily to another frequency, reset to default for that frequency
+      if (formValues.serviceFrequency === 'weekly') {
+        setValue('serviceDays', ['wednesday']);
+      } else if (formValues.serviceFrequency === 'bi_weekly') {
+        setValue('serviceDays', ['friday']);
+      } else if (formValues.serviceFrequency === 'monthly') {
+        setValue('serviceDays', ['friday']);
+      }
+    }
+  }, [formValues.serviceFrequency, isLoaded, setValue, formValues.serviceDays]);
+
   // Save form data to localStorage when it changes
   useEffect(() => {
     if (!isLoaded) return;
@@ -414,6 +434,12 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
     const lengthDiscounts = { 6: 0, 12: 0.05, 24: 0.10, 36: 0.15 };
     const discountedAnnualRate = annualRate * (1 - lengthDiscounts[data.contractLength]);
     
+    // Set service days based on frequency
+    let serviceDays = data.serviceDays;
+    if (data.serviceFrequency === 'daily') {
+      serviceDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    }
+    
     return {
       monthlyRate: Math.round(monthlyRate * 100) / 100,
       annualRate: Math.round(discountedAnnualRate * 100) / 100,
@@ -422,7 +448,7 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
       serviceScope: SERVICE_SCOPES[data.buildingType],
       schedule: {
         frequency: data.serviceFrequency,
-        days: data.serviceDays,
+        days: serviceDays,
         time: data.serviceTime,
         estimatedHours: Math.ceil((baseMonthlyRate / 125) * frequencyMultipliers[data.serviceFrequency])
       },
@@ -438,6 +464,12 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
 
   // Form submission handler
   const onSubmit: SubmitHandler<JanitorialFormData> = useCallback((data) => {
+    // Validate service days for non-daily frequencies
+    if (data.serviceFrequency !== 'daily' && (!data.serviceDays || data.serviceDays.length === 0)) {
+      alert('Please select at least one service day for the selected frequency.');
+      return;
+    }
+    
     const contractData = calculateContractPricing(data);
     onContractGenerated(contractData, data);
   }, [onContractGenerated, calculateContractPricing]);
@@ -771,6 +803,56 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
               </select>
             </div>
           </div>
+
+          {/* Service Days Selection */}
+          {serviceFrequency !== 'daily' && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
+                📅 Service Days *
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { value: 'monday', label: 'Monday' },
+                  { value: 'tuesday', label: 'Tuesday' },
+                  { value: 'wednesday', label: 'Wednesday' },
+                  { value: 'thursday', label: 'Thursday' },
+                  { value: 'friday', label: 'Friday' },
+                  { value: 'saturday', label: 'Saturday' },
+                  { value: 'sunday', label: 'Sunday' }
+                ].map((day) => (
+                  <label key={day.value} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      value={day.value}
+                      checked={formValues.serviceDays?.includes(day.value)}
+                      onChange={(e) => {
+                        const currentDays = formValues.serviceDays || [];
+                        const newDays = e.target.checked
+                          ? [...currentDays, day.value]
+                          : currentDays.filter(d => d !== day.value);
+                        setValue('serviceDays', newDays);
+                      }}
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600 rounded"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{day.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {serviceFrequency === 'weekly' && 'Select 1 day per week'}
+                {serviceFrequency === 'bi_weekly' && 'Select 1-2 days (service every other week)'}
+                {serviceFrequency === 'monthly' && 'Select 1 day per month'}
+              </p>
+            </div>
+          )}
+
+          {serviceFrequency === 'daily' && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                📋 <strong>Daily Service:</strong> Monday through Friday (5 days per week)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Contract Terms */}
