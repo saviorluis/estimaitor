@@ -474,15 +474,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             Location: {quoteInfo.projectAddress}
           </Text>
           
-          {/* Professional Summary Box */}
-          <View style={[styles.summaryBox, { marginTop: 15, marginBottom: 15 }]}>
-            <Text style={styles.summaryTitle}>Why Choose Our Professional Cleaning Services?</Text>
-            <Text style={styles.summaryText}>
-              ✓ Licensed & Insured ($2M coverage) • ✓ Specialized in post-construction cleaning{'\n'}
-              ✓ Industry-standard equipment & eco-friendly solutions • ✓ Experienced with commercial timelines{'\n'}
-              ✓ Quality assurance inspections • ✓ Contractor-friendly payment terms
-            </Text>
-          </View>
+
           
           <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }]}>
             Quote #: {quoteInfo.quoteNumber}

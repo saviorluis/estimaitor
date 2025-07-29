@@ -69,7 +69,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const savedCompanyInfo = localStorage.getItem('quoteCompanyInfo');
       return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : {
         name: "Big Brother Property Solutions",
-        address: "1200 Eastchester Dr.",
+        address: "1300 Eastchester Dr.",
         city: "High Point, NC 27265",
         phone: "(336) 624-7442",
         email: "bids@bigbroprops.com",
@@ -78,7 +78,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }
     return {
       name: "Big Brother Property Solutions",
-      address: "1200 Eastchester Dr.",
+      address: "1300 Eastchester Dr.",
       city: "High Point, NC 27265",
       phone: "(336) 624-7442",
       email: "bids@bigbroprops.com",
@@ -494,13 +494,42 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       const zip = new JSZip();
       
-      // Extract just the number from quote number (e.g., "2025" from "Q-2025")
-      const quoteNumberOnly = quoteInfo.quoteNumber.split('-')[1] || quoteInfo.quoteNumber;
+      // Extract just the number from quote number (e.g., "123" from "Q-2025-123")
+      const quoteNumberParts = quoteInfo.quoteNumber.split('-');
+      const quoteNumberOnly = quoteNumberParts[quoteNumberParts.length - 1] || quoteInfo.quoteNumber;
+
+      // Create adjusted estimate data with the EXACT same calculation as the browser preview
+      const adjustedEstimateData = {...estimateData};
+    
+      // Calculate subtotal EXACTLY as shown in the browser preview
+      const subtotal = Object.keys(adjustedPrices).length > 0 
+        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+        : estimateData.totalBeforeMarkup;
+      
+      // Calculate sales tax 
+      const salesTax = subtotal * 0.07;
+      
+      // Set all the values for the PDF
+      adjustedEstimateData.totalBeforeMarkup = subtotal;
+      // Set markup to 0 since we're distributing it across the line items
+      adjustedEstimateData.markup = 0;
+      adjustedEstimateData.salesTax = salesTax;
+      adjustedEstimateData.totalPrice = subtotal + salesTax;
+      
+      // Add adjusted line items to the estimate data
+      if (Object.keys(adjustedPrices).length > 0) {
+        adjustedEstimateData.adjustedLineItems = adjustedPrices;
+      } else {
+        // Ensure the base price includes the cleaning type multiplier
+        adjustedEstimateData.adjustedLineItems = {
+          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
+        };
+      }
 
       // Generate Quote PDF
       const quoteBlob = await pdf(
         <QuotePDF
-          estimateData={estimateData}
+          estimateData={adjustedEstimateData}
           formData={formData}
           companyInfo={companyInfo}
           clientInfo={clientInfo}
@@ -513,7 +542,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Work Order PDF (English)
       const workOrderBlob = await pdf(
         <WorkOrderPDF
-          estimateData={estimateData}
+          estimateData={adjustedEstimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -524,7 +553,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Work Order PDF (Spanish)
       const workOrderSpanishBlob = await pdf(
         <WorkOrderPDFSpanish
-          estimateData={estimateData}
+          estimateData={adjustedEstimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -535,7 +564,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Purchase Order PDF
       const purchaseOrderBlob = await pdf(
         <PurchaseOrderPDF
-          estimateData={estimateData}
+          estimateData={adjustedEstimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -553,7 +582,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
       const invoiceBlob = await pdf(
         <InvoicePDF
-          estimateData={estimateData}
+          estimateData={adjustedEstimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -586,7 +615,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const addressParts = quoteInfo.projectAddress.split(',').map(part => part.trim());
       const city = addressParts[addressParts.length - 2] || '';
       const state = addressParts[addressParts.length - 1] || '';
-      const fileName = `${quoteNumberOnly} ${quoteInfo.projectName} ${city}, ${state}.zip`;
+      
+      // Create filename: project name + quote number (without year) + city, state
+      const projectName = quoteInfo.projectName.trim() || 'Project';
+      const cityState = city && state ? `${city}, ${state}` : (quoteInfo.projectAddress.trim() || 'Location');
+      const fileName = `${projectName} ${quoteNumberOnly} ${cityState}.zip`;
       saveAs(content, fileName);
 
       // Increment the quote counter after successful generation
