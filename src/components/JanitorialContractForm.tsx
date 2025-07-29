@@ -588,7 +588,6 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
                 <option value="VA">Virginia</option>
                 <option value="TN">Tennessee</option>
                 <option value="GA">Georgia</option>
-                <option value="OTHER">Other</option>
               </select>
               {errors.state && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.state.message}</p>
