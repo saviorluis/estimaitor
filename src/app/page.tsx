@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
+import SimpleEstimatorForm from '@/components/SimpleEstimatorForm';
+import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import { EstimateData, FormData } from '@/lib/types';
 
@@ -22,6 +24,39 @@ interface PastEntry {
   totalPrice: number;
   estimateData: EstimateData;
   formData: FormData;
+}
+
+// Types for contract data (imported from JanitorialContractForm)
+interface ContractData {
+  monthlyRate: number;
+  annualRate: number;
+  pricePerSqFt?: number;
+  pricePerRoom?: number;
+  serviceScope: any;
+  schedule: any;
+  contractTerms: any;
+}
+
+interface JanitorialFormData {
+  facilityName: string;
+  facilityAddress: string;
+  city: string;
+  state: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  buildingType: any;
+  measurementType: 'square_footage' | 'room_count';
+  squareFootage?: number;
+  roomCount?: number;
+  bathroomCount: number;
+  floorType: 'carpet' | 'hard_floor' | 'mixed';
+  serviceFrequency: 'daily' | 'weekly' | 'bi_weekly' | 'monthly';
+  serviceDays: string[];
+  serviceTime: 'morning' | 'afternoon' | 'evening' | 'overnight';
+  contractLength: 6 | 12 | 24 | 36;
+  startDate: string;
+  specialRequirements?: string;
 }
 
 // App modes
@@ -46,9 +81,9 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
   simple: {
     title: 'Simple Reference Mode',
     subtitle: 'Quick Price Estimates & Budget Planning',
-    description: 'Streamlined calculator for customers and contractors to get fast, accurate ballpark estimates for budgeting and validation.',
+    description: 'Streamlined calculator with just 4 essential fields: project type, cleaning type, square footage, and location. Automatic location-based pricing included.',
     color: 'from-green-600 to-green-800',
-    features: ['Quick inputs', 'Instant estimates', 'Budget validation', 'Lead capture', 'Professional presentation']
+    features: ['4 simple fields', 'Location-based pricing', 'Auto calculations', 'Instant estimates', 'Customer-friendly']
   },
   contract: {
     title: 'Janitorial Contract Generator',
@@ -62,6 +97,8 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
 export default function Home() {
   const [estimateData, setEstimateData] = useState<EstimateData | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
+  const [contractData, setContractData] = useState<ContractData | null>(null);
+  const [janitorialFormData, setJanitorialFormData] = useState<JanitorialFormData | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [pastEntries, setPastEntries] = useState<PastEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
@@ -126,13 +163,22 @@ export default function Home() {
     localStorage.setItem(PAST_ENTRIES_KEY, JSON.stringify(updatedEntries));
   };
 
+  const handleContractGenerated = (data: ContractData, formValues: JanitorialFormData) => {
+    setContractData(data);
+    setJanitorialFormData(formValues);
+  };
+
   // Function to clear saved data
   const handleClearSavedData = () => {
     localStorage.removeItem(ESTIMATE_STORAGE_KEY);
     localStorage.removeItem(FORM_STORAGE_KEY);
     localStorage.removeItem('estimaitor_form_data');
+    localStorage.removeItem('estimaitor_simple_form_data');
+    localStorage.removeItem('estimaitor_contract_form_data');
     setEstimateData(null);
     setFormData(null);
+    setContractData(null);
+    setJanitorialFormData(null);
     window.location.reload();
   };
   
@@ -155,9 +201,11 @@ export default function Home() {
   // Function to switch modes
   const handleModeSwitch = (mode: AppMode) => {
     setCurrentMode(mode);
-    // Clear current estimate when switching modes
+    // Clear current data when switching modes
     setEstimateData(null);
     setFormData(null);
+    setContractData(null);
+    setJanitorialFormData(null);
   };
 
   const currentConfig = MODE_CONFIGS[currentMode];
@@ -204,7 +252,7 @@ export default function Home() {
                 {showPastEntries ? 'Hide Past Entries' : 'Show Past Entries'} ({pastEntries.length})
               </button>
             )}
-            {(estimateData || formData) && (
+            {(estimateData || formData || contractData || janitorialFormData) && (
               <button
                 onClick={handleClearSavedData}
                 className="text-sm text-white bg-black bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded transition-colors"
@@ -268,61 +316,142 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="card h-full">
             {currentMode === 'contract' ? (
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Janitorial Contract Generator</h2>
-                <div className="space-y-6">
-                  <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
-                    <h3 className="font-semibold text-purple-800 dark:text-purple-200 mb-2">🚧 Coming Soon!</h3>
-                    <p className="text-sm text-purple-700 dark:text-purple-300">
-                      The Janitorial Contract Generator is currently under development. This feature will include:
-                    </p>
-                    <ul className="mt-3 text-sm text-purple-700 dark:text-purple-300 space-y-1">
-                      <li>• Recurring service scheduling (daily, weekly, monthly)</li>
-                      <li>• Multi-year contract pricing with escalations</li>
-                      <li>• Service level agreement templates</li>
-                      <li>• Maintenance and deep cleaning add-ons</li>
-                      <li>• Automatic contract renewal options</li>
-                      <li>• Custom service specifications</li>
-                    </ul>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      For now, please use Professional Mode for detailed estimates or Simple Reference Mode for quick pricing.
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      <button 
-                        onClick={() => handleModeSwitch('pro')}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors text-sm"
-                      >
-                        Switch to Professional Mode
-                      </button>
-                      <button 
-                        onClick={() => handleModeSwitch('simple')}
-                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
-                      >
-                        Switch to Simple Reference
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <JanitorialContractForm onContractGenerated={handleContractGenerated} />
+            ) : currentMode === 'simple' ? (
+              <SimpleEstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             ) : (
               <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             )}
           </div>
           
-          {estimateData && formData && currentMode !== 'contract' ? (
+          {(estimateData && formData && currentMode !== 'contract') || (contractData && janitorialFormData && currentMode === 'contract') ? (
             <div className="card h-full">
-              <EstimateResult estimateData={estimateData} formData={formData} />
+              {currentMode === 'contract' && contractData && janitorialFormData ? (
+                <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
+                  <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">
+                    Janitorial Contract Summary
+                  </h2>
+                  
+                  {/* Contract Overview */}
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700 mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-purple-800 dark:text-purple-200">📄 Contract Overview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Facility</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{janitorialFormData.facilityName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Contact</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{janitorialFormData.contactName}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Building Type</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{janitorialFormData.buildingType.replace('_', ' ')}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Service Frequency</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{janitorialFormData.serviceFrequency.replace('_', ' ')}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing Summary */}
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700 mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-green-800 dark:text-green-200">💰 Pricing Summary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Monthly Rate</p>
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          ${contractData.monthlyRate.toLocaleString()}
+                        </p>
+                        {contractData.pricePerSqFt && (
+                          <p className="text-sm text-gray-500">${contractData.pricePerSqFt.toFixed(2)}/sq ft/month</p>
+                        )}
+                        {contractData.pricePerRoom && (
+                          <p className="text-sm text-gray-500">${contractData.pricePerRoom.toFixed(2)}/room/month</p>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Annual Rate</p>
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                          ${contractData.annualRate.toLocaleString()}
+                        </p>
+                        {contractData.contractTerms.annualDiscount > 0 && (
+                          <p className="text-sm text-green-600">
+                            {contractData.contractTerms.annualDiscount}% contract discount applied
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service Schedule */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-blue-800 dark:text-blue-200">📅 Service Schedule</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Frequency</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">
+                          {contractData.schedule.frequency.replace('_', ' ')}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Service Time</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">
+                          {janitorialFormData.serviceTime}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Estimated Hours</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">
+                          {contractData.schedule.estimatedHours} hours per {janitorialFormData.serviceFrequency === 'daily' ? 'week' : janitorialFormData.serviceFrequency}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service Scope Preview */}
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <h3 className="text-lg font-semibold mb-4 text-orange-800 dark:text-orange-200">🧹 Service Scope Preview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Daily Tasks</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                          {contractData.serviceScope.daily.slice(0, 3).map((task: string, index: number) => (
+                            <li key={index}>• {task}</li>
+                          ))}
+                          {contractData.serviceScope.daily.length > 3 && (
+                            <li className="text-gray-500">+ {contractData.serviceScope.daily.length - 3} more tasks...</li>
+                          )}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Weekly/Monthly Tasks</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                          {contractData.serviceScope.weekly.slice(0, 2).map((task: string, index: number) => (
+                            <li key={index}>• {task}</li>
+                          ))}
+                          {contractData.serviceScope.monthly.slice(0, 1).map((task: string, index: number) => (
+                            <li key={index}>• {task}</li>
+                          ))}
+                          <li className="text-gray-500">+ Complete scope in full contract...</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <EstimateResult estimateData={estimateData!} formData={formData!} />
+              )}
             </div>
           ) : (
             <div className="card h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
               <div className="text-center p-8">
                 {currentMode === 'contract' ? (
                   <>
-                    <h2 className="text-2xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Contract Generator Preview</h2>
+                    <h2 className="text-2xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Contract Generator</h2>
                     <p className="text-gray-600 dark:text-gray-300 mb-6">
-                      Once developed, this panel will show contract previews, recurring schedules, and pricing summaries.
+                      Fill out the facility information and service requirements to generate a comprehensive janitorial service contract.
                     </p>
                   </>
                 ) : (
@@ -335,7 +464,7 @@ export default function Home() {
                 )}
                 <div className="p-4 bg-indigo-50 dark:bg-slate-700 rounded-lg">
                   <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                    Your estimates are automatically saved and will be available when you return.
+                    Your {currentMode === 'contract' ? 'contracts' : 'estimates'} are automatically saved and will be available when you return.
                   </p>
                 </div>
               </div>
@@ -402,7 +531,7 @@ export default function Home() {
 
         <footer className="mt-12 text-center text-sm text-gray-500 py-6 border-t border-gray-200 dark:border-gray-700">
           <p>© 2023 EstimAItor - Commercial Cleaning Estimation Tool</p>
-          <p className="mt-1">Prices based on East Coast rates (VA, NC, SC, GA)</p>
+          <p className="mt-1">Prices based on East Coast rates • Home Base: High Point, NC</p>
           <p className="mt-1">Current Mode: <span className="font-semibold">{currentConfig.title}</span></p>
         </footer>
       </div>
