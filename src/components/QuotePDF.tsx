@@ -617,16 +617,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
-                <Text style={[styles.tableCell, { fontSize: 8 }]}>
-                  {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
-                  Includes all necessary equipment, supplies, labor, and travel expenses.
+              <View style={[styles.descriptionCell, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold', flex: 1 }]}>
+                  {getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft
                 </Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
-                {formatCurrency(
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                  {formatCurrency(
                     (estimateData.adjustedLineItems?.basePrice !== undefined
                       ? estimateData.adjustedLineItems.basePrice
                       : estimateData.basePrice) + 
@@ -636,9 +632,19 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     (estimateData.adjustedLineItems?.travelCost !== undefined
                       ? estimateData.adjustedLineItems.travelCost
                       : estimateData.travelCost)
-                )}
-              </Text>
+                  )}
+                </Text>
+              </View>
             </View>
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontSize: 8 }]}>
+                  {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
+                </Text>
+                <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
+                  Includes all necessary equipment, supplies, labor, and travel expenses.
+                </Text>
+              </View>
             </View>
 
 
@@ -646,22 +652,29 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {/* Window Cleaning Services Row */}
             {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
               <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Window Cleaning Services - {(() => {
-                    const windowTypes = [];
-                    if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
-                    if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
-                    if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
-                    return windowTypes.join(', ');
-                  })()} - Includes all necessary equipment, cleaning solutions, and labor</Text>
-                </View>
-                <View style={styles.amountCell}>
+                <View style={[styles.descriptionCell, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                  <Text style={[styles.tableCell, { fontWeight: 'bold', flex: 1 }]}>
+                    Window Cleaning Services - {(() => {
+                      const windowTypes = [];
+                      if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
+                      if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
+                      if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
+                      return windowTypes.join(', ');
+                    })()}
+                  </Text>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.windowCleaningCost !== undefined
                         ? estimateData.adjustedLineItems.windowCleaningCost
                         : estimateData.windowCleaningCost
                     )}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionCell}>
+                  <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
+                    Includes all necessary equipment, supplies, labor, and travel expenses.
                   </Text>
                 </View>
               </View>
