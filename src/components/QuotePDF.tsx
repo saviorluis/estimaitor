@@ -494,12 +494,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={{ flex: 1, padding: 40 }}>
           {/* Logo */}
-          <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            <Image src="/assets/logo.png" style={{ width: 100, height: 100 }} />
+          <View style={{ alignItems: 'center', marginBottom: 40 }}>
+            <Image src="/assets/logo.png" style={{ width: 150, height: 150 }} />
           </View>
 
           {/* Title */}
-          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
             POST CONSTRUCTION
           </Text>
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 60 }}>
