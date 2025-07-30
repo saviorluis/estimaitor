@@ -781,11 +781,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.termsText}>
             1. Payment Terms: Net 15 - Payment due within 15 days of completion.{'\n'}
             2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.{'\n'}
-            3. Scope: This quote covers only the services explicitly described.{'\n'}
-            4. Additional Services: Any services not specified will be quoted separately.{'\n'}
-            5. Access: Client must provide necessary access to the property.{'\n'}
-            6. Utilities: Working electricity and water must be available on-site.{'\n'}
-            7. Quote Validity: This quote is valid for 30 days from the date issued.
+            3. Rescheduling Fee: A fee of 25% of the total quote will be charged for rescheduling due to poor planning or site readiness issues.{'\n'}
+            4. Scope: This quote covers only the services explicitly described.{'\n'}
+            5. Additional Services: Any services not specified will be quoted separately.{'\n'}
+            6. Access: Client must provide necessary access to the property.{'\n'}
+            7. Utilities: Working electricity and water must be available on-site.{'\n'}
+            8. Quote Validity: This quote is valid for 30 days from the date issued.
           </Text>
         </View>
 
