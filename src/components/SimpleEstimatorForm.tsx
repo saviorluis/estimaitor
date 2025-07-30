@@ -22,6 +22,7 @@ interface SimpleFormData {
   location: string;
   needsWindowCleaning: boolean;
   numberOfWindows: number;
+  pressureWashingArea: number;
   clientName?: string;
   projectName?: string;
 }
@@ -136,13 +137,14 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
 
   // Default values for simple form
   const defaultValues = useMemo(() => ({
-    serviceType: 'commercial' as ServiceType,
-    projectType: 'office' as ProjectType,
-    cleaningType: 'final' as CleaningType,
-    squareFootage: 5000,
+    serviceType: 'residential' as ServiceType,
+    projectType: 'other' as ProjectType,
+    cleaningType: 'window_cleaning_only' as CleaningType,
+    squareFootage: 2000,
     location: 'High Point, NC',
     needsWindowCleaning: false,
-    numberOfWindows: 0,
+    numberOfWindows: 10,
+    pressureWashingArea: 1000,
     clientName: '',
     projectName: '',
     ...getSavedFormData()
@@ -177,17 +179,23 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
     }
   }, [formValues, isLoaded]);
 
-  // Auto-update project type and square footage when service type changes
+  // Auto-update project type, cleaning type, and sizing when service type changes
   useEffect(() => {
     if (!isLoaded) return;
     
-    // Set appropriate default project type based on service type
+    // Set appropriate defaults based on service type
     if (serviceType === 'residential') {
       setValue('projectType', 'other'); // Default to "Residential Home"
-      setValue('squareFootage', 2500); // Typical residential size
+      setValue('cleaningType', 'window_cleaning_only'); // Default to window cleaning
+      setValue('squareFootage', 2000); // Typical residential size
+      setValue('numberOfWindows', 10); // Default window count
+      setValue('pressureWashingArea', 1000); // Default pressure washing area
     } else if (serviceType === 'commercial') {
       setValue('projectType', 'office'); // Default to "Office Building"
+      setValue('cleaningType', 'final'); // Default to final clean
       setValue('squareFootage', 5000); // Typical commercial size
+      setValue('numberOfWindows', 0); // Reset windows
+      setValue('pressureWashingArea', 0); // Reset pressure washing
     }
   }, [serviceType, isLoaded, setValue]);
 
@@ -204,11 +212,15 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
   const convertToFullFormData = useCallback((simpleData: SimpleFormData): FormData => {
     const locationConfig = CITY_LOCATIONS[simpleData.location as keyof typeof CITY_LOCATIONS] || CITY_LOCATIONS['High Point, NC'];
     
+    // Handle different service types
+    const isWindowCleaningOnly = simpleData.serviceType === 'residential' && simpleData.cleaningType === 'window_cleaning_only';
+    const isPressureWashingOnly = simpleData.serviceType === 'residential' && simpleData.cleaningType === 'pressure_washing';
+    
     return {
       // Basic project info
       projectType: simpleData.projectType,
       cleaningType: simpleData.cleaningType,
-      squareFootage: simpleData.squareFootage,
+      squareFootage: isWindowCleaningOnly ? 1000 : (isPressureWashingOnly ? simpleData.pressureWashingArea : simpleData.squareFootage), // Use default for window cleaning, pressure washing area for pressure washing
       clientName: simpleData.clientName,
       projectName: simpleData.projectName,
       
@@ -220,21 +232,21 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
       hasVCT: false,
       vctSquareFootage: 0,
       applyMarkup: true,
-      numberOfCleaners: getRecommendedCleaners(simpleData.squareFootage),
+      numberOfCleaners: getRecommendedCleaners(simpleData.squareFootage || 1000),
       urgencyLevel: 3, // Medium urgency
       
-      // Window cleaning from simple form
-      needsWindowCleaning: simpleData.needsWindowCleaning,
-      numberOfWindows: simpleData.numberOfWindows,
+      // Window cleaning - conditional
+      needsWindowCleaning: isWindowCleaningOnly ? true : simpleData.needsWindowCleaning,
+      numberOfWindows: isWindowCleaningOnly ? simpleData.numberOfWindows : (simpleData.needsWindowCleaning ? simpleData.numberOfWindows : 0),
       numberOfLargeWindows: 0,
       numberOfHighAccessWindows: 0,
       
-      // No other add-ons in simple mode
+      // Pressure washing - conditional
       stayingOvernight: false,
       numberOfNights: 1,
-      needsPressureWashing: false,
+      needsPressureWashing: isPressureWashingOnly ? true : false,
       pressureWashingServices: [],
-      pressureWashingArea: 0,
+      pressureWashingArea: isPressureWashingOnly ? simpleData.pressureWashingArea : 0,
       pressureWashingType: 'soft_wash' as const,
       numberOfDisplayCases: 0
     };
@@ -356,8 +368,8 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                     )}
                   </div>
                   <div>
-                    <div className="font-medium text-gray-800 dark:text-gray-200">🏢 Commercial</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Offices, restaurants, retail stores</div>
+                    <div className="font-medium text-gray-800 dark:text-gray-200">🏗️ Post Construction</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Construction cleanup, final clean</div>
                   </div>
                 </div>
               </label>
@@ -438,22 +450,31 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           )}
         </div>
 
-        {/* Cleaning Type */}
+        {/* Cleaning Type - Conditional based on service type */}
         <div>
           <label htmlFor="cleaningType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Cleaning Type
+            {serviceType === 'residential' ? 'Service Type' : 'Cleaning Type'}
           </label>
           <select
             id="cleaningType"
-            {...register('cleaningType', { required: 'Cleaning type is required' })}
+            {...register('cleaningType', { required: 'Service type is required' })}
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
           >
-            <option value="rough">Rough Clean (80% rate)</option>
-            <option value="final">Final Clean (Standard rate)</option>
-            <option value="rough_final">Rough & Final Clean (120% rate)</option>
-            <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
+            {serviceType === 'residential' ? (
+              <>
+                <option value="window_cleaning_only">🪟 Window Cleaning Service</option>
+                <option value="pressure_washing">💧 Pressure Washing Service</option>
+              </>
+            ) : (
+              <>
+                <option value="rough">Rough Clean (80% rate)</option>
+                <option value="final">Final Clean (Standard rate)</option>
+                <option value="rough_final">Rough & Final Clean (120% rate)</option>
+                <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
+              </>
+            )}
           </select>
-          {formValues.cleaningType && (
+          {formValues.cleaningType && CLEANING_TYPE_DESCRIPTIONS[formValues.cleaningType] && (
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {CLEANING_TYPE_DESCRIPTIONS[formValues.cleaningType]}
             </p>
@@ -463,32 +484,86 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           )}
         </div>
 
-        {/* Building Square Footage */}
+        {/* Area/Size Input - Conditional based on service type */}
         <div>
-          <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            🏢 Building Size - Total Square Footage
-          </label>
-          <input
-            id="squareFootage"
-            type="number"
-            min="100"
-            max="1000000"
-            {...register('squareFootage', { 
-              required: 'Building square footage is required',
-              min: { value: 100, message: 'Minimum 100 sq ft' },
-              max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-            })}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-            placeholder="Enter total building square footage"
-          />
-          <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-            Interior space to be cleaned (offices, hallways, bathrooms, etc.)
-          </p>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Recommended cleaners: {recommendedCleaners}
-          </p>
+          {serviceType === 'residential' && formValues.cleaningType === 'window_cleaning_only' ? (
+            <>
+              <label htmlFor="numberOfWindows" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                🪟 Number of Windows
+              </label>
+              <input
+                id="numberOfWindows"
+                type="number"
+                min="1"
+                max="500"
+                {...register('numberOfWindows', { 
+                  required: formValues.cleaningType === 'window_cleaning_only' ? 'Number of windows is required' : false,
+                  min: { value: 1, message: 'Minimum 1 window' },
+                  max: { value: 500, message: 'Maximum 500 windows' }
+                })}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="Enter number of windows to clean"
+              />
+              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                Count all windows that need cleaning (interior and exterior)
+              </p>
+            </>
+          ) : serviceType === 'residential' && formValues.cleaningType === 'pressure_washing' ? (
+            <>
+              <label htmlFor="pressureWashingArea" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                💧 Area to Pressure Wash (sq ft)
+              </label>
+              <input
+                id="pressureWashingArea"
+                type="number"
+                min="100"
+                max="50000"
+                {...register('pressureWashingArea', { 
+                  required: formValues.cleaningType === 'pressure_washing' ? 'Pressure washing area is required' : false,
+                  min: { value: 100, message: 'Minimum 100 sq ft' },
+                  max: { value: 50000, message: 'Maximum 50,000 sq ft' }
+                })}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="Enter total area to pressure wash"
+              />
+              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                Driveways, sidewalks, decks, building exterior, etc.
+              </p>
+            </>
+          ) : (
+            <>
+              <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                🏢 Building Size - Total Square Footage
+              </label>
+              <input
+                id="squareFootage"
+                type="number"
+                min="100"
+                max="1000000"
+                {...register('squareFootage', { 
+                  required: serviceType === 'commercial' ? 'Building square footage is required' : false,
+                  min: { value: 100, message: 'Minimum 100 sq ft' },
+                  max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                })}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="Enter total building square footage"
+              />
+              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                Interior space to be cleaned (offices, hallways, bathrooms, etc.)
+              </p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Recommended cleaners: {recommendedCleaners}
+              </p>
+            </>
+          )}
           {errors.squareFootage && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
+          )}
+          {errors.numberOfWindows && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.numberOfWindows.message}</p>
+          )}
+          {errors.pressureWashingArea && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.pressureWashingArea.message}</p>
           )}
         </div>
 
