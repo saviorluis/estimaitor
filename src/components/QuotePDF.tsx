@@ -495,7 +495,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={{ flex: 1, padding: 40 }}>
           {/* Logo */}
           <View style={{ alignItems: 'center', marginBottom: 30 }}>
-            <Image src="/assets/logo.png" style={{ width: 200, height: 200 }} />
+            <Image src="/assets/logo.png" style={{ width: 120, height: 120 }} />
           </View>
 
           {/* Title */}
