@@ -628,14 +628,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                   {formatCurrency(
-                    (estimateData.adjustedLineItems?.basePrice !== undefined
-                      ? estimateData.adjustedLineItems.basePrice
+                    (adjustedPrices.basePrice !== undefined
+                      ? adjustedPrices.basePrice
                       : estimateData.basePrice * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) + 
-                    (estimateData.adjustedLineItems?.vctCost !== undefined
-                      ? estimateData.adjustedLineItems.vctCost
+                    (adjustedPrices.vctCost !== undefined
+                      ? adjustedPrices.vctCost
                       : estimateData.vctCost || 0) +
-                    (estimateData.adjustedLineItems?.travelCost !== undefined
-                      ? estimateData.adjustedLineItems.travelCost
+                    (adjustedPrices.travelCost !== undefined
+                      ? adjustedPrices.travelCost
                       : estimateData.travelCost || 0)
                   )}
                 </Text>
@@ -664,8 +664,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
-                      estimateData.adjustedLineItems?.windowCleaningCost !== undefined
-                        ? estimateData.adjustedLineItems.windowCleaningCost
+                      adjustedPrices.windowCleaningCost !== undefined
+                        ? adjustedPrices.windowCleaningCost
                         : estimateData.windowCleaningCost || 0
                     )}
                   </Text>
@@ -686,8 +686,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
-                      estimateData.adjustedLineItems?.overnightCost !== undefined
-                        ? estimateData.adjustedLineItems.overnightCost
+                      adjustedPrices.overnightCost !== undefined
+                        ? adjustedPrices.overnightCost
                         : estimateData.overnightCost || 0
                     )}
                   </Text>
@@ -708,8 +708,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
-                      estimateData.adjustedLineItems?.pressureWashingCost !== undefined
-                        ? estimateData.adjustedLineItems.pressureWashingCost
+                      adjustedPrices.pressureWashingCost !== undefined
+                        ? adjustedPrices.pressureWashingCost
                         : estimateData.pressureWashingCost || 0
                     )}
                   </Text>
@@ -729,8 +729,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
-                      estimateData.adjustedLineItems?.displayCaseCost !== undefined
-                        ? estimateData.adjustedLineItems.displayCaseCost
+                      adjustedPrices.displayCaseCost !== undefined
+                        ? adjustedPrices.displayCaseCost
                         : estimateData.displayCaseCost || 0
                     )}
                   </Text>
@@ -747,7 +747,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                  {formatCurrency(Object.keys(adjustedPrices).length > 0 
+                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                    : estimateData.totalBeforeMarkup)}
                 </Text>
               </View>
             </View>
@@ -759,7 +761,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.salesTax)}
+                  {formatCurrency((Object.keys(adjustedPrices).length > 0 
+                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                    : estimateData.totalBeforeMarkup) * 0.07)}
                 </Text>
               </View>
             </View>
@@ -771,7 +775,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
-                  {formatCurrency(estimateData.totalPrice)}
+                  {formatCurrency((Object.keys(adjustedPrices).length > 0 
+                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
+                    : estimateData.totalBeforeMarkup) * 1.07)}
                 </Text>
               </View>
             </View>
