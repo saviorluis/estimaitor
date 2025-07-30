@@ -432,3 +432,25 @@ export class PerformanceTimer {
 
 // Export singleton performance timer
 export const performanceTimer = new PerformanceTimer(); 
+
+export function getCapabilityStatementImage(projectType: string, squareFootage: number): string {
+  // If square footage is over 5000 and not a specific type, show big jobs
+  if (squareFootage > 5000 && 
+      !['restaurant', 'fast_food', 'medical', 'retail'].includes(projectType)) {
+    return '/images/Big jobs.png';
+  }
+
+  // Otherwise determine by project type
+  switch (projectType) {
+    case 'restaurant':
+    case 'fast_food':
+      return '/images/fast food.png';
+    case 'medical':
+      return '/images/medical.png';
+    case 'retail':
+      return '/images/Retail.png';
+    default:
+      // For all other cases, use the big jobs image if over 5000 sq ft
+      return squareFootage > 5000 ? '/images/Big jobs.png' : '/images/Real Capability.png';
+  }
+} 

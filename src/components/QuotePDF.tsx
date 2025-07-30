@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency, getQuoteCounter } from '@/lib/utils';
+import { formatCurrency, getQuoteCounter, getCapabilityStatementImage } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
 
 // Register fonts
@@ -563,6 +563,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </Text>
           </View>
         </View>
+      </Page>
+
+      {/* Capability Statement Page */}
+      <Page size="LETTER" style={styles.page}>
+        <Image
+          src={getCapabilityStatementImage(formData.projectType, formData.squareFootage)}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
       </Page>
 
       <Page size="LETTER" style={styles.page}>
