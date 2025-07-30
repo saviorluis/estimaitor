@@ -506,39 +506,47 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
              'PROFESSIONAL CLEANING\nSERVICES PROPOSAL'}
           </Text>
 
-          {/* Client Information */}
-          <Text style={[styles.clientName, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }]}>
-            {clientInfo.name}
-          </Text>
-          {clientInfo.company && (
-            <Text style={[styles.clientCompany, { fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#4A5568' }]}>
-              {clientInfo.company}
+          {/* Main Content Area - Centered Vertically */}
+          <View style={{ flex: 1, justifyContent: 'center', marginTop: -40 }}>
+            {/* Prepared For Section */}
+            <Text style={[styles.subtitle, { fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }]}>
+              Prepared For:
             </Text>
-          )}
+            
+            {/* Client Information */}
+            <Text style={[styles.clientName, { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }]}>
+              {clientInfo.name}
+            </Text>
+            {clientInfo.company && (
+              <Text style={[styles.clientCompany, { fontSize: 18, textAlign: 'center', marginBottom: 30, color: '#4A5568' }]}>
+                {clientInfo.company}
+              </Text>
+            )}
+            
+            <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 5 }]}>
+              Project: {quoteInfo.projectName}
+            </Text>
+            <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 20 }]}>
+              Location: {quoteInfo.projectAddress}
+            </Text>
+            
+            <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center' }]}>
+              Quote #: {quoteInfo.quoteNumber}
+            </Text>
+          </View>
           
-          <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 3 }]}>
-            Project: {quoteInfo.projectName}
-          </Text>
-          <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 20 }]}>
-            Location: {quoteInfo.projectAddress}
-          </Text>
-          
-          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
-            Quote #: {quoteInfo.quoteNumber}
-          </Text>
-          
-          {/* Company info moved to bottom */}
-          <View style={{ position: 'absolute', bottom: 30, left: 0, right: 0, alignItems: 'center' }}>
-            <Text style={[styles.companyName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
+          {/* Company info at bottom */}
+          <View style={{ position: 'absolute', bottom: 40, left: 0, right: 0, alignItems: 'center' }}>
+            <Text style={[styles.companyName, { fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }]}>
               {companyInfo.name}
             </Text>
-            <Text style={[styles.contactLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+            <Text style={[styles.contactLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
               {companyInfo.phone} | {companyInfo.email}
             </Text>
-            <Text style={[styles.addressLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+            <Text style={[styles.addressLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
               {companyInfo.address}, {companyInfo.city}
             </Text>
-            <Text style={[styles.websiteLine, { fontSize: 11, textAlign: 'center' }]}>
+            <Text style={[styles.websiteLine, { fontSize: 12, textAlign: 'center' }]}>
               {companyInfo.website}
             </Text>
           </View>
