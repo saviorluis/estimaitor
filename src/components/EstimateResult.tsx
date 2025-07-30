@@ -240,19 +240,22 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                   `Base Price (${formatCurrency(PROJECT_TYPE_MULTIPLIERS[formData.projectType] * CLEANING_TYPE_MULTIPLIERS[formData.cleaningType] * 0.18)}/sq ft)`
                 }
               </span>
-              <span className="text-gray-800 dark:text-gray-200">
+              <span className="text-gray-800 dark:text-gray-200 flex items-center">
+                <span className="text-red-400 text-sm mr-2">
+                  {formatCurrency(estimateData.basePrice * 0.6)}
+                </span>
                 {formatCurrency(estimateData.basePrice + estimateData.vctCost)}
               </span>
             </div>
 
-            <div className="flex justify-between pl-4">
-              <span className="text-gray-500 dark:text-gray-500 text-sm italic">
-                Estimated Labor Cost (60%)
-              </span>
-              <span className="text-gray-600 dark:text-gray-400 text-sm">
-                {formatCurrency(estimateData.basePrice * 0.6)}
-              </span>
-            </div>
+            {estimateData.windowCleaningCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Window Cleaning Services</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.windowCleaningCost)}
+                </span>
+              </div>
+            )}
 
             {estimateData.travelCost > 0 && (
               <div className="flex justify-between">
