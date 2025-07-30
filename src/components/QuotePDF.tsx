@@ -507,21 +507,21 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </Text>
 
           {/* Center Content */}
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', marginTop: 40 }}>
             <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }}>
               Prepared For:
             </Text>
             {clientInfo.company && (
-              <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }}>
                 {clientInfo.company}
               </Text>
             )}
 
             {/* Project Info */}
-            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 10 }}>
+            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 8 }}>
               Project: {quoteInfo.projectName}
             </Text>
-            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 10 }}>
+            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 8 }}>
               Location: {quoteInfo.projectAddress}
             </Text>
             <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
