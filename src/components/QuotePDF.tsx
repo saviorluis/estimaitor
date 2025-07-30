@@ -499,15 +499,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
 
           {/* Title */}
-          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#2563eb' }}>
             POST CONSTRUCTION
           </Text>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 60 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 60, color: '#2563eb' }}>
             CLEANING PROPOSAL
           </Text>
 
           {/* Center Content */}
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 120 }}>
             <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }}>
               Prepared For:
             </Text>
