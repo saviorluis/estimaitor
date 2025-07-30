@@ -411,6 +411,7 @@ const getScopeOfWork = (formData: FormData): string => {
   if (!scope) return 'No specific scope of work defined for this project type.';
 
   let baseScope = scope.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`);
+  baseScope += ' Includes all necessary equipment, supplies, labor, and travel expenses.';
 
   if (formData.cleaningType === 'rough_final_touchup') {
     baseScope += '\n\nThree-Stage Cleaning Schedule:\n• Rough Clean: During construction\n• Final Clean: After construction completion\n• Touch-up Clean: Before client move-in/opening';
@@ -630,7 +631,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       : estimateData.basePrice) + 
                     (estimateData.adjustedLineItems?.vctCost !== undefined
                       ? estimateData.adjustedLineItems.vctCost
-                      : estimateData.vctCost)
+                      : estimateData.vctCost) +
+                    (estimateData.adjustedLineItems?.travelCost !== undefined
+                      ? estimateData.adjustedLineItems.travelCost
+                      : estimateData.travelCost)
                 )}
               </Text>
             </View>
@@ -731,22 +735,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           )}
 
-            {/* Travel Expenses Row - positioned right above subtotal */}
-            <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Travel Expenses</Text>
-                <Text style={styles.tableCell}>{formData.distanceFromOffice || 0} miles</Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
-                  {formatCurrency(
-                    estimateData.adjustedLineItems?.travelCost !== undefined
-                      ? estimateData.adjustedLineItems.travelCost
-                      : estimateData.travelCost
-                  )}
-                </Text>
-              </View>
-            </View>
+
 
             {/* Subtotal Row */}
             <View style={styles.tableRow}>
