@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
-import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS } from '@/lib/constants';
+import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
 import QuoteTemplate from './QuoteTemplate';
 
 interface EstimateResultProps {
@@ -64,6 +64,32 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
     setShowQuote(prev => !prev);
   }, []);
 
+  // Validation check for test mode
+  const getTestValidation = () => {
+    if (!TEST_MODE) return null;
+
+    const matchingScenario = TEST_SCENARIOS.find(scenario => 
+      scenario.input.projectType === formData.projectType &&
+      scenario.input.squareFootage === formData.squareFootage &&
+      scenario.input.cleaningType === formData.cleaningType
+    );
+
+    if (!matchingScenario) return null;
+
+    const isWithinRange = estimateData.totalPrice >= matchingScenario.expectedRange.minPrice && 
+                         estimateData.totalPrice <= matchingScenario.expectedRange.maxPrice;
+
+    return (
+      <div className={`mt-4 p-4 rounded-lg ${isWithinRange ? 'bg-green-50 text-green-800' : 'bg-yellow-50 text-yellow-800'}`}>
+        <h3 className="font-semibold">Test Validation</h3>
+        <p>Scenario: {matchingScenario.name}</p>
+        <p>Expected Range: ${matchingScenario.expectedRange.minPrice} - ${matchingScenario.expectedRange.maxPrice}</p>
+        <p>Actual: ${estimateData.totalPrice.toFixed(2)}</p>
+        <p>Status: {isWithinRange ? '✅ Within expected range' : '⚠️ Outside expected range'}</p>
+      </div>
+    );
+  };
+
   // Early return if data is not available
   if (!estimateData || !formData || !calculatedValues) {
     return (
@@ -86,17 +112,81 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
     <div className="space-y-6">
       {/* Main Estimate Display */}
       <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            Estimate Results
-          </h2>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-              {formatCurrency(estimateData.totalPrice)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {formatCurrency(estimateData.pricePerSquareFoot)}/sq ft
-            </div>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+          Estimate Results
+        </h2>
+
+        {/* Test validation feedback */}
+        {TEST_MODE && getTestValidation()}
+
+        {/* Base Price */}
+        <div className="mb-4">
+          <h3 className="font-semibold text-gray-700 dark:text-gray-300">Base Price</h3>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+            ${estimateData.basePrice.toFixed(2)}
+          </p>
+        </div>
+
+        {/* Detailed Breakdown */}
+        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <p>Project Type Multiplier: {estimateData.projectTypeMultiplier}x</p>
+          <p>Cleaning Type Multiplier: {estimateData.cleaningTypeMultiplier}x</p>
+          <p>Urgency Multiplier: {estimateData.urgencyMultiplier}x</p>
+          
+          {estimateData.vctCost > 0 && (
+            <p>VCT Cleaning Cost: ${estimateData.vctCost.toFixed(2)}</p>
+          )}
+          
+          {estimateData.travelCost > 0 && (
+            <p>Travel Cost: ${estimateData.travelCost.toFixed(2)}</p>
+          )}
+          
+          {estimateData.overnightCost > 0 && (
+            <p>Overnight Cost: ${estimateData.overnightCost.toFixed(2)}</p>
+          )}
+
+          {estimateData.windowCleaningCost > 0 && (
+            <p>Window Cleaning Cost: ${estimateData.windowCleaningCost.toFixed(2)}</p>
+          )}
+
+          {estimateData.pressureWashingCost > 0 && (
+            <p>Pressure Washing Cost: ${estimateData.pressureWashingCost.toFixed(2)}</p>
+          )}
+
+          {estimateData.displayCaseCost > 0 && (
+            <p>Display Case Cleaning Cost: ${estimateData.displayCaseCost.toFixed(2)}</p>
+          )}
+        </div>
+
+        {/* Final Calculations */}
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-2">
+            <p className="flex justify-between">
+              <span>Subtotal:</span>
+              <span>${estimateData.totalBeforeMarkup.toFixed(2)}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Professional Markup (30%):</span>
+              <span>${estimateData.markup.toFixed(2)}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Sales Tax:</span>
+              <span>${estimateData.salesTax.toFixed(2)}</span>
+            </p>
+            <p className="flex justify-between text-lg font-bold text-gray-800 dark:text-gray-200">
+              <span>Total Price:</span>
+              <span>${estimateData.totalPrice.toFixed(2)}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Additional Information */}
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Additional Information</h3>
+          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <p>Price per Square Foot: ${estimateData.pricePerSquareFoot.toFixed(2)}</p>
+            <p>Estimated Hours: {estimateData.estimatedHours.toFixed(1)} hours</p>
+            <p>Time to Complete: {estimateData.timeToCompleteInDays} day(s)</p>
           </div>
         </div>
 
@@ -282,11 +372,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
       {/* Quote Template */}
       {showQuote && (
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-          <div className="p-4 bg-gray-50 dark:bg-slate-700 border-b">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              Professional Quote
-            </h3>
-          </div>
           <QuoteTemplate estimateData={estimateData} formData={formData} />
         </div>
       )}

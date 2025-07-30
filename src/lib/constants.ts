@@ -383,3 +383,142 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 
 // Performance optimized project scopes reference
 export const PROJECT_SCOPES: Record<ProjectType, string> = SCOPE_OF_WORK; 
+
+// Test Mode Configuration
+export const TEST_MODE = process.env.NODE_ENV === 'development';
+
+// Test Scenarios for Quick Validation
+export const TEST_SCENARIOS = [
+  {
+    name: 'Small Office',
+    input: {
+      projectType: 'office',
+      cleaningType: 'final',
+      squareFootage: 2500,
+      location: 'High Point, NC',
+      needsWindowCleaning: true,
+      numberOfWindows: 12,
+      clientName: 'John Smith',
+      projectName: 'Downtown Office Renovation'
+    },
+    expectedRange: {
+      minPrice: 800,
+      maxPrice: 1200
+    },
+    quoteValidation: {
+      requiredSections: [
+        'Client Information',
+        'Project Information',
+        'Service Details & Pricing',
+        'Detailed Scope of Work',
+        'Professional Terms & Conditions'
+      ],
+      expectedLineItems: [
+        'Final Clean',
+        'Travel Expenses',
+        'Window Cleaning'
+      ],
+      formatting: {
+        companyLogo: true,
+        quoteNumber: true,
+        validDates: true,
+        signatures: true,
+        pricing: {
+          subtotal: true,
+          markup: true,
+          tax: true,
+          total: true
+        }
+      }
+    }
+  },
+  {
+    name: 'Restaurant',
+    input: {
+      projectType: 'restaurant',
+      cleaningType: 'rough_final',
+      squareFootage: 3500,
+      location: 'Greensboro, NC',
+      needsWindowCleaning: true,
+      numberOfWindows: 20,
+      clientName: 'Sarah Johnson',
+      projectName: 'New Restaurant Build'
+    },
+    expectedRange: {
+      minPrice: 1500,
+      maxPrice: 2200
+    },
+    quoteValidation: {
+      requiredSections: [
+        'Client Information',
+        'Project Information',
+        'Service Details & Pricing',
+        'Detailed Scope of Work',
+        'Professional Terms & Conditions'
+      ],
+      expectedLineItems: [
+        'Rough & Final Clean',
+        'Travel Expenses',
+        'Window Cleaning'
+      ],
+      formatting: {
+        companyLogo: true,
+        quoteNumber: true,
+        validDates: true,
+        signatures: true,
+        pricing: {
+          subtotal: true,
+          markup: true,
+          tax: true,
+          total: true
+        }
+      }
+    }
+  },
+  {
+    name: 'Retail Space',
+    input: {
+      projectType: 'retail',
+      cleaningType: 'final',
+      squareFootage: 5000,
+      location: 'High Point, NC',
+      needsWindowCleaning: true,
+      numberOfWindows: 18,
+      clientName: 'Robert Chen',
+      projectName: 'Uptown Retail Center',
+      hasVCT: true,
+      vctSquareFootage: 3000
+    },
+    expectedRange: {
+      minPrice: 2000,
+      maxPrice: 3000
+    },
+    quoteValidation: {
+      requiredSections: [
+        'Client Information',
+        'Project Information',
+        'Service Details & Pricing',
+        'Detailed Scope of Work',
+        'Professional Terms & Conditions'
+      ],
+      expectedLineItems: [
+        'Final Clean',
+        'Travel Expenses',
+        'Window Cleaning',
+        'VCT Flooring Treatment'
+      ],
+      formatting: {
+        companyLogo: true,
+        quoteNumber: true,
+        validDates: true,
+        signatures: true,
+        pricing: {
+          subtotal: true,
+          markup: true,
+          tax: true,
+          total: true
+        }
+      }
+    }
+  }
+]; 

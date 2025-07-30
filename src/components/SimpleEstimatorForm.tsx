@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
-import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/constants';
+import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
 
 interface SimpleEstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
@@ -269,6 +269,29 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
         Quick Estimate Calculator
       </h2>
       
+      {/* Test Mode Controls */}
+      {TEST_MODE && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+          <h3 className="text-lg font-semibold mb-2 text-blue-800 dark:text-blue-200">Test Mode</h3>
+          <div className="space-y-2">
+            {TEST_SCENARIOS.map((scenario, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  // Set form values from test scenario
+                  Object.entries(scenario.input).forEach(([key, value]) => {
+                    setValue(key as keyof SimpleFormData, value);
+                  });
+                }}
+                className="block w-full text-left px-4 py-2 rounded bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors"
+              >
+                Run Test: {scenario.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Service Type Selection */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-green-200 dark:border-green-700">
