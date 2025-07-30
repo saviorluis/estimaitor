@@ -914,7 +914,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
     })
   );
 
-  // Base Cleaning Service
+  // Cleaning Services (Base + VCT integrated)
   rows.push(
     new TableRow({
       children: [
@@ -923,11 +923,18 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${(formData.squareFootage || 0).toLocaleString()} sq ft`,
+                  text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${(formData.squareFootage || 0).toLocaleString()} sq ft total cleaning area`,
                   bold: true,
                 }),
               ],
             }),
+            ...(formData.hasVCT ? [
+              new Paragraph({
+                children: [
+                  new TextRun(`Includes ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing`),
+                ],
+              })
+            ] : []),
           ],
         }),
         new TableCell({
@@ -937,9 +944,9 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
               children: [
                 new TextRun(
                   formatCurrency(
-                    estimateData.basePrice *
+                    (estimateData.basePrice *
                     estimateData.projectTypeMultiplier *
-                    estimateData.cleaningTypeMultiplier
+                    estimateData.cleaningTypeMultiplier) + estimateData.vctCost
                   )
                 ),
               ],
@@ -949,41 +956,6 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
       ],
     })
   );
-
-  // VCT Flooring if applicable
-  if (formData.hasVCT) {
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: "VCT Flooring Treatment",
-                    bold: true,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun("Stripping, waxing, and buffing of vinyl composition tile"),
-                ],
-              }),
-            ],
-          }),
-          new TableCell({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [new TextRun(formatCurrency(estimateData.vctCost))],
-              }),
-            ],
-          }),
-        ],
-      })
-    );
-  }
 
   // Pressure Washing if applicable
   if (formData.needsPressureWashing) {

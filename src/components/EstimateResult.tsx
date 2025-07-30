@@ -239,23 +239,15 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">
-                Base Price ({formatCurrency(PROJECT_TYPE_MULTIPLIERS[formData.projectType] * CLEANING_TYPE_MULTIPLIERS[formData.cleaningType] * 0.18)}/sq ft)
+                {formData.hasVCT ? 
+                  `Cleaning Services (${formData.squareFootage.toLocaleString()} sq ft + ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT)` :
+                  `Base Price (${formatCurrency(PROJECT_TYPE_MULTIPLIERS[formData.projectType] * CLEANING_TYPE_MULTIPLIERS[formData.cleaningType] * 0.18)}/sq ft)`
+                }
               </span>
               <span className="text-gray-800 dark:text-gray-200">
-                {formatCurrency(estimateData.basePrice)}
+                {formatCurrency(estimateData.basePrice + estimateData.vctCost)}
               </span>
             </div>
-
-            {estimateData.vctCost > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
-                  VCT Flooring ({(formData.vctSquareFootage || 0).toLocaleString()} sq ft)
-                </span>
-                <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.vctCost)}
-                </span>
-              </div>
-            )}
 
 
 

@@ -394,7 +394,7 @@ const getScopeOfWork = (formData: FormData): string => {
   }
 
   if (formData.hasVCT) {
-    baseScope += '\n\nVCT Flooring Treatment: Stripping, waxing, and buffing of vinyl composition tile.';
+    baseScope += `\n\nVCT Flooring Services: Professional stripping, waxing, and buffing of ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft of vinyl composition tile flooring.`;
   }
 
   if (formData.needsPressureWashing && formData.pressureWashingArea > 0) {
@@ -617,42 +617,30 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Pricing</Text>
 
-          {/* Base Cleaning Service */}
+          {/* Cleaning Services (Base + VCT integrated) */}
           <View style={styles.lineItem}>
             <View style={styles.lineItemContent}>
               <Text style={styles.lineItemTitle}>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
               <Text style={styles.lineItemDescription}>
-                {formData.squareFootage.toLocaleString()} sq ft
+                {formData.squareFootage.toLocaleString()} sq ft total cleaning area
               </Text>
+              {formData.hasVCT && (
+                <Text style={styles.lineItemDescription}>
+                  Includes {(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing
+                </Text>
+              )}
             </View>
             <Text style={styles.lineItemAmount}>
               {formatCurrency(
-                estimateData.adjustedLineItems?.basePrice !== undefined
+                (estimateData.adjustedLineItems?.basePrice !== undefined
                   ? estimateData.adjustedLineItems.basePrice
-                  : estimateData.basePrice
+                  : estimateData.basePrice) + 
+                (estimateData.adjustedLineItems?.vctCost !== undefined
+                  ? estimateData.adjustedLineItems.vctCost
+                  : estimateData.vctCost)
               )}
             </Text>
           </View>
-
-          {/* VCT Flooring if applicable */}
-          {formData.hasVCT && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>VCT Flooring Treatment</Text>
-                <Text style={styles.lineItemDescription}>
-                  {(formData.vctSquareFootage || 0).toLocaleString()} sq ft of VCT flooring
-                </Text>
-                <Text style={styles.lineItemDescription}>Vinyl Composition Tile floor cleaning and maintenance</Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.vctCost !== undefined
-                    ? estimateData.adjustedLineItems.vctCost
-                    : estimateData.vctCost
-                )}
-              </Text>
-            </View>
-          )}
 
 
 
