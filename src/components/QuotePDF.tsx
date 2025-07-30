@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     backgroundColor: '#F0F0F0',
+    flexDirection: 'row',
   },
   tableCell: {
     padding: 5,
