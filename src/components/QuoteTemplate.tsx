@@ -12,7 +12,7 @@ import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
-import { SCOPE_OF_WORK, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
+import { SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
 const CompanyLogo = ({ className = "" }: { className?: string }) => {
@@ -640,148 +640,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     };
   }, []);
 
-  // Add validation function
-  const validateQuote = () => {
-    if (!TEST_MODE) return null;
 
-    const matchingScenario = TEST_SCENARIOS.find(scenario => 
-      scenario.input.projectType === formData.projectType &&
-      scenario.input.squareFootage === formData.squareFootage &&
-      scenario.input.cleaningType === formData.cleaningType
-    );
-
-    if (!matchingScenario) return null;
-
-    const validation = matchingScenario.quoteValidation;
-    const results = {
-      sections: {
-        missing: [] as string[],
-        present: [] as string[]
-      },
-      lineItems: {
-        missing: [] as string[],
-        present: [] as string[]
-      },
-      formatting: {
-        issues: [] as string[],
-        passed: [] as string[]
-      }
-    };
-
-    // Validate required sections
-    validation.requiredSections.forEach(section => {
-      if (document.body.innerHTML.includes(section)) {
-        results.sections.present.push(section);
-      } else {
-        results.sections.missing.push(section);
-      }
-    });
-
-    // Validate line items
-    validation.expectedLineItems.forEach(item => {
-      if (document.body.innerHTML.includes(item)) {
-        results.lineItems.present.push(item);
-      } else {
-        results.lineItems.missing.push(item);
-      }
-    });
-
-    // Validate formatting
-    const format = validation.formatting;
-    if (format.companyLogo && !document.querySelector('img[src*="logo"]')) {
-      results.formatting.issues.push('Company logo missing');
-    } else {
-      results.formatting.passed.push('Company logo present');
-    }
-
-    if (format.quoteNumber && !document.body.innerHTML.includes('Quote #')) {
-      results.formatting.issues.push('Quote number missing');
-    } else {
-      results.formatting.passed.push('Quote number present');
-    }
-
-    if (format.validDates && !document.body.innerHTML.includes('Valid Until')) {
-      results.formatting.issues.push('Valid until date missing');
-    } else {
-      results.formatting.passed.push('Valid until date present');
-    }
-
-    // Validate pricing elements
-    const pricing = format.pricing;
-    if (pricing.subtotal && !document.body.innerHTML.includes('Subtotal')) {
-      results.formatting.issues.push('Subtotal missing');
-    } else {
-      results.formatting.passed.push('Subtotal present');
-    }
-
-    if (pricing.markup && !document.body.innerHTML.includes('Markup')) {
-      results.formatting.issues.push('Markup missing');
-    } else {
-      results.formatting.passed.push('Markup present');
-    }
-
-    if (pricing.tax && !document.body.innerHTML.includes('Sales Tax')) {
-      results.formatting.issues.push('Sales tax missing');
-    } else {
-      results.formatting.passed.push('Sales tax present');
-    }
-
-    if (pricing.total && !document.body.innerHTML.includes('Total:')) {
-      results.formatting.issues.push('Total missing');
-    } else {
-      results.formatting.passed.push('Total present');
-    }
-
-    return results;
-  };
-
-  // Add validation display
-  const ValidationResults = () => {
-    const results = validateQuote();
-    if (!results) return null;
-
-    return (
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
-        <h3 className="text-lg font-semibold mb-2">Quote Validation Results</h3>
-        
-        {/* Sections */}
-        <div className="mb-3">
-          <h4 className="font-medium">Required Sections:</h4>
-          {results.sections.missing.length === 0 ? (
-            <p className="text-green-600">✓ All required sections present</p>
-          ) : (
-            <p className="text-red-600">
-              Missing sections: {results.sections.missing.join(', ')}
-            </p>
-          )}
-        </div>
-
-        {/* Line Items */}
-        <div className="mb-3">
-          <h4 className="font-medium">Expected Line Items:</h4>
-          {results.lineItems.missing.length === 0 ? (
-            <p className="text-green-600">✓ All expected line items present</p>
-          ) : (
-            <p className="text-red-600">
-              Missing items: {results.lineItems.missing.join(', ')}
-            </p>
-          )}
-        </div>
-
-        {/* Formatting */}
-        <div>
-          <h4 className="font-medium">Formatting:</h4>
-          {results.formatting.issues.length === 0 ? (
-            <p className="text-green-600">✓ All formatting requirements met</p>
-          ) : (
-            <p className="text-red-600">
-              Formatting issues: {results.formatting.issues.join(', ')}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
@@ -1127,8 +986,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </div>
         </div>
       </div>
-      {/* Test validation results */}
-      {TEST_MODE && <ValidationResults />}
+
 
       {/* ACTUAL QUOTE DISPLAY - This shows the formatted quote for preview and printing */}
       <div className="quote-display print:block">
