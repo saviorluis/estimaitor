@@ -1,5 +1,6 @@
 import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -36,9 +37,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="h-full bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </div>
+        <ThemeProvider>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

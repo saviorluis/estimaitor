@@ -5,6 +5,7 @@ import EstimatorForm from '@/components/EstimatorForm';
 import SimpleEstimatorForm from '@/components/SimpleEstimatorForm';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
+import AdminThemeMenu from '@/components/AdminThemeMenu';
 import { EstimateData, FormData } from '@/lib/types';
 
 // Storage keys for saved data
@@ -105,6 +106,7 @@ export default function Home() {
   const [pastEntries, setPastEntries] = useState<PastEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
   const [currentMode, setCurrentMode] = useState<AppMode>('pro');
+  const [showAdminThemeMenu, setShowAdminThemeMenu] = useState(false);
 
   // Load saved data on initial render
   useEffect(() => {
@@ -548,8 +550,7 @@ export default function Home() {
             onClick={() => {
               const passcode = prompt('Enter admin passcode:');
               if (passcode === '1234') {
-                alert('Admin access granted!');
-                // Add admin functionality here
+                setShowAdminThemeMenu(true);
               } else if (passcode !== null) {
                 alert('Incorrect passcode');
               }
@@ -557,6 +558,12 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* Admin Theme Menu */}
+      <AdminThemeMenu 
+        isOpen={showAdminThemeMenu} 
+        onClose={() => setShowAdminThemeMenu(false)} 
+      />
     </main>
   );
 } 
