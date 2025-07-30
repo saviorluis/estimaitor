@@ -651,33 +651,35 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
             {/* Window Cleaning Services Row */}
             {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
-              <View style={styles.tableRow}>
-                <View style={[styles.descriptionCell, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold', flex: 1 }]}>
-                    Window Cleaning Services - {(() => {
-                      const windowTypes = [];
-                      if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
-                      if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
-                      if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
-                      return windowTypes.join(', ');
-                    })()}
-                  </Text>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(
-                      estimateData.adjustedLineItems?.windowCleaningCost !== undefined
-                        ? estimateData.adjustedLineItems.windowCleaningCost
-                        : estimateData.windowCleaningCost || 0
-                    )}
-                  </Text>
+              <>
+                <View style={styles.tableRow}>
+                  <View style={[styles.descriptionCell, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', flex: 1 }]}>
+                      Window Cleaning Services - {(() => {
+                        const windowTypes = [];
+                        if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
+                        if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
+                        if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
+                        return windowTypes.join(', ');
+                      })()}
+                    </Text>
+                    <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                      {formatCurrency(
+                        estimateData.adjustedLineItems?.windowCleaningCost !== undefined
+                          ? estimateData.adjustedLineItems.windowCleaningCost
+                          : estimateData.windowCleaningCost || 0
+                      )}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
-                    Includes all necessary equipment, supplies, labor, and travel expenses.
-                  </Text>
+                <View style={styles.tableRow}>
+                  <View style={styles.descriptionCell}>
+                    <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
+                      Includes all necessary equipment, supplies, labor, and travel expenses.
+                    </Text>
+                  </View>
                 </View>
-              </View>
+              </>
             )}
 
             {/* Overnight Accommodations Row */}
@@ -738,7 +740,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       estimateData.adjustedLineItems?.displayCaseCost !== undefined
                         ? estimateData.adjustedLineItems.displayCaseCost
-                        : estimateData.displayCaseCost
+                        : estimateData.displayCaseCost || 0
                     )}
                   </Text>
                 </View>
