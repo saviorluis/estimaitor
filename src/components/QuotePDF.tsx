@@ -625,13 +625,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   {formatCurrency(
                     (estimateData.adjustedLineItems?.basePrice !== undefined
                       ? estimateData.adjustedLineItems.basePrice
-                      : estimateData.basePrice) + 
+                      : estimateData.basePrice * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) + 
                     (estimateData.adjustedLineItems?.vctCost !== undefined
                       ? estimateData.adjustedLineItems.vctCost
-                      : estimateData.vctCost) +
+                      : estimateData.vctCost || 0) +
                     (estimateData.adjustedLineItems?.travelCost !== undefined
                       ? estimateData.adjustedLineItems.travelCost
-                      : estimateData.travelCost)
+                      : estimateData.travelCost || 0)
                   )}
                 </Text>
               </View>
@@ -666,7 +666,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       estimateData.adjustedLineItems?.windowCleaningCost !== undefined
                         ? estimateData.adjustedLineItems.windowCleaningCost
-                        : estimateData.windowCleaningCost
+                        : estimateData.windowCleaningCost || 0
                     )}
                   </Text>
                 </View>
@@ -695,7 +695,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       estimateData.adjustedLineItems?.overnightCost !== undefined
                         ? estimateData.adjustedLineItems.overnightCost
-                        : estimateData.overnightCost
+                        : estimateData.overnightCost || 0
                     )}
                   </Text>
                 </View>
@@ -717,7 +717,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       estimateData.adjustedLineItems?.pressureWashingCost !== undefined
                         ? estimateData.adjustedLineItems.pressureWashingCost
-                        : estimateData.pressureWashingCost
+                        : estimateData.pressureWashingCost || 0
                     )}
                   </Text>
                 </View>
