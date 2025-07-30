@@ -378,11 +378,11 @@ export function calculateEstimate(formData: FormData): EstimateData {
     vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
     pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
     windowCleaningCost = calculateWindowCleaningCost(
-      needsWindowCleaning,
-      numberOfWindows,
-      numberOfLargeWindows,
-      numberOfHighAccessWindows
-    );
+    needsWindowCleaning,
+    numberOfWindows,
+    numberOfLargeWindows,
+    numberOfHighAccessWindows
+  );
   }
 
   const travelCost = calculateTravelCost(distanceFromOffice);
@@ -412,15 +412,15 @@ export function calculateEstimate(formData: FormData): EstimateData {
     additionalHours = calculateAdditionalHours(false, 0, true, numberOfWindows, numberOfLargeWindows, numberOfHighAccessWindows, projectType, numberOfDisplayCases);
   } else {
     additionalHours = calculateAdditionalHours(
-      needsPressureWashing,
-      pressureWashingArea,
-      needsWindowCleaning,
-      numberOfWindows,
-      numberOfLargeWindows,
-      numberOfHighAccessWindows,
-      projectType,
-      numberOfDisplayCases
-    );
+    needsPressureWashing,
+    pressureWashingArea,
+    needsWindowCleaning,
+    numberOfWindows,
+    numberOfLargeWindows,
+    numberOfHighAccessWindows,
+    projectType,
+    numberOfDisplayCases
+  );
   }
   
   const estimatedHours = baseHours + additionalHours;

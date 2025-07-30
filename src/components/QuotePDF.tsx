@@ -40,7 +40,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   logoAndCompany: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
   },
   quoteInfoBelow: {
@@ -206,8 +207,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   logo: {
-    width: '100%',
-    height: '100%',
+    width: 80,
+    height: 80,
     objectFit: 'contain'
   },
   companyHeader: {
@@ -475,10 +476,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
           <View style={styles.logoContainer}>
-            {/* Logo temporarily removed for debugging - will re-add with proper path */}
-            <Text style={[styles.companyName, { fontSize: 20, fontWeight: 'bold' }]}>
-              {companyInfo.name}
-            </Text>
+            <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
           </View>
           
           {formData.cleaningType === 'pressure_washing' ? (
@@ -538,21 +536,23 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.header}>
           <View style={styles.leftSide}>
             {/* Empty left side - company info moved to right */}
-          </View>
+              </View>
           <View style={styles.rightSide}>
             <View style={styles.logoAndCompany}>
-              {/* Logo temporarily removed for debugging - will re-add with proper path */}
-              <Text style={[styles.companyName, { fontSize: 16, fontWeight: 'bold' }]}>{companyInfo.name}</Text>
-              <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-              <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-              <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
-              <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-              <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+              <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
+              <View style={{ marginLeft: 15 }}>
+                <Text style={styles.companyName}>{companyInfo.name}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+                <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+                <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+                <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+              </View>
             </View>
             <View style={styles.quoteInfoBelow}>
-              <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
-              <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
             </View>
           </View>
         </View>
@@ -560,209 +560,200 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         {/* Client and Project Information on same horizontal line */}
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
-            <Text style={styles.sectionTitle}>Client Information</Text>
-            <Text style={styles.clientText}>{clientInfo.name}</Text>
-            <Text style={styles.clientText}>{clientInfo.company}</Text>
-            <Text style={styles.clientText}>{clientInfo.address}</Text>
-            <Text style={styles.clientText}>{clientInfo.email}</Text>
-            <Text style={styles.clientText}>{clientInfo.phone}</Text>
-          </View>
+          <Text style={styles.sectionTitle}>Client Information</Text>
+          <Text style={styles.clientText}>{clientInfo.name}</Text>
+          <Text style={styles.clientText}>{clientInfo.company}</Text>
+          <Text style={styles.clientText}>{clientInfo.address}</Text>
+          <Text style={styles.clientText}>{clientInfo.email}</Text>
+          <Text style={styles.clientText}>{clientInfo.phone}</Text>
+        </View>
           <View style={styles.infoColumn}>
-            <Text style={styles.sectionTitle}>Project Information</Text>
-            <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
-            <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-            <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-            <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+          <Text style={styles.sectionTitle}>Project Information</Text>
+          <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
+          <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
+          <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
+          <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+          <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
           </View>
         </View>
 
-        {/* Service Details */}
+        {/* Service Details Table */}
         <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Service Details</Text>
           
-          {/* Cleaning Type Description */}
-          <View style={styles.serviceDescription}>
-            <Text style={styles.serviceTitle}>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
-            <Text style={styles.serviceInfo}>
-              Square Footage: {formData.squareFootage.toLocaleString()} sq ft
-            </Text>
+          <View style={styles.table}>
+            {/* Table Header */}
+            <View style={styles.tableHeader}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Description</Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Amount</Text>
+              </View>
+            </View>
+
+            {/* Main Cleaning Service Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
+                <Text style={styles.tableCell}>
+                  {getScopeOfWork(formData)}
+                </Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                  {formatCurrency(
+                    (estimateData.adjustedLineItems?.basePrice !== undefined
+                      ? estimateData.adjustedLineItems.basePrice
+                      : estimateData.basePrice) + 
+                    (estimateData.adjustedLineItems?.vctCost !== undefined
+                      ? estimateData.adjustedLineItems.vctCost
+                      : estimateData.vctCost)
+                  )}
+                </Text>
+              </View>
+            </View>
+
+            {/* Travel Expenses Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionColumn}>
+                <Text style={styles.tableCellTitle}>Travel Expenses</Text>
+                <Text style={styles.tableCellText}>{formData.distanceFromOffice || 0} miles</Text>
+              </View>
+              <View style={styles.amountColumn}>
+                <Text style={styles.tableCellAmount}>
+                  {formatCurrency(
+                    estimateData.adjustedLineItems?.travelCost !== undefined
+                      ? estimateData.adjustedLineItems.travelCost
+                      : estimateData.travelCost
+                  )}
+                </Text>
+              </View>
+            </View>
+
+            {/* Window Cleaning Services Row */}
+            {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionColumn}>
+                  <Text style={styles.tableCellTitle}>Window Cleaning Services</Text>
+                  <Text style={styles.tableCellText}>
+                    {formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows || 0} large windows, {formData.numberOfHighAccessWindows || 0} high-access windows
+                  </Text>
+                  <Text style={styles.tableCellText}>Includes all necessary equipment, cleaning solutions, and labor</Text>
+                </View>
+                <View style={styles.amountColumn}>
+                  <Text style={styles.tableCellAmount}>
+                    {formatCurrency(
+                      estimateData.adjustedLineItems?.windowCleaningCost !== undefined
+                        ? estimateData.adjustedLineItems.windowCleaningCost
+                        : estimateData.windowCleaningCost
+                    )}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Overnight Accommodations Row */}
+            {formData.stayingOvernight && (
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionColumn}>
+                  <Text style={styles.tableCellTitle}>Overnight Accommodations</Text>
+                  <Text style={styles.tableCellText}>
+                    {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
+                  </Text>
+                  <Text style={styles.tableCellText}>Includes hotel accommodations, meals & incidentals, and coordination</Text>
+                </View>
+                <View style={styles.amountColumn}>
+                  <Text style={styles.tableCellAmount}>
+                    {formatCurrency(
+                      estimateData.adjustedLineItems?.overnightCost !== undefined
+                        ? estimateData.adjustedLineItems.overnightCost
+                        : estimateData.overnightCost
+                    )}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Pressure Washing Services Row */}
+            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionColumn}>
+                  <Text style={styles.tableCellTitle}>Pressure Washing Services</Text>
+                  <Text style={styles.tableCellText}>
+                    {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
+                  </Text>
+                  <Text style={styles.tableCellText}>Includes equipment rental and cleaning solutions</Text>
+                </View>
+                <View style={styles.amountColumn}>
+                  <Text style={styles.tableCellAmount}>
+                    {formatCurrency(
+                      estimateData.adjustedLineItems?.pressureWashingCost !== undefined
+                        ? estimateData.adjustedLineItems.pressureWashingCost
+                        : estimateData.pressureWashingCost
+                    )}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Display Case Cleaning Row */}
+            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionColumn}>
+                  <Text style={styles.tableCellTitle}>Display Case Cleaning</Text>
+                  <Text style={styles.tableCellText}>
+                    {formData.numberOfDisplayCases} display cases with specialized cleaning
+                  </Text>
+                </View>
+                <View style={styles.amountColumn}>
+                  <Text style={styles.tableCellAmount}>
+                    {formatCurrency(
+                      estimateData.adjustedLineItems?.displayCaseCost !== undefined
+                        ? estimateData.adjustedLineItems.displayCaseCost
+                        : estimateData.displayCaseCost
+                    )}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Subtotal Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionColumn}>
+                <Text style={styles.tableCellTitle}>Subtotal</Text>
+              </View>
+              <View style={styles.amountColumn}>
+                <Text style={styles.tableCellAmount}>
+                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Sales Tax Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionColumn}>
+                <Text style={styles.tableCellTitle}>Sales Tax (7%)</Text>
+              </View>
+              <View style={styles.amountColumn}>
+                <Text style={styles.tableCellAmount}>
+                  {formatCurrency(estimateData.salesTax)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Total Row */}
+            <View style={styles.tableRowLast}>
+              <View style={styles.descriptionColumn}>
+                <Text style={[styles.tableCellTitle, { fontSize: 12, fontWeight: 'bold' }]}>TOTAL</Text>
+              </View>
+              <View style={styles.amountColumn}>
+                <Text style={[styles.tableCellAmount, { fontSize: 12, fontWeight: 'bold' }]}>
+                  {formatCurrency(estimateData.totalPrice)}
+                </Text>
+              </View>
+            </View>
           </View>
-        </View>
-
-        {/* Scope of Work */}
-        <View style={[styles.section, { marginTop: 10 }]}>
-          <Text style={styles.sectionTitle}>Detailed Scope of Work</Text>
-          <Text style={styles.scopeText}>
-            {getScopeOfWork(formData)}
-          </Text>
-        </View>
-
-        {/* Window Cleaning Services (if applicable) */}
-        {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
-          <View style={[styles.section, { marginTop: 10 }]}>
-            <Text style={styles.sectionTitle}>Window Cleaning Services</Text>
-            <Text style={styles.serviceInfo}>
-              {formData.numberOfWindows} windows requiring professional cleaning
-            </Text>
-          </View>
-        )}
-
-        {/* Travel Expenses */}
-        <View style={[styles.section, { marginTop: 10 }]}>
-          <Text style={styles.sectionTitle}>Travel Expenses</Text>
-          <Text style={styles.serviceInfo}>
-            Distance from our facility: {formData.distanceFromOffice || 0} miles
-          </Text>
-        </View>
-
-        {/* Pricing Section */}
-        <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Pricing</Text>
-
-          {/* Cleaning Services (Base + VCT integrated) */}
-          <View style={styles.lineItem}>
-            <View style={styles.lineItemContent}>
-              <Text style={styles.lineItemTitle}>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
-              <Text style={styles.lineItemDescription}>
-                {formData.squareFootage.toLocaleString()} sq ft total cleaning area
-              </Text>
-              {formData.hasVCT && (
-                <Text style={styles.lineItemDescription}>
-                  Includes {(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing
-                </Text>
-              )}
-            </View>
-            <Text style={styles.lineItemAmount}>
-              {formatCurrency(
-                (estimateData.adjustedLineItems?.basePrice !== undefined
-                  ? estimateData.adjustedLineItems.basePrice
-                  : estimateData.basePrice) + 
-                (estimateData.adjustedLineItems?.vctCost !== undefined
-                  ? estimateData.adjustedLineItems.vctCost
-                  : estimateData.vctCost)
-              )}
-            </Text>
-          </View>
-
-
-
-          {/* Window Cleaning Services (pricing) */}
-          {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Window Cleaning Services</Text>
-                <Text style={styles.lineItemDescription}>
-                  {formData.numberOfWindows} windows requiring professional cleaning
-                </Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.windowCleaningCost !== undefined
-                    ? estimateData.adjustedLineItems.windowCleaningCost
-                    : estimateData.windowCleaningCost
-                )}
-              </Text>
-            </View>
-          )}
-
-          {/* Travel Expenses */}
-          <View style={styles.lineItem}>
-            <View style={styles.lineItemContent}>
-              <Text style={styles.lineItemTitle}>Travel Expenses</Text>
-              <Text style={styles.lineItemDescription}>
-                Travel to project location ({formData.distanceFromOffice || 0} miles from our facility)
-              </Text>
-            </View>
-            <Text style={styles.lineItemAmount}>
-              {formatCurrency(
-                estimateData.adjustedLineItems?.travelCost !== undefined
-                  ? estimateData.adjustedLineItems.travelCost
-                  : estimateData.travelCost
-              )}
-            </Text>
-          </View>
-
-          {/* Overnight Accommodations if applicable */}
-          {formData.stayingOvernight && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Overnight Accommodations</Text>
-                <Text style={styles.lineItemDescription}>
-                  {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
-                </Text>
-                <Text style={styles.lineItemDescription}>
-                  Includes hotel accommodations ({Math.ceil(formData.numberOfCleaners / 2)} rooms), meals & incidentals, and coordination
-                </Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.overnightCost !== undefined
-                    ? estimateData.adjustedLineItems.overnightCost
-                    : estimateData.overnightCost
-                )}
-              </Text>
-            </View>
-          )}
-
-          {/* Pressure Washing if applicable */}
-          {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Pressure Washing Services</Text>
-                <Text style={styles.lineItemDescription}>
-                  {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
-                </Text>
-                <Text style={styles.lineItemDescription}>Includes equipment rental and cleaning solutions</Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.pressureWashingCost !== undefined
-                    ? estimateData.adjustedLineItems.pressureWashingCost
-                    : estimateData.pressureWashingCost
-                )}
-              </Text>
-            </View>
-          )}
-
-          {/* Display case cleaning for jewelry stores */}
-          {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Display Case Cleaning</Text>
-                <Text style={styles.lineItemDescription}>
-                  {formData.numberOfDisplayCases} display cases with specialized cleaning
-                </Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  estimateData.adjustedLineItems?.displayCaseCost !== undefined
-                    ? estimateData.adjustedLineItems.displayCaseCost
-                    : estimateData.displayCaseCost
-                )}
-              </Text>
-            </View>
-          )}
-
-          {/* Urgency Adjustment if applicable */}
-          {estimateData.urgencyMultiplier > 1 && (
-            <View style={styles.lineItem}>
-              <View style={styles.lineItemContent}>
-                <Text style={styles.lineItemTitle}>Urgency Adjustment</Text>
-                <Text style={styles.lineItemDescription}>
-                  {((estimateData.urgencyMultiplier - 1) * 100).toFixed(0)}% adjustment for expedited timeline
-                </Text>
-              </View>
-              <Text style={styles.lineItemAmount}>
-                {formatCurrency(
-                  (estimateData.basePrice + estimateData.vctCost + estimateData.travelCost + 
-                   estimateData.overnightCost + estimateData.pressureWashingCost + 
-                   estimateData.windowCleaningCost + estimateData.displayCaseCost) * 
-                  (estimateData.urgencyMultiplier - 1)
-                )}
-              </Text>
-            </View>
-          )}
         </View>
 
         {/* Pricing Summary */}
