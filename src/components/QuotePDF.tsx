@@ -175,6 +175,17 @@ const styles = StyleSheet.create({
   signatureLabel: {
     fontSize: 8,
   },
+  signatureBox: {
+    width: '45%',
+  },
+  signatureTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCCCCC',
+    paddingBottom: 5,
+  },
   footer: {
     position: 'absolute',
     bottom: 30,
@@ -743,12 +754,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
 
             {/* Total Row */}
-            <View style={styles.tableRowLast}>
+            <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                <Text style={[[styles.tableCell, { fontWeight: 'bold' }], { fontSize: 12, fontWeight: 'bold' }]}>TOTAL</Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 12 }]}>TOTAL</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }], { fontSize: 12, fontWeight: 'bold' }]}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
                   {formatCurrency(estimateData.totalPrice)}
                 </Text>
               </View>
@@ -797,35 +808,42 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Professional Terms & Conditions</Text>
           <Text style={styles.termsText}>
-            • Payment Terms: Net 15 - Payment due within 15 days of completion{'\n'}
-            • Cancellation Policy: 48-hour notice required for cancellation or rescheduling{'\n'}
-            • Scope: This quote covers only the services explicitly described{'\n'}
-            • Additional Services: Any services not specified will be quoted separately{'\n'}
-            • Access: Client must provide necessary access to the property{'\n'}
-            • Utilities: Working electricity and water must be available on-site{'\n'}
-            • Quote Validity: This quote is valid for 30 days from the date issued{'\n'}
-            • Reschedule/Site Access Policy: If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip{'\n'}
-            • Insurance & Liability: Full commercial general liability and workers compensation coverage maintained for financial protection
+            1. Payment Terms: Net 15 - Payment due within 15 days of completion.{'\n'}
+            2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.{'\n'}
+            3. Scope: This quote covers only the services explicitly described.{'\n'}
+            4. Additional Services: Any services not specified will be quoted separately.{'\n'}
+            5. Access: Client must provide necessary access to the property.{'\n'}
+            6. Utilities: Working electricity and water must be available on-site.{'\n'}
+            7. Quote Validity: This quote is valid for 30 days from the date issued.
           </Text>
         </View>
 
-        {/* Company Information */}
-        <View style={[styles.section, { marginTop: 30 }]}>
-          <Text style={styles.sectionTitle}>Company Information</Text>
-          <Text style={styles.companyContactText}>
-            {companyInfo.name}{'\n'}
-            {companyInfo.address}{'\n'}
-            {companyInfo.city}{'\n'}
-            Phone: {companyInfo.phone}{'\n'}
-            Email: {companyInfo.email}{'\n'}
-            Website: {companyInfo.website}
-          </Text>
+        {/* Signature Section */}
+        <View style={styles.signatureSection}>
+          <View style={styles.signatureBox}>
+            <Text style={styles.signatureTitle}>Acceptance</Text>
+            <View style={styles.signatureLine}></View>
+            <Text style={styles.signatureLabel}>Client Signature</Text>
+            <View style={styles.signatureLine}></View>
+            <Text style={styles.signatureLabel}>Date</Text>
+          </View>
+          
+          <View style={styles.signatureBox}>
+            <Text style={styles.signatureTitle}>Provider</Text>
+            <View style={styles.signatureLine}></View>
+            <Text style={styles.signatureLabel}>Authorized Signature</Text>
+            <View style={styles.signatureLine}></View>
+            <Text style={styles.signatureLabel}>Date</Text>
+          </View>
         </View>
 
-        {/* Contact Information */}
-        <View style={[styles.section, { marginTop: 10 }]}>
-          <Text style={styles.contactNote}>
-            For questions regarding this quote, please contact us using the information above.
+        {/* Footer */}
+        <View style={{ marginTop: 50, alignItems: 'center' }}>
+          <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 5 }}>
+            Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}
+          </Text>
+          <Text style={{ fontSize: 9, textAlign: 'center', fontStyle: 'italic', color: '#666666' }}>
+            All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
           </Text>
         </View>
       </Page>
