@@ -491,7 +491,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
-  // Use exact same calculation logic as estimator - no custom overhead distribution
+  // Distribute 25% business overhead seamlessly into line items
+  const businessOverheadRate = 0.25; // 25% overhead
+  const totalRawCosts = estimateData.totalBeforeMarkup;
+  const overheadAmount = totalRawCosts * businessOverheadRate;
+  
+  // Calculate overhead multiplier for line items
+  const overheadMultiplier = 1 + businessOverheadRate; // 1.25
 
   return (
     <Document>
@@ -501,13 +507,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <View style={{ alignItems: 'center', marginBottom: 30 }}>
             <Image src="/assets/logo.png" style={{ width: 120, height: 120 }} />
           </View>
-
+          
           {/* Title */}
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#2563eb' }}>
-            POST CONSTRUCTION
-          </Text>
+                POST CONSTRUCTION
+              </Text>
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, color: '#2563eb' }}>
-            CLEANING PROPOSAL
+                CLEANING PROPOSAL
           </Text>
 
           {/* Center Content */}
@@ -523,30 +529,30 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
             {/* Project Info */}
             <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 8 }}>
-              Project: {quoteInfo.projectName}
-            </Text>
+            Project: {quoteInfo.projectName}
+          </Text>
             <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 8 }}>
-              Location: {quoteInfo.projectAddress}
-            </Text>
+            Location: {quoteInfo.projectAddress}
+          </Text>
             <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
-              Quote #: {quoteInfo.quoteNumber}
-            </Text>
+            Quote #: {quoteInfo.quoteNumber}
+          </Text>
           </View>
-
+          
           {/* Company Info at Bottom */}
           <View style={{ position: 'absolute', bottom: 40, left: 0, right: 0 }}>
             <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
-              {companyInfo.name}
-            </Text>
+            {companyInfo.name}
+          </Text>
             <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
-              {companyInfo.phone} | {companyInfo.email}
-            </Text>
+            {companyInfo.phone} | {companyInfo.email}
+          </Text>
             <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
-              {companyInfo.address}, {companyInfo.city}
-            </Text>
+            {companyInfo.address}, {companyInfo.city}
+          </Text>
             <Text style={{ fontSize: 12, textAlign: 'center' }}>
-              {companyInfo.website}
-            </Text>
+            {companyInfo.website}
+          </Text>
           </View>
         </View>
       </Page>
@@ -576,9 +582,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
           <View style={styles.rightSide}>
             <View style={styles.quoteInfoBelow}>
-              <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
-              <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
             </View>
           </View>
         </View>
@@ -615,7 +621,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { fontWeight: 'bold', textAlign: 'right' }]}>Amount</Text>
-              </View>
+            </View>
           </View>
 
             {/* Main Cleaning Service Row */}
@@ -630,12 +636,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(
-                    estimateData.basePrice + 
+                {formatCurrency(
+                    (estimateData.basePrice + 
                     (estimateData.vctCost || 0) +
-                    (estimateData.travelCost || 0)
-                  )}
-                </Text>
+                    (estimateData.travelCost || 0)) * overheadMultiplier
+                )}
+              </Text>
               </View>
             </View>
 
@@ -656,47 +662,47 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   </Text>
                   <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
                     Includes all necessary equipment, supplies, labor, and travel expenses.
-                  </Text>
-                </View>
+              </Text>
+            </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(estimateData.windowCleaningCost || 0)}
-                  </Text>
-                </View>
+                    {formatCurrency((estimateData.windowCleaningCost || 0) * overheadMultiplier)}
+            </Text>
+          </View>
               </View>
             )}
 
             {/* Overnight Accommodations Row */}
-            {formData.stayingOvernight && (
+          {formData.stayingOvernight && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Overnight Accommodations</Text>
                   <Text style={styles.tableCell}>
-                    {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
-                  </Text>
+                  {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
+                </Text>
                   <Text style={styles.tableCell}>Includes hotel accommodations, meals & incidentals, and coordination</Text>
                 </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(estimateData.overnightCost || 0)}
-                  </Text>
+                    {formatCurrency((estimateData.overnightCost || 0) * overheadMultiplier)}
+                </Text>
                 </View>
-              </View>
-            )}
+            </View>
+          )}
 
             {/* Pressure Washing Services Row */}
-            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
+          {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Pressure Washing Services</Text>
                   <Text style={styles.tableCell}>
-                    {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
-                  </Text>
+                  {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
+                </Text>
                   <Text style={styles.tableCell}>Includes equipment rental and cleaning solutions</Text>
                 </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(estimateData.pressureWashingCost || 0)}
+                    {formatCurrency((estimateData.pressureWashingCost || 0) * overheadMultiplier)}
                   </Text>
                 </View>
               </View>
@@ -711,48 +717,36 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formData.numberOfDisplayCases} display cases with specialized cleaning
                   </Text>
                 </View>
-                <View style={styles.amountCell}>
+                                <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(estimateData.displayCaseCost || 0)}
+                    {formatCurrency((estimateData.displayCaseCost || 0) * overheadMultiplier)}
                   </Text>
                 </View>
-              </View>
-            )}
+            </View>
+          )}
 
 
 
-            {/* Subtotal Row */}
+            {/* Subtotal Row - now includes 25% overhead seamlessly */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Subtotal</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                  {formatCurrency(estimateData.totalBeforeMarkup * overheadMultiplier)}
                 </Text>
               </View>
             </View>
 
-            {/* Business Overhead (30% Markup) Row */}
-            <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Business Overhead (30%)</Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.markup)}
-                </Text>
-              </View>
-            </View>
-
-            {/* Sales Tax Row */}
+                        {/* Sales Tax Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Sales Tax (7%)</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.salesTax)}
+                  {formatCurrency((estimateData.totalBeforeMarkup * overheadMultiplier) * 0.07)}
                 </Text>
               </View>
             </View>
@@ -764,11 +758,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
-                  {formatCurrency(estimateData.totalPrice)}
+                  {formatCurrency((estimateData.totalBeforeMarkup * overheadMultiplier) * 1.07)}
                 </Text>
               </View>
             </View>
-          </View>
+        </View>
         </View>
 
         {/* Terms and Conditions */}
