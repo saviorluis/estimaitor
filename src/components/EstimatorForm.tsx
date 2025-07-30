@@ -257,6 +257,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <input
               id="squareFootage"
               type="number"
+              inputMode="numeric"
               min="100"
               max="1000000"
               {...register('squareFootage', { 
@@ -264,7 +265,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 min: { value: 100, message: 'Minimum 100 sq ft' },
                 max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
               })}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
               placeholder="Enter total building square footage for interior cleaning"
             />
             <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
@@ -292,6 +293,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                   <input
                     id="vctSquareFootage"
                     type="number"
+                    inputMode="numeric"
                     min="100"
                     max="1000000"
                     {...register('vctSquareFootage', { 
@@ -299,7 +301,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                       min: { value: 100, message: 'Minimum 100 sq ft' },
                       max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
                     })}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
                     placeholder="Enter total VCT square footage"
                   />
                   <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
@@ -332,6 +334,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     <input
                       id="vctSquareFootage"
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       max="1000000"
                       {...register('vctSquareFootage', { 
@@ -339,7 +342,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                         min: { value: 0, message: 'VCT square footage cannot be negative' },
                         max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
                       })}
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
                       placeholder="Enter VCT square footage"
                     />
                     {errors.vctSquareFootage && (

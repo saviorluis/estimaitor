@@ -502,6 +502,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
               <input
                 id="numberOfWindows"
                 type="number"
+                inputMode="numeric"
                 min="1"
                 max="500"
                 {...register('numberOfWindows', { 
@@ -509,7 +510,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                   min: { value: 1, message: 'Minimum 1 window' },
                   max: { value: 500, message: 'Maximum 500 windows' }
                 })}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
                 placeholder="Enter number of windows to clean"
               />
               <p className="mt-1 text-xs text-green-600 dark:text-green-400">
