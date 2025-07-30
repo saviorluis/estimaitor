@@ -475,10 +475,10 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
               </>
             ) : (
               <>
-                <option value="rough">Rough Clean (80% rate)</option>
-                <option value="final">Final Clean (Standard rate)</option>
-                <option value="rough_final">Rough & Final Clean (120% rate)</option>
-                <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
+            <option value="rough">Rough Clean (80% rate)</option>
+            <option value="final">Final Clean (Standard rate)</option>
+            <option value="rough_final">Rough & Final Clean (120% rate)</option>
+            <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
               </>
             )}
           </select>
@@ -540,28 +540,28 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
             </>
           ) : (
             <>
-              <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                🏢 Building Size - Total Square Footage
-              </label>
-              <input
-                id="squareFootage"
-                type="number"
-                min="100"
-                max="1000000"
-                {...register('squareFootage', { 
+          <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            🏢 Building Size - Total Square Footage
+          </label>
+          <input
+            id="squareFootage"
+            type="number"
+            min="100"
+            max="1000000"
+            {...register('squareFootage', { 
                   required: serviceType === 'commercial' ? 'Building square footage is required' : false,
-                  min: { value: 100, message: 'Minimum 100 sq ft' },
-                  max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-                })}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                placeholder="Enter total building square footage"
-              />
-              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-                Interior space to be cleaned (offices, hallways, bathrooms, etc.)
-              </p>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Recommended cleaners: {recommendedCleaners}
-              </p>
+              min: { value: 100, message: 'Minimum 100 sq ft' },
+              max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+            })}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+            placeholder="Enter total building square footage"
+          />
+          <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+            Interior space to be cleaned (offices, hallways, bathrooms, etc.)
+          </p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Recommended cleaners: {recommendedCleaners}
+          </p>
             </>
           )}
           {errors.squareFootage && (
