@@ -261,6 +261,18 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   // Get scope of work based on project type and split into array
   const scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
   const totalWindows = (formData.numberOfWindows || 0) + (formData.numberOfLargeWindows || 0) + (formData.numberOfHighAccessWindows || 0);
+  
+  // Debug: Log the window values to help identify the issue
+  console.log('WorkOrder Window Debug:', {
+    numberOfWindows: formData.numberOfWindows,
+    numberOfLargeWindows: formData.numberOfLargeWindows,
+    numberOfHighAccessWindows: formData.numberOfHighAccessWindows,
+    totalWindows,
+    vctSquareFootage: formData.vctSquareFootage
+  });
+  // Debug: Log the original scope text
+  console.log('Original scope text:', scopeOfWorkText);
+  
   const scopeOfWork = scopeOfWorkText
     .split('\n')
     .filter(line => line.trim())
@@ -269,11 +281,15 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
     .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName))
     .map(line => {
       if (line.includes('___WINDOW_COUNT___')) {
+        console.log('Found WINDOW_COUNT placeholder in line:', line);
         return totalWindows > 0 ? line.replace('___WINDOW_COUNT___', totalWindows.toString()) : '';
       }
       return line;
     })
     .filter(line => line); // Remove empty lines
+    
+  // Debug: Log the final processed scope
+  console.log('Final processed scope:', scopeOfWork);
 
   return (
     <Document>
