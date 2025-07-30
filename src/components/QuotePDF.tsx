@@ -17,6 +17,10 @@ Font.register({
 
 // Create styles
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
@@ -519,32 +523,22 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             Location: {quoteInfo.projectAddress}
           </Text>
           
-          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }]}>
+          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
             Quote #: {quoteInfo.quoteNumber}
           </Text>
-          
-          {/* Capability Statement */}
-          <View style={{ marginTop: 40, marginBottom: 40, padding: 20, backgroundColor: '#F8F9FA', borderRadius: 5 }}>
-            <Text style={[styles.subtitle, { textAlign: 'center', marginBottom: 15, fontSize: 14, fontWeight: 'bold' }]}>
-              CAPABILITY STATEMENT
-            </Text>
-            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
-              Big Brother Property Solutions is a certified commercial cleaning company specializing in post-construction cleanup, 
-              janitorial services, and specialized cleaning solutions for commercial properties throughout North Carolina.
-            </Text>
-            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
-              • Licensed & Insured with comprehensive liability coverage
-            </Text>
-            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
-              • OSHA certified technicians with specialized equipment
-            </Text>
-            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
-              • Experienced in retail, medical, restaurant, and office environments
-            </Text>
-            <Text style={{ fontSize: 10, textAlign: 'center' }}>
-              • Committed to quality, safety, and customer satisfaction
-            </Text>
-          </View>
+
+          {/* Cleaning Type Title */}
+          <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, marginTop: 60 }]}>
+            {formData.cleaningType === 'final' ? 'Post Construction Cleaning Proposal' :
+             formData.cleaningType === 'vct_only' ? 'VCT Stripping & Waxing Proposal' :
+             formData.cleaningType === 'window_cleaning_only' ? 'Window Cleaning Services Proposal' :
+             formData.cleaningType === 'pressure_washing' ? 'Pressure Washing Services Proposal' :
+             'Professional Cleaning Services Proposal'}
+          </Text>
+
+          <Text style={[styles.subtitle, { fontSize: 16, textAlign: 'center', marginBottom: 60, color: '#4A5568' }]}>
+            Prepared for {clientInfo.name}
+          </Text>
           
           {/* Company info moved to bottom */}
           <View style={{ position: 'absolute', bottom: 30, left: 0, right: 0, alignItems: 'center' }}>
@@ -560,6 +554,89 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Text style={[styles.websiteLine, { fontSize: 11, textAlign: 'center' }]}>
               {companyInfo.website}
             </Text>
+          </View>
+        </View>
+      </Page>
+
+      {/* Capability Statement Page */}
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.container}>
+          {/* Header with Logo and Company Name */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, borderBottom: 1, borderColor: '#E2E8F0', paddingBottom: 15 }}>
+            <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={{ width: 60, height: 60 }} />
+            <View style={{ marginLeft: 15 }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+                Big Brother{'\n'}
+                Property Solutions
+              </Text>
+            </View>
+          </View>
+
+          {/* Main Content */}
+          <View style={{ flex: 1 }}>
+            {/* Company History */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>COMPANY HISTORY</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', lineHeight: 1.5 }}>
+                BBPS is a Latino owned and operated commercial cleaning company, proudly serving the Southeast since 2023. 
+                Known for our reliability and expertise, We deliver safe, efficient cleaning solutions across residential, 
+                commercial, and industrial projects. Even in challenging environments like medical/healthcare centers, tight 
+                urban spaces, and environmentally sensitive areas.
+              </Text>
+            </View>
+
+            {/* Core Services */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>CORE SERVICES</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                <View style={{ width: '50%', marginBottom: 10 }}>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Post Construction Cleaning</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Commercial Cleaning</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• VCT Stripping & Waxing</Text>
+                </View>
+                <View style={{ width: '50%', marginBottom: 10 }}>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Window Cleaning</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Pressure Washing</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Janitorial Services</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Certifications & Insurance */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>CERTIFICATIONS & INSURANCE</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', marginBottom: 5 }}>• Licensed & Insured with comprehensive liability coverage</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', marginBottom: 5 }}>• OSHA certified technicians</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', marginBottom: 5 }}>• Specialized equipment and training</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', marginBottom: 5 }}>• Safety-first approach</Text>
+            </View>
+
+            {/* Industry Experience */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>INDUSTRY EXPERIENCE</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                <View style={{ width: '50%', marginBottom: 10 }}>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Retail Stores</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Medical Facilities</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Restaurants</Text>
+                </View>
+                <View style={{ width: '50%', marginBottom: 10 }}>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Office Buildings</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Churches</Text>
+                  <Text style={{ fontSize: 11, color: '#4A5568' }}>• Industrial Spaces</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Quality Commitment */}
+            <View>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>QUALITY COMMITMENT</Text>
+              <Text style={{ fontSize: 11, color: '#4A5568', lineHeight: 1.5 }}>
+                We are committed to delivering exceptional results through meticulous attention to detail, 
+                professional staff, and state-of-the-art equipment. Our quality assurance process ensures 
+                consistent, high-standard cleaning services that meet and exceed client expectations.
+              </Text>
+            </View>
           </View>
         </View>
       </Page>
