@@ -128,7 +128,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
         </div>
 
         {/* Detailed Breakdown and Additional Information side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-6">
           <div>
             <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Multipliers & Costs</h3>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
