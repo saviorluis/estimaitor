@@ -660,9 +660,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       return windowTypes.join(', ');
                     })()}
                   </Text>
-                  <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic' }]}>
-                    Includes all necessary equipment, supplies, labor, and travel expenses.
-              </Text>
             </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
@@ -726,6 +723,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
 
+            {/* Includes Statement Row */}
+            <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', textAlign: 'center' }]}>
+                  Includes all necessary equipment, supplies, labor, and travel expenses.
+                </Text>
+              </View>
+              <View style={styles.amountCell}></View>
+            </View>
 
             {/* Subtotal Row - now includes 25% overhead seamlessly */}
             <View style={styles.tableRow}>
