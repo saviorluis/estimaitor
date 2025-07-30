@@ -337,28 +337,102 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
           <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeader]}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>Description</Text>
+                <Text>Item</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text>Amount</Text>
               </View>
             </View>
+
+            {/* Main Cleaning Service */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
-                <Text style={{ fontSize: 9, marginTop: 5 }}>
-                  {formData.squareFootage.toLocaleString()} sq ft
-                </Text>
-                <Text style={styles.scopeText}>Scope of Work:</Text>
-                {scopeOfWork.map((item, index) => (
-                  <Text key={index} style={styles.scopeItem}>• {item}</Text>
-                ))}
-                {(estimateData.windowCount || 0) > 0 && (
-                  <Text style={styles.scopeItem}>• {estimateData.windowCount} windows included in cleaning scope</Text>
-                )}
+                <Text>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(estimateData.totalPrice)}</Text>
+                <Text>{formatCurrency(
+                  (estimateData.basePrice + 
+                  (estimateData.vctCost || 0) +
+                  (estimateData.travelCost || 0)) * 1.30
+                )}</Text>
+              </View>
+            </View>
+
+            {/* Window Cleaning Services */}
+            {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text>Window Cleaning Services</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency((estimateData.windowCleaningCost || 0) * 1.30)}</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Overnight Accommodations */}
+            {formData.stayingOvernight && (
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text>Overnight Accommodations</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency((estimateData.overnightCost || 0) * 1.30)}</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Pressure Washing Services */}
+            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text>Pressure Washing Services</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency((estimateData.pressureWashingCost || 0) * 1.30)}</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Display Case Cleaning */}
+            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text>Display Case Cleaning</Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency((estimateData.displayCaseCost || 0) * 1.30)}</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Subtotal */}
+            <View style={[styles.tableRow, { borderTop: '1px solid #ddd', marginTop: 10 }]}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={{ fontWeight: 'bold' }}>Subtotal</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(estimateData.totalBeforeMarkup * 1.30)}</Text>
+              </View>
+            </View>
+
+            {/* Sales Tax */}
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={{ fontWeight: 'bold' }}>Sales Tax (7%)</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text style={{ fontWeight: 'bold' }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 0.07)}</Text>
+              </View>
+            </View>
+
+            {/* Total */}
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>TOTAL</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 1.07)}</Text>
               </View>
             </View>
           </View>
@@ -393,7 +467,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
           border: '1px solid #d0d0d0'
         }}>
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Balance Due:</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>${estimateData.totalPrice.toLocaleString()}</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 1.07)}</Text>
         </View>
 
         {/* Footer */}
