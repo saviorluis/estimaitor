@@ -18,8 +18,8 @@ export const metadata: Metadata = {
     title: 'EstimAItor',
   },
   icons: {
-    icon: '/favicon.svg',
-    apple: '/favicon.svg'
+    icon: '/LOGO.png',
+    apple: '/LOGO.png'
   }
 };
 
@@ -31,8 +31,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/favicon.svg" />
+        <link rel="icon" href="/LOGO.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/LOGO.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
