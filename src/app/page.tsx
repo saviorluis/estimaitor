@@ -541,10 +541,19 @@ export default function Home() {
           <Image
             src="/favicon.ico"
             alt="Calculator Logo"
-            width={192}
-            height={192}
+            width={96}
+            height={96}
             className="rounded-full shadow-lg"
             priority
+            onClick={() => {
+              const passcode = prompt('Enter admin passcode:');
+              if (passcode === '1234') {
+                alert('Admin access granted!');
+                // Add admin functionality here
+              } else if (passcode !== null) {
+                alert('Incorrect passcode');
+              }
+            }}
           />
         </div>
       </div>

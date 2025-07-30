@@ -611,7 +611,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Description</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold', textAlign: 'right', alignSelf: 'flex-start' }]}>Amount</Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold', textAlign: 'right' }]}>Amount</Text>
               </View>
           </View>
 
