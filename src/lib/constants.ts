@@ -46,6 +46,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   interactive_toy_store: 1.45,
   church: 1.2,
   arcade: 1.3,
+  coffee_shop: 1.25,
   other: 1.0
 } as const;
 
@@ -168,6 +169,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   interactive_toy_store: 380,
   church: 500,
   arcade: 450,
+  coffee_shop: 440,
   other: 500
 } as const;
 
@@ -391,6 +393,16 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Special attention to high-traffic gaming zones
 • Clean break rooms and employee areas
 • Clean seating and refreshment areas`),
+
+  coffee_shop: createScopeTemplate(`
+• Deep clean and sanitize espresso machines and coffee equipment
+• Clean and sanitize food preparation areas and counters
+• Detail clean seating areas and customer tables
+• Clean and disinfect condiment stations and self-service areas
+• Clean and sanitize display cases for pastries and food items
+• Special attention to high-touch surfaces like door handles and registers
+• Clean barista stations and work areas behind counter
+• Clean and sanitize restrooms and ensure all fixtures are spotless`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

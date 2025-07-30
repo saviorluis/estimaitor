@@ -17,6 +17,7 @@ export type ProjectType =
   | 'interactive_toy_store'
   | 'church'
   | 'arcade'
+  | 'coffee_shop'
   | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
