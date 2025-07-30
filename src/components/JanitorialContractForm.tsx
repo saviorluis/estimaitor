@@ -266,6 +266,35 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
     monthly: ['Deep facility cleaning', 'Storage area organization'],
     quarterly: ['Professional deep cleaning', 'Equipment area deep clean']
   },
+  coffee_shop: {
+    daily: [
+      'Clean and sanitize espresso machines and coffee equipment',
+      'Wipe down food prep areas and service counters',
+      'Clean and restock condiment stations',
+      'Empty trash and sanitize high-touch surfaces',
+      'Clean customer seating areas and tables',
+      'Restroom cleaning and supply restocking'
+    ],
+    weekly: [
+      'Deep clean coffee equipment and grinders',
+      'Clean display cases and pastry areas',
+      'Sanitize POS systems and payment areas',
+      'Deep clean barista station and back areas',
+      'Floor mopping and sanitization',
+      'Interior window and glass cleaning'
+    ],
+    monthly: [
+      'Deep clean espresso machine internals',
+      'Professional equipment descaling',
+      'Deep clean storage and inventory areas',
+      'Grout and tile deep cleaning'
+    ],
+    quarterly: [
+      'Professional equipment servicing coordination',
+      'Deep facility cleaning and maintenance',
+      'HVAC vent cleaning in food prep areas'
+    ]
+  },
   other: {
     daily: ['Basic daily cleaning tasks', 'High-touch sanitization', 'Restroom care'],
     weekly: ['Deep area cleaning', 'Common area maintenance', 'Floor care'],
@@ -292,6 +321,7 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   interactive_toy_store: 1.15,
   church: 0.70,
   arcade: 1.05,
+  coffee_shop: 1.60,
   other: 0.85
 };
 
@@ -313,6 +343,7 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   interactive_toy_store: 170,
   church: 100,
   arcade: 155,
+  coffee_shop: 240,
   other: 125
 };
 
