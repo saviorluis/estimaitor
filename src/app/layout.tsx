@@ -18,8 +18,15 @@ export const metadata: Metadata = {
     title: 'EstimAItor',
   },
   icons: {
-    icon: '/LOGO.png',
-    apple: '/LOGO.png'
+    icon: [
+      { url: '/LOGO.png', sizes: '512x512', type: 'image/png' },
+      { url: '/LOGO.png', sizes: '192x192', type: 'image/png' },
+      { url: '/LOGO.png', sizes: '32x32', type: 'image/png' },
+      { url: '/LOGO.png', sizes: '16x16', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/LOGO.png', sizes: '180x180', type: 'image/png' }
+    ]
   }
 };
 
@@ -31,9 +38,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="icon" href="/LOGO.png" type="image/png" sizes="200x200" />
-        <link rel="icon" href="/LOGO.png" type="image/png" sizes="32x32" />
-        <link rel="icon" href="/LOGO.png" type="image/png" sizes="16x16" />
+        <link rel="icon" href="/LOGO.png" sizes="512x512" type="image/png" />
+        <link rel="icon" href="/LOGO.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="/LOGO.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/LOGO.png" sizes="16x16" type="image/png" />
         <link rel="apple-touch-icon" href="/LOGO.png" sizes="180x180" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />

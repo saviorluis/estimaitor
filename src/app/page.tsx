@@ -541,8 +541,8 @@ export default function Home() {
           <Image
             src="/LOGO.png"
             alt="Calculator Logo"
-            width={200}
-            height={200}
+            width={192}
+            height={192}
             className="rounded-full shadow-lg"
             priority
           />
