@@ -557,7 +557,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.header}>
           <View style={styles.leftSide}>
             <View style={styles.logoAndCompany}>
-              <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
+              <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/LOGO.png" style={styles.logo} />
               <View style={{ marginLeft: 15 }}>
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.address}</Text>

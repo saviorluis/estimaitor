@@ -539,7 +539,7 @@ export default function Home() {
         {/* Admin Access Logo */}
         <div className="fixed bottom-4 right-4 cursor-pointer hover:opacity-80 transition-opacity">
           <Image
-            src="/assets/logo.png"
+            src="/LOGO.png"
             alt="BBPS Logo"
             width={60}
             height={60}
