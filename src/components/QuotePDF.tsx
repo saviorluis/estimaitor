@@ -101,6 +101,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginBottom: 3,
   },
+  clientCompany: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#4A5568',
+  },
   infoGrid: {
     flexDirection: 'row',
     marginBottom: 20,
@@ -511,24 +517,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </>
           )}
           
-          <Text style={[styles.subtitle, { marginTop: 20, marginBottom: 10 }]}>Prepared for:</Text>
-          <Text style={[styles.clientName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
-            {clientInfo.company || clientInfo.name}
-          </Text>
-          
-          <Text style={[styles.projectInfo, { fontSize: 12, textAlign: 'center', marginBottom: 3 }]}>
-            Project: {quoteInfo.projectName}
-          </Text>
-          <Text style={[styles.projectInfo, { fontSize: 12, textAlign: 'center', marginBottom: 15 }]}>
-            Location: {quoteInfo.projectAddress}
-          </Text>
-          
-          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
-            Quote #: {quoteInfo.quoteNumber}
-          </Text>
-
           {/* Cleaning Type Title */}
-          <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, marginTop: 60 }]}>
+          <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, marginTop: 60 }]}>
             {formData.cleaningType === 'final' ? 'Post Construction Cleaning Proposal' :
              formData.cleaningType === 'vct_only' ? 'VCT Stripping & Waxing Proposal' :
              formData.cleaningType === 'window_cleaning_only' ? 'Window Cleaning Services Proposal' :
@@ -536,8 +526,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
              'Professional Cleaning Services Proposal'}
           </Text>
 
-          <Text style={[styles.subtitle, { fontSize: 16, textAlign: 'center', marginBottom: 60, color: '#4A5568' }]}>
-            Prepared for {clientInfo.name}
+          {/* Client Information */}
+          <Text style={[styles.clientName, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }]}>
+            {clientInfo.name}
+          </Text>
+          {clientInfo.company && (
+            <Text style={[styles.clientCompany, { fontSize: 16, textAlign: 'center', marginBottom: 20, color: '#4A5568' }]}>
+              {clientInfo.company}
+            </Text>
+          )}
+          
+          <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 3 }]}>
+            Project: {quoteInfo.projectName}
+          </Text>
+          <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 20 }]}>
+            Location: {quoteInfo.projectAddress}
+          </Text>
+          
+          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
+            Quote #: {quoteInfo.quoteNumber}
           </Text>
           
           {/* Company info moved to bottom */}
