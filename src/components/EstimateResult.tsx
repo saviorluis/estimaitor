@@ -140,10 +140,6 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 <p>VCT Cleaning Cost: ${estimateData.vctCost.toFixed(2)}</p>
               )}
               
-              {estimateData.travelCost > 0 && (
-                <p>Travel Cost: ${estimateData.travelCost.toFixed(2)}</p>
-              )}
-              
               {estimateData.overnightCost > 0 && (
                 <p>Overnight Cost: ${estimateData.overnightCost.toFixed(2)}</p>
               )}
