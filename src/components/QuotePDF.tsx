@@ -140,7 +140,8 @@ const styles = StyleSheet.create({
   },
   amountCell: {
     width: '30%',
-    textAlign: 'right',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   subtotalRow: {
     backgroundColor: '#F0F0F0',
@@ -218,8 +219,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 120,
     objectFit: 'contain'
   },
   companyHeader: {
@@ -518,33 +519,54 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             Location: {quoteInfo.projectAddress}
           </Text>
           
-
-          
-          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 }]}>
+          <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }]}>
             Quote #: {quoteInfo.quoteNumber}
           </Text>
           
-          <Text style={[styles.companyName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
-            {companyInfo.name}
-          </Text>
-          <Text style={[styles.contactLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
-            {companyInfo.phone} | {companyInfo.email}
-          </Text>
-          <Text style={[styles.addressLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
-            {companyInfo.address}, {companyInfo.city}
-          </Text>
-          <Text style={[styles.websiteLine, { fontSize: 11, textAlign: 'center' }]}>
-            {companyInfo.website}
-          </Text>
+          {/* Capability Statement */}
+          <View style={{ marginTop: 40, marginBottom: 40, padding: 20, backgroundColor: '#F8F9FA', borderRadius: 5 }}>
+            <Text style={[styles.subtitle, { textAlign: 'center', marginBottom: 15, fontSize: 14, fontWeight: 'bold' }]}>
+              CAPABILITY STATEMENT
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
+              Big Brother Property Solutions is a certified commercial cleaning company specializing in post-construction cleanup, 
+              janitorial services, and specialized cleaning solutions for commercial properties throughout North Carolina.
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
+              • Licensed & Insured with comprehensive liability coverage
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
+              • OSHA certified technicians with specialized equipment
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 10 }}>
+              • Experienced in retail, medical, restaurant, and office environments
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'center' }}>
+              • Committed to quality, safety, and customer satisfaction
+            </Text>
+          </View>
+          
+          {/* Company info moved to bottom */}
+          <View style={{ position: 'absolute', bottom: 30, left: 0, right: 0, alignItems: 'center' }}>
+            <Text style={[styles.companyName, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }]}>
+              {companyInfo.name}
+            </Text>
+            <Text style={[styles.contactLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+              {companyInfo.phone} | {companyInfo.email}
+            </Text>
+            <Text style={[styles.addressLine, { fontSize: 11, textAlign: 'center', marginBottom: 3 }]}>
+              {companyInfo.address}, {companyInfo.city}
+            </Text>
+            <Text style={[styles.websiteLine, { fontSize: 11, textAlign: 'center' }]}>
+              {companyInfo.website}
+            </Text>
+          </View>
         </View>
       </Page>
 
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.leftSide}>
-            {/* Empty left side - company info moved to right */}
-              </View>
-          <View style={styles.rightSide}>
             <View style={styles.logoAndCompany}>
               <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
               <View style={{ marginLeft: 15 }}>
@@ -556,10 +578,12 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
               </View>
             </View>
+          </View>
+          <View style={styles.rightSide}>
             <View style={styles.quoteInfoBelow}>
-            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+              <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+              <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
             </View>
           </View>
         </View>
@@ -595,9 +619,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Description</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Amount</Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold', textAlign: 'right', alignSelf: 'flex-start' }]}>Amount</Text>
               </View>
-            </View>
+          </View>
 
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
@@ -608,17 +632,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
+                {formatCurrency(
                     (estimateData.adjustedLineItems?.basePrice !== undefined
                       ? estimateData.adjustedLineItems.basePrice
                       : estimateData.basePrice) + 
                     (estimateData.adjustedLineItems?.vctCost !== undefined
                       ? estimateData.adjustedLineItems.vctCost
                       : estimateData.vctCost)
-                  )}
-                </Text>
-              </View>
+                )}
+              </Text>
+            </View>
             </View>
 
             {/* Travel Expenses Row */}
@@ -627,8 +651,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Travel Expenses</Text>
                 <Text style={styles.tableCell}>{formData.distanceFromOffice || 0} miles</Text>
               </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                            <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                   {formatCurrency(
                     estimateData.adjustedLineItems?.travelCost !== undefined
                       ? estimateData.adjustedLineItems.travelCost
@@ -636,7 +660,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   )}
                 </Text>
               </View>
-            </View>
+          </View>
 
             {/* Window Cleaning Services Row */}
             {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
@@ -651,11 +675,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
                       return windowTypes.join(', ');
                     })()}
-                  </Text>
+                </Text>
                   <Text style={styles.tableCell}>Includes all necessary equipment, cleaning solutions, and labor</Text>
                 </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                                <View style={styles.amountCell}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.windowCleaningCost !== undefined
                         ? estimateData.adjustedLineItems.windowCleaningCost
@@ -676,8 +700,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   </Text>
                   <Text style={styles.tableCell}>Includes hotel accommodations, meals & incidentals, and coordination</Text>
                 </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                                <View style={styles.amountCell}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.overnightCost !== undefined
                         ? estimateData.adjustedLineItems.overnightCost
@@ -685,21 +709,21 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     )}
                   </Text>
                 </View>
-              </View>
-            )}
+            </View>
+          )}
 
             {/* Pressure Washing Services Row */}
-            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
+          {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Pressure Washing Services</Text>
                   <Text style={styles.tableCell}>
-                    {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
-                  </Text>
+                  {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
+                </Text>
                   <Text style={styles.tableCell}>Includes equipment rental and cleaning solutions</Text>
-                </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+              </View>
+                                <View style={styles.amountCell}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.pressureWashingCost !== undefined
                         ? estimateData.adjustedLineItems.pressureWashingCost
@@ -707,20 +731,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     )}
                   </Text>
                 </View>
-              </View>
-            )}
+            </View>
+          )}
 
             {/* Display Case Cleaning Row */}
-            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
+          {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Display Case Cleaning</Text>
                   <Text style={styles.tableCell}>
-                    {formData.numberOfDisplayCases} display cases with specialized cleaning
-                  </Text>
-                </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                  {formData.numberOfDisplayCases} display cases with specialized cleaning
+                </Text>
+              </View>
+                                <View style={styles.amountCell}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.displayCaseCost !== undefined
                         ? estimateData.adjustedLineItems.displayCaseCost
@@ -728,8 +752,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     )}
                   </Text>
                 </View>
-              </View>
-            )}
+            </View>
+          )}
 
             {/* Subtotal Row */}
             <View style={styles.tableRow}>
@@ -737,7 +761,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Subtotal</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                   {formatCurrency(estimateData.totalBeforeMarkup)}
                 </Text>
               </View>
@@ -749,7 +773,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Sales Tax (7%)</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                   {formatCurrency(estimateData.salesTax)}
                 </Text>
               </View>
@@ -761,7 +785,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 12 }]}>TOTAL</Text>
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12, alignSelf: 'flex-start' }]}>
                   {formatCurrency(estimateData.totalPrice)}
                 </Text>
               </View>
