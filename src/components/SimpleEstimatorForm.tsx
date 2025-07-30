@@ -28,7 +28,7 @@ interface SimpleFormData {
 }
 
 // Project types by service category
-const RESIDENTIAL_TYPES: ProjectType[] = ['office', 'other']; // Using office as "home office" and other for general residential
+const RESIDENTIAL_TYPES: ProjectType[] = ['other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
 const COMMERCIAL_TYPES: ProjectType[] = [
   'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
   'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
@@ -39,8 +39,12 @@ const COMMERCIAL_TYPES: ProjectType[] = [
 const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string => {
   if (serviceType === 'residential') {
     switch (type) {
-      case 'office': return 'Home Office / Study';
-      case 'other': return 'Residential Home';
+      case 'other': return 'Single Family House';
+      case 'office': return 'Apartment Complex';
+      case 'hotel': return 'Multifamily Property';
+      case 'educational': return 'HOA Community';
+      case 'retail': return 'Residential Community';
+      case 'industrial': return 'Townhomes/Condos';
       default: return 'Residential Property';
     }
   }
@@ -420,8 +424,12 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           >
             {serviceType === 'residential' ? (
               <>
-                <option value="other">Residential Home</option>
-                <option value="office">Home Office / Study</option>
+                <option value="other">🏠 Single Family House</option>
+                <option value="office">🏬 Apartment Complex</option>
+                <option value="hotel">🏘️ Multifamily Property</option>
+                <option value="educational">🏛️ HOA Community</option>
+                <option value="retail">🏘️ Residential Community</option>
+                <option value="industrial">🏘️ Townhomes/Condos</option>
               </>
             ) : (
               <>
