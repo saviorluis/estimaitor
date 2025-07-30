@@ -417,10 +417,6 @@ const getScopeOfWork = (formData: FormData): string => {
     baseScope += '\n\nOvernight Accommodations: Hotel accommodations and per diem expenses for staff.';
   }
 
-  if (formData.needsWindowCleaning && (formData.numberOfWindows || formData.numberOfLargeWindows || formData.numberOfHighAccessWindows) > 0) {
-    baseScope += '\n\nWindow Cleaning Services: Standard and high-access window cleaning, including equipment and solutions.';
-  }
-
   if (formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0) {
     baseScope += '\n\nDisplay Case Cleaning: Cleaning and maintenance of display cases.';
   }
@@ -648,7 +644,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Window Cleaning Services</Text>
                   <Text style={styles.tableCell}>
-                    {formData.numberOfWindows} standard windows, {formData.numberOfLargeWindows || 0} large windows, {formData.numberOfHighAccessWindows || 0} high-access windows
+                    {(() => {
+                      const windowTypes = [];
+                      if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
+                      if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
+                      if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
+                      return windowTypes.join(', ');
+                    })()}
                   </Text>
                   <Text style={styles.tableCell}>Includes all necessary equipment, cleaning solutions, and labor</Text>
                 </View>
@@ -806,7 +808,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
         {/* Terms and Conditions */}
         <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Professional Terms & Conditions</Text>
+          <Text style={styles.sectionTitle}>Terms & Conditions</Text>
           <Text style={styles.termsText}>
             1. Payment Terms: Net 15 - Payment due within 15 days of completion.{'\n'}
             2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.{'\n'}
