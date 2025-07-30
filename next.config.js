@@ -17,6 +17,7 @@ const nextConfig = {
         pathname: '/saviorluis/estimaitor/**',
       },
     ],
+    unoptimized: true,
   },
 };
 
