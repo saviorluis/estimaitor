@@ -491,14 +491,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
-  // ---------- overhead distribution ----------
-  // Use 15% of totalBeforeMarkup as distributed overhead instead of full 30% markup
-  const overhead = estimateData.totalBeforeMarkup * 0.15;
-  const rawWindowCost = estimateData.windowCleaningCost || 0;
-  const hasWindow = formData.needsWindowCleaning && rawWindowCost > 0;
-
-  const overheadCleaning = hasWindow ? overhead / 2 : overhead;
-  const overheadWindow = hasWindow ? overhead / 2 : 0;
+  // Use exact same calculation logic as estimator - no custom overhead distribution
 
   return (
     <Document>
@@ -638,10 +631,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                   {formatCurrency(
-                    estimateData.basePrice * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1) + 
+                    estimateData.basePrice + 
                     (estimateData.vctCost || 0) +
-                    (estimateData.travelCost || 0) +
-                    overheadCleaning
+                    (estimateData.travelCost || 0)
                   )}
                 </Text>
               </View>
@@ -668,9 +660,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(
-                      (estimateData.windowCleaningCost || 0) + overheadWindow
-                    )}
+                    {formatCurrency(estimateData.windowCleaningCost || 0)}
                   </Text>
                 </View>
               </View>
@@ -738,7 +728,19 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.totalBeforeMarkup + overhead)}
+                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Business Overhead (30% Markup) Row */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Business Overhead (30%)</Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                  {formatCurrency(estimateData.markup)}
                 </Text>
               </View>
             </View>
