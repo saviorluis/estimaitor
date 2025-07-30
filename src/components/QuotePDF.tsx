@@ -691,7 +691,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
           {estimateData.markup > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Business Overhead (50%):</Text>
+              <Text style={styles.summaryLabel}>Business Overhead (30%):</Text>
               <Text style={styles.summaryAmount}>
                 {formatCurrency(estimateData.markup)}
               </Text>
@@ -713,16 +713,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         </View>
 
-        {/* Value Proposition for Contractors */}
-        <View style={[styles.section, { marginTop: 25 }]}>
-          <Text style={styles.sectionTitle}>Partnership Benefits</Text>
-          <Text style={styles.termsText}>
-            🏗️ Construction-Specialized: Deep understanding of post-construction cleaning requirements and timelines{'\n'}
-            📋 Seamless Integration: Dedicated project coordination ensures no delays to your construction schedule{'\n'}
-            💰 Contractor Benefits: Net 30 payment terms, volume discounts available, and transparent pricing structure{'\n'}
-            📞 24/7 Support: Direct project manager contact for real-time updates and immediate issue resolution
-          </Text>
-        </View>
+
 
         {/* Scope of Work */}
         <View style={[styles.section, { marginTop: 20 }]}>
@@ -736,14 +727,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Professional Terms & Conditions</Text>
           <Text style={styles.termsText}>
-            • Payment Terms: Net 30 days from completion - contractor-friendly payment schedule{'\n'}
-            • Change Orders: Additional services require written authorization and will be billed at agreed rates{'\n'}
-            • Quote Validity: 30 days from issue date - allows ample time for project planning{'\n'}
-            • Insurance & Bonding: $2M general liability, workers compensation, and bonding certificates available{'\n'}
-            • Quality Standards: All work performed to ISSA and industry standards with quality assurance inspections{'\n'}
-            • Site Access Policy: If reschedule required due to site conditions or poor planning, minimum $250 return trip fee applies{'\n'}
-
-            • Project Coordination: Dedicated project manager assigned for seamless integration with your construction schedule
+            • Payment Terms: Net 15 - Payment due within 15 days of completion{'\n'}
+            • Cancellation Policy: 48-hour notice required for cancellation or rescheduling{'\n'}
+            • Scope: This quote covers only the services explicitly described{'\n'}
+            • Additional Services: Any services not specified will be quoted separately{'\n'}
+            • Access: Client must provide necessary access to the property{'\n'}
+            • Utilities: Working electricity and water must be available on-site{'\n'}
+            • Quote Validity: This quote is valid for 30 days from the date issued{'\n'}
+            • Reschedule/Site Access Policy: If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip{'\n'}
+            • Insurance & Liability: Full commercial general liability and workers compensation coverage maintained for financial protection
           </Text>
         </View>
 

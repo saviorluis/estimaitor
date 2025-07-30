@@ -10,8 +10,12 @@ interface SimpleEstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
 }
 
+// Service type for residential vs commercial
+type ServiceType = 'residential' | 'commercial';
+
 // Simplified form data for simple mode
 interface SimpleFormData {
+  serviceType: ServiceType;
   projectType: ProjectType;
   cleaningType: CleaningType;
   squareFootage: number;
@@ -21,6 +25,47 @@ interface SimpleFormData {
   clientName?: string;
   projectName?: string;
 }
+
+// Project types by service category
+const RESIDENTIAL_TYPES: ProjectType[] = ['office', 'other']; // Using office as "home office" and other for general residential
+const COMMERCIAL_TYPES: ProjectType[] = [
+  'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
+  'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
+  'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 'other'
+];
+
+// Get project type names with residential context
+const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string => {
+  if (serviceType === 'residential') {
+    switch (type) {
+      case 'office': return 'Home Office / Study';
+      case 'other': return 'Residential Home';
+      default: return 'Residential Property';
+    }
+  }
+  
+  // Commercial names
+  switch (type) {
+    case 'restaurant': return 'Restaurant';
+    case 'fast_food': return 'Fast Food';
+    case 'medical': return 'Medical Facility';
+    case 'retail': return 'Retail Store';
+    case 'office': return 'Office Building';
+    case 'industrial': return 'Industrial/Warehouse';
+    case 'educational': return 'Educational Facility';
+    case 'hotel': return 'Hotel/Hospitality';
+    case 'jewelry_store': return 'Jewelry Store';
+    case 'grocery_store': return 'Grocery Store';
+    case 'yoga_studio': return 'Yoga Studio';
+    case 'kids_fitness': return 'Kids Fitness Center';
+    case 'bakery': return 'Bakery';
+    case 'interactive_toy_store': return 'Toy Store';
+    case 'church': return 'Church/Religious';
+    case 'arcade': return 'Arcade/Entertainment';
+    case 'other': return 'Other Commercial';
+    default: return 'Commercial Property';
+  }
+};
 
 // Location-based defaults and pricing (Home Base: 1200 Eastchester Dr, High Point, NC)
 const CITY_LOCATIONS = {
@@ -91,6 +136,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
 
   // Default values for simple form
   const defaultValues = useMemo(() => ({
+    serviceType: 'commercial' as ServiceType,
     projectType: 'office' as ProjectType,
     cleaningType: 'final' as CleaningType,
     squareFootage: 5000,
@@ -109,7 +155,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
 
   // Watch form values
   const formValues = watch();
-  const { squareFootage, location, needsWindowCleaning } = formValues;
+  const { serviceType, squareFootage, location, needsWindowCleaning } = formValues;
 
   // Load saved form data on component mount
   useEffect(() => {
@@ -130,6 +176,20 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
       console.error('Error saving simple form data:', error);
     }
   }, [formValues, isLoaded]);
+
+  // Auto-update project type and square footage when service type changes
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    // Set appropriate default project type based on service type
+    if (serviceType === 'residential') {
+      setValue('projectType', 'other'); // Default to "Residential Home"
+      setValue('squareFootage', 2500); // Typical residential size
+    } else if (serviceType === 'commercial') {
+      setValue('projectType', 'office'); // Default to "Office Building"
+      setValue('squareFootage', 5000); // Typical commercial size
+    }
+  }, [serviceType, isLoaded, setValue]);
 
   // Get location configuration
   const locationConfig = CITY_LOCATIONS[location as keyof typeof CITY_LOCATIONS] || CITY_LOCATIONS['High Point, NC'];
@@ -210,6 +270,81 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
       </h2>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Service Type Selection */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-green-200 dark:border-green-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+            🏠 What type of cleaning service do you need?
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <input
+                type="radio"
+                id="residential"
+                value="residential"
+                {...register('serviceType', { required: 'Service type is required' })}
+                className="sr-only"
+              />
+              <label
+                htmlFor="residential"
+                className={`block w-full p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                  serviceType === 'residential'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 shadow-md'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-green-300 hover:bg-green-25 dark:hover:bg-green-900/10'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-4 h-4 rounded-full border-2 ${
+                    serviceType === 'residential' ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                  } flex items-center justify-center`}>
+                    {serviceType === 'residential' && (
+                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-800 dark:text-gray-200">🏡 Residential</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Homes, apartments, condos</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+            
+            <div>
+              <input
+                type="radio"
+                id="commercial"
+                value="commercial"
+                {...register('serviceType', { required: 'Service type is required' })}
+                className="sr-only"
+              />
+              <label
+                htmlFor="commercial"
+                className={`block w-full p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                  serviceType === 'commercial'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 shadow-md'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-green-300 hover:bg-green-25 dark:hover:bg-green-900/10'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-4 h-4 rounded-full border-2 ${
+                    serviceType === 'commercial' ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                  } flex items-center justify-center`}>
+                    {serviceType === 'commercial' && (
+                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-800 dark:text-gray-200">🏢 Commercial</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Offices, restaurants, retail stores</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+          {errors.serviceType && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.serviceType.message}</p>
+          )}
+        </div>
+
         {/* Client Information - Optional */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -241,30 +376,39 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
         {/* Project Type */}
         <div>
           <label htmlFor="projectType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Project Type
+            {serviceType === 'residential' ? '🏡 Property Type' : '🏢 Business Type'}
           </label>
           <select
             id="projectType"
             {...register('projectType', { required: 'Project type is required' })}
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
           >
-            <option value="restaurant">Restaurant</option>
-            <option value="fast_food">Fast Food</option>
-            <option value="medical">Medical Facility</option>
-            <option value="retail">Retail Store</option>
-            <option value="office">Office Building</option>
-            <option value="industrial">Industrial/Warehouse</option>
-            <option value="educational">Educational Facility</option>
-            <option value="hotel">Hotel</option>
-            <option value="jewelry_store">Jewelry Store</option>
-            <option value="grocery_store">Grocery Store</option>
-            <option value="yoga_studio">Yoga Studio</option>
-            <option value="kids_fitness">Kids Fitness</option>
-            <option value="bakery">Bakery</option>
-            <option value="interactive_toy_store">Interactive Toy Store</option>
-            <option value="church">Church</option>
-            <option value="arcade">Arcade</option>
-            <option value="other">Other</option>
+            {serviceType === 'residential' ? (
+              <>
+                <option value="other">Residential Home</option>
+                <option value="office">Home Office / Study</option>
+              </>
+            ) : (
+              <>
+                <option value="restaurant">Restaurant</option>
+                <option value="fast_food">Fast Food</option>
+                <option value="medical">Medical Facility</option>
+                <option value="retail">Retail Store</option>
+                <option value="office">Office Building</option>
+                <option value="industrial">Industrial/Warehouse</option>
+                <option value="educational">Educational Facility</option>
+                <option value="hotel">Hotel</option>
+                <option value="jewelry_store">Jewelry Store</option>
+                <option value="grocery_store">Grocery Store</option>
+                <option value="yoga_studio">Yoga Studio</option>
+                <option value="kids_fitness">Kids Fitness</option>
+                <option value="bakery">Bakery</option>
+                <option value="interactive_toy_store">Interactive Toy Store</option>
+                <option value="church">Church</option>
+                <option value="arcade">Arcade</option>
+                <option value="other">Other Commercial</option>
+              </>
+            )}
           </select>
           {errors.projectType && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectType.message}</p>
@@ -437,13 +581,20 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
 
         {/* Automatic Calculations Info */}
         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">🤖 Automatic Calculations</h4>
+          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+            🤖 {serviceType === 'residential' ? 'Residential' : 'Commercial'} Pricing Included
+          </h4>
           <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <p>• Professional crew size optimized for your project ({recommendedCleaners} cleaners)</p>
+            <p>• Professional crew size optimized for your {serviceType} project ({recommendedCleaners} cleaners)</p>
             <p>• <strong>30% professional markup included</strong> (overhead, insurance, profit)</p>
             <p>• Standard urgency level (no rush charges)</p>
             <p>• Accurate distance-based travel costs</p>
             <p>• Optional window cleaning available</p>
+            {serviceType === 'residential' ? (
+              <p>• Residential rates and smaller crew configurations</p>
+            ) : (
+              <p>• Commercial insurance and specialized equipment included</p>
+            )}
             <p>• For detailed estimates, switch to Professional Mode</p>
           </div>
         </div>

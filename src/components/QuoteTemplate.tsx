@@ -12,7 +12,7 @@ import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
-import { SCOPE_OF_WORK } from '@/lib/constants';
+import { SCOPE_OF_WORK, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
 const CompanyLogo = ({ className = "" }: { className?: string }) => {
@@ -640,11 +640,153 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     };
   }, []);
 
+  // Add validation function
+  const validateQuote = () => {
+    if (!TEST_MODE) return null;
+
+    const matchingScenario = TEST_SCENARIOS.find(scenario => 
+      scenario.input.projectType === formData.projectType &&
+      scenario.input.squareFootage === formData.squareFootage &&
+      scenario.input.cleaningType === formData.cleaningType
+    );
+
+    if (!matchingScenario) return null;
+
+    const validation = matchingScenario.quoteValidation;
+    const results = {
+      sections: {
+        missing: [] as string[],
+        present: [] as string[]
+      },
+      lineItems: {
+        missing: [] as string[],
+        present: [] as string[]
+      },
+      formatting: {
+        issues: [] as string[],
+        passed: [] as string[]
+      }
+    };
+
+    // Validate required sections
+    validation.requiredSections.forEach(section => {
+      if (document.body.innerHTML.includes(section)) {
+        results.sections.present.push(section);
+      } else {
+        results.sections.missing.push(section);
+      }
+    });
+
+    // Validate line items
+    validation.expectedLineItems.forEach(item => {
+      if (document.body.innerHTML.includes(item)) {
+        results.lineItems.present.push(item);
+      } else {
+        results.lineItems.missing.push(item);
+      }
+    });
+
+    // Validate formatting
+    const format = validation.formatting;
+    if (format.companyLogo && !document.querySelector('img[src*="logo"]')) {
+      results.formatting.issues.push('Company logo missing');
+    } else {
+      results.formatting.passed.push('Company logo present');
+    }
+
+    if (format.quoteNumber && !document.body.innerHTML.includes('Quote #')) {
+      results.formatting.issues.push('Quote number missing');
+    } else {
+      results.formatting.passed.push('Quote number present');
+    }
+
+    if (format.validDates && !document.body.innerHTML.includes('Valid Until')) {
+      results.formatting.issues.push('Valid until date missing');
+    } else {
+      results.formatting.passed.push('Valid until date present');
+    }
+
+    // Validate pricing elements
+    const pricing = format.pricing;
+    if (pricing.subtotal && !document.body.innerHTML.includes('Subtotal')) {
+      results.formatting.issues.push('Subtotal missing');
+    } else {
+      results.formatting.passed.push('Subtotal present');
+    }
+
+    if (pricing.markup && !document.body.innerHTML.includes('Markup')) {
+      results.formatting.issues.push('Markup missing');
+    } else {
+      results.formatting.passed.push('Markup present');
+    }
+
+    if (pricing.tax && !document.body.innerHTML.includes('Sales Tax')) {
+      results.formatting.issues.push('Sales tax missing');
+    } else {
+      results.formatting.passed.push('Sales tax present');
+    }
+
+    if (pricing.total && !document.body.innerHTML.includes('Total:')) {
+      results.formatting.issues.push('Total missing');
+    } else {
+      results.formatting.passed.push('Total present');
+    }
+
+    return results;
+  };
+
+  // Add validation display
+  const ValidationResults = () => {
+    const results = validateQuote();
+    if (!results) return null;
+
+    return (
+      <div className="bg-white p-4 rounded-lg shadow mb-4">
+        <h3 className="text-lg font-semibold mb-2">Quote Validation Results</h3>
+        
+        {/* Sections */}
+        <div className="mb-3">
+          <h4 className="font-medium">Required Sections:</h4>
+          {results.sections.missing.length === 0 ? (
+            <p className="text-green-600">✓ All required sections present</p>
+          ) : (
+            <p className="text-red-600">
+              Missing sections: {results.sections.missing.join(', ')}
+            </p>
+          )}
+        </div>
+
+        {/* Line Items */}
+        <div className="mb-3">
+          <h4 className="font-medium">Expected Line Items:</h4>
+          {results.lineItems.missing.length === 0 ? (
+            <p className="text-green-600">✓ All expected line items present</p>
+          ) : (
+            <p className="text-red-600">
+              Missing items: {results.lineItems.missing.join(', ')}
+            </p>
+          )}
+        </div>
+
+        {/* Formatting */}
+        <div>
+          <h4 className="font-medium">Formatting:</h4>
+          {results.formatting.issues.length === 0 ? (
+            <p className="text-green-600">✓ All formatting requirements met</p>
+          ) : (
+            <p className="text-red-600">
+              Formatting issues: {results.formatting.issues.join(', ')}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
-      {/* Remove the cover page toggle button */}
+      {/* Header with action buttons */}
       <div className="flex justify-between items-center mb-6 print:hidden">
-        <h2 className="text-2xl font-bold text-gray-800">Quote Details</h2>
         <div className="space-x-4">
           <button
             onClick={handlePDFDownload}
@@ -676,7 +818,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <div className="flex">
           {editingCompanyInfo ? (
             <div className="grid grid-cols-2 gap-4 w-full">
-          <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
                 <input
                   type="text"
@@ -982,6 +1124,284 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="Terms and conditions for the quote"
             />
+          </div>
+        </div>
+      </div>
+      {/* Test validation results */}
+      {TEST_MODE && <ValidationResults />}
+
+      {/* ACTUAL QUOTE DISPLAY - This shows the formatted quote for preview and printing */}
+      <div className="quote-display print:block">
+        {/* Cover Page */}
+        <div className="cover-page bg-white min-h-screen flex flex-col items-center justify-center text-center p-8 print:page-break-after">
+          {/* Company Logo */}
+          <div className="mb-8">
+            <CompanyLogo className="w-48 h-24" />
+          </div>
+
+          {/* Title */}
+          <div className="mb-8">
+            {formData.cleaningType === 'pressure_washing' ? (
+              <>
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">PRESSURE WASHING</h1>
+                <h2 className="text-2xl font-bold text-gray-800">SERVICES PROPOSAL</h2>
+              </>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">POST CONSTRUCTION</h1>
+                <h2 className="text-2xl font-bold text-gray-800">CLEANING PROPOSAL</h2>
+              </>
+            )}
+          </div>
+
+          {/* Prepared For Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 border-b pb-2">Prepared for:</h3>
+            <p className="text-xl font-bold text-gray-800 mb-2">
+              {clientInfo.company || clientInfo.name || 'Client Name'}
+            </p>
+            
+            <p className="text-base mb-1">
+              <strong>Project:</strong> {quoteInfo.projectName || 'Project Name'}
+            </p>
+            <p className="text-base mb-4">
+              <strong>Location:</strong> {quoteInfo.projectAddress || 'Project Address'}
+            </p>
+            
+            <p className="text-base font-bold text-blue-600">
+              Quote #: {quoteInfo.quoteNumber}
+            </p>
+          </div>
+
+          {/* Company Contact Info */}
+          <div className="mt-auto">
+            <p className="text-lg font-bold mb-2">{companyInfo.name}</p>
+            <p className="text-sm mb-1">{companyInfo.phone} | {companyInfo.email}</p>
+            <p className="text-sm mb-1">{companyInfo.address}, {companyInfo.city}</p>
+            <p className="text-sm">{companyInfo.website}</p>
+          </div>
+        </div>
+
+        {/* Second Page - Detailed Quote */}
+        <div className="quote-details bg-white min-h-screen p-8 print:page-break-before">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8">
+            <div className="flex items-center">
+              <CompanyLogo className="w-32 h-16 mr-4" />
+              <div>
+                <h3 className="font-bold text-lg">{companyInfo.name}</h3>
+                <p className="text-sm">{companyInfo.address}</p>
+                <p className="text-sm">{companyInfo.city}</p>
+                <p className="text-sm">Phone: {companyInfo.phone}</p>
+                <p className="text-sm">Email: {companyInfo.email}</p>
+                <p className="text-sm">Website: {companyInfo.website}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <h2 className="text-xl font-bold text-blue-600">QUOTE #{quoteInfo.quoteNumber}</h2>
+              <p className="text-sm">Date: {quoteInfo.date}</p>
+              <p className="text-sm">Valid Until: {quoteInfo.validUntil}</p>
+            </div>
+          </div>
+
+          {/* Client Information */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
+            <p className="text-sm">{clientInfo.name}</p>
+            <p className="text-sm">{clientInfo.company}</p>
+            <p className="text-sm">{clientInfo.address}</p>
+            <p className="text-sm">{clientInfo.email}</p>
+            <p className="text-sm">{clientInfo.phone}</p>
+          </div>
+
+          {/* Project Information */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
+            <p className="text-sm"><strong>Project:</strong> {quoteInfo.projectName}</p>
+            <p className="text-sm"><strong>Address:</strong> {quoteInfo.projectAddress}</p>
+            <p className="text-sm"><strong>Type:</strong> {getProjectTypeDisplay(formData.projectType)}</p>
+            <p className="text-sm"><strong>Square Footage:</strong> {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
+            <p className="text-sm"><strong>Cleaning Type:</strong> {getCleaningTypeDisplay(formData.cleaningType)}</p>
+          </div>
+
+          {/* Service Details & Pricing */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 border-b pb-1">Service Details & Pricing</h3>
+            
+            {/* Base Cleaning Service */}
+            <div className="flex justify-between items-start py-2 border-b border-gray-200">
+              <div className="flex-1">
+                <p className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)}</p>
+                <p className="text-sm text-gray-600">{formData.squareFootage?.toLocaleString()} sq ft</p>
+              </div>
+              <div className="text-right font-medium">
+                {formatCurrency(getAdjustedPrice('basePrice', 
+                  (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)))}
+              </div>
+            </div>
+
+            {/* VCT Flooring */}
+            {formData.hasVCT && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">VCT Flooring Treatment</p>
+                  <p className="text-sm text-gray-600">{(formData.vctSquareFootage || 0).toLocaleString()} sq ft of VCT flooring</p>
+                  <p className="text-sm text-gray-600">Vinyl Composition Tile floor cleaning and maintenance</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}
+                </div>
+              </div>
+            )}
+
+            {/* Travel Expenses */}
+            <div className="flex justify-between items-start py-2 border-b border-gray-200">
+              <div className="flex-1">
+                <p className="font-semibold">Travel Expenses</p>
+                <p className="text-sm text-gray-600">Travel to project location ({formData.distanceFromOffice || 0} miles from our facility)</p>
+              </div>
+              <div className="text-right font-medium">
+                {formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}
+              </div>
+            </div>
+
+            {/* Overnight Accommodations */}
+            {formData.stayingOvernight && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">Overnight Accommodations</p>
+                  <p className="text-sm text-gray-600">{formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members</p>
+                  <p className="text-sm text-gray-600">Includes hotel accommodations ({Math.ceil(formData.numberOfCleaners / 2)} rooms), meals & incidentals, and coordination</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('overnightCost', estimateData.overnightCost || 0))}
+                </div>
+              </div>
+            )}
+
+            {/* Pressure Washing */}
+            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">Pressure Washing Services</p>
+                  <p className="text-sm text-gray-600">{formData.pressureWashingArea?.toLocaleString()} sq ft of pressure washing</p>
+                  <p className="text-sm text-gray-600">Includes equipment rental and cleaning solutions</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0))}
+                </div>
+              </div>
+            )}
+
+            {/* Window Cleaning */}
+            {formData.needsWindowCleaning && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">Window Cleaning Services</p>
+                  <p className="text-sm text-gray-600">Standard and high-access window cleaning, including equipment and solutions</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0))}
+                </div>
+              </div>
+            )}
+
+            {/* Display Case Cleaning */}
+            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">Display Case Cleaning</p>
+                  <p className="text-sm text-gray-600">{formData.numberOfDisplayCases} display cases with specialized cleaning</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0))}
+                </div>
+              </div>
+            )}
+
+            {/* Urgency Adjustment */}
+            {estimateData.urgencyMultiplier > 1 && (
+              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+                <div className="flex-1">
+                  <p className="font-semibold">Urgency Adjustment</p>
+                  <p className="text-sm text-gray-600">{((estimateData.urgencyMultiplier - 1) * 100).toFixed(0)}% adjustment for expedited timeline</p>
+                </div>
+                <div className="text-right font-medium">
+                  {formatCurrency(getAdjustedPrice('urgencyCost', 
+                    (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
+                      (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + 
+                      (estimateData.pressureWashingCost || 0)) * ((estimateData.urgencyMultiplier || 1) - 1)))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Pricing Summary */}
+          <div className="mb-8 bg-gray-50 p-4 rounded">
+            <div className="flex justify-between py-1">
+              <span className="font-semibold">Subtotal:</span>
+              <span>{formatCurrency(Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup)}</span>
+            </div>
+
+            {(estimateData.markup > 0 && Object.keys(adjustedPrices).length === 0) && (
+              <div className="flex justify-between py-1">
+                <span className="font-semibold">Business Overhead (30%):</span>
+                <span>{formatCurrency(estimateData.markup)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between py-1">
+              <span className="font-semibold">Sales Tax (7%):</span>
+              <span>{formatCurrency((Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup) * 0.07)}</span>
+            </div>
+
+            <div className="flex justify-between py-2 border-t border-gray-300 font-bold text-lg bg-blue-50">
+              <span>Total:</span>
+              <span>{formatCurrency(calculateAdjustedTotal())}</span>
+            </div>
+          </div>
+
+          {/* Detailed Scope of Work */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Detailed Scope of Work</h3>
+            <div className="text-sm whitespace-pre-line">
+              {SCOPE_OF_WORK[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || 'No specific scope of work defined for this project type.'}
+              
+              {formData.cleaningType === 'rough_final_touchup' && (
+                '\n\nThree-Stage Cleaning Schedule:\n• Rough Clean: During construction\n• Final Clean: After construction completion\n• Touch-up Clean: Before client move-in/opening'
+              )}
+              
+              {formData.hasVCT && '\n\nVCT Flooring Treatment: Stripping, waxing, and buffing of vinyl composition tile.'}
+              
+              {formData.needsPressureWashing && formData.pressureWashingArea > 0 && '\n\nPressure Washing Services: Professional-grade cleaning solutions and equipment for exterior/concrete surfaces.'}
+              
+              {formData.stayingOvernight && '\n\nOvernight Accommodations: Hotel accommodations and per diem expenses for staff.'}
+              
+              {formData.needsWindowCleaning && (formData.numberOfWindows || formData.numberOfLargeWindows || formData.numberOfHighAccessWindows) > 0 && '\n\nWindow Cleaning Services: Standard and high-access window cleaning, including equipment and solutions.'}
+              
+              {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && '\n\nDisplay Case Cleaning: Cleaning and maintenance of display cases.'}
+              
+              {formData.urgencyLevel > 5 && '\n\nUrgency Adjustment: Priority scheduling (Level ' + formData.urgencyLevel + '/10) for expedited timeline.'}
+            </div>
+          </div>
+
+          {/* Updated Terms and Conditions */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Professional Terms & Conditions</h3>
+            <div className="text-sm whitespace-pre-line">
+              {quoteInfo.terms}
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Contact Information</h3>
+            <div className="text-sm">
+              <p>For questions regarding this quote, please contact:</p>
+              <p><strong>{companyInfo.name}</strong></p>
+              <p>Phone: {companyInfo.phone}</p>
+              <p>Email: {companyInfo.email}</p>
+            </div>
           </div>
         </div>
       </div>
