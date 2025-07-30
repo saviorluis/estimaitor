@@ -345,18 +345,48 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const cleaningTypeMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
   const urgencyMultiplier = URGENCY_MULTIPLIERS[urgencyLevel] || 1;
 
-  // Calculate all cost components
-  const basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
-  const vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
+  // Handle specialized cleaning types
+  let basePrice = 0;
+  let vctCost = 0;
+  let pressureWashingCost = 0;
+  let windowCleaningCost = 0;
+  let actualSquareFootage = squareFootage;
+
+  if (cleaningType === 'vct_only') {
+    // For VCT only service, use VCT square footage and VCT pricing
+    actualSquareFootage = vctSquareFootage || 0;
+    basePrice = 0; // No base cleaning price for VCT only
+    vctCost = actualSquareFootage * getVCTCostPerSqFt(actualSquareFootage);
+  } else if (cleaningType === 'window_cleaning_only') {
+    // For window cleaning only, calculate based on windows and no base price
+    actualSquareFootage = 0; // No square footage for window only
+    basePrice = 0; // No base cleaning price for window only
+    windowCleaningCost = calculateWindowCleaningCost(
+      true, // Always needs window cleaning for this type
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
+  } else if (cleaningType === 'pressure_washing') {
+    // For pressure washing only, use pressure washing area and no base price
+    actualSquareFootage = pressureWashingArea || 0;
+    basePrice = 0; // No base cleaning price for pressure washing only
+    pressureWashingCost = calculatePressureWashingCost(true, pressureWashingArea, pressureWashingType);
+  } else {
+    // Traditional cleaning types
+    basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
+    vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
+    pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
+    windowCleaningCost = calculateWindowCleaningCost(
+      needsWindowCleaning,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
+  }
+
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
-  const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
-  const windowCleaningCost = calculateWindowCleaningCost(
-    needsWindowCleaning,
-    numberOfWindows,
-    numberOfLargeWindows,
-    numberOfHighAccessWindows
-  );
   const displayCaseCost = calculateDisplayCaseCost(projectType, numberOfDisplayCases);
 
   // Calculate totals
@@ -371,22 +401,33 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const salesTax = totalWithMarkup * SALES_TAX_RATE;
   const totalPrice = totalWithMarkup + salesTax;
 
-  // Calculate hours
-  const baseHours = calculateEstimatedHours(squareFootage, projectType, cleaningType);
-  const additionalHours = calculateAdditionalHours(
-    needsPressureWashing,
-    pressureWashingArea,
-    needsWindowCleaning,
-    numberOfWindows,
-    numberOfLargeWindows,
-    numberOfHighAccessWindows,
-    projectType,
-    numberOfDisplayCases
-  );
+  // Calculate hours using appropriate square footage for specialized services
+  const baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);
+  
+  // For specialized services, calculate additional hours based on service type
+  let additionalHours = 0;
+  if (cleaningType === 'pressure_washing') {
+    additionalHours = calculateAdditionalHours(true, pressureWashingArea, false, 0, 0, 0, projectType, numberOfDisplayCases);
+  } else if (cleaningType === 'window_cleaning_only') {
+    additionalHours = calculateAdditionalHours(false, 0, true, numberOfWindows, numberOfLargeWindows, numberOfHighAccessWindows, projectType, numberOfDisplayCases);
+  } else {
+    additionalHours = calculateAdditionalHours(
+      needsPressureWashing,
+      pressureWashingArea,
+      needsWindowCleaning,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows,
+      projectType,
+      numberOfDisplayCases
+    );
+  }
+  
   const estimatedHours = baseHours + additionalHours;
 
-  // Calculate price per square foot
-  const pricePerSquareFoot = totalPrice / squareFootage;
+  // Calculate price per square foot (use actual relevant footage)
+  const relevantFootage = actualSquareFootage > 0 ? actualSquareFootage : (squareFootage > 0 ? squareFootage : 1);
+  const pricePerSquareFoot = totalPrice / relevantFootage;
 
   // Return optimized estimate data
   return {

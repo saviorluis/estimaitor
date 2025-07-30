@@ -234,7 +234,9 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="final">Final Clean (Standard rate)</option>
             <option value="rough_final">Rough & Final Clean (120% rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
-            <option value="pressure_washing">Pressure Washing (Standard rate)</option>
+            <option value="pressure_washing">Pressure Washing Only</option>
+            <option value="vct_only">VCT Stripping/Waxing Only</option>
+            <option value="window_cleaning_only">Window Cleaning Only</option>
           </select>
           {formValues.cleaningType && (
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -246,73 +248,109 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        {/* Building Square Footage */}
-        <div>
-          <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            🏢 Building Size - Total Square Footage
-          </label>
-          <input
-            id="squareFootage"
-            type="number"
-            min="100"
-            max="1000000"
-            {...register('squareFootage', { 
-              required: 'Building square footage is required',
-              min: { value: 100, message: 'Minimum 100 sq ft' },
-              max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-            })}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-            placeholder="Enter total building square footage for interior cleaning"
-          />
-          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-            This is the total interior space to be cleaned (offices, hallways, bathrooms, etc.)
-          </p>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Recommended cleaners: {recommendedCleaners}
-          </p>
-          {errors.squareFootage && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
-          )}
-        </div>
-
-        {/* VCT Flooring */}
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <input
-              id="hasVCT"
-              type="checkbox"
-              {...register('hasVCT')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-            />
-            <label htmlFor="hasVCT" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Has VCT Flooring (+$0.15/sq ft)
+        {/* Building Square Footage - Only for traditional cleaning types */}
+        {!['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType) && (
+          <div>
+            <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              🏢 Building Size - Total Square Footage
             </label>
+            <input
+              id="squareFootage"
+              type="number"
+              min="100"
+              max="1000000"
+              {...register('squareFootage', { 
+                required: !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType) ? 'Building square footage is required' : false,
+                min: { value: 100, message: 'Minimum 100 sq ft' },
+                max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+              })}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+              placeholder="Enter total building square footage for interior cleaning"
+            />
+            <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+              This is the total interior space to be cleaned (offices, hallways, bathrooms, etc.)
+            </p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Recommended cleaners: {recommendedCleaners}
+            </p>
+            {errors.squareFootage && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
+            )}
           </div>
-          
-          {watch('hasVCT') && (
-            <div>
-              <label htmlFor="vctSquareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                VCT Square Footage
-              </label>
-              <input
-                id="vctSquareFootage"
-                type="number"
-                min="0"
-                max="1000000"
-                {...register('vctSquareFootage', { 
-                  required: watch('hasVCT') ? 'VCT square footage is required when VCT is selected' : false,
-                  min: { value: 0, message: 'VCT square footage cannot be negative' },
-                  max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-                })}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-                placeholder="Enter VCT square footage"
-              />
-              {errors.vctSquareFootage && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vctSquareFootage.message}</p>
-              )}
-            </div>
-          )}
-        </div>
+        )}
+
+        {/* VCT Flooring - Show for traditional cleaning types as option, or required for VCT only */}
+        {(formValues.cleaningType === 'vct_only' || !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType)) && (
+          <div className="space-y-3">
+            {formValues.cleaningType === 'vct_only' ? (
+              <>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">🏢 VCT Stripping & Waxing Details</h3>
+                <div>
+                  <label htmlFor="vctSquareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    VCT Square Footage to Strip & Wax
+                  </label>
+                  <input
+                    id="vctSquareFootage"
+                    type="number"
+                    min="100"
+                    max="1000000"
+                    {...register('vctSquareFootage', { 
+                      required: formValues.cleaningType === 'vct_only' ? 'VCT square footage is required' : false,
+                      min: { value: 100, message: 'Minimum 100 sq ft' },
+                      max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                    })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Enter total VCT square footage"
+                  />
+                  <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                    Total area of VCT flooring that needs stripping, waxing, and buffing
+                  </p>
+                  {errors.vctSquareFootage && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vctSquareFootage.message}</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center space-x-3">
+                  <input
+                    id="hasVCT"
+                    type="checkbox"
+                    {...register('hasVCT')}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                  />
+                  <label htmlFor="hasVCT" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Has VCT Flooring (Dynamic pricing: $1.50-$2.20/sq ft)
+                  </label>
+                </div>
+                
+                {watch('hasVCT') && (
+                  <div>
+                    <label htmlFor="vctSquareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      VCT Square Footage
+                    </label>
+                    <input
+                      id="vctSquareFootage"
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      {...register('vctSquareFootage', { 
+                        required: watch('hasVCT') ? 'VCT square footage is required when VCT is selected' : false,
+                        min: { value: 0, message: 'VCT square footage cannot be negative' },
+                        max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                      })}
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Enter VCT square footage"
+                    />
+                    {errors.vctSquareFootage && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vctSquareFootage.message}</p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Distance and Gas Price */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -449,21 +487,26 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        {/* Pressure Washing */}
-        <div className="border-t pt-4">
-          <div className="flex items-center space-x-3 mb-4">
-            <input
-              id="needsPressureWashing"
-              type="checkbox"
-              {...register('needsPressureWashing')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-            />
-            <label htmlFor="needsPressureWashing" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Needs Pressure Washing
-            </label>
-          </div>
+        {/* Pressure Washing - Show as option for traditional cleaning, required for pressure washing only */}
+        {(formValues.cleaningType === 'pressure_washing' || !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType)) && (
+          <div className="border-t pt-4">
+            {formValues.cleaningType === 'pressure_washing' ? (
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">💧 Pressure Washing Service Details</h3>
+            ) : (
+              <div className="flex items-center space-x-3 mb-4">
+                <input
+                  id="needsPressureWashing"
+                  type="checkbox"
+                  {...register('needsPressureWashing')}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                />
+                <label htmlFor="needsPressureWashing" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Needs Pressure Washing
+                </label>
+              </div>
+            )}
           
-          {needsPressureWashing && (
+          {(needsPressureWashing || formValues.cleaningType === 'pressure_washing') && (
             <div className="space-y-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
               <h4 className="font-medium text-gray-900 dark:text-gray-100">Pressure Washing Details</h4>
               
@@ -632,23 +675,29 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               </div>
             </div>
           )}
-        </div>
-
-        {/* Window Cleaning */}
-        <div className="border-t pt-4">
-          <div className="flex items-center space-x-3 mb-4">
-            <input
-              id="needsWindowCleaning"
-              type="checkbox"
-              {...register('needsWindowCleaning')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-            />
-            <label htmlFor="needsWindowCleaning" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Needs Window Cleaning
-            </label>
           </div>
+        )}
+
+        {/* Window Cleaning - Show as option for traditional cleaning, required for window cleaning only */}
+        {(formValues.cleaningType === 'window_cleaning_only' || !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType)) && (
+        <div className="border-t pt-4">
+          {formValues.cleaningType === 'window_cleaning_only' ? (
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">🪟 Window Cleaning Service Details</h3>
+          ) : (
+            <div className="flex items-center space-x-3 mb-4">
+              <input
+                id="needsWindowCleaning"
+                type="checkbox"
+                {...register('needsWindowCleaning')}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+              />
+              <label htmlFor="needsWindowCleaning" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Needs Window Cleaning
+              </label>
+            </div>
+          )}
           
-          {needsWindowCleaning && (
+          {(needsWindowCleaning || formValues.cleaningType === 'window_cleaning_only') && (
             <div className="space-y-4">
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -701,6 +750,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             </div>
           )}
         </div>
+        )}
 
         {/* Display Cases (Jewelry Store) */}
         {formValues.projectType === 'jewelry_store' && (

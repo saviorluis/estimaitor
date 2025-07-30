@@ -19,7 +19,7 @@ export type ProjectType =
   | 'arcade'
   | 'other';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing';
+export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
 
 // ===================== FORM DATA INTERFACE =====================
 

@@ -56,7 +56,9 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   final: 1.0,
   rough_final: 1.2,
   rough_final_touchup: 1.45,
-  pressure_washing: 1.0
+  pressure_washing: 1.0,
+  vct_only: 1.0,
+  window_cleaning_only: 1.0
 } as const;
 
 export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
@@ -64,7 +66,9 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   final: 1.0,
   rough_final: 1.5,
   rough_final_touchup: 1.8,
-  pressure_washing: 1.0
+  pressure_washing: 1.0,
+  vct_only: 1.0,
+  window_cleaning_only: 1.0
 } as const;
 
 export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
@@ -72,7 +76,9 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
   final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
   rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
   rough_final_touchup: "Complete three-stage process: rough, final, and touch-up clean (145% of standard rate).",
-  pressure_washing: "Professional pressure washing services with appropriate equipment and chemicals (standard rate)."
+  pressure_washing: "Professional pressure washing services with appropriate equipment and chemicals (standard rate).",
+  vct_only: "Professional VCT stripping, waxing, and buffing services for vinyl composition tile flooring (standard rate).",
+  window_cleaning_only: "Professional window cleaning services including standard and high-access windows (standard rate)."
 } as const;
 
 // ===================== TRAVEL AND LOGISTICS =====================
