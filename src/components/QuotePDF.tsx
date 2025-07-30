@@ -497,33 +497,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
           </View>
           
-          {formData.cleaningType === 'pressure_washing' ? (
-            <>
-              <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
-                PRESSURE WASHING
-              </Text>
-              <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
-                SERVICES PROPOSAL
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.title, { marginTop: 30, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }]}>
-                POST CONSTRUCTION
-              </Text>
-              <Text style={[styles.title, { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }]}>
-                CLEANING PROPOSAL
-              </Text>
-            </>
-          )}
-          
-          {/* Cleaning Type Title */}
-          <Text style={[styles.title, { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, marginTop: 60 }]}>
-            {formData.cleaningType === 'final' ? 'Post Construction Cleaning Proposal' :
-             formData.cleaningType === 'vct_only' ? 'VCT Stripping & Waxing Proposal' :
-             formData.cleaningType === 'window_cleaning_only' ? 'Window Cleaning Services Proposal' :
-             formData.cleaningType === 'pressure_washing' ? 'Pressure Washing Services Proposal' :
-             'Professional Cleaning Services Proposal'}
+          {/* Title */}
+          <Text style={[styles.title, { marginTop: 30, fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }]}>
+            {formData.cleaningType === 'final' ? 'POST CONSTRUCTION\nCLEANING PROPOSAL' :
+             formData.cleaningType === 'vct_only' ? 'VCT STRIPPING &\nWAXING PROPOSAL' :
+             formData.cleaningType === 'window_cleaning_only' ? 'WINDOW CLEANING\nSERVICES PROPOSAL' :
+             formData.cleaningType === 'pressure_washing' ? 'PRESSURE WASHING\nSERVICES PROPOSAL' :
+             'PROFESSIONAL CLEANING\nSERVICES PROPOSAL'}
           </Text>
 
           {/* Client Information */}
