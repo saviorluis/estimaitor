@@ -618,10 +618,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
-                <Text style={styles.tableCell}>
-                  {getScopeOfWork(formData)}
-                </Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft - Includes all necessary equipment, supplies, labor, and travel expenses</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
@@ -646,19 +643,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Window Cleaning Services</Text>
-                  <Text style={styles.tableCell}>
-                    {(() => {
-                      const windowTypes = [];
-                      if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
-                      if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
-                      if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
-                      return windowTypes.join(', ');
-                    })()}
-                </Text>
-                  <Text style={styles.tableCell}>Includes all necessary equipment, cleaning solutions, and labor</Text>
+                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Window Cleaning Services - {(() => {
+                    const windowTypes = [];
+                    if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
+                    if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
+                    if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
+                    return windowTypes.join(', ');
+                  })()} - Includes all necessary equipment, cleaning solutions, and labor</Text>
                 </View>
-                                <View style={styles.amountCell}>
+                <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.windowCleaningCost !== undefined
@@ -781,7 +774,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.termsText}>
             1. Payment Terms: Net 15 - Payment due within 15 days of completion.{'\n'}
             2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.{'\n'}
-            3. Rescheduling Fee: A fee of 25% of the total quote will be charged for rescheduling due to poor planning or site readiness issues.{'\n'}
+            3. Rescheduling Fee: A $200 mobilization fee will be charged for rescheduling due to poor planning or site readiness issues.{'\n'}
             4. Scope: This quote covers only the services explicitly described.{'\n'}
             5. Additional Services: Any services not specified will be quoted separately.{'\n'}
             6. Access: Client must provide necessary access to the property.{'\n'}
