@@ -250,7 +250,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
                 Estimated Labor Cost (60%)
               </span>
               <span className="text-gray-600 dark:text-gray-400 text-sm">
-                {formatCurrency((estimateData.basePrice + estimateData.vctCost) * 0.6)}
+                {formatCurrency(estimateData.basePrice * 0.6)}
               </span>
             </div>
 
