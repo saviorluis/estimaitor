@@ -300,7 +300,120 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </div>
             )}
 
+            {/* Cost Breakdown */}
+            <div className="border-t pt-4 mt-4">
+              <h4 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Cost Breakdown</h4>
+              
+              <div className="space-y-2">
+                {/* Base Price */}
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Base Price (${estimateData.pricePerSquareFoot.toFixed(2)}/sq ft)
+                  </span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                    {formatCurrency(estimateData.basePrice)}
+                  </span>
+                </div>
 
+                {/* VCT Cost if applicable */}
+                {estimateData.vctCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">VCT Cleaning</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.vctCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Travel Cost if applicable */}
+                {estimateData.travelCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Travel Cost</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.travelCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Overnight Cost if applicable */}
+                {estimateData.overnightCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Overnight Accommodations</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.overnightCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Window Cleaning Cost if applicable */}
+                {estimateData.windowCleaningCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Window Cleaning</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.windowCleaningCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Pressure Washing Cost if applicable */}
+                {estimateData.pressureWashingCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Pressure Washing</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.pressureWashingCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Display Case Cost if applicable */}
+                {estimateData.displayCaseCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Display Case Cleaning</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.displayCaseCost)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Subtotal */}
+                <div className="border-t pt-2">
+                  <div className="flex justify-between font-medium">
+                    <span className="text-gray-700 dark:text-gray-300">Subtotal</span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.totalBeforeMarkup)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Markup if applicable */}
+                {estimateData.markup > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Business Overhead (30%)</span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {formatCurrency(estimateData.markup)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Sales Tax */}
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
+                  <span className="text-gray-800 dark:text-gray-200">
+                    {formatCurrency(estimateData.salesTax)}
+                  </span>
+                </div>
+
+                {/* Total */}
+                <div className="border-t pt-2">
+                  <div className="flex justify-between text-lg font-bold">
+                    <span className="text-gray-800 dark:text-gray-200">Total</span>
+                    <span className="text-indigo-600 dark:text-indigo-400">
+                      {formatCurrency(estimateData.totalPrice)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
