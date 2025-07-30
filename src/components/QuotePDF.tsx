@@ -475,7 +475,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
           <View style={styles.logoContainer}>
-            <Image src="/assets/logo.png" style={styles.logo} />
+            {/* Logo temporarily removed for debugging - will re-add with proper path */}
+            <Text style={[styles.companyName, { fontSize: 20, fontWeight: 'bold' }]}>
+              {companyInfo.name}
+            </Text>
           </View>
           
           {formData.cleaningType === 'pressure_washing' ? (
@@ -538,8 +541,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
           <View style={styles.rightSide}>
             <View style={styles.logoAndCompany}>
-              <Image src="/assets/logo.png" style={styles.logo} />
-              <Text style={styles.companyName}>{companyInfo.name}</Text>
+              {/* Logo temporarily removed for debugging - will re-add with proper path */}
+              <Text style={[styles.companyName, { fontSize: 16, fontWeight: 'bold' }]}>{companyInfo.name}</Text>
               <Text style={styles.companyDetails}>{companyInfo.address}</Text>
               <Text style={styles.companyDetails}>{companyInfo.city}</Text>
               <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
