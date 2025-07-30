@@ -122,7 +122,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
         {/* Base Price */}
         <div className="mb-4">
           <h3 className="font-semibold text-gray-700 dark:text-gray-300">Base Price</h3>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
             ${estimateData.basePrice.toFixed(2)}
           </p>
         </div>
@@ -320,9 +320,9 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
 
             {/* Total */}
             <div className="border-t pt-2">
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between text-xl font-bold">
                 <span className="text-gray-800 dark:text-gray-200">Total</span>
-                <span className="text-indigo-600 dark:text-indigo-400">
+                <span className="text-green-600 dark:text-green-400 text-2xl">
                   {formatCurrency(estimateData.totalPrice)}
                 </span>
               </div>
