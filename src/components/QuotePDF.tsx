@@ -492,7 +492,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
   // ---------- overhead distribution ----------
-  const overhead = estimateData.markup;
+  // Use 15% of totalBeforeMarkup as distributed overhead instead of full 30% markup
+  const overhead = estimateData.totalBeforeMarkup * 0.15;
   const rawWindowCost = estimateData.windowCleaningCost || 0;
   const hasWindow = formData.needsWindowCleaning && rawWindowCost > 0;
 
@@ -737,7 +738,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.totalBeforeMarkup + estimateData.markup)}
+                  {formatCurrency(estimateData.totalBeforeMarkup + overhead)}
                 </Text>
               </View>
             </View>
