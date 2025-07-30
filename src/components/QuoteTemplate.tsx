@@ -991,137 +991,156 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       {/* ACTUAL QUOTE DISPLAY - This shows the formatted quote for preview and printing */}
       <div className="quote-display print:block">
         {/* Cover Page */}
-        <div className="cover-page bg-white min-h-screen flex flex-col items-center justify-center text-center p-8 print:page-break-after">
-          {/* Company Logo */}
-          <div className="mb-8">
-            <CompanyLogo className="w-48 h-24" />
+        <div className="cover-page bg-white min-h-screen flex flex-col justify-center text-center p-12 print:page-break-after">
+          {/* Company Logo - Centered at top */}
+          <div className="flex justify-center mb-12">
+            <CompanyLogo className="w-56 h-28" />
           </div>
 
-          {/* Title */}
-          <div className="mb-8">
-            {formData.cleaningType === 'pressure_washing' ? (
-              <>
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">PRESSURE WASHING</h1>
-                <h2 className="text-2xl font-bold text-gray-800">SERVICES PROPOSAL</h2>
-              </>
-            ) : (
-              <>
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">POST CONSTRUCTION</h1>
-                <h2 className="text-2xl font-bold text-gray-800">CLEANING PROPOSAL</h2>
-              </>
-            )}
+          {/* Main Content Container - Centered */}
+          <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto">
+            {/* Title Section */}
+            <div className="mb-16">
+              {formData.cleaningType === 'pressure_washing' ? (
+                <>
+                  <h1 className="text-4xl font-bold text-gray-800 mb-4 tracking-wide">PRESSURE WASHING</h1>
+                  <h2 className="text-4xl font-bold text-gray-800 tracking-wide">SERVICES PROPOSAL</h2>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-4xl font-bold text-gray-800 mb-4 tracking-wide">POST CONSTRUCTION</h1>
+                  <h2 className="text-4xl font-bold text-gray-800 tracking-wide">CLEANING PROPOSAL</h2>
+                </>
+              )}
+            </div>
+
+            {/* Prepared For Section */}
+            <div className="mb-16 border border-gray-300 p-8 bg-gray-50">
+              <h3 className="text-xl font-semibold mb-6 text-gray-700">Prepared for:</h3>
+              <div className="space-y-3">
+                <p className="text-2xl font-bold text-gray-800">
+                  {clientInfo.company || clientInfo.name || 'Client Name'}
+                </p>
+                
+                <div className="text-lg text-gray-700 space-y-2">
+                  <p><strong>Project:</strong> {quoteInfo.projectName || 'Project Name'}</p>
+                  <p><strong>Location:</strong> {quoteInfo.projectAddress || 'Project Address'}</p>
+                </div>
+                
+                <p className="text-xl font-bold text-blue-600 mt-6">
+                  Quote #: {quoteInfo.quoteNumber}
+                </p>
+              </div>
+            </div>
+
+            {/* Quote Date */}
+            <div className="mb-16">
+              <p className="text-lg text-gray-600">Date: {quoteInfo.date}</p>
+              <p className="text-lg text-gray-600">Valid Until: {quoteInfo.validUntil}</p>
+            </div>
           </div>
 
-          {/* Prepared For Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4 border-b pb-2">Prepared for:</h3>
-            <p className="text-xl font-bold text-gray-800 mb-2">
-              {clientInfo.company || clientInfo.name || 'Client Name'}
-            </p>
-            
-            <p className="text-base mb-1">
-              <strong>Project:</strong> {quoteInfo.projectName || 'Project Name'}
-            </p>
-            <p className="text-base mb-4">
-              <strong>Location:</strong> {quoteInfo.projectAddress || 'Project Address'}
-            </p>
-            
-            <p className="text-base font-bold text-blue-600">
-              Quote #: {quoteInfo.quoteNumber}
-            </p>
-          </div>
-
-          {/* Company Contact Info */}
-          <div className="mt-auto">
-            <p className="text-lg font-bold mb-2">{companyInfo.name}</p>
-            <p className="text-sm mb-1">{companyInfo.phone} | {companyInfo.email}</p>
-            <p className="text-sm mb-1">{companyInfo.address}, {companyInfo.city}</p>
-            <p className="text-sm">{companyInfo.website}</p>
+          {/* Company Contact Info - Footer */}
+          <div className="mt-auto border-t border-gray-300 pt-8">
+            <p className="text-xl font-bold mb-4 text-gray-800">{companyInfo.name}</p>
+            <div className="text-base text-gray-600 space-y-1">
+              <p>{companyInfo.phone} | {companyInfo.email}</p>
+              <p>{companyInfo.address}, {companyInfo.city}</p>
+              <p className="font-medium">{companyInfo.website}</p>
+            </div>
           </div>
         </div>
 
         {/* Second Page - Detailed Quote */}
-        <div className="quote-details bg-white min-h-screen p-8 print:page-break-before">
+        <div className="quote-details bg-white min-h-screen p-8 print:page-break-before max-w-5xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start mb-12 border-b border-gray-200 pb-6">
             <div className="flex items-center">
-              <CompanyLogo className="w-32 h-16 mr-4" />
-              <div>
-                <h3 className="font-bold text-lg">{companyInfo.name}</h3>
-                <p className="text-sm">{companyInfo.address}</p>
-                <p className="text-sm">{companyInfo.city}</p>
-                <p className="text-sm">Phone: {companyInfo.phone}</p>
-                <p className="text-sm">Email: {companyInfo.email}</p>
-                <p className="text-sm">Website: {companyInfo.website}</p>
+              <CompanyLogo className="w-40 h-20 mr-6" />
+              <div className="space-y-1">
+                <h3 className="font-bold text-xl text-gray-800">{companyInfo.name}</h3>
+                <p className="text-sm text-gray-600">{companyInfo.address}</p>
+                <p className="text-sm text-gray-600">{companyInfo.city}</p>
+                <p className="text-sm text-gray-600">Phone: {companyInfo.phone}</p>
+                <p className="text-sm text-gray-600">Email: {companyInfo.email}</p>
+                <p className="text-sm text-gray-600 font-medium">Website: {companyInfo.website}</p>
               </div>
             </div>
             <div className="text-right">
-              <h2 className="text-xl font-bold text-blue-600">QUOTE #{quoteInfo.quoteNumber}</h2>
-              <p className="text-sm">Date: {quoteInfo.date}</p>
-              <p className="text-sm">Valid Until: {quoteInfo.validUntil}</p>
+              <h2 className="text-2xl font-bold text-blue-600 mb-2">QUOTE #{quoteInfo.quoteNumber}</h2>
+              <p className="text-base text-gray-600">Date: {quoteInfo.date}</p>
+              <p className="text-base text-gray-600">Valid Until: {quoteInfo.validUntil}</p>
             </div>
           </div>
 
-          {/* Client Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information</h3>
-            <p className="text-sm">{clientInfo.name}</p>
-            <p className="text-sm">{clientInfo.company}</p>
-            <p className="text-sm">{clientInfo.address}</p>
-            <p className="text-sm">{clientInfo.email}</p>
-            <p className="text-sm">{clientInfo.phone}</p>
-          </div>
+          {/* Client and Project Information Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Client Information */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-300 pb-2">Client Information</h3>
+              <div className="space-y-2">
+                <p className="text-base"><strong>Name:</strong> {clientInfo.name}</p>
+                <p className="text-base"><strong>Company:</strong> {clientInfo.company}</p>
+                <p className="text-base"><strong>Address:</strong> {clientInfo.address}</p>
+                <p className="text-base"><strong>Email:</strong> {clientInfo.email}</p>
+                <p className="text-base"><strong>Phone:</strong> {clientInfo.phone}</p>
+              </div>
+            </div>
 
-          {/* Project Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Project Information</h3>
-            <p className="text-sm"><strong>Project:</strong> {quoteInfo.projectName}</p>
-            <p className="text-sm"><strong>Address:</strong> {quoteInfo.projectAddress}</p>
-            <p className="text-sm"><strong>Type:</strong> {getProjectTypeDisplay(formData.projectType)}</p>
-            <p className="text-sm"><strong>Square Footage:</strong> {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
-            <p className="text-sm"><strong>Cleaning Type:</strong> {getCleaningTypeDisplay(formData.cleaningType)}</p>
+            {/* Project Information */}
+            <div className="bg-blue-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800 border-b border-gray-300 pb-2">Project Information</h3>
+              <div className="space-y-2">
+                <p className="text-base"><strong>Project:</strong> {quoteInfo.projectName}</p>
+                <p className="text-base"><strong>Address:</strong> {quoteInfo.projectAddress}</p>
+                <p className="text-base"><strong>Type:</strong> {getProjectTypeDisplay(formData.projectType)}</p>
+                <p className="text-base"><strong>Square Footage:</strong> {(formData.squareFootage || 0).toLocaleString()} sq ft</p>
+                <p className="text-base"><strong>Cleaning Type:</strong> {getCleaningTypeDisplay(formData.cleaningType)}</p>
+              </div>
+            </div>
           </div>
 
           {/* Service Details & Pricing */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4 border-b pb-1">Service Details & Pricing</h3>
+          <div className="mb-12">
+            <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800 border-b-2 border-blue-600 pb-3">Service Details & Pricing</h3>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
             
-            {/* Base Cleaning Service */}
-            <div className="flex justify-between items-start py-2 border-b border-gray-200">
-              <div className="flex-1">
-                <p className="font-semibold">{getCleaningTypeDisplay(formData.cleaningType)}</p>
-                <p className="text-sm text-gray-600">{formData.squareFootage?.toLocaleString()} sq ft</p>
-              </div>
-              <div className="text-right font-medium">
-                {formatCurrency(getAdjustedPrice('basePrice', 
-                  (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)))}
-              </div>
-            </div>
-
-            {/* VCT Flooring */}
-            {formData.hasVCT && (
-              <div className="flex justify-between items-start py-2 border-b border-gray-200">
+              {/* Base Cleaning Service */}
+              <div className="flex justify-between items-start py-4 px-6 border-b border-gray-200 hover:bg-gray-50">
                 <div className="flex-1">
-                  <p className="font-semibold">VCT Flooring Treatment</p>
-                  <p className="text-sm text-gray-600">{(formData.vctSquareFootage || 0).toLocaleString()} sq ft of VCT flooring</p>
-                  <p className="text-sm text-gray-600">Vinyl Composition Tile floor cleaning and maintenance</p>
+                  <p className="font-semibold text-lg text-gray-800">{getCleaningTypeDisplay(formData.cleaningType)}</p>
+                  <p className="text-base text-gray-600">{formData.squareFootage?.toLocaleString()} sq ft</p>
                 </div>
-                <div className="text-right font-medium">
-                  {formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}
+                <div className="text-right font-bold text-lg text-blue-600">
+                  {formatCurrency(getAdjustedPrice('basePrice', 
+                    (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)))}
                 </div>
               </div>
-            )}
 
-            {/* Travel Expenses */}
-            <div className="flex justify-between items-start py-2 border-b border-gray-200">
-              <div className="flex-1">
-                <p className="font-semibold">Travel Expenses</p>
-                <p className="text-sm text-gray-600">Travel to project location ({formData.distanceFromOffice || 0} miles from our facility)</p>
+              {/* VCT Flooring */}
+              {formData.hasVCT && (
+                <div className="flex justify-between items-start py-4 px-6 border-b border-gray-200 hover:bg-gray-50">
+                  <div className="flex-1">
+                    <p className="font-semibold text-lg text-gray-800">VCT Flooring Treatment</p>
+                    <p className="text-base text-gray-600">{(formData.vctSquareFootage || 0).toLocaleString()} sq ft of VCT flooring</p>
+                    <p className="text-base text-gray-600">Vinyl Composition Tile floor cleaning and maintenance</p>
+                  </div>
+                  <div className="text-right font-bold text-lg text-blue-600">
+                    {formatCurrency(getAdjustedPrice('vctCost', estimateData.vctCost || 0))}
+                  </div>
+                </div>
+              )}
+
+              {/* Travel Expenses */}
+              <div className="flex justify-between items-start py-4 px-6 border-b border-gray-200 hover:bg-gray-50">
+                <div className="flex-1">
+                  <p className="font-semibold text-lg text-gray-800">Travel Expenses</p>
+                  <p className="text-base text-gray-600">Travel to project location ({formData.distanceFromOffice || 0} miles from our facility)</p>
+                </div>
+                <div className="text-right font-bold text-lg text-blue-600">
+                  {formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}
+                </div>
               </div>
-              <div className="text-right font-medium">
-                {formatCurrency(getAdjustedPrice('travelCost', estimateData.travelCost || 0))}
-              </div>
-            </div>
 
             {/* Overnight Accommodations */}
             {formData.stayingOvernight && (
@@ -1192,73 +1211,87 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 </div>
               </div>
             )}
+            </div>
           </div>
 
           {/* Pricing Summary */}
-          <div className="mb-8 bg-gray-50 p-4 rounded">
-            <div className="flex justify-between py-1">
-              <span className="font-semibold">Subtotal:</span>
-              <span>{formatCurrency(Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup)}</span>
-            </div>
+          <div className="mb-12 max-w-lg mx-auto">
+            <h4 className="text-xl font-semibold mb-4 text-center text-gray-800">Price Summary</h4>
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 text-base">
+                  <span className="font-medium">Subtotal:</span>
+                  <span className="font-semibold">{formatCurrency(Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup)}</span>
+                </div>
 
-            {(estimateData.markup > 0 && Object.keys(adjustedPrices).length === 0) && (
-              <div className="flex justify-between py-1">
-                <span className="font-semibold">Business Overhead (30%):</span>
-                <span>{formatCurrency(estimateData.markup)}</span>
+                {(estimateData.markup > 0 && Object.keys(adjustedPrices).length === 0) && (
+                  <div className="flex justify-between py-2 text-base">
+                    <span className="font-medium">Business Overhead (30%):</span>
+                    <span className="font-semibold">{formatCurrency(estimateData.markup)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between py-2 text-base">
+                  <span className="font-medium">Sales Tax (7%):</span>
+                  <span className="font-semibold">{formatCurrency((Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup) * 0.07)}</span>
+                </div>
               </div>
-            )}
 
-            <div className="flex justify-between py-1">
-              <span className="font-semibold">Sales Tax (7%):</span>
-              <span>{formatCurrency((Object.keys(adjustedPrices).length > 0 ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0) : estimateData.totalBeforeMarkup) * 0.07)}</span>
-            </div>
-
-            <div className="flex justify-between py-2 border-t border-gray-300 font-bold text-lg bg-blue-50">
-              <span>Total:</span>
-              <span>{formatCurrency(calculateAdjustedTotal())}</span>
+              <div className="border-t border-gray-300 mt-4 pt-4">
+                <div className="flex justify-between py-3 text-xl font-bold text-blue-600 bg-blue-50 px-4 rounded-lg">
+                  <span>Total:</span>
+                  <span>{formatCurrency(calculateAdjustedTotal())}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Detailed Scope of Work */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Detailed Scope of Work</h3>
-            <div className="text-sm whitespace-pre-line">
-              {SCOPE_OF_WORK[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || 'No specific scope of work defined for this project type.'}
-              
-              {formData.cleaningType === 'rough_final_touchup' && (
-                '\n\nThree-Stage Cleaning Schedule:\n• Rough Clean: During construction\n• Final Clean: After construction completion\n• Touch-up Clean: Before client move-in/opening'
-              )}
-              
-              {formData.hasVCT && '\n\nVCT Flooring Treatment: Stripping, waxing, and buffing of vinyl composition tile.'}
-              
-              {formData.needsPressureWashing && formData.pressureWashingArea > 0 && '\n\nPressure Washing Services: Professional-grade cleaning solutions and equipment for exterior/concrete surfaces.'}
-              
-              {formData.stayingOvernight && '\n\nOvernight Accommodations: Hotel accommodations and per diem expenses for staff.'}
-              
-              {formData.needsWindowCleaning && (formData.numberOfWindows || formData.numberOfLargeWindows || formData.numberOfHighAccessWindows) > 0 && '\n\nWindow Cleaning Services: Standard and high-access window cleaning, including equipment and solutions.'}
-              
-              {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && '\n\nDisplay Case Cleaning: Cleaning and maintenance of display cases.'}
-              
-              {formData.urgencyLevel > 5 && '\n\nUrgency Adjustment: Priority scheduling (Level ' + formData.urgencyLevel + '/10) for expedited timeline.'}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6 text-center text-gray-800 border-b-2 border-blue-600 pb-3">Detailed Scope of Work</h3>
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+              <div className="text-base whitespace-pre-line leading-relaxed">
+                {SCOPE_OF_WORK[formData.projectType]?.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`) || 'No specific scope of work defined for this project type.'}
+                
+                {formData.cleaningType === 'rough_final_touchup' && (
+                  '\n\nThree-Stage Cleaning Schedule:\n• Rough Clean: During construction\n• Final Clean: After construction completion\n• Touch-up Clean: Before client move-in/opening'
+                )}
+                
+                {formData.hasVCT && '\n\nVCT Flooring Treatment: Stripping, waxing, and buffing of vinyl composition tile.'}
+                
+                {formData.needsPressureWashing && formData.pressureWashingArea > 0 && '\n\nPressure Washing Services: Professional-grade cleaning solutions and equipment for exterior/concrete surfaces.'}
+                
+                {formData.stayingOvernight && '\n\nOvernight Accommodations: Hotel accommodations and per diem expenses for staff.'}
+                
+                {formData.needsWindowCleaning && (formData.numberOfWindows || formData.numberOfLargeWindows || formData.numberOfHighAccessWindows) > 0 && '\n\nWindow Cleaning Services: Standard and high-access window cleaning, including equipment and solutions.'}
+                
+                {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && '\n\nDisplay Case Cleaning: Cleaning and maintenance of display cases.'}
+                
+                {formData.urgencyLevel > 5 && '\n\nUrgency Adjustment: Priority scheduling (Level ' + formData.urgencyLevel + '/10) for expedited timeline.'}
+              </div>
             </div>
           </div>
 
           {/* Updated Terms and Conditions */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Professional Terms & Conditions</h3>
-            <div className="text-sm whitespace-pre-line">
-              {quoteInfo.terms}
+          <div className="mb-12">
+            <h3 className="text-xl font-semibold mb-6 text-center text-gray-800 border-b-2 border-blue-600 pb-3">Professional Terms & Conditions</h3>
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <div className="text-base whitespace-pre-line leading-relaxed">
+                {quoteInfo.terms}
+              </div>
             </div>
           </div>
 
           {/* Contact Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 border-b pb-1">Contact Information</h3>
-            <div className="text-sm">
-              <p>For questions regarding this quote, please contact:</p>
-              <p><strong>{companyInfo.name}</strong></p>
-              <p>Phone: {companyInfo.phone}</p>
-              <p>Email: {companyInfo.email}</p>
+          <div className="mb-12 text-center">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800 border-b-2 border-blue-600 pb-3 max-w-md mx-auto">Contact Information</h3>
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 max-w-md mx-auto">
+              <p className="text-base mb-3">For questions regarding this quote, please contact:</p>
+              <div className="space-y-2">
+                <p className="text-lg font-bold text-gray-800">{companyInfo.name}</p>
+                <p className="text-base">Phone: {companyInfo.phone}</p>
+                <p className="text-base">Email: {companyInfo.email}</p>
+              </div>
             </div>
           </div>
         </div>
