@@ -4,7 +4,7 @@ import {
   PROJECT_TYPE_MULTIPLIERS, 
   CLEANING_TYPE_MULTIPLIERS,
   CLEANING_TYPE_TIME_MULTIPLIERS,
-  VCT_COST_PER_SQFT,
+  getVCTCostPerSqFt,
   getTravelRate,
   calculateHourlyTravelFee,
   getDriveTimeHours,
@@ -347,7 +347,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
 
   // Calculate all cost components
   const basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
-  const vctCost = hasVCT ? (vctSquareFootage || 0) * VCT_COST_PER_SQFT : 0;
+  const vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);

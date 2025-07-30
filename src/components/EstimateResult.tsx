@@ -127,46 +127,48 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
           </p>
         </div>
 
-        {/* Detailed Breakdown */}
-        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <p>Project Type Multiplier: {estimateData.projectTypeMultiplier}x</p>
-          <p>Cleaning Type Multiplier: {estimateData.cleaningTypeMultiplier}x</p>
-          <p>Urgency Multiplier: {estimateData.urgencyMultiplier}x</p>
-          
-          {estimateData.vctCost > 0 && (
-            <p>VCT Cleaning Cost: ${estimateData.vctCost.toFixed(2)}</p>
-          )}
-          
-          {estimateData.travelCost > 0 && (
-            <p>Travel Cost: ${estimateData.travelCost.toFixed(2)}</p>
-          )}
-          
-          {estimateData.overnightCost > 0 && (
-            <p>Overnight Cost: ${estimateData.overnightCost.toFixed(2)}</p>
-          )}
+        {/* Detailed Breakdown and Additional Information side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Multipliers & Costs</h3>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <p>Project Type Multiplier: {estimateData.projectTypeMultiplier}x</p>
+              <p>Cleaning Type Multiplier: {estimateData.cleaningTypeMultiplier}x</p>
+              <p>Urgency Multiplier: {estimateData.urgencyMultiplier}x</p>
+              
+              {estimateData.vctCost > 0 && (
+                <p>VCT Cleaning Cost: ${estimateData.vctCost.toFixed(2)}</p>
+              )}
+              
+              {estimateData.travelCost > 0 && (
+                <p>Travel Cost: ${estimateData.travelCost.toFixed(2)}</p>
+              )}
+              
+              {estimateData.overnightCost > 0 && (
+                <p>Overnight Cost: ${estimateData.overnightCost.toFixed(2)}</p>
+              )}
 
-          {estimateData.windowCleaningCost > 0 && (
-            <p>Window Cleaning Cost: ${estimateData.windowCleaningCost.toFixed(2)}</p>
-          )}
+              {estimateData.windowCleaningCost > 0 && (
+                <p>Window Cleaning Cost: ${estimateData.windowCleaningCost.toFixed(2)}</p>
+              )}
 
-          {estimateData.pressureWashingCost > 0 && (
-            <p>Pressure Washing Cost: ${estimateData.pressureWashingCost.toFixed(2)}</p>
-          )}
+              {estimateData.pressureWashingCost > 0 && (
+                <p>Pressure Washing Cost: ${estimateData.pressureWashingCost.toFixed(2)}</p>
+              )}
 
-          {estimateData.displayCaseCost > 0 && (
-            <p>Display Case Cleaning Cost: ${estimateData.displayCaseCost.toFixed(2)}</p>
-          )}
-        </div>
+              {estimateData.displayCaseCost > 0 && (
+                <p>Display Case Cleaning Cost: ${estimateData.displayCaseCost.toFixed(2)}</p>
+              )}
+            </div>
+          </div>
 
-
-
-        {/* Additional Information */}
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Additional Information</h3>
-          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-            <p>Price per Square Foot: ${estimateData.pricePerSquareFoot.toFixed(2)}</p>
-            <p>Estimated Hours: {estimateData.estimatedHours.toFixed(1)} hours</p>
-            <p>Time to Complete: {estimateData.timeToCompleteInDays} day(s)</p>
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Additional Information</h3>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <p>Price per Square Foot: ${estimateData.pricePerSquareFoot.toFixed(2)}</p>
+              <p>Estimated Hours: {estimateData.estimatedHours.toFixed(1)} hours</p>
+              <p>Time to Complete: {estimateData.timeToCompleteInDays} day(s)</p>
+            </div>
           </div>
         </div>
 
@@ -300,118 +302,41 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </div>
             )}
 
-            {/* Cost Breakdown */}
-            <div className="border-t pt-4 mt-4">
-              <h4 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Cost Breakdown</h4>
-              
-              <div className="space-y-2">
-                {/* Base Price */}
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Base Price (${estimateData.pricePerSquareFoot.toFixed(2)}/sq ft)
-                  </span>
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
-                    {formatCurrency(estimateData.basePrice)}
-                  </span>
-                </div>
+            {/* Subtotal */}
+            <div className="border-t pt-2 mt-4">
+              <div className="flex justify-between font-medium">
+                <span className="text-gray-700 dark:text-gray-300">Subtotal</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                </span>
+              </div>
+            </div>
 
-                {/* VCT Cost if applicable */}
-                {estimateData.vctCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">VCT Cleaning</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.vctCost)}
-                    </span>
-                  </div>
-                )}
+            {/* Markup if applicable */}
+            {estimateData.markup > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Business Overhead (30%)</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.markup)}
+                </span>
+              </div>
+            )}
 
-                {/* Travel Cost if applicable */}
-                {estimateData.travelCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Travel Cost</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.travelCost)}
-                    </span>
-                  </div>
-                )}
+            {/* Sales Tax */}
+            <div className="flex justify-between">
+              <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
+              <span className="text-gray-800 dark:text-gray-200">
+                {formatCurrency(estimateData.salesTax)}
+              </span>
+            </div>
 
-                {/* Overnight Cost if applicable */}
-                {estimateData.overnightCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Overnight Accommodations</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.overnightCost)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Window Cleaning Cost if applicable */}
-                {estimateData.windowCleaningCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Window Cleaning</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.windowCleaningCost)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Pressure Washing Cost if applicable */}
-                {estimateData.pressureWashingCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Pressure Washing</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.pressureWashingCost)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Display Case Cost if applicable */}
-                {estimateData.displayCaseCost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Display Case Cleaning</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.displayCaseCost)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Subtotal */}
-                <div className="border-t pt-2">
-                  <div className="flex justify-between font-medium">
-                    <span className="text-gray-700 dark:text-gray-300">Subtotal</span>
-                    <span className="text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.totalBeforeMarkup)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Markup if applicable */}
-                {estimateData.markup > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Business Overhead (30%)</span>
-                    <span className="text-gray-800 dark:text-gray-200">
-                      {formatCurrency(estimateData.markup)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Sales Tax */}
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
-                  <span className="text-gray-800 dark:text-gray-200">
-                    {formatCurrency(estimateData.salesTax)}
-                  </span>
-                </div>
-
-                {/* Total */}
-                <div className="border-t pt-2">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span className="text-gray-800 dark:text-gray-200">Total</span>
-                    <span className="text-indigo-600 dark:text-indigo-400">
-                      {formatCurrency(estimateData.totalPrice)}
-                    </span>
-                  </div>
-                </div>
+            {/* Total */}
+            <div className="border-t pt-2">
+              <div className="flex justify-between text-lg font-bold">
+                <span className="text-gray-800 dark:text-gray-200">Total</span>
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  {formatCurrency(estimateData.totalPrice)}
+                </span>
               </div>
             </div>
           </div>

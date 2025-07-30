@@ -5,8 +5,21 @@ import { ProjectType, CleaningType } from './types';
 // Base rate per square foot (in dollars)
 export const BASE_RATE_PER_SQFT = 0.18;
 
-// VCT (Vinyl Composition Tile) additional cost per square foot
-export const VCT_COST_PER_SQFT = 0.15;
+// VCT (Vinyl Composition Tile) stripping and waxing tiered pricing
+// Small jobs (< 1,000 sq ft): $2.20/sq ft - higher overhead per sq ft
+// Medium jobs (1,000-5,000 sq ft): $2.20 scaling down to $1.50 based on volume
+// Large jobs (> 5,000 sq ft): $1.50/sq ft - volume discount
+export const getVCTCostPerSqFt = (vctSquareFootage: number): number => {
+  if (vctSquareFootage < 1000) {
+    return 2.20; // Small job premium
+  } else if (vctSquareFootage <= 5000) {
+    // Linear interpolation between $2.20 and $1.50 for medium jobs
+    const ratio = (vctSquareFootage - 1000) / (5000 - 1000);
+    return 2.20 - (ratio * 0.70); // $2.20 down to $1.50
+  } else {
+    return 1.50; // Large job volume discount
+  }
+};
 
 // Sales tax rate
 export const SALES_TAX_RATE = 0.07;
