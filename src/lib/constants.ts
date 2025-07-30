@@ -262,7 +262,6 @@ export const PRESSURE_WASHING_PAYMENT_TERMS = {
 // Base scope template function for better performance
 const createScopeTemplate = (specificTasks: string) => `Final Cleaning includes:
 • Sweep/mop all hard surface floors${specificTasks}
-• Clean interior/exterior windows (___WINDOW_COUNT___ windows)
 • Clean/sanitize bathrooms and ensure all fixtures are spotless
 • Clean light fixtures and perform hi-lo dusting
 • Clean and sanitize all door handles and high-touch surfaces

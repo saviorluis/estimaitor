@@ -645,22 +645,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
             </View>
 
-            {/* Travel Expenses Row */}
-            <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Travel Expenses</Text>
-                <Text style={styles.tableCell}>{formData.distanceFromOffice || 0} miles</Text>
-              </View>
-                            <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
-                  {formatCurrency(
-                    estimateData.adjustedLineItems?.travelCost !== undefined
-                      ? estimateData.adjustedLineItems.travelCost
-                      : estimateData.travelCost
-                  )}
-                </Text>
-              </View>
-          </View>
+
 
             {/* Window Cleaning Services Row */}
             {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
@@ -754,6 +739,23 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
             </View>
           )}
+
+            {/* Travel Expenses Row - positioned right above subtotal */}
+            <View style={styles.tableRow}>
+              <View style={styles.descriptionCell}>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Travel Expenses</Text>
+                <Text style={styles.tableCell}>{formData.distanceFromOffice || 0} miles</Text>
+              </View>
+              <View style={styles.amountCell}>
+                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
+                  {formatCurrency(
+                    estimateData.adjustedLineItems?.travelCost !== undefined
+                      ? estimateData.adjustedLineItems.travelCost
+                      : estimateData.travelCost
+                  )}
+                </Text>
+              </View>
+            </View>
 
             {/* Subtotal Row */}
             <View style={styles.tableRow}>
