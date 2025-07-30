@@ -539,7 +539,7 @@ export default function Home() {
         {/* Admin Access Logo */}
         <div className="fixed bottom-4 right-4 cursor-pointer hover:opacity-80 transition-opacity">
           <Image
-            src="/images/LOGO.png"
+            src="/LOGO.png"
             alt="Calculator Logo"
             width={192}
             height={192}

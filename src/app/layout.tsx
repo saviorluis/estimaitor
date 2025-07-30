@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: 'https://estimaitor.vercel.app/images/LOGO.png', sizes: '512x512', type: 'image/png' },
-      { url: 'https://estimaitor.vercel.app/images/LOGO.png', sizes: '192x192', type: 'image/png' },
-      { url: 'https://estimaitor.vercel.app/images/LOGO.png', sizes: '32x32', type: 'image/png' },
-      { url: 'https://estimaitor.vercel.app/images/LOGO.png', sizes: '16x16', type: 'image/png' }
+      { url: 'https://estimaitor.vercel.app/LOGO.png', sizes: '512x512', type: 'image/png' },
+      { url: 'https://estimaitor.vercel.app/LOGO.png', sizes: '192x192', type: 'image/png' },
+      { url: 'https://estimaitor.vercel.app/LOGO.png', sizes: '32x32', type: 'image/png' },
+      { url: 'https://estimaitor.vercel.app/LOGO.png', sizes: '16x16', type: 'image/png' }
     ],
     apple: [
-      { url: 'https://estimaitor.vercel.app/images/LOGO.png', sizes: '180x180', type: 'image/png' }
+      { url: 'https://estimaitor.vercel.app/LOGO.png', sizes: '180x180', type: 'image/png' }
     ]
   }
 };
@@ -38,11 +38,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <link rel="icon" href="https://estimaitor.vercel.app/images/LOGO.png" sizes="512x512" type="image/png" />
-        <link rel="icon" href="https://estimaitor.vercel.app/images/LOGO.png" sizes="192x192" type="image/png" />
-        <link rel="icon" href="https://estimaitor.vercel.app/images/LOGO.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="https://estimaitor.vercel.app/images/LOGO.png" sizes="16x16" type="image/png" />
-        <link rel="apple-touch-icon" href="https://estimaitor.vercel.app/images/LOGO.png" sizes="180x180" />
+        <link rel="icon" href="https://estimaitor.vercel.app/LOGO.png" sizes="512x512" type="image/png" />
+        <link rel="icon" href="https://estimaitor.vercel.app/LOGO.png" sizes="192x192" type="image/png" />
+        <link rel="icon" href="https://estimaitor.vercel.app/LOGO.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="https://estimaitor.vercel.app/LOGO.png" sizes="16x16" type="image/png" />
+        <link rel="apple-touch-icon" href="https://estimaitor.vercel.app/LOGO.png" sizes="180x180" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
