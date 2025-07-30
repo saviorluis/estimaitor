@@ -708,23 +708,23 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
       {/* Header with action buttons */}
-      <div className="flex justify-between items-center mb-6 print:hidden">
-        <div className="space-x-4">
+      <div className="flex justify-center items-center mb-8 print:hidden">
+        <div className="flex gap-6">
           <button
             onClick={handlePreviewQuote}
-            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm"
           >
             Preview Quote
           </button>
           <button
             onClick={handlePDFDownload}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
           >
             Download PDF
           </button>
           <button
             onClick={handlePackageDownload}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
           >
             Download Package
           </button>

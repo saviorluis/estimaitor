@@ -158,27 +158,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
           )}
         </div>
 
-        {/* Final Calculations */}
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="space-y-2">
-            <p className="flex justify-between">
-              <span>Subtotal:</span>
-              <span>${estimateData.totalBeforeMarkup.toFixed(2)}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Professional Markup (30%):</span>
-              <span>${estimateData.markup.toFixed(2)}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Sales Tax:</span>
-              <span>${estimateData.salesTax.toFixed(2)}</span>
-            </p>
-            <p className="flex justify-between text-lg font-bold text-gray-800 dark:text-gray-200">
-              <span>Total Price:</span>
-              <span>${estimateData.totalPrice.toFixed(2)}</span>
-            </p>
-          </div>
-        </div>
+
 
         {/* Additional Information */}
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -320,39 +300,7 @@ export default function EstimateResult({ estimateData, formData }: EstimateResul
               </div>
             )}
 
-            <div className="border-t pt-2">
-              <div className="flex justify-between font-medium">
-                <span className="text-gray-700 dark:text-gray-300">Subtotal</span>
-                <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.totalBeforeMarkup)}
-                </span>
-              </div>
-            </div>
 
-            {estimateData.markup > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">50% Markup</span>
-                <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.markup)}
-                </span>
-              </div>
-            )}
-
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
-              <span className="text-gray-800 dark:text-gray-200">
-                {formatCurrency(estimateData.salesTax)}
-              </span>
-            </div>
-
-            <div className="border-t pt-2">
-              <div className="flex justify-between text-lg font-bold">
-                <span className="text-gray-800 dark:text-gray-200">Total</span>
-                <span className="text-indigo-600 dark:text-indigo-400">
-                  {formatCurrency(estimateData.totalPrice)}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 

@@ -32,6 +32,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
+  leftSide: {
+    width: '50%',
+  },
+  rightSide: {
+    width: '50%',
+    alignItems: 'flex-end',
+  },
+  logoAndCompany: {
+    alignItems: 'flex-end',
+    marginBottom: 15,
+  },
+  quoteInfoBelow: {
+    alignItems: 'flex-end',
+  },
   companyInfo: {
     width: '50%',
   },
@@ -67,6 +81,18 @@ const styles = StyleSheet.create({
     color: '#0066CC',
   },
   quoteDetails: {
+    fontSize: 10,
+    marginBottom: 3,
+  },
+  serviceDescription: {
+    marginBottom: 10,
+  },
+  serviceTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  serviceInfo: {
     fontSize: 10,
     marginBottom: 3,
   },
@@ -242,6 +268,16 @@ const styles = StyleSheet.create({
   contactText: {
     fontSize: 10,
     marginTop: 5,
+  },
+  companyContactText: {
+    fontSize: 10,
+    lineHeight: 1.4,
+    textAlign: 'center',
+  },
+  contactNote: {
+    fontSize: 10,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   summaryRow: {
     flexDirection: 'row',
@@ -497,50 +533,89 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
-          <View style={styles.companyInfo}>
-            <View style={styles.companyHeader}>
-              <View style={styles.logoContainer}>
-                <Image src="/assets/logo.png" style={styles.logo} />
-              </View>
-              <View>
-                <Text style={styles.companyName}>{companyInfo.name}</Text>
-                <Text style={styles.companyDetails}>{companyInfo.address}</Text>
-                <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-                <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
-                <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
-                <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
-              </View>
+          <View style={styles.leftSide}>
+            {/* Empty left side - company info moved to right */}
+          </View>
+          <View style={styles.rightSide}>
+            <View style={styles.logoAndCompany}>
+              <Image src="/assets/logo.png" style={styles.logo} />
+              <Text style={styles.companyName}>{companyInfo.name}</Text>
+              <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+              <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+              <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+              <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+              <Text style={styles.companyDetails}>Website: {companyInfo.website}</Text>
+            </View>
+            <View style={styles.quoteInfoBelow}>
+              <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
+              <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
+              <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
             </View>
           </View>
-          <View style={styles.quoteInfo}>
-            <Text style={styles.quoteTitle}>QUOTE #{quoteInfo.quoteNumber}</Text>
-            <Text style={styles.quoteDate}>Date: {quoteInfo.date}</Text>
-            <Text style={styles.quoteDetails}>Valid Until: {quoteInfo.validUntil}</Text>
+        </View>
+
+        {/* Client and Project Information on same horizontal line */}
+        <View style={styles.infoGrid}>
+          <View style={styles.infoColumn}>
+            <Text style={styles.sectionTitle}>Client Information</Text>
+            <Text style={styles.clientText}>{clientInfo.name}</Text>
+            <Text style={styles.clientText}>{clientInfo.company}</Text>
+            <Text style={styles.clientText}>{clientInfo.address}</Text>
+            <Text style={styles.clientText}>{clientInfo.email}</Text>
+            <Text style={styles.clientText}>{clientInfo.phone}</Text>
           </View>
-        </View>
-
-        {/* Client and Project Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Client Information</Text>
-          <Text style={styles.clientText}>{clientInfo.name}</Text>
-          <Text style={styles.clientText}>{clientInfo.company}</Text>
-          <Text style={styles.clientText}>{clientInfo.address}</Text>
-          <Text style={styles.clientText}>{clientInfo.email}</Text>
-          <Text style={styles.clientText}>{clientInfo.phone}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Project Information</Text>
-          <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
-          <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
-          <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-          <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-          <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+          <View style={styles.infoColumn}>
+            <Text style={styles.sectionTitle}>Project Information</Text>
+            <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
+            <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
+            <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
+            <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+            <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+          </View>
         </View>
 
         {/* Service Details */}
         <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Service Details & Pricing</Text>
+          <Text style={styles.sectionTitle}>Service Details</Text>
+          
+          {/* Cleaning Type Description */}
+          <View style={styles.serviceDescription}>
+            <Text style={styles.serviceTitle}>{getCleaningTypeDisplay(formData.cleaningType)}</Text>
+            <Text style={styles.serviceInfo}>
+              Square Footage: {formData.squareFootage.toLocaleString()} sq ft
+            </Text>
+          </View>
+        </View>
+
+        {/* Scope of Work */}
+        <View style={[styles.section, { marginTop: 10 }]}>
+          <Text style={styles.sectionTitle}>Detailed Scope of Work</Text>
+          <Text style={styles.scopeText}>
+            {getScopeOfWork(formData)}
+          </Text>
+        </View>
+
+        {/* Window Cleaning Services (if applicable) */}
+        {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
+          <View style={[styles.section, { marginTop: 10 }]}>
+            <Text style={styles.sectionTitle}>Window Cleaning Services</Text>
+            <Text style={styles.serviceInfo}>
+              {formData.numberOfWindows} windows requiring professional cleaning
+            </Text>
+          </View>
+        )}
+
+        {/* Travel Expenses */}
+        <View style={[styles.section, { marginTop: 10 }]}>
+          <Text style={styles.sectionTitle}>Travel Expenses</Text>
+          <Text style={styles.serviceInfo}>
+            Distance from our facility: {formData.distanceFromOffice || 0} miles
+          </Text>
+        </View>
+
+        {/* Pricing Section */}
+        <View style={[styles.section, { marginTop: 20 }]}>
+          <Text style={styles.sectionTitle}>Pricing</Text>
 
           {/* Base Cleaning Service */}
           <View style={styles.lineItem}>
@@ -580,6 +655,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           )}
 
 
+
+          {/* Window Cleaning Services (pricing) */}
+          {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
+            <View style={styles.lineItem}>
+              <View style={styles.lineItemContent}>
+                <Text style={styles.lineItemTitle}>Window Cleaning Services</Text>
+                <Text style={styles.lineItemDescription}>
+                  {formData.numberOfWindows} windows requiring professional cleaning
+                </Text>
+              </View>
+              <Text style={styles.lineItemAmount}>
+                {formatCurrency(
+                  estimateData.adjustedLineItems?.windowCleaningCost !== undefined
+                    ? estimateData.adjustedLineItems.windowCleaningCost
+                    : estimateData.windowCleaningCost
+                )}
+              </Text>
+            </View>
+          )}
 
           {/* Travel Expenses */}
           <View style={styles.lineItem}>
@@ -715,13 +809,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
 
 
-        {/* Scope of Work */}
-        <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Detailed Scope of Work</Text>
-          <Text style={styles.scopeText}>
-            {getScopeOfWork(formData)}
-          </Text>
-        </View>
+
 
         {/* Terms and Conditions */}
         <View style={[styles.section, { marginTop: 20 }]}>
@@ -739,14 +827,23 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </Text>
         </View>
 
-        {/* Contact Information */}
-        <View style={[styles.section, { marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>Contact Information</Text>
-          <Text style={styles.contactText}>
-            For questions regarding this quote, please contact:{'\n'}
+        {/* Company Information */}
+        <View style={[styles.section, { marginTop: 30 }]}>
+          <Text style={styles.sectionTitle}>Company Information</Text>
+          <Text style={styles.companyContactText}>
             {companyInfo.name}{'\n'}
+            {companyInfo.address}{'\n'}
+            {companyInfo.city}{'\n'}
             Phone: {companyInfo.phone}{'\n'}
-            Email: {companyInfo.email}
+            Email: {companyInfo.email}{'\n'}
+            Website: {companyInfo.website}
+          </Text>
+        </View>
+
+        {/* Contact Information */}
+        <View style={[styles.section, { marginTop: 10 }]}>
+          <Text style={styles.contactNote}>
+            For questions regarding this quote, please contact us using the information above.
           </Text>
         </View>
       </Page>
