@@ -491,13 +491,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
-  // Distribute 25% business overhead seamlessly into line items
-  const businessOverheadRate = 0.25; // 25% overhead
+  // Distribute 30% business overhead seamlessly into line items (match estimator)
+  const businessOverheadRate = 0.30; // 30% overhead to match estimator
   const totalRawCosts = estimateData.totalBeforeMarkup;
   const overheadAmount = totalRawCosts * businessOverheadRate;
   
   // Calculate overhead multiplier for line items
-  const overheadMultiplier = 1 + businessOverheadRate; // 1.25
+  const overheadMultiplier = 1 + businessOverheadRate; // 1.30
 
   return (
     <Document>
