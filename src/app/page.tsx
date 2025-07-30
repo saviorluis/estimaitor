@@ -94,6 +94,8 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
   }
 };
 
+import Image from 'next/image';
+
 export default function Home() {
   const [estimateData, setEstimateData] = useState<EstimateData | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -534,6 +536,16 @@ export default function Home() {
           <p className="mt-1">Prices based on East Coast rates • Home Base: High Point, NC</p>
           <p className="mt-1">Current Mode: <span className="font-semibold">{currentConfig.title}</span></p>
         </footer>
+        {/* Admin Access Logo */}
+        <div className="fixed bottom-4 right-4 cursor-pointer hover:opacity-80 transition-opacity">
+          <Image
+            src="/LOGO.png"
+            alt="BBPS Logo"
+            width={60}
+            height={60}
+            className="rounded-full shadow-lg"
+          />
+        </div>
       </div>
     </main>
   );
