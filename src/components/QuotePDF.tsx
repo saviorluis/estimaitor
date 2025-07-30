@@ -494,7 +494,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
           <View style={styles.logoContainer}>
-            <Image src="https://raw.githubusercontent.com/saviorluis/estimaitor/main/public/assets/logo.png" style={styles.logo} />
+                          <Image src="/LOGO.png" style={[styles.logo, { width: 120, height: 120 }]} />
           </View>
           
           {/* Title */}
