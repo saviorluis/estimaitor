@@ -618,7 +618,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft - Includes all necessary equipment, supplies, labor, and travel expenses</Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft - Includes: all necessary equipment, supplies, labor, and travel expenses</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
@@ -652,7 +652,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   })()} - Includes all necessary equipment, cleaning solutions, and labor</Text>
                 </View>
                 <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.windowCleaningCost !== undefined
                         ? estimateData.adjustedLineItems.windowCleaningCost
@@ -674,7 +674,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   <Text style={styles.tableCell}>Includes hotel accommodations, meals & incidentals, and coordination</Text>
                 </View>
                                 <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', alignSelf: 'flex-start' }]}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency(
                       estimateData.adjustedLineItems?.overnightCost !== undefined
                         ? estimateData.adjustedLineItems.overnightCost
