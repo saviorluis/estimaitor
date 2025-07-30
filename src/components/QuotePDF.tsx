@@ -498,53 +498,52 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <Image src="/assets/logo.png" style={{ width: 100, height: 100 }} />
           </View>
 
-          {/* Company Name */}
-          <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
-            {companyInfo.name}
-          </Text>
-
-          {/* Contact Info */}
-          <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
-            {companyInfo.phone} | {companyInfo.email}
-          </Text>
-          <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
-            {companyInfo.address}, {companyInfo.city}
-          </Text>
-          <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 40 }}>
-            {companyInfo.website}
-          </Text>
-
           {/* Title */}
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
             POST CONSTRUCTION
           </Text>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 60 }}>
             CLEANING PROPOSAL
           </Text>
 
-          {/* Prepared For Section */}
-          <Text style={{ fontSize: 14, textAlign: 'left', marginBottom: 10 }}>
-            Prepared For:
-          </Text>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 5 }}>
-            {clientInfo.name}
-          </Text>
-          {clientInfo.company && (
-            <Text style={{ fontSize: 14, marginBottom: 20 }}>
-              {clientInfo.company}
+          {/* Center Content */}
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }}>
+              Prepared For:
             </Text>
-          )}
+            {clientInfo.company && (
+              <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }}>
+                {clientInfo.company}
+              </Text>
+            )}
 
-          {/* Project Info */}
-          <Text style={{ fontSize: 14, marginBottom: 5 }}>
-            Project: {quoteInfo.projectName}
-          </Text>
-          <Text style={{ fontSize: 14, marginBottom: 5 }}>
-            Location: {quoteInfo.projectAddress}
-          </Text>
-          <Text style={{ fontSize: 14, fontWeight: 'bold' }}>
-            Quote #: {quoteInfo.quoteNumber}
-          </Text>
+            {/* Project Info */}
+            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 10 }}>
+              Project: {quoteInfo.projectName}
+            </Text>
+            <Text style={{ fontSize: 14, textAlign: 'center', marginBottom: 10 }}>
+              Location: {quoteInfo.projectAddress}
+            </Text>
+            <Text style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
+              Quote #: {quoteInfo.quoteNumber}
+            </Text>
+          </View>
+
+          {/* Company Info at Bottom */}
+          <View style={{ position: 'absolute', bottom: 40, left: 0, right: 0 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 }}>
+              {companyInfo.name}
+            </Text>
+            <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
+              {companyInfo.phone} | {companyInfo.email}
+            </Text>
+            <Text style={{ fontSize: 12, textAlign: 'center', marginBottom: 3 }}>
+              {companyInfo.address}, {companyInfo.city}
+            </Text>
+            <Text style={{ fontSize: 12, textAlign: 'center' }}>
+              {companyInfo.website}
+            </Text>
+          </View>
         </View>
       </Page>
 
