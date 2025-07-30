@@ -9,6 +9,15 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+        pathname: '/saviorluis/estimaitor/**',
+      },
+    ],
+  },
 };
 
 module.exports = withPWA(nextConfig); 
