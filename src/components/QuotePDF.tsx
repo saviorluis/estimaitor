@@ -762,9 +762,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency((Object.keys(adjustedPrices).length > 0 
-                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-                    : estimateData.totalBeforeMarkup) * 0.07)}
+                  {formatCurrency(estimateData.salesTax)}
                 </Text>
               </View>
             </View>
@@ -776,9 +774,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
-                  {formatCurrency((Object.keys(adjustedPrices).length > 0 
-                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-                    : estimateData.totalBeforeMarkup) * 1.07)}
+                  {formatCurrency(estimateData.totalPrice)}
                 </Text>
               </View>
             </View>

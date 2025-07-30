@@ -251,16 +251,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         return;
       }
 
-    // If there's no custom markup but there is built-in markup, apply the built-in markup
+    // If there's no custom markup but there is built-in markup, use the original prices
+    // since the totalPrice already includes the markup
     if (markupPercentage === 0 && estimateData.markup > 0) {
-      // Apply the built-in markup proportionally
-      const adjustedPrices: {[key: string]: number} = {};
-      lineItems.forEach(item => {
-        const proportion = item.value / totalBeforeMarkup;
-        const itemMarkup = estimateData.markup * proportion;
-        adjustedPrices[item.key] = item.value + itemMarkup;
-      });
-      setAdjustedPrices(adjustedPrices);
+      setAdjustedPrices({});
       return;
     }
 
