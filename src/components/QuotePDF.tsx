@@ -872,43 +872,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         </View>
 
-        {/* Pricing Summary */}
-        <View style={[styles.section, { marginTop: 30 }]}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal:</Text>
-            <Text style={styles.summaryAmount}>
-              {formatCurrency(estimateData.totalBeforeMarkup)}
-            </Text>
-          </View>
-
-          {estimateData.markup > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Business Overhead (30%):</Text>
-              <Text style={styles.summaryAmount}>
-                {formatCurrency(estimateData.markup)}
-              </Text>
-            </View>
-          )}
-
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Sales Tax (7%):</Text>
-            <Text style={styles.summaryAmount}>
-              {formatCurrency(estimateData.salesTax)}
-            </Text>
-          </View>
-
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total:</Text>
-            <Text style={styles.totalAmount}>
-              {formatCurrency(estimateData.totalPrice)}
-            </Text>
-          </View>
-        </View>
-
-
-
-
-
         {/* Terms and Conditions */}
         <View style={[styles.section, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Terms & Conditions</Text>
