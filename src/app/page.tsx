@@ -540,10 +540,11 @@ export default function Home() {
         <div className="fixed bottom-4 right-4 cursor-pointer hover:opacity-80 transition-opacity">
           <Image
             src="/LOGO.png"
-            alt="BBPS Logo"
+            alt="Calculator Logo"
             width={80}
             height={80}
             className="rounded-full shadow-lg"
+            priority
           />
         </div>
       </div>
