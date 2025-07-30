@@ -494,7 +494,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       <Page size="LETTER" style={styles.page}>
         <View style={styles.companyHeader}>
           <View style={styles.logoContainer}>
-                          <Image src="/LOGO.png" style={[styles.logo, { width: 120, height: 120 }]} />
+                          <Image src="/assets/logo.png" style={[styles.logo, { width: 120, height: 120 }]} />
           </View>
           
           {/* Title */}
@@ -506,49 +506,52 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
              'PROFESSIONAL CLEANING\nSERVICES PROPOSAL'}
           </Text>
 
-          {/* Main Content Area - Centered Vertically */}
-          <View style={{ flex: 1, justifyContent: 'center', marginTop: -40 }}>
-            {/* Prepared For Section */}
-            <Text style={[styles.subtitle, { fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }]}>
-              Prepared For:
-            </Text>
-            
-            {/* Client Information */}
-            <Text style={[styles.clientName, { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }]}>
-              {clientInfo.name}
-            </Text>
-            {clientInfo.company && (
-              <Text style={[styles.clientCompany, { fontSize: 18, textAlign: 'center', marginBottom: 30, color: '#4A5568' }]}>
-                {clientInfo.company}
+          {/* Content Container */}
+          <View style={{ flex: 1, position: 'relative' }}>
+            {/* Main Content Area - Centered */}
+            <View style={{ flex: 1, justifyContent: 'center', paddingTop: 40, paddingBottom: 100 }}>
+              {/* Prepared For Section */}
+              <Text style={[styles.subtitle, { fontSize: 16, textAlign: 'center', marginBottom: 15, color: '#4A5568' }]}>
+                Prepared For:
               </Text>
-            )}
+              
+              {/* Client Information */}
+              <Text style={[styles.clientName, { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }]}>
+                {clientInfo.name}
+              </Text>
+              {clientInfo.company && (
+                <Text style={[styles.clientCompany, { fontSize: 18, textAlign: 'center', marginBottom: 30, color: '#4A5568' }]}>
+                  {clientInfo.company}
+                </Text>
+              )}
+              
+              <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 5 }]}>
+                Project: {quoteInfo.projectName}
+              </Text>
+              <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 20 }]}>
+                Location: {quoteInfo.projectAddress}
+              </Text>
+              
+              <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center' }]}>
+                Quote #: {quoteInfo.quoteNumber}
+              </Text>
+            </View>
             
-            <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 5 }]}>
-              Project: {quoteInfo.projectName}
-            </Text>
-            <Text style={[styles.projectInfo, { fontSize: 14, textAlign: 'center', marginBottom: 20 }]}>
-              Location: {quoteInfo.projectAddress}
-            </Text>
-            
-            <Text style={[styles.quoteNumber, { fontSize: 12, fontWeight: 'bold', textAlign: 'center' }]}>
-              Quote #: {quoteInfo.quoteNumber}
-            </Text>
-          </View>
-          
-          {/* Company info at bottom */}
-          <View style={{ position: 'absolute', bottom: 40, left: 0, right: 0, alignItems: 'center' }}>
-            <Text style={[styles.companyName, { fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }]}>
-              {companyInfo.name}
-            </Text>
-            <Text style={[styles.contactLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
-              {companyInfo.phone} | {companyInfo.email}
-            </Text>
-            <Text style={[styles.addressLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
-              {companyInfo.address}, {companyInfo.city}
-            </Text>
-            <Text style={[styles.websiteLine, { fontSize: 12, textAlign: 'center' }]}>
-              {companyInfo.website}
-            </Text>
+            {/* Company info fixed at bottom */}
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', paddingBottom: 40 }}>
+              <Text style={[styles.companyName, { fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }]}>
+                {companyInfo.name}
+              </Text>
+              <Text style={[styles.contactLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
+                {companyInfo.phone} | {companyInfo.email}
+              </Text>
+              <Text style={[styles.addressLine, { fontSize: 12, textAlign: 'center', marginBottom: 4 }]}>
+                {companyInfo.address}, {companyInfo.city}
+              </Text>
+              <Text style={[styles.websiteLine, { fontSize: 12, textAlign: 'center' }]}>
+                {companyInfo.website}
+              </Text>
+            </View>
           </View>
         </View>
       </Page>
@@ -565,7 +568,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.header}>
           <View style={styles.leftSide}>
             <View style={styles.logoAndCompany}>
-              <Image src="/LOGO.png" style={[styles.logo, { width: 120, height: 120 }]} />
+              <Image src="/assets/logo.png" style={[styles.logo, { width: 120, height: 120 }]} />
               <View style={{ marginLeft: 15 }}>
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.address}</Text>
