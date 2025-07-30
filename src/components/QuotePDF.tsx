@@ -631,13 +631,13 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   {formatCurrency(
                     (adjustedPrices.basePrice !== undefined
                       ? adjustedPrices.basePrice
-                      : (estimateData.basePrice * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))) + 
+                      : estimateData.basePrice * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) + 
                     (adjustedPrices.vctCost !== undefined
                       ? adjustedPrices.vctCost
-                      : (estimateData.vctCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))) +
+                      : estimateData.vctCost || 0) +
                     (adjustedPrices.travelCost !== undefined
                       ? adjustedPrices.travelCost
-                      : (estimateData.travelCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup)))
+                      : estimateData.travelCost || 0)
                   )}
                 </Text>
               </View>
@@ -667,7 +667,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       adjustedPrices.windowCleaningCost !== undefined
                         ? adjustedPrices.windowCleaningCost
-                        : (estimateData.windowCleaningCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))
+                        : estimateData.windowCleaningCost || 0
                     )}
                   </Text>
                 </View>
@@ -689,7 +689,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       adjustedPrices.overnightCost !== undefined
                         ? adjustedPrices.overnightCost
-                        : (estimateData.overnightCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))
+                        : estimateData.overnightCost || 0
                     )}
                   </Text>
                 </View>
@@ -711,7 +711,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       adjustedPrices.pressureWashingCost !== undefined
                         ? adjustedPrices.pressureWashingCost
-                        : (estimateData.pressureWashingCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))
+                        : estimateData.pressureWashingCost || 0
                     )}
                   </Text>
                 </View>
@@ -732,7 +732,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                     {formatCurrency(
                       adjustedPrices.displayCaseCost !== undefined
                         ? adjustedPrices.displayCaseCost
-                        : (estimateData.displayCaseCost || 0) * (1 + (estimateData.markup / estimateData.totalBeforeMarkup))
+                        : estimateData.displayCaseCost || 0
                     )}
                   </Text>
                 </View>
@@ -748,9 +748,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(Object.keys(adjustedPrices).length > 0 
-                    ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-                    : estimateData.totalBeforeMarkup)}
+                  {formatCurrency(estimateData.totalBeforeMarkup)}
                 </Text>
               </View>
             </View>
