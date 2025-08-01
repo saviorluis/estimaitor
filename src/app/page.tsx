@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
 import SimpleEstimatorForm from '@/components/SimpleEstimatorForm';
+import ModernEstimatorWizard from '@/components/ModernEstimatorWizard';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import AdminThemeMenu from '@/components/AdminThemeMenu';
@@ -61,7 +62,7 @@ interface JanitorialFormData {
 }
 
 // App modes
-export type AppMode = 'pro' | 'simple' | 'contract';
+export type AppMode = 'pro' | 'simple' | 'wizard' | 'contract';
 
 interface ModeConfig {
   title: string;
@@ -85,6 +86,13 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
     description: 'Streamlined calculator with just 4 essential fields: project type, cleaning type, square footage, and location. Automatic location-based pricing included.',
     color: 'from-green-600 to-green-800',
     features: ['4 simple fields', 'Location-based pricing', 'Auto calculations', 'Instant estimates', 'Customer-friendly']
+  },
+  wizard: {
+    title: 'Modern Wizard Mode',
+    subtitle: 'SimplyWise-Inspired Interactive Experience',
+    description: 'Step-by-step conversational interface with real-time estimates, photo uploads, and guided experience similar to modern estimation apps.',
+    color: 'from-blue-600 to-blue-800',
+    features: ['Step-by-step wizard', 'Real-time estimates', 'Photo integration', 'Interactive design', 'Mobile-optimized']
   },
   contract: {
     title: 'Janitorial Contract Generator',
@@ -128,7 +136,7 @@ export default function Home() {
         setPastEntries(JSON.parse(savedEntries));
       }
 
-      if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
+      if (savedMode && ['pro', 'simple', 'wizard', 'contract'].includes(savedMode)) {
         setCurrentMode(savedMode);
       }
     } catch (error) {
@@ -323,6 +331,8 @@ export default function Home() {
               <JanitorialContractForm onContractGenerated={handleContractGenerated} />
             ) : currentMode === 'simple' ? (
               <SimpleEstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+            ) : currentMode === 'wizard' ? (
+              <ModernEstimatorWizard onEstimateCalculated={handleEstimateCalculated} />
             ) : (
               <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             )}
@@ -481,7 +491,7 @@ export default function Home() {
           <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white text-center">
             Switch Calculator Mode
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {(Object.keys(MODE_CONFIGS) as AppMode[]).map((mode) => {
               const config = MODE_CONFIGS[mode];
               const isActive = currentMode === mode;

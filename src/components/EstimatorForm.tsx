@@ -21,13 +21,19 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     description?: string;
   }[]>([]);
 
-  // Get saved form data from localStorage (memoized)
+  // Get saved form data from localStorage (memoized) - excludes client-specific info
   const getSavedFormData = useCallback((): Partial<FormData> => {
     if (typeof window === 'undefined') return {};
     
     try {
       const savedData = localStorage.getItem(STORAGE_KEY);
-      return savedData ? JSON.parse(savedData) : {};
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        // Exclude client-specific information from loaded data
+        const { clientName, projectName, ...technicalData } = parsedData;
+        return technicalData;
+      }
+      return {};
     } catch (error) {
       console.error('Error loading saved form data:', error);
       return {};
@@ -97,10 +103,11 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       setValue('numberOfCleaners', newRecommendedCleaners);
     }
     
-    // Save form data to localStorage
+    // Save form data to localStorage (excluding client-specific information)
     try {
+      const { clientName, projectName, ...technicalData } = formValues;
       const formDataToSave = {
-        ...formValues,
+        ...technicalData,
         gasPrice: typeof formValues.gasPrice === 'string' 
           ? parseFloat(formValues.gasPrice) 
           : formValues.gasPrice
@@ -159,33 +166,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       </h2>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Client Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="clientName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Client Name (Optional)
-            </label>
-            <input
-              id="clientName"
-              type="text"
-              {...register('clientName')}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-              placeholder="Enter client name"
-            />
-          </div>
-          <div>
-            <label htmlFor="projectName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Project Name (Optional)
-            </label>
-            <input
-              id="projectName"
-              type="text"
-              {...register('projectName')}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-              placeholder="Enter project name"
-            />
-          </div>
-        </div>
+
 
         {/* Project Type */}
         <div>
@@ -213,6 +194,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="interactive_toy_store">Interactive Toy Store</option>
             <option value="church">Church</option>
             <option value="arcade">Arcade</option>
+            <option value="coffee_shop">Coffee Shop</option>
+            <option value="fire_station">Fire Station</option>
             <option value="other">Other</option>
           </select>
           {errors.projectType && (
@@ -780,6 +763,73 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
         )}
 
 
+
+        {/* Client Information for Professional Quote Generation */}
+        <div className="border-t pt-6 mt-8">
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-green-200 dark:border-green-700 mb-4">
+            <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200 flex items-center">
+              📋 Professional Quote Information
+            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Add client details to generate a professional quote document (optional for basic estimates)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('clientName', '');
+                    setValue('projectName', '');
+                  }}
+                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                >
+                  Clear Fields
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Clear any old saved data that might contain client info
+                    localStorage.removeItem(STORAGE_KEY);
+                    // Clear the current form client fields
+                    setValue('clientName', '');
+                    setValue('projectName', '');
+                    alert('Cleared all saved client data!');
+                  }}
+                  className="text-xs px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded transition-colors"
+                >
+                  Reset Saved Data
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="clientName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Client Name
+                </label>
+                <input
+                  id="clientName"
+                  type="text"
+                  {...register('clientName')}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  placeholder="Enter client name for quote"
+                />
+              </div>
+              <div>
+                <label htmlFor="projectName" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Project Name
+                </label>
+                <input
+                  id="projectName"
+                  type="text"
+                  {...register('projectName')}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  placeholder="Enter project name for quote"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Submit Button */}
         <button

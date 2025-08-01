@@ -295,6 +295,38 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
       'HVAC vent cleaning in food prep areas'
     ]
   },
+  fire_station: {
+    daily: [
+      'Clean and maintain apparatus bay floors',
+      'Sanitize living quarters and common areas',
+      'Clean kitchen and dining facilities',
+      'Maintain dormitory and sleeping areas',
+      'Empty trash and sanitize high-touch surfaces',
+      'Clean restrooms and shower facilities'
+    ],
+    weekly: [
+      'Deep clean apparatus bays and equipment areas',
+      'Sanitize fitness equipment and exercise areas',
+      'Clean offices and administrative areas',
+      'Detail clean vehicle maintenance areas',
+      'Floor maintenance and sanitization',
+      'Clean meeting rooms and training areas'
+    ],
+    monthly: [
+      'Deep clean gear storage and turnout areas',
+      'Professional cleaning of decontamination areas',
+      'Deep clean workshops and maintenance bays',
+      'HVAC vent cleaning and air quality maintenance',
+      'Deep clean emergency equipment storage areas'
+    ],
+    quarterly: [
+      'Comprehensive apparatus bay deep cleaning',
+      'Professional equipment area sanitization',
+      'Deep facility safety inspection and cleaning',
+      'Floor refinishing in high-traffic areas',
+      'Emergency preparedness area organization'
+    ]
+  },
   other: {
     daily: ['Basic daily cleaning tasks', 'High-touch sanitization', 'Restroom care'],
     weekly: ['Deep area cleaning', 'Common area maintenance', 'Floor care'],
@@ -322,6 +354,7 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   church: 0.70,
   arcade: 1.05,
   coffee_shop: 1.60,
+  fire_station: 1.30,
   other: 0.85
 };
 
@@ -344,6 +377,7 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   church: 100,
   arcade: 155,
   coffee_shop: 240,
+  fire_station: 195,
   other: 125
 };
 

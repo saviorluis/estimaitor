@@ -449,6 +449,8 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                 <option value="interactive_toy_store">Interactive Toy Store</option>
                 <option value="church">Church</option>
                 <option value="arcade">Arcade</option>
+                <option value="coffee_shop">Coffee Shop</option>
+                <option value="fire_station">Fire Station</option>
                 <option value="other">Other Commercial</option>
               </>
             )}
