@@ -249,3 +249,4 @@ Once deployed, you can:
 
 For any deployment issues, refer to the [Next.js deployment documentation](https://nextjs.org/docs/deployment).
 # Trigger deployment Thu Sep 11 18:47:28 EDT 2025
+# Fix Git author for Vercel deployment Thu Sep 11 18:48:26 EDT 2025
