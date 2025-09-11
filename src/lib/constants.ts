@@ -27,6 +27,12 @@ export const SALES_TAX_RATE = 0.07;
 // Markup percentage (50% markup = 0.5)
 export const MARKUP_PERCENTAGE = 0.3; // 30% professional markup
 
+// ===================== BUSINESS FEES =====================
+
+// Fixed business fees added to all quotes
+export const SCHEDULING_FEE = 99; // $99 scheduling fee
+export const INVOICING_FEE = 99; // $99 invoicing fee
+
 // ===================== PROJECT TYPE MULTIPLIERS =====================
 
 export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {

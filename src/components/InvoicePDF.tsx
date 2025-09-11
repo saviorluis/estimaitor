@@ -406,6 +406,25 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               </View>
             )}
 
+            {/* Business Fees */}
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text>Scheduling Fee</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency((estimateData.schedulingFee || 0) * 1.30)}</Text>
+              </View>
+            </View>
+
+            <View style={styles.tableRow}>
+              <View style={[styles.tableCell, styles.descriptionCell]}>
+                <Text>Invoicing Fee</Text>
+              </View>
+              <View style={[styles.tableCell, styles.amountCell]}>
+                <Text>{formatCurrency((estimateData.invoicingFee || 0) * 1.30)}</Text>
+              </View>
+            </View>
+
             {/* Subtotal */}
             <View style={[styles.tableRow, { borderTop: '1px solid #ddd', marginTop: 10 }]}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
@@ -468,6 +487,22 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
         }}>
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Balance Due:</Text>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 1.07)}</Text>
+        </View>
+
+        {/* Payment Terms */}
+        <View style={{
+          position: 'absolute',
+          bottom: 100,
+          left: 30,
+          right: 30,
+          padding: 10,
+          backgroundColor: '#f8fafc',
+          borderRadius: 4,
+          borderWidth: 1,
+          borderColor: '#E2E8F0',
+        }}>
+          <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1e40af', marginBottom: 5 }}>Payment Terms</Text>
+          <Text style={{ fontSize: 10 }}>{invoiceInfo.paymentTerms}</Text>
         </View>
 
         {/* Footer */}

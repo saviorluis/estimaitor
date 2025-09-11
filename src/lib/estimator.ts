@@ -16,7 +16,9 @@ import {
   DISPLAY_CASE,
   SALES_TAX_RATE,
   MARKUP_PERCENTAGE,
-  URGENCY_MULTIPLIERS
+  URGENCY_MULTIPLIERS,
+  SCHEDULING_FEE,
+  INVOICING_FEE
 } from './constants';
 
 // ===================== CALCULATION CACHE =====================
@@ -391,11 +393,19 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const displayCaseCost = calculateDisplayCaseCost(projectType, numberOfDisplayCases);
 
-  // Calculate totals
-  const totalBeforeMarkup = (
+  // Business fees (always included)
+  const schedulingFee = SCHEDULING_FEE;
+  const invoicingFee = INVOICING_FEE;
+
+  // Calculate totals - business fees should not be subject to urgency multiplier
+  const laborCosts = (
     basePrice + vctCost + travelCost + overnightCost + 
     pressureWashingCost + windowCleaningCost + displayCaseCost
   ) * urgencyMultiplier;
+  
+  const businessFees = schedulingFee + invoicingFee; // Fixed costs, not subject to urgency
+  
+  const totalBeforeMarkup = laborCosts + businessFees;
 
   // Always apply 30% professional markup
   const markupAmount = totalBeforeMarkup * MARKUP_PERCENTAGE;
@@ -450,6 +460,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
     pressureWashingCost,
     windowCleaningCost,
     displayCaseCost,
+    schedulingFee,
+    invoicingFee,
     aiRecommendations: []
   };
 }

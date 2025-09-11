@@ -86,6 +86,8 @@ export interface EstimateData {
   pressureWashingCost: number;
   windowCleaningCost: number;
   displayCaseCost: number;
+  schedulingFee: number;
+  invoicingFee: number;
   
   // Adjustments
   urgencyMultiplier: number;

@@ -242,6 +242,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
       }
 
+      // Business fees (always included)
+      lineItems.push({ key: 'schedulingFee', value: estimateData.schedulingFee || 0 });
+      lineItems.push({ key: 'invoicingFee', value: estimateData.invoicingFee || 0 });
+
     // Calculate total before markup
     const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
       
@@ -367,6 +371,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
       subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
     }
+    
+    // Business fees (always included)
+    subtotal += getAdjustedPrice('schedulingFee', estimateData.schedulingFee || 0);
+    subtotal += getAdjustedPrice('invoicingFee', estimateData.invoicingFee || 0);
     
     // Add sales tax
     const salesTax = subtotal * 0.07;
@@ -641,7 +649,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         invoiceNumber: quoteInfo.quoteNumber,
         date: formatDate(new Date()),
         dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
-        paymentTerms: "Net 15 - Payment due within 15 days of invoice date",
+        paymentTerms: "Net 15 - Payment due within 15 days of invoice date. A late payment fee of 10% of the total invoice amount will be added if payment is not received by the due date.",
       };
 
       const invoiceBlob = await pdf(
