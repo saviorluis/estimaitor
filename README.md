@@ -248,3 +248,4 @@ Once deployed, you can:
 3. Share the link with team members who need to create estimates
 
 For any deployment issues, refer to the [Next.js deployment documentation](https://nextjs.org/docs/deployment).
+# Trigger deployment Thu Sep 11 18:47:28 EDT 2025
