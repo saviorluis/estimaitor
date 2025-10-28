@@ -196,6 +196,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="arcade">Arcade</option>
             <option value="coffee_shop">Coffee Shop</option>
             <option value="fire_station">Fire Station</option>
+            <option value="home_renovation">Home Renovation</option>
+            <option value="building_shell">Building Shell</option>
             <option value="other">Other</option>
           </select>
           {errors.projectType && (

@@ -45,7 +45,7 @@ const ROOM_TYPES = [
 ] as const;
 
 // Project types by service category
-const RESIDENTIAL_TYPES: ProjectType[] = ['home_renovation', 'other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
+const RESIDENTIAL_TYPES: ProjectType[] = ['home_renovation', 'building_shell', 'other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
 const COMMERCIAL_TYPES: ProjectType[] = [
   'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
   'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
@@ -58,6 +58,7 @@ const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string
   if (serviceType === 'residential') {
     switch (type) {
       case 'home_renovation': return 'Home Renovation';
+      case 'building_shell': return 'Building Shell';
       case 'other': return 'Single Family House';
       case 'office': return 'Apartment Complex';
       case 'hotel': return 'Multifamily Property';

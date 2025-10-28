@@ -45,7 +45,7 @@ const PROJECT_TYPES = [
   { value: 'yoga_studio', label: 'Yoga Studio', icon: '🧘', description: 'Fitness studios, wellness centers' },
   { value: 'kids_fitness', label: 'Kids Fitness', icon: '🏃', description: 'Children\'s activity centers' },
   { value: 'bakery', label: 'Bakery', icon: '🥖', description: 'Bakeries, pastry shops' },
-  { value: 'church', label: 'Church', icon: '⛪', description: 'Religious facilities' },
+  { value: 'church', label: 'Church', icon: '⛪', description: 'Religious facilities' }, description: 'Religious facilities' },
   { value: 'arcade', label: 'Arcade', icon: '🎮', description: 'Entertainment venues' },
   { value: 'coffee_shop', label: 'Coffee Shop', icon: '☕', description: 'Coffee shops, cafes' },
   { value: 'fire_station', label: 'Fire Station', icon: '🚒', description: 'Emergency services facilities' },
