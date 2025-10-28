@@ -162,8 +162,8 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
   // Default values for simple form
   const defaultValues = useMemo(() => ({
     serviceType: 'residential' as ServiceType,
-    projectType: 'other' as ProjectType,
-    cleaningType: 'window_cleaning_only' as CleaningType,
+    projectType: 'home_renovation' as ProjectType,
+    cleaningType: 'final' as CleaningType,
     squareFootage: 2000,
     location: 'High Point, NC',
     needsWindowCleaning: false,
@@ -214,8 +214,8 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
     
     // Set appropriate defaults based on service type
     if (serviceType === 'residential') {
-      setValue('projectType', 'other'); // Default to "Residential Home"
-      setValue('cleaningType', 'window_cleaning_only'); // Default to window cleaning
+      setValue('projectType', 'home_renovation'); // Default to "Home Renovation"
+      setValue('cleaningType', 'final'); // Default to final clean
       setValue('squareFootage', 2000); // Typical residential size
       setValue('numberOfWindows', 10); // Default window count
       setValue('pressureWashingArea', 1000); // Default pressure washing area
@@ -449,6 +449,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           >
             {serviceType === 'residential' ? (
               <>
+                <option value="home_renovation">🏠 Home Renovation</option>
                 <option value="other">🏠 Single Family House</option>
                 <option value="office">🏬 Apartment Complex</option>
                 <option value="hotel">🏘️ Multifamily Property</option>
@@ -476,6 +477,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                 <option value="arcade">Arcade</option>
                 <option value="coffee_shop">Coffee Shop</option>
                 <option value="fire_station">Fire Station</option>
+                <option value="home_renovation">🏠 Home Renovation</option>
                 <option value="other">Other Commercial</option>
               </>
             )}
@@ -497,6 +499,10 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           >
             {serviceType === 'residential' ? (
               <>
+                <option value="final">✨ Final Clean (Standard rate)</option>
+                <option value="rough">🧹 Rough Clean (80% rate)</option>
+                <option value="rough_final">🔄 Rough & Final Clean (120% rate)</option>
+                <option value="rough_final_touchup">⭐ Complete Package (145% rate)</option>
                 <option value="window_cleaning_only">🪟 Window Cleaning Service</option>
                 <option value="pressure_washing">💧 Pressure Washing Service</option>
               </>
