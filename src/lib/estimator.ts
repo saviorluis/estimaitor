@@ -1,4 +1,4 @@
-import { FormData, EstimateData, CleaningType, ProjectType } from './types';
+import { FormData, EstimateData, CleaningType, ProjectType, PricingMethod } from './types';
 import { 
   BASE_RATE_PER_SQFT, 
   PROJECT_TYPE_MULTIPLIERS, 
@@ -18,7 +18,9 @@ import {
   MARKUP_PERCENTAGE,
   URGENCY_MULTIPLIERS,
   SCHEDULING_FEE,
-  INVOICING_FEE
+  INVOICING_FEE,
+  calculateRoomBasedPrice,
+  calculateRoomBasedHours
 } from './constants';
 
 // ===================== CALCULATION CACHE =====================
@@ -376,17 +378,31 @@ export function calculateEstimate(formData: FormData): EstimateData {
     actualSquareFootage = pressureWashingArea || 0;
     basePrice = 0; // No base cleaning price for pressure washing only
     pressureWashingCost = calculatePressureWashingCost(true, pressureWashingArea, pressureWashingType);
+  } else if (projectType === 'home_renovation' && formData.pricingMethod === 'room_based' && formData.rooms) {
+    // Room-based pricing for home renovation projects
+    basePrice = calculateRoomBasedPrice(formData.rooms, cleaningType);
+    actualSquareFootage = formData.rooms.reduce((total, room) => {
+      return total + (room.squareFootage || 0);
+    }, 0);
+    vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
+    pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
+    windowCleaningCost = calculateWindowCleaningCost(
+      needsWindowCleaning,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
   } else {
     // Traditional cleaning types
     basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
     vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
     pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
     windowCleaningCost = calculateWindowCleaningCost(
-    needsWindowCleaning,
-    numberOfWindows,
-    numberOfLargeWindows,
-    numberOfHighAccessWindows
-  );
+      needsWindowCleaning,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
   }
 
   const travelCost = calculateTravelCost(distanceFromOffice);
@@ -413,8 +429,15 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const salesTax = totalWithMarkup * SALES_TAX_RATE;
   const totalPrice = totalWithMarkup + salesTax;
 
-  // Calculate hours using appropriate square footage for specialized services
-  const baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);
+  // Calculate hours using appropriate method for different project types
+  let baseHours = 0;
+  if (projectType === 'home_renovation' && formData.pricingMethod === 'room_based' && formData.rooms) {
+    // Room-based hours calculation for home renovation
+    baseHours = calculateRoomBasedHours(formData.rooms, cleaningType);
+  } else {
+    // Standard square footage-based hours calculation
+    baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);
+  }
   
   // For specialized services, calculate additional hours based on service type
   let additionalHours = 0;

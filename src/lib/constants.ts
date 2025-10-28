@@ -1,4 +1,4 @@
-import { ProjectType, CleaningType } from './types';
+import { ProjectType, CleaningType, RoomType } from './types';
 
 // ===================== CORE PRICING CONSTANTS =====================
 
@@ -54,6 +54,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   arcade: 1.3,
   coffee_shop: 1.25,
   fire_station: 1.4,
+  home_renovation: 1.4,
   other: 1.0
 } as const;
 
@@ -129,6 +130,32 @@ export const URGENCY_MULTIPLIERS: Record<number, number> = {
   6: 1.20, 7: 1.24, 8: 1.28, 9: 1.32, 10: 1.40
 } as const;
 
+// ===================== ROOM-BASED PRICING (HOME RENOVATION) =====================
+
+export const ROOM_PRICING: Record<RoomType, { baseRate: number; description: string }> = {
+  bedroom: { baseRate: 85, description: 'Standard bedroom cleaning' },
+  bathroom: { baseRate: 125, description: 'Bathroom deep clean and sanitization' },
+  kitchen: { baseRate: 150, description: 'Kitchen deep clean including appliances' },
+  living_room: { baseRate: 95, description: 'Living room and common area cleaning' },
+  dining_room: { baseRate: 75, description: 'Dining room cleaning' },
+  office: { baseRate: 80, description: 'Home office cleaning' },
+  basement: { baseRate: 100, description: 'Basement cleaning (unfinished areas)' },
+  garage: { baseRate: 90, description: 'Garage cleaning and organization' },
+  laundry_room: { baseRate: 60, description: 'Laundry room cleaning' },
+  other: { baseRate: 70, description: 'Other room types' }
+} as const;
+
+// Room-based pricing multipliers for different cleaning types
+export const ROOM_CLEANING_MULTIPLIERS: Record<CleaningType, number> = {
+  rough: 0.7,
+  final: 1.0,
+  rough_final: 1.3,
+  rough_final_touchup: 1.5,
+  pressure_washing: 1.0,
+  vct_only: 1.0,
+  window_cleaning_only: 1.0
+} as const;
+
 // ===================== SPECIALTY SERVICES =====================
 
 // Pressure Washing
@@ -178,6 +205,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   arcade: 450,
   coffee_shop: 440,
   fire_station: 550,
+  home_renovation: 400,
   other: 500
 } as const;
 
@@ -224,6 +252,47 @@ export function getTravelRate(distance: number): number {
   return distance < DISTANCE_THRESHOLD 
     ? TRAVEL_COST_PER_MILE.SHORT_DISTANCE 
     : TRAVEL_COST_PER_MILE.LONG_DISTANCE;
+}
+
+// ===================== ROOM-BASED PRICING FUNCTIONS =====================
+
+export function calculateRoomBasedPrice(
+  rooms: Array<{ type: RoomType; count: number; squareFootage?: number }>,
+  cleaningType: CleaningType
+): number {
+  const cleaningMultiplier = ROOM_CLEANING_MULTIPLIERS[cleaningType];
+  
+  return rooms.reduce((total, room) => {
+    const roomPricing = ROOM_PRICING[room.type];
+    const roomCost = roomPricing.baseRate * room.count * cleaningMultiplier;
+    return total + roomCost;
+  }, 0);
+}
+
+export function calculateRoomBasedHours(
+  rooms: Array<{ type: RoomType; count: number; squareFootage?: number }>,
+  cleaningType: CleaningType
+): number {
+  const cleaningMultiplier = ROOM_CLEANING_MULTIPLIERS[cleaningType];
+  
+  // Base hours per room type (rough estimate)
+  const ROOM_HOURS: Record<RoomType, number> = {
+    bedroom: 1.5,
+    bathroom: 2.0,
+    kitchen: 2.5,
+    living_room: 1.5,
+    dining_room: 1.0,
+    office: 1.5,
+    basement: 2.0,
+    garage: 1.5,
+    laundry_room: 1.0,
+    other: 1.0
+  };
+  
+  return rooms.reduce((total, room) => {
+    const roomHours = ROOM_HOURS[room.type] * room.count * cleaningMultiplier;
+    return total + roomHours;
+  }, 0);
 }
 
 // ===================== BUSINESS PROTECTION =====================
@@ -422,6 +491,21 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Detail clean vehicle maintenance areas and workshops
 • Clean and sanitize decontamination areas
 • Special attention to high-touch surfaces and emergency equipment areas`),
+
+  home_renovation: createScopeTemplate(`
+• Remove construction debris, dust, and residue from all surfaces
+• Deep clean and sanitize all bathrooms and fixtures
+• Clean and polish all kitchen surfaces, cabinets, and appliances
+• Detail clean all windows, mirrors, and glass surfaces
+• Vacuum and clean all carpeted areas and rugs
+• Sweep, mop, and sanitize all hard surface floors
+• Clean and sanitize all door handles, light switches, and high-touch surfaces
+• Clean light fixtures and perform high/low dusting throughout
+• Clean and sanitize all baseboards, trim, and molding
+• Remove paint splatters and construction adhesive residue
+• Clean and sanitize HVAC vents and air returns
+• Empty and clean all trash receptacles
+• Final walk-through inspection to ensure construction cleanup standards`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

@@ -32,7 +32,8 @@ const RESIDENTIAL_TYPES: ProjectType[] = ['other', 'office', 'hotel', 'education
 const COMMERCIAL_TYPES: ProjectType[] = [
   'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
   'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
-  'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 'other'
+  'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
+  'home_renovation', 'other'
 ];
 
 // Get project type names with residential context
@@ -67,6 +68,7 @@ const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string
     case 'interactive_toy_store': return 'Toy Store';
     case 'church': return 'Church/Religious';
     case 'arcade': return 'Arcade/Entertainment';
+    case 'home_renovation': return 'Home Renovation';
     case 'other': return 'Other Commercial';
     default: return 'Commercial Property';
   }

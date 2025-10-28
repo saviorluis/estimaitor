@@ -64,6 +64,13 @@ const PROJECT_TYPES = [
     icon: '🎓', 
     description: 'Schools, universities, training centers',
     baseRate: 0.16 
+  },
+  { 
+    value: 'home_renovation' as ProjectType, 
+    label: 'Home Renovation', 
+    icon: '🏠', 
+    description: 'Post-construction cleaning, residential renovation cleanup',
+    baseRate: 0.25 
   }
 ];
 

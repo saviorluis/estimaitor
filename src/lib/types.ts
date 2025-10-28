@@ -19,9 +19,24 @@ export type ProjectType =
   | 'arcade'
   | 'coffee_shop'
   | 'fire_station'
+  | 'home_renovation'
   | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
+
+export type PricingMethod = 'square_footage' | 'room_based';
+
+export type RoomType = 
+  | 'bedroom'
+  | 'bathroom'
+  | 'kitchen'
+  | 'living_room'
+  | 'dining_room'
+  | 'office'
+  | 'basement'
+  | 'garage'
+  | 'laundry_room'
+  | 'other';
 
 // ===================== FORM DATA INTERFACE =====================
 
@@ -69,6 +84,14 @@ export interface FormData {
   // Client Information (Optional)
   clientName?: string;
   projectName?: string;
+  
+  // Room-based pricing (for home renovation projects)
+  pricingMethod?: PricingMethod;
+  rooms?: Array<{
+    type: RoomType;
+    count: number;
+    squareFootage?: number;
+  }>;
 }
 
 // ===================== ESTIMATE DATA INTERFACE =====================
@@ -202,7 +225,7 @@ export function isValidProjectType(value: string): value is ProjectType {
     'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial',
     'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio',
     'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
-    'coffee_shop', 'fire_station', 'other'
+    'coffee_shop', 'fire_station', 'home_renovation', 'other'
   ];
   return validTypes.includes(value as ProjectType);
 }
