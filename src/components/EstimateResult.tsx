@@ -8,13 +8,14 @@ import QuoteTemplate from './QuoteTemplate';
 interface EstimateResultProps {
   estimateData: EstimateData;
   formData: FormData;
+  onNewEstimate?: () => void;
 }
 
 // Storage keys for saving estimate data
 const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
 const FORM_STORAGE_KEY = 'estimaitor_saved_form_data';
 
-export default function EstimateResult({ estimateData, formData }: EstimateResultProps) {
+export default function EstimateResult({ estimateData, formData, onNewEstimate }: EstimateResultProps) {
   const [showQuote, setShowQuote] = useState(false);
 
   // Memoized calculations for better performance

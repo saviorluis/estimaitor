@@ -332,6 +332,12 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
     weekly: ['Deep area cleaning', 'Common area maintenance', 'Floor care'],
     monthly: ['Deep facility cleaning', 'Storage area organization'],
     quarterly: ['Professional deep cleaning', 'Floor treatments']
+  },
+  home_renovation: {
+    daily: ['Post-construction debris removal', 'Dust and residue cleanup', 'High-touch sanitization'],
+    weekly: ['Deep construction cleanup', 'Paint and adhesive removal', 'HVAC vent cleaning'],
+    monthly: ['Complete renovation cleanup', 'Final inspection cleaning', 'Move-in ready preparation'],
+    quarterly: ['Comprehensive renovation deep clean', 'Specialized equipment cleaning']
   }
 };
 
@@ -355,7 +361,8 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   arcade: 1.05,
   coffee_shop: 1.60,
   fire_station: 1.30,
-  other: 0.85
+  other: 0.85,
+  home_renovation: 1.40
 };
 
 // Pricing rates per room (monthly)
@@ -378,7 +385,8 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   arcade: 155,
   coffee_shop: 240,
   fire_station: 195,
-  other: 125
+  other: 125,
+  home_renovation: 180
 };
 
 // Bathroom pricing (additional monthly cost per bathroom)

@@ -6,7 +6,7 @@
 import { Resend } from 'resend';
 
 // Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 'dummy-key-for-build');
 
 // Email templates
 export const EMAIL_TEMPLATES = {

@@ -208,7 +208,8 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   arcade: 1.3,
   coffee_shop: 1.25,
   fire_station: 1.35,
-  other: 1.0
+  other: 1.0,
+  home_renovation: 1.4
 } as const;
 
 // ===================== OPTIMIZED HOURS CALCULATION =====================
