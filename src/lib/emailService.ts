@@ -49,7 +49,7 @@ export interface EstimateEmailData {
 // Main email service class
 export class EmailService {
   private static instance: EmailService;
-  private fromEmail = 'EstimAItor <noreply@bigbropros.com>';
+  private fromEmail = 'Big Bro Pros <noreply@bigbropros.com>';
 
   static getInstance(): EmailService {
     if (!EmailService.instance) {

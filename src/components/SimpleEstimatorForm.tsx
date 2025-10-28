@@ -25,10 +25,27 @@ interface SimpleFormData {
   pressureWashingArea: number;
   clientName?: string;
   projectName?: string;
+  // Room-based pricing for home renovation
+  pricingMethod?: 'square_footage' | 'room_based';
+  rooms?: Record<string, { type: string; count: number }>;
 }
 
+// Room types and pricing for home renovation
+const ROOM_TYPES = [
+  { value: 'bedroom', label: 'Bedroom', price: 85, icon: '🛏️' },
+  { value: 'bathroom', label: 'Bathroom', price: 125, icon: '🚿' },
+  { value: 'kitchen', label: 'Kitchen', price: 150, icon: '🍳' },
+  { value: 'living_room', label: 'Living Room', price: 95, icon: '🛋️' },
+  { value: 'dining_room', label: 'Dining Room', price: 75, icon: '🍽️' },
+  { value: 'office', label: 'Office', price: 80, icon: '💼' },
+  { value: 'basement', label: 'Basement', price: 100, icon: '🏠' },
+  { value: 'garage', label: 'Garage', price: 90, icon: '🚗' },
+  { value: 'laundry_room', label: 'Laundry Room', price: 60, icon: '👕' },
+  { value: 'other', label: 'Other Room', price: 70, icon: '🏢' }
+] as const;
+
 // Project types by service category
-const RESIDENTIAL_TYPES: ProjectType[] = ['other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
+const RESIDENTIAL_TYPES: ProjectType[] = ['home_renovation', 'other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
 const COMMERCIAL_TYPES: ProjectType[] = [
   'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
   'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
@@ -40,6 +57,7 @@ const COMMERCIAL_TYPES: ProjectType[] = [
 const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string => {
   if (serviceType === 'residential') {
     switch (type) {
+      case 'home_renovation': return 'Home Renovation';
       case 'other': return 'Single Family House';
       case 'office': return 'Apartment Complex';
       case 'hotel': return 'Multifamily Property';
@@ -153,6 +171,11 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
     pressureWashingArea: 1000,
     clientName: '',
     projectName: '',
+    pricingMethod: 'square_footage' as 'square_footage' | 'room_based',
+    rooms: ROOM_TYPES.reduce((acc, room) => {
+      acc[room.value] = { type: room.value, count: 0 };
+      return acc;
+    }, {} as Record<string, { type: string; count: number }>),
     ...getSavedFormData()
   }), [getSavedFormData]);
 
@@ -569,6 +592,53 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           </p>
             </>
           )}
+          
+          {/* Room-based pricing for home renovation */}
+          {formValues.projectType === 'home_renovation' && (
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-3">
+                🏠 Room-Based Pricing (Optional)
+              </h4>
+              <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+                For home renovation projects, you can also estimate by room count instead of square footage
+              </p>
+              
+              <div className="space-y-3">
+                {ROOM_TYPES.map((room) => (
+                  <div key={room.value} className="flex items-center justify-between">
+                    <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+                      <span className="text-lg">{room.icon}</span>
+                      <span>{room.label}</span>
+                      <span className="text-xs text-gray-500">(${room.price}/room)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      {...register(`rooms.${room.value}.count`, { 
+                        valueAsNumber: true,
+                        min: { value: 0, message: 'Minimum 0' },
+                        max: { value: 20, message: 'Maximum 20' }
+                      })}
+                      className="w-16 p-2 text-center border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                      placeholder="0"
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-800/30 rounded text-xs text-blue-800 dark:text-blue-200">
+                <strong>Room-based total:</strong> ${(() => {
+                  const rooms = formValues.rooms || {};
+                  return ROOM_TYPES.reduce((total, room) => {
+                    const count = rooms[room.value]?.count || 0;
+                    return total + (count * room.price);
+                  }, 0);
+                })()}
+              </div>
+            </div>
+          )}
+          
           {errors.squareFootage && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
           )}
