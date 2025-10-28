@@ -55,6 +55,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   coffee_shop: 1.25,
   fire_station: 1.4,
   home_renovation: 1.4,
+  building_shell: 1.1,
   other: 1.0
 } as const;
 
@@ -206,6 +207,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   coffee_shop: 440,
   fire_station: 550,
   home_renovation: 400,
+  building_shell: 800,
   other: 500
 } as const;
 
@@ -506,6 +508,21 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Clean and sanitize HVAC vents and air returns
 • Empty and clean all trash receptacles
 • Final walk-through inspection to ensure construction cleanup standards`),
+
+  building_shell: createScopeTemplate(`
+• Remove construction debris, dust, and concrete residue from all surfaces
+• Clean exposed concrete floors and structural elements
+• Remove construction adhesive, paint splatters, and construction markings
+• Clean and sanitize exposed plumbing rough-ins and electrical boxes
+• Clean exposed HVAC ductwork and mechanical systems
+• Remove construction dust from exposed beams, columns, and structural steel
+• Clean exposed concrete walls and structural elements
+• Remove construction debris from elevator shafts and mechanical rooms
+• Clean exposed utility rooms and mechanical spaces
+• Remove construction dust from exposed ceilings and overhead structures
+• Clean and organize construction storage areas
+• Remove construction debris from loading docks and service areas
+• Final inspection to ensure building shell is ready for tenant build-out`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

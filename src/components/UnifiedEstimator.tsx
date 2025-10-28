@@ -50,6 +50,7 @@ const PROJECT_TYPES = [
   { value: 'coffee_shop', label: 'Coffee Shop', icon: '☕', description: 'Coffee shops, cafes' },
   { value: 'fire_station', label: 'Fire Station', icon: '🚒', description: 'Emergency services facilities' },
   { value: 'home_renovation', label: 'Home Renovation', icon: '🏠', description: 'Post-construction cleaning, residential renovation cleanup' },
+  { value: 'building_shell', label: 'Building Shell', icon: '🏗️', description: 'Commercial construction cleanup, pre-tenant build-out' },
   { value: 'other', label: 'Other', icon: '🏢', description: 'Other commercial spaces' }
 ] as const;
 

@@ -71,6 +71,13 @@ const PROJECT_TYPES = [
     icon: '🏠', 
     description: 'Post-construction cleaning, residential renovation cleanup',
     baseRate: 0.25 
+  },
+  { 
+    value: 'building_shell' as ProjectType, 
+    label: 'Building Shell', 
+    icon: '🏗️', 
+    description: 'Commercial construction cleanup, pre-tenant build-out',
+    baseRate: 0.20 
   }
 ];
 

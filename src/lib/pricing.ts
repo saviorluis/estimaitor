@@ -33,6 +33,7 @@ export const PROJECT_MULTIPLIERS: Record<ProjectType, number> = {
   fast_food: 1.2,
   interactive_toy_store: 1.45,
   home_renovation: 1.4,
+  building_shell: 1.1,
   other: 1.0
 } as const;
 

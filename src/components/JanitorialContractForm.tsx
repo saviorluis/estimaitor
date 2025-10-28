@@ -338,6 +338,12 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
     weekly: ['Deep construction cleanup', 'Paint and adhesive removal', 'HVAC vent cleaning'],
     monthly: ['Complete renovation cleanup', 'Final inspection cleaning', 'Move-in ready preparation'],
     quarterly: ['Comprehensive renovation deep clean', 'Specialized equipment cleaning']
+  },
+  building_shell: {
+    daily: ['Remove construction debris and concrete dust', 'Clean exposed concrete floors', 'Empty construction waste containers'],
+    weekly: ['Deep clean exposed structural elements', 'Clean exposed HVAC ductwork', 'Remove construction adhesive residue'],
+    monthly: ['Comprehensive building shell cleanup', 'Clean exposed beams and columns', 'Remove construction markings'],
+    quarterly: ['Complete building shell restoration', 'Clean exposed mechanical systems', 'Prepare for tenant build-out']
   }
 };
 
@@ -362,7 +368,8 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   coffee_shop: 1.60,
   fire_station: 1.30,
   other: 0.85,
-  home_renovation: 1.40
+  home_renovation: 1.40,
+  building_shell: 1.20
 };
 
 // Pricing rates per room (monthly)
@@ -386,7 +393,8 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   coffee_shop: 240,
   fire_station: 195,
   other: 125,
-  home_renovation: 180
+  home_renovation: 180,
+  building_shell: 150
 };
 
 // Bathroom pricing (additional monthly cost per bathroom)
