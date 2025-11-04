@@ -269,6 +269,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
         return 'Rough Clean';
       case 'final':
         return 'Final Clean';
+      case 'final_touchup':
+        return 'Final & Touchup Clean';
       case 'rough_final':
         return 'Rough & Final Clean';
       case 'rough_final_touchup':

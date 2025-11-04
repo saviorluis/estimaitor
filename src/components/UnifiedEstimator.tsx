@@ -59,7 +59,13 @@ const CLEANING_TYPES = [
   { 
     value: 'final', 
     label: 'Final Clean', 
-    description: 'Complete detailed cleaning (Standard rate)',
+    description: 'Complete detailed cleaning with touchup (120% of standard rate)',
+    icon: '✨'
+  },
+  { 
+    value: 'final_touchup', 
+    label: 'Final & Touchup', 
+    description: 'Final cleaning with touchup service (120% of standard rate)',
     icon: '✨'
   },
   { 
@@ -71,13 +77,13 @@ const CLEANING_TYPES = [
   { 
     value: 'rough_final', 
     label: 'Rough & Final', 
-    description: 'Two-stage cleaning process (120% of standard rate)',
+    description: 'Two-stage cleaning process (140% of standard rate)',
     icon: '🔄'
   },
   { 
     value: 'rough_final_touchup', 
     label: 'Complete Package', 
-    description: 'Three-stage process (145% of standard rate)',
+    description: 'Three-stage process (160% of standard rate)',
     icon: '⭐'
   },
   { 

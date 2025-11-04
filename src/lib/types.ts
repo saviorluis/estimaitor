@@ -23,7 +23,7 @@ export type ProjectType =
   | 'building_shell'
   | 'other';
 
-export type CleaningType = 'rough' | 'final' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
+export type CleaningType = 'rough' | 'final' | 'final_touchup' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
 
 export type PricingMethod = 'square_footage' | 'room_based';
 
@@ -93,6 +93,13 @@ export interface FormData {
     count: number;
     squareFootage?: number;
   }>;
+  
+  // Mobilization options
+  mobilizationType?: 'auto' | 'small' | 'medium' | 'large' | 'complex';
+  customMobilizationFee?: number;
+  
+  // Building shell specific (exterior dimensions)
+  exteriorSquareFootage?: number;
 }
 
 // ===================== ESTIMATE DATA INTERFACE =====================
@@ -112,6 +119,7 @@ export interface EstimateData {
   displayCaseCost: number;
   schedulingFee: number;
   invoicingFee: number;
+  mobilizationFee: number;
   
   // Adjustments
   urgencyMultiplier: number;
@@ -232,7 +240,7 @@ export function isValidProjectType(value: string): value is ProjectType {
 }
 
 export function isValidCleaningType(value: string): value is CleaningType {
-  const validTypes: CleaningType[] = ['rough', 'final', 'rough_final', 'rough_final_touchup'];
+  const validTypes: CleaningType[] = ['rough', 'final', 'final_touchup', 'rough_final', 'rough_final_touchup'];
   return validTypes.includes(value as CleaningType);
 }
 

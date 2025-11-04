@@ -385,6 +385,7 @@ const getCleaningTypeDisplay = (type: string): string => {
   switch (type) {
     case 'rough': return 'Rough Clean';
     case 'final': return 'Final Clean';
+    case 'final_touchup': return 'Final & Touchup Clean';
     case 'rough_final': return 'Rough & Final Clean';
     case 'rough_final_touchup': return 'Rough, Final & Touch-up Clean';
     case 'pressure_washing': return 'Pressure Washing Services';

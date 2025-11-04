@@ -41,9 +41,10 @@ export const PROJECT_MULTIPLIERS: Record<ProjectType, number> = {
 
 export const CLEANING_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
-  final: 1.0,
-  rough_final: 1.2,
-  rough_final_touchup: 1.45,
+  final: 1.2, // Final clean now includes touchup (was 1.0)
+  final_touchup: 1.2, // Final & touchup (same as final since final includes touchup)
+  rough_final: 1.4, // Rough + final with touchup (adjusted from 1.2)
+  rough_final_touchup: 1.6, // Rough + final with touchup + additional touchup (adjusted from 1.45)
   pressure_washing: 1.0,
   vct_only: 1.0,
   window_cleaning_only: 1.0

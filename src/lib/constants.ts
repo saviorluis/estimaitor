@@ -5,6 +5,9 @@ import { ProjectType, CleaningType, RoomType } from './types';
 // Base rate per square foot (in dollars)
 export const BASE_RATE_PER_SQFT = 0.18;
 
+// Building shell specific rate (exterior structural cleanup only)
+export const BUILDING_SHELL_RATE_PER_SQFT = 0.12; // Lower rate for exterior-only work
+
 // VCT (Vinyl Composition Tile) stripping and waxing tiered pricing
 // Small jobs (< 1,000 sq ft): $2.20/sq ft - higher overhead per sq ft
 // Medium jobs (1,000-5,000 sq ft): $2.20 scaling down to $1.50 based on volume
@@ -32,6 +35,42 @@ export const MARKUP_PERCENTAGE = 0.3; // 30% professional markup
 // Fixed business fees added to all quotes
 export const SCHEDULING_FEE = 99; // $99 scheduling fee
 export const INVOICING_FEE = 99; // $99 invoicing fee
+
+// ===================== MOBILIZATION FEES =====================
+
+// Mobilization fees based on project size and complexity
+export const MOBILIZATION_FEES = {
+  small: 150,    // Up to 2,500 sq ft - Basic setup, equipment transport
+  medium: 250,   // 2,501-10,000 sq ft - Additional equipment, staging area
+  large: 400,    // 10,001+ sq ft - Full mobilization, multiple crews, extensive setup
+  complex: 500   // Specialized projects requiring specialized equipment or access
+} as const;
+
+// Mobilization fee thresholds
+export const MOBILIZATION_THRESHOLDS = {
+  small: 2500,
+  medium: 10000,
+  large: Infinity
+} as const;
+
+// Function to calculate mobilization fee based on square footage and project type
+export function calculateMobilizationFee(squareFootage: number, projectType: ProjectType): number {
+  // Complex projects that require specialized equipment or access
+  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation'];
+  
+  if (complexProjects.includes(projectType)) {
+    return MOBILIZATION_FEES.complex;
+  }
+  
+  // Size-based mobilization fees
+  if (squareFootage <= MOBILIZATION_THRESHOLDS.small) {
+    return MOBILIZATION_FEES.small;
+  } else if (squareFootage <= MOBILIZATION_THRESHOLDS.medium) {
+    return MOBILIZATION_FEES.medium;
+  } else {
+    return MOBILIZATION_FEES.large;
+  }
+}
 
 // ===================== PROJECT TYPE MULTIPLIERS =====================
 
@@ -63,9 +102,10 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
 
 export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.8,
-  final: 1.0,
-  rough_final: 1.2,
-  rough_final_touchup: 1.45,
+  final: 1.2, // Final clean now includes touchup (was 1.0)
+  final_touchup: 1.2, // Final & touchup (same as final since final includes touchup)
+  rough_final: 1.4, // Rough + final with touchup (adjusted from 1.2)
+  rough_final_touchup: 1.6, // Rough + final with touchup + additional touchup (adjusted from 1.45)
   pressure_washing: 1.0,
   vct_only: 1.0,
   window_cleaning_only: 1.0
@@ -73,9 +113,10 @@ export const CLEANING_TYPE_MULTIPLIERS: Record<CleaningType, number> = {
 
 export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
-  final: 1.0,
-  rough_final: 1.5,
-  rough_final_touchup: 1.8,
+  final: 1.2, // Final clean with touchup takes more time (was 1.0)
+  final_touchup: 1.2, // Same as final since it includes touchup
+  rough_final: 1.6, // Rough + final with touchup (adjusted from 1.5)
+  rough_final_touchup: 2.0, // Rough + final with touchup + additional touchup (adjusted from 1.8)
   pressure_washing: 1.0,
   vct_only: 1.0,
   window_cleaning_only: 1.0
@@ -83,9 +124,10 @@ export const CLEANING_TYPE_TIME_MULTIPLIERS: Record<CleaningType, number> = {
 
 export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
   rough: "First stage cleaning that focuses on debris removal and basic surface cleaning (80% of standard rate).",
-  final: "Complete detailed cleaning of all surfaces and areas (standard rate).",
-  rough_final: "Combination of first stage rough clean followed by final clean (120% of standard rate).",
-  rough_final_touchup: "Complete three-stage process: rough, final, and touch-up clean (145% of standard rate).",
+  final: "Complete detailed cleaning of all surfaces and areas with touchup (120% of standard rate).",
+  final_touchup: "Final cleaning with touchup service - complete detailed cleaning plus final touchup (120% of standard rate).",
+  rough_final: "Combination of first stage rough clean followed by final clean with touchup (140% of standard rate).",
+  rough_final_touchup: "Complete three-stage process: rough, final with touchup, and additional touch-up clean (160% of standard rate).",
   pressure_washing: "Professional pressure washing services with appropriate equipment and chemicals (standard rate).",
   vct_only: "Professional VCT stripping, waxing, and buffing services for vinyl composition tile flooring (standard rate).",
   window_cleaning_only: "Professional window cleaning services including standard and high-access windows (standard rate)."
@@ -149,9 +191,10 @@ export const ROOM_PRICING: Record<RoomType, { baseRate: number; description: str
 // Room-based pricing multipliers for different cleaning types
 export const ROOM_CLEANING_MULTIPLIERS: Record<CleaningType, number> = {
   rough: 0.7,
-  final: 1.0,
-  rough_final: 1.3,
-  rough_final_touchup: 1.5,
+  final: 1.2, // Final clean with touchup (was 1.0)
+  final_touchup: 1.2, // Same as final since it includes touchup
+  rough_final: 1.4, // Rough + final with touchup (adjusted from 1.3)
+  rough_final_touchup: 1.6, // Rough + final with touchup + additional touchup (adjusted from 1.5)
   pressure_washing: 1.0,
   vct_only: 1.0,
   window_cleaning_only: 1.0
