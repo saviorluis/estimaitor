@@ -242,12 +242,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
       }
 
-      // Business fees (always included)
-      lineItems.push({ key: 'schedulingFee', value: estimateData.schedulingFee || 0 });
-      lineItems.push({ key: 'invoicingFee', value: estimateData.invoicingFee || 0 });
+      // Business fees (scheduling and invoicing) are included in totals but not shown as line items
+      const businessFees = (estimateData.schedulingFee || 0) + (estimateData.invoicingFee || 0);
 
-    // Calculate total before markup
-    const totalBeforeMarkup = lineItems.reduce((sum, item) => sum + item.value, 0);
+    // Calculate totals - line items total for markup distribution, full total for final calculation
+    const lineItemsTotal = lineItems.reduce((sum, item) => sum + item.value, 0);
+    const totalBeforeMarkup = lineItemsTotal + businessFees;
       
     // If markup percentage is 0, and there's no built-in markup, use original prices
     if (markupPercentage === 0 && estimateData.markup === 0) {
@@ -262,19 +262,19 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       return;
     }
 
-    // Calculate markup amount
-    const markupAmount = totalBeforeMarkup * (markupPercentage / 100);
+    // Calculate markup amount on line items only (business fees don't get markup applied)
+    const markupAmount = lineItemsTotal * (markupPercentage / 100);
     
-    // Distribute markup proportionally
+    // Distribute markup proportionally across line items only
       const adjustedPrices: {[key: string]: number} = {};
       lineItems.forEach(item => {
-      const proportion = item.value / totalBeforeMarkup;
+      const proportion = lineItemsTotal > 0 ? item.value / lineItemsTotal : 0;
       const itemMarkup = markupAmount * proportion;
       adjustedPrices[item.key] = item.value + itemMarkup;
       });
 
       // Balance window cleaning pricing with base price
-    const balancedPrices = balancePricing(adjustedPrices, lineItems, totalBeforeMarkup);
+    const balancedPrices = balancePricing(adjustedPrices, lineItems, lineItemsTotal);
       if (Object.keys(balancedPrices).length > 0) {
         setAdjustedPrices(balancedPrices);
       } else {
@@ -286,7 +286,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const balancePricing = (
     adjustedPrices: {[key: string]: number}, 
     lineItems: Array<{key: string, value: number}>, 
-    totalBeforeMarkup: number
+    lineItemsTotal: number
   ): {[key: string]: number} => {
     const result = {...adjustedPrices};
     
@@ -298,9 +298,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (basePrice && windowCleaning && windowCleaning.value > 0 && formData.needsWindowCleaning) {
       // Only apply if markup has been applied
       if (markupPercentage > 0) {
-        // Calculate original markup for window cleaning
-        const windowProportion = windowCleaning.value / totalBeforeMarkup;
-        const windowMarkup = (totalBeforeMarkup * (markupPercentage / 100)) * windowProportion;
+        // Calculate original markup for window cleaning (based on line items only, not business fees)
+        const windowProportion = lineItemsTotal > 0 ? windowCleaning.value / lineItemsTotal : 0;
+        const windowMarkup = (lineItemsTotal * (markupPercentage / 100)) * windowProportion;
         
         // Calculate how much to transfer (50% of the window cleaning markup)
         const transferAmount = windowMarkup * 0.5;
@@ -372,9 +372,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
     }
     
-    // Business fees (always included)
-    subtotal += getAdjustedPrice('schedulingFee', estimateData.schedulingFee || 0);
-    subtotal += getAdjustedPrice('invoicingFee', estimateData.invoicingFee || 0);
+    // Business fees (scheduling and invoicing) are included in totals but not shown as line items
+    // They're already included in the estimateData.totalBeforeMarkup from the estimator
+    // Add them directly without showing as separate line items
+    const businessFees = (estimateData.schedulingFee || 0) + (estimateData.invoicingFee || 0);
+    subtotal += businessFees;
     
     // Add sales tax
     const salesTax = subtotal * 0.07;

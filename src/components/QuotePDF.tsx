@@ -723,37 +723,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           )}
 
-            {/* Business Fees Row */}
-            <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Scheduling Fee</Text>
-                <Text style={styles.tableCell}>
-                  Project coordination and scheduling services
-                </Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency((estimateData.schedulingFee || 0) * overheadMultiplier)}
-                </Text>
-              </View>
-            </View>
-
-            {/* Invoicing Fee Row */}
-            <View style={styles.tableRow}>
-              <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Invoicing Fee</Text>
-                <Text style={styles.tableCell}>
-                  Invoice processing and payment coordination
-                </Text>
-              </View>
-              <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency((estimateData.invoicingFee || 0) * overheadMultiplier)}
-                </Text>
-              </View>
-            </View>
-
-
             {/* Includes Statement Row */}
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>
               <View style={styles.descriptionCell}>
