@@ -727,7 +727,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', textAlign: 'center' }]}>
-                  Includes all necessary equipment, supplies, labor, and travel expenses.
+                  Includes all necessary equipment, supplies, labor, travel expenses, and administrative fees.
                 </Text>
               </View>
               <View style={styles.amountCell}></View>
@@ -737,6 +737,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Subtotal</Text>
+                <Text style={[styles.tableCell, { fontSize: 7, fontStyle: 'italic', color: '#666' }]}>
+                  Includes project coordination and administrative processing
+                </Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
