@@ -1,6 +1,7 @@
 import { FormData, EstimateData, CleaningType, ProjectType, PricingMethod } from './types';
 import { 
   BASE_RATE_PER_SQFT, 
+  BUILDING_SHELL_RATE_PER_SQFT,
   PROJECT_TYPE_MULTIPLIERS, 
   CLEANING_TYPE_MULTIPLIERS,
   CLEANING_TYPE_TIME_MULTIPLIERS,
@@ -8,6 +9,8 @@ import {
   getTravelRate,
   calculateHourlyTravelFee,
   getDriveTimeHours,
+  MOBILIZATION_FEES,
+  calculateMobilizationFee,
   HOTEL_COST_PER_NIGHT,
   PER_DIEM_PER_DAY,
   PRESSURE_WASHING,
@@ -48,7 +51,10 @@ function calculateBasePrice(
 
   const projectMultiplier = PROJECT_TYPE_MULTIPLIERS[projectType];
   const cleaningMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
-  const result = squareFootage * BASE_RATE_PER_SQFT * projectMultiplier * cleaningMultiplier;
+  
+  // Use building shell rate for building shell projects
+  const baseRate = projectType === 'building_shell' ? BUILDING_SHELL_RATE_PER_SQFT : BASE_RATE_PER_SQFT;
+  const result = squareFootage * baseRate * projectMultiplier * cleaningMultiplier;
   
   calculationCache.set(cacheKey, result);
   return result;
@@ -394,6 +400,17 @@ export function calculateEstimate(formData: FormData): EstimateData {
       numberOfLargeWindows,
       numberOfHighAccessWindows
     );
+  } else if (projectType === 'building_shell') {
+    // Building shell projects - exterior structural cleanup only
+    // Use exterior dimensions or minimum pricing for shell cleanup
+    const shellFootage = formData.exteriorSquareFootage || squareFootage || 1000; // Use exterior footage or minimum
+    actualSquareFootage = shellFootage;
+    basePrice = calculateBasePrice(shellFootage, projectType, cleaningType);
+    
+    // Building shell typically doesn't have VCT, windows, or pressure washing
+    vctCost = 0;
+    pressureWashingCost = 0;
+    windowCleaningCost = 0;
   } else {
     // Traditional cleaning types
     basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
@@ -415,13 +432,32 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const schedulingFee = SCHEDULING_FEE;
   const invoicingFee = INVOICING_FEE;
 
+  // Calculate mobilization fee
+  let mobilizationFee = 0;
+  if (formData.mobilizationType === 'auto') {
+    mobilizationFee = calculateMobilizationFee(squareFootage, projectType);
+  } else if (formData.mobilizationType === 'small') {
+    mobilizationFee = MOBILIZATION_FEES.small;
+  } else if (formData.mobilizationType === 'medium') {
+    mobilizationFee = MOBILIZATION_FEES.medium;
+  } else if (formData.mobilizationType === 'large') {
+    mobilizationFee = MOBILIZATION_FEES.large;
+  } else if (formData.mobilizationType === 'complex') {
+    mobilizationFee = MOBILIZATION_FEES.complex;
+  } else if (formData.customMobilizationFee) {
+    mobilizationFee = formData.customMobilizationFee;
+  } else {
+    // Default to auto calculation if no option selected
+    mobilizationFee = calculateMobilizationFee(squareFootage, projectType);
+  }
+
   // Calculate totals - business fees should not be subject to urgency multiplier
   const laborCosts = (
     basePrice + vctCost + travelCost + overnightCost + 
     pressureWashingCost + windowCleaningCost + displayCaseCost
   ) * urgencyMultiplier;
   
-  const businessFees = schedulingFee + invoicingFee; // Fixed costs, not subject to urgency
+  const businessFees = schedulingFee + invoicingFee + mobilizationFee; // Fixed costs, not subject to urgency
   
   const totalBeforeMarkup = laborCosts + businessFees;
 
@@ -467,7 +503,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const pricePerSquareFoot = totalPrice / relevantFootage;
 
   // Return optimized estimate data
-  return {
+  const estimateData: EstimateData = {
     basePrice,
     cleaningTypeMultiplier,
     projectTypeMultiplier,
@@ -487,8 +523,11 @@ export function calculateEstimate(formData: FormData): EstimateData {
     displayCaseCost,
     schedulingFee,
     invoicingFee,
+    mobilizationFee,
     aiRecommendations: []
   };
+  
+  return estimateData;
 }
 
 // ===================== UTILITY FUNCTIONS =====================
