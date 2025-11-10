@@ -402,15 +402,25 @@ export function calculateEstimate(formData: FormData): EstimateData {
     );
   } else if (projectType === 'building_shell') {
     // Building shell projects - exterior structural cleanup only
-    // Use exterior dimensions or minimum pricing for shell cleanup
-    const shellFootage = formData.exteriorSquareFootage || squareFootage || 1000; // Use exterior footage or minimum
-    actualSquareFootage = shellFootage;
-    basePrice = calculateBasePrice(shellFootage, projectType, cleaningType);
+    // Pricing is NOT based on square footage, but on structural elements and windows
+    // Base price for structural cleanup (fixed cost regardless of size)
+    const BUILDING_SHELL_BASE_PRICE = 850; // Base structural cleanup fee
+    const projectMultiplier = PROJECT_TYPE_MULTIPLIERS[projectType];
+    const cleaningMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
     
-    // Building shell typically doesn't have VCT, windows, or pressure washing
-    vctCost = 0;
-    pressureWashingCost = 0;
-    windowCleaningCost = 0;
+    // Base price is fixed, not based on square footage
+    basePrice = BUILDING_SHELL_BASE_PRICE * projectMultiplier * cleaningMultiplier;
+    actualSquareFootage = 0; // Not used for pricing
+    
+    // Building shell can have windows and pressure washing
+    vctCost = 0; // Building shell doesn't have VCT flooring
+    pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
+    windowCleaningCost = calculateWindowCleaningCost(
+      needsWindowCleaning,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
   } else {
     // Traditional cleaning types
     basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
@@ -472,6 +482,12 @@ export function calculateEstimate(formData: FormData): EstimateData {
   if (projectType === 'home_renovation' && formData.pricingMethod === 'room_based' && formData.rooms) {
     // Room-based hours calculation for home renovation
     baseHours = calculateRoomBasedHours(formData.rooms, cleaningType);
+  } else if (projectType === 'building_shell') {
+    // Building shell projects: fixed base hours based on structural cleanup scope
+    // Base structural cleanup typically takes 8-12 hours depending on cleaning type
+    const BUILDING_SHELL_BASE_HOURS = 10; // Base hours for structural cleanup
+    const cleaningModifier = CLEANING_TYPE_TIME_MULTIPLIERS[cleaningType];
+    baseHours = BUILDING_SHELL_BASE_HOURS * cleaningModifier;
   } else {
     // Standard square footage-based hours calculation
     baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);

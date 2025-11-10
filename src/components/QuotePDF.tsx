@@ -606,7 +606,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
           <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
           <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-          <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+          {formData.projectType !== 'building_shell' && (
+            <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+          )}
           <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
           </View>
         </View>
@@ -629,12 +631,35 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
-                  {getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft
-                </Text>
-                <Text style={[styles.tableCell, { fontSize: 8 }]}>
-                  {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
-                </Text>
+                {formData.projectType === 'building_shell' ? (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} - Building Shell Structural Cleanup
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 9, marginTop: 3 }]}>
+                      Base Structural Cleanup Service (Fixed Fee)
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                      Includes: Removal of construction debris, concrete dust, and residue from exposed structural elements. 
+                      Cleaning of exposed concrete floors, walls, beams, columns, and mechanical systems. 
+                      Removal of construction adhesive, paint splatters, and construction markings. 
+                      Preparation of building shell for tenant build-out.
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', marginTop: 2, color: '#666666' }]}>
+                      Note: Building shell pricing is based on structural cleanup scope, not square footage. 
+                      Additional services (windows, pressure washing) are itemized separately below.
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8 }]}>
+                      {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
+                    </Text>
+                  </>
+                )}
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
