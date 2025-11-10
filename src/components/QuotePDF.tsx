@@ -410,6 +410,11 @@ const getProjectTypeDisplay = (type: string): string => {
 
 // Get scope of work text
 const getScopeOfWork = (formData: FormData): string => {
+  // Skip scope of work for window_cleaning_only cleaning type
+  if (formData.cleaningType === 'window_cleaning_only') {
+    return '';
+  }
+
   const scope = PROJECT_SCOPES[formData.projectType];
   if (!scope) return 'No specific scope of work defined for this project type.';
 
@@ -666,7 +671,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 {formatCurrency(
                     (estimateData.basePrice + 
                     (estimateData.vctCost || 0) +
-                    (estimateData.travelCost || 0)) * overheadMultiplier
+                    (estimateData.travelCost || 0)) * (estimateData.urgencyMultiplier || 1) * overheadMultiplier
                 )}
               </Text>
               </View>
@@ -690,7 +695,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.windowCleaningCost || 0) * overheadMultiplier)}
+                    {formatCurrency((estimateData.windowCleaningCost || 0) * (estimateData.urgencyMultiplier || 1) * overheadMultiplier)}
             </Text>
           </View>
               </View>
