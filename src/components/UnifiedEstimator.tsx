@@ -51,6 +51,7 @@ const PROJECT_TYPES = [
   { value: 'fire_station', label: 'Fire Station', icon: '🚒', description: 'Emergency services facilities' },
   { value: 'home_renovation', label: 'Home Renovation', icon: '🏠', description: 'Post-construction cleaning, residential renovation cleanup' },
   { value: 'building_shell', label: 'Building Shell', icon: '🏗️', description: 'Commercial construction cleanup, pre-tenant build-out' },
+  { value: 'assisted_living', label: 'Assisted Living Facility', icon: '🏥', description: 'Senior living facilities with multiple bed/baths, cafeteria, laundry, utility rooms' },
   { value: 'other', label: 'Other', icon: '🏢', description: 'Other commercial spaces' }
 ] as const;
 
@@ -137,6 +138,7 @@ export default function UnifiedEstimator({
       numberOfLargeWindows: 0,
       numberOfHighAccessWindows: 0,
       numberOfDisplayCases: 0,
+      numberOfBedBaths: 0,
       clientName: '',
       projectName: ''
     }
@@ -222,22 +224,43 @@ export default function UnifiedEstimator({
               </div>
             </div>
 
-            {/* Square Footage */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Square Footage</label>
-              <input
-                type="number"
-                {...register('squareFootage', { 
-                  required: 'Square footage is required',
-                  min: { value: 1, message: 'Must be at least 1 sq ft' }
-                })}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter square footage"
-              />
-              {errors.squareFootage && (
-                <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
-              )}
-            </div>
+            {/* Square Footage or Bed/Baths based on project type */}
+            {watchedValues.projectType === 'assisted_living' ? (
+              <div>
+                <label className="block text-sm font-medium mb-2">Number of Bed/Bath Units</label>
+                <input
+                  type="number"
+                  {...register('numberOfBedBaths', { 
+                    required: 'Number of bed/bath units is required',
+                    min: { value: 1, message: 'Must be at least 1 unit' }
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter number of bed/bath units"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Each unit includes one bedroom and one bathroom
+                </p>
+                {errors.numberOfBedBaths && (
+                  <p className="text-red-500 text-sm mt-1">{errors.numberOfBedBaths.message}</p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium mb-2">Square Footage</label>
+                <input
+                  type="number"
+                  {...register('squareFootage', { 
+                    required: 'Square footage is required',
+                    min: { value: 1, message: 'Must be at least 1 sq ft' }
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter square footage"
+                />
+                {errors.squareFootage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
+                )}
+              </div>
+            )}
           </div>
         );
 
@@ -307,10 +330,11 @@ export default function UnifiedEstimator({
                 type="checkbox"
                 {...register('needsWindowCleaning')}
                 className="w-4 h-4 text-blue-600"
+                defaultChecked={watchedValues.projectType === 'assisted_living'}
               />
               <label className="text-sm font-medium">Window Cleaning</label>
             </div>
-            {watchedValues.needsWindowCleaning && (
+            {(watchedValues.needsWindowCleaning || watchedValues.projectType === 'assisted_living') && (
               <div className="ml-7 space-y-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">Standard Windows</label>
@@ -589,22 +613,43 @@ export default function UnifiedEstimator({
               </select>
             </div>
 
-            {/* Square Footage */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Square Footage</label>
-              <input
-                type="number"
-                {...register('squareFootage', { 
-                  required: 'Square footage is required',
-                  min: { value: 1, message: 'Must be at least 1 sq ft' }
-                })}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter square footage"
-              />
-              {errors.squareFootage && (
-                <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
-              )}
-            </div>
+            {/* Square Footage or Bed/Baths based on project type */}
+            {watchedValues.projectType === 'assisted_living' ? (
+              <div>
+                <label className="block text-sm font-medium mb-2">Number of Bed/Bath Units</label>
+                <input
+                  type="number"
+                  {...register('numberOfBedBaths', { 
+                    required: 'Number of bed/bath units is required',
+                    min: { value: 1, message: 'Must be at least 1 unit' }
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter number of bed/bath units"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Each unit includes one bedroom and one bathroom
+                </p>
+                {errors.numberOfBedBaths && (
+                  <p className="text-red-500 text-sm mt-1">{errors.numberOfBedBaths.message}</p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium mb-2">Square Footage</label>
+                <input
+                  type="number"
+                  {...register('squareFootage', { 
+                    required: 'Square footage is required',
+                    min: { value: 1, message: 'Must be at least 1 sq ft' }
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter square footage"
+                />
+                {errors.squareFootage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
+                )}
+              </div>
+            )}
 
             {/* Cleaning Type */}
             <div>
@@ -684,9 +729,41 @@ export default function UnifiedEstimator({
                   type="checkbox"
                   {...register('needsWindowCleaning')}
                   className="w-4 h-4 text-blue-600"
+                  defaultChecked={watchedValues.projectType === 'assisted_living'}
                 />
                 <label className="text-sm font-medium">Window Cleaning</label>
               </div>
+              {watchedValues.projectType === 'assisted_living' && (
+                <div className="col-span-2 space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Standard Windows</label>
+                    <input
+                      type="number"
+                      {...register('numberOfWindows')}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="Number of standard windows"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Large Windows</label>
+                    <input
+                      type="number"
+                      {...register('numberOfLargeWindows')}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="Number of large windows"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">High-Access Windows</label>
+                    <input
+                      type="number"
+                      {...register('numberOfHighAccessWindows')}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      placeholder="Number of high-access windows"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Pressure Washing */}
               <div className="flex items-center space-x-3">

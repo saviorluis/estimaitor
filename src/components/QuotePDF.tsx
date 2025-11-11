@@ -404,6 +404,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'bakery': return 'Bakery';
     case 'interactive_toy_store': return 'Interactive Toy Store';
     case 'coffee_shop': return 'Coffee Shop';
+    case 'assisted_living': return 'Assisted Living Facility';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };
@@ -611,7 +612,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
           <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
           <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
-          {formData.projectType !== 'building_shell' && (
+          {formData.projectType === 'assisted_living' ? (
+            <Text style={styles.projectText}>Bed/Bath Units: {(formData.numberOfBedBaths || 0).toLocaleString()} units</Text>
+          ) : formData.projectType !== 'building_shell' && (
             <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
           )}
           <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
@@ -655,6 +658,25 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       Additional services (windows, pressure washing) are itemized separately below.
                     </Text>
                   </>
+                ) : formData.projectType === 'assisted_living' ? (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} - Assisted Living Facility
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 9, marginTop: 3 }]}>
+                      {formData.numberOfBedBaths || 0} Bed/Bath Units + Facility Common Areas
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                      Includes: Deep cleaning and sanitization of {formData.numberOfBedBaths || 0} resident bed/bath units. 
+                      Professional cleaning of cafeteria, dining areas, laundry rooms, and utility areas. 
+                      Sanitization of all common areas, lounges, activity rooms, and administrative offices. 
+                      Healthcare-grade cleaning standards with hospital-grade disinfectants.
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', marginTop: 2, color: '#666666' }]}>
+                      Note: Pricing based on number of bed/bath units plus base facility fee for common areas. 
+                      Window cleaning is itemized separately below.
+                    </Text>
+                  </>
                 ) : (
                   <>
                     <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
@@ -680,7 +702,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 
 
             {/* Window Cleaning Services Row */}
-            {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
+            {((formData.needsWindowCleaning || formData.projectType === 'assisted_living') && formData.numberOfWindows > 0) && (
               <View style={styles.tableRow}>
                 <View style={styles.descriptionCell}>
                   <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>

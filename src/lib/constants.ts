@@ -56,7 +56,7 @@ export const MOBILIZATION_THRESHOLDS = {
 // Function to calculate mobilization fee based on square footage and project type
 export function calculateMobilizationFee(squareFootage: number, projectType: ProjectType): number {
   // Complex projects that require specialized equipment or access
-  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation'];
+  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation', 'assisted_living'];
   
   if (complexProjects.includes(projectType)) {
     return MOBILIZATION_FEES.complex;
@@ -95,6 +95,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   fire_station: 1.4,
   home_renovation: 1.4,
   building_shell: 1.1,
+  assisted_living: 1.5,
   other: 1.0
 } as const;
 
@@ -228,6 +229,13 @@ export const DISPLAY_CASE = {
   TIME_PER_CASE_HOURS: 0.6
 } as const;
 
+// Assisted Living Facility Pricing
+export const ASSISTED_LIVING_PRICING = {
+  COST_PER_BED_BATH: 150, // Cost per bed/bath unit (includes bedroom + bathroom)
+  BASE_FACILITY_FEE: 500, // Base fee for cafeteria, laundry, utility rooms, common areas
+  TIME_PER_BED_BATH_HOURS: 2.5 // Hours per bed/bath unit
+} as const;
+
 // ===================== PRODUCTIVITY RATES =====================
 
 export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
@@ -251,6 +259,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   fire_station: 550,
   home_renovation: 400,
   building_shell: 800,
+  assisted_living: 450,
   other: 500
 } as const;
 
@@ -566,6 +575,20 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Clean and organize construction storage areas
 • Remove construction debris from loading docks and service areas
 • Final inspection to ensure building shell is ready for tenant build-out`),
+
+  assisted_living: createScopeTemplate(`
+• Deep clean and sanitize all resident bedrooms and bathrooms
+• Clean and sanitize cafeteria and dining areas with hospital-grade disinfectants
+• Detail clean laundry rooms and utility areas
+• Sanitize all common areas, lounges, and activity rooms
+• Clean and sanitize medical equipment areas and medication rooms
+• Detail clean administrative offices and reception areas
+• Sanitize all high-touch surfaces including handrails, door handles, and light switches
+• Clean and sanitize kitchen and food preparation areas
+• Detail clean all windows and glass surfaces
+• Clean and sanitize HVAC vents and air returns
+• Empty and sanitize all trash receptacles
+• Final walk-through inspection to ensure healthcare-grade cleaning standards`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

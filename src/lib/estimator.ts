@@ -17,6 +17,7 @@ import {
   PRESSURE_WASHING_RATES,
   WINDOW_CLEANING,
   DISPLAY_CASE,
+  ASSISTED_LIVING_PRICING,
   SALES_TAX_RATE,
   MARKUP_PERCENTAGE,
   URGENCY_MULTIPLIERS,
@@ -216,7 +217,8 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   fire_station: 1.35,
   other: 1.0,
   home_renovation: 1.4,
-  building_shell: 1.1
+  building_shell: 1.1,
+  assisted_living: 1.3
 } as const;
 
 // ===================== OPTIMIZED HOURS CALCULATION =====================
@@ -421,6 +423,28 @@ export function calculateEstimate(formData: FormData): EstimateData {
       numberOfLargeWindows,
       numberOfHighAccessWindows
     );
+  } else if (projectType === 'assisted_living') {
+    // Assisted living facilities - pricing based on bed/baths and windows
+    const numberOfBedBaths = formData.numberOfBedBaths || 0;
+    const projectMultiplier = PROJECT_TYPE_MULTIPLIERS[projectType];
+    const cleaningMultiplier = CLEANING_TYPE_MULTIPLIERS[cleaningType];
+    
+    // Base price = (bed/bath units * cost per unit + base facility fee) * multipliers
+    const bedBathCost = numberOfBedBaths * ASSISTED_LIVING_PRICING.COST_PER_BED_BATH;
+    const facilityBasePrice = ASSISTED_LIVING_PRICING.BASE_FACILITY_FEE;
+    basePrice = (bedBathCost + facilityBasePrice) * projectMultiplier * cleaningMultiplier;
+    actualSquareFootage = 0; // Not used for pricing
+    
+    // Assisted living can have windows, but typically no VCT or pressure washing
+    vctCost = 0;
+    pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
+    // Windows are required for assisted living, so always calculate if provided
+    windowCleaningCost = calculateWindowCleaningCost(
+      needsWindowCleaning || numberOfWindows > 0,
+      numberOfWindows,
+      numberOfLargeWindows,
+      numberOfHighAccessWindows
+    );
   } else {
     // Traditional cleaning types
     basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
@@ -488,6 +512,13 @@ export function calculateEstimate(formData: FormData): EstimateData {
     const BUILDING_SHELL_BASE_HOURS = 10; // Base hours for structural cleanup
     const cleaningModifier = CLEANING_TYPE_TIME_MULTIPLIERS[cleaningType];
     baseHours = BUILDING_SHELL_BASE_HOURS * cleaningModifier;
+  } else if (projectType === 'assisted_living') {
+    // Assisted living: hours based on bed/baths and facility areas
+    const numberOfBedBaths = formData.numberOfBedBaths || 0;
+    const cleaningModifier = CLEANING_TYPE_TIME_MULTIPLIERS[cleaningType];
+    const bedBathHours = numberOfBedBaths * ASSISTED_LIVING_PRICING.TIME_PER_BED_BATH_HOURS;
+    const facilityBaseHours = 8; // Base hours for cafeteria, laundry, utility, common areas
+    baseHours = (bedBathHours + facilityBaseHours) * cleaningModifier;
   } else {
     // Standard square footage-based hours calculation
     baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);
