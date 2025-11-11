@@ -181,6 +181,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="restaurant">Restaurant</option>
             <option value="fast_food">Fast Food</option>
             <option value="medical">Medical Facility</option>
+            <option value="assisted_living">🏘️ Assisted Living Facility</option>
             <option value="retail">Retail Store</option>
             <option value="office">Office Building</option>
             <option value="industrial">Industrial/Warehouse</option>
