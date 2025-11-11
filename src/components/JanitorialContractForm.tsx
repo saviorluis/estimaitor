@@ -344,6 +344,12 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
     weekly: ['Deep clean exposed structural elements', 'Clean exposed HVAC ductwork', 'Remove construction adhesive residue'],
     monthly: ['Comprehensive building shell cleanup', 'Clean exposed beams and columns', 'Remove construction markings'],
     quarterly: ['Complete building shell restoration', 'Clean exposed mechanical systems', 'Prepare for tenant build-out']
+  },
+  assisted_living: {
+    daily: ['Deep clean and sanitize all resident bedrooms and bathrooms', 'Clean and sanitize cafeteria and dining areas', 'Empty and sanitize all trash receptacles', 'Sanitize high-touch surfaces including handrails and door handles'],
+    weekly: ['Detail clean laundry rooms and utility areas', 'Sanitize all common areas, lounges, and activity rooms', 'Clean and sanitize medical equipment areas', 'Detail clean administrative offices'],
+    monthly: ['Comprehensive deep clean of all resident units', 'Sanitize HVAC vents and air returns', 'Deep clean kitchen and food preparation areas', 'Professional window cleaning'],
+    quarterly: ['Complete facility-wide sanitization', 'Deep clean all mechanical systems', 'Comprehensive cleaning of all storage areas', 'Final inspection to ensure healthcare-grade standards']
   }
 };
 
@@ -369,7 +375,8 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   fire_station: 1.30,
   other: 0.85,
   home_renovation: 1.40,
-  building_shell: 1.20
+  building_shell: 1.20,
+  assisted_living: 1.50
 };
 
 // Pricing rates per room (monthly)
@@ -394,7 +401,8 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   fire_station: 195,
   other: 125,
   home_renovation: 180,
-  building_shell: 150
+  building_shell: 150,
+  assisted_living: 200
 };
 
 // Bathroom pricing (additional monthly cost per bathroom)
@@ -509,11 +517,14 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
     };
     
     const monthlyRate = (baseMonthlyRate + bathroomCost) * frequencyMultipliers[data.serviceFrequency];
-    const annualRate = monthlyRate * 12;
     
     // Contract length discounts
     const lengthDiscounts = { 6: 0, 12: 0.05, 24: 0.10, 36: 0.15 };
-    const discountedAnnualRate = annualRate * (1 - lengthDiscounts[data.contractLength]);
+    const discount = lengthDiscounts[data.contractLength];
+    
+    // Annual rate is monthly rate * 12, then discount is applied
+    const baseAnnualRate = monthlyRate * 12;
+    const discountedAnnualRate = baseAnnualRate * (1 - discount);
     
     // Set service days based on frequency
     let serviceDays = data.serviceDays;
