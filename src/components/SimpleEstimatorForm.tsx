@@ -19,6 +19,7 @@ interface SimpleFormData {
   projectType: ProjectType;
   cleaningType: CleaningType;
   squareFootage: number;
+  numberOfBedBaths?: number; // For assisted living facilities
   location: string;
   needsWindowCleaning: boolean;
   numberOfWindows: number;
@@ -167,6 +168,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
     projectType: 'home_renovation' as ProjectType,
     cleaningType: 'final' as CleaningType,
     squareFootage: 2000,
+    numberOfBedBaths: 0,
     location: 'High Point, NC',
     needsWindowCleaning: false,
     numberOfWindows: 10,
@@ -252,6 +254,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
       projectType: simpleData.projectType,
       cleaningType: simpleData.cleaningType,
       squareFootage: isWindowCleaningOnly ? 1000 : (isPressureWashingOnly ? simpleData.pressureWashingArea : simpleData.squareFootage), // Use default for window cleaning, pressure washing area for pressure washing
+      numberOfBedBaths: simpleData.numberOfBedBaths, // For assisted living facilities
       clientName: simpleData.clientName,
       projectName: simpleData.projectName,
       
