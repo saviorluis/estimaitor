@@ -120,7 +120,7 @@ export default function Home() {
       const savedEstimate = localStorage.getItem(ESTIMATE_STORAGE_KEY);
       const savedForm = localStorage.getItem(FORM_STORAGE_KEY);
       const savedEntries = localStorage.getItem(PAST_ENTRIES_KEY);
-      const savedMode = localStorage.getItem(APP_MODE_KEY) as AppMode;
+      const savedMode = localStorage.getItem(APP_MODE_KEY);
       
       if (savedEstimate && savedForm) {
         setEstimateData(JSON.parse(savedEstimate));
@@ -132,7 +132,7 @@ export default function Home() {
       }
 
       if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
-        setCurrentMode(savedMode);
+        setCurrentMode(savedMode as AppMode);
       } else if (savedMode === 'wizard') {
         // Fallback: if old 'wizard' mode is saved, default to 'pro'
         setCurrentMode('pro');
