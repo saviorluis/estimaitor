@@ -16,7 +16,6 @@ const CONFIG = {
   COMPONENTS: [
     './src/components/EstimatorForm.tsx',
     './src/components/SimpleEstimatorForm.tsx',
-    './src/components/ModernEstimatorWizard.tsx',
     './src/components/EstimateResult.tsx',
     './src/components/JanitorialContractForm.tsx'
   ]

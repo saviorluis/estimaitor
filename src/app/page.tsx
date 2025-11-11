@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
 import SimpleEstimatorForm from '@/components/SimpleEstimatorForm';
-import ModernEstimatorWizard from '@/components/ModernEstimatorWizard';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import AdminThemeMenu from '@/components/AdminThemeMenu';
+import ContractPDF from '@/components/ContractPDF';
 import { EstimateData, FormData } from '@/lib/types';
+import { pdf } from '@react-pdf/renderer';
+import { emailService } from '@/lib/emailService';
 
 // Storage keys for saved data
 const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
@@ -62,7 +64,7 @@ interface JanitorialFormData {
 }
 
 // App modes
-export type AppMode = 'pro' | 'simple' | 'wizard' | 'contract';
+export type AppMode = 'pro' | 'simple' | 'contract';
 
 interface ModeConfig {
   title: string;
@@ -86,13 +88,6 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
     description: 'Streamlined calculator with just 4 essential fields: project type, cleaning type, square footage, and location. Automatic location-based pricing included.',
     color: 'from-green-600 to-green-800',
     features: ['4 simple fields', 'Location-based pricing', 'Auto calculations', 'Instant estimates', 'Customer-friendly']
-  },
-  wizard: {
-    title: 'Modern Wizard Mode',
-    subtitle: 'SimplyWise-Inspired Interactive Experience',
-    description: 'Step-by-step conversational interface with real-time estimates, photo uploads, and guided experience similar to modern estimation apps.',
-    color: 'from-blue-600 to-blue-800',
-    features: ['Step-by-step wizard', 'Real-time estimates', 'Photo integration', 'Interactive design', 'Mobile-optimized']
   },
   contract: {
     title: 'Janitorial Contract Generator',
@@ -136,8 +131,11 @@ export default function Home() {
         setPastEntries(JSON.parse(savedEntries));
       }
 
-      if (savedMode && ['pro', 'simple', 'wizard', 'contract'].includes(savedMode)) {
+      if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
         setCurrentMode(savedMode);
+      } else if (savedMode === 'wizard') {
+        // Fallback: if old 'wizard' mode is saved, default to 'pro'
+        setCurrentMode('pro');
       }
     } catch (error) {
       console.error('Error loading saved data:', error);
@@ -331,8 +329,6 @@ export default function Home() {
               <JanitorialContractForm onContractGenerated={handleContractGenerated} />
             ) : currentMode === 'simple' ? (
               <SimpleEstimatorForm onEstimateCalculated={handleEstimateCalculated} />
-            ) : currentMode === 'wizard' ? (
-              <ModernEstimatorWizard onEstimateCalculated={handleEstimateCalculated} />
             ) : (
               <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             )}
@@ -425,7 +421,7 @@ export default function Home() {
                   </div>
 
                   {/* Service Scope Preview */}
-                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700 mb-6">
                     <h3 className="text-lg font-semibold mb-4 text-orange-800 dark:text-orange-200">🧹 Service Scope Preview</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -452,6 +448,117 @@ export default function Home() {
                         </ul>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Contract Actions */}
+                  <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const companyInfo = {
+                            name: 'Big Bro Pros',
+                            address: '123 Main Street',
+                            city: 'High Point, NC',
+                            phone: '(336) 123-4567',
+                            email: 'bids@bigbropros.com',
+                            website: 'www.bigbropros.com'
+                          };
+                          const contractNumber = `CONTRACT-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+                          
+                          const blob = await pdf(
+                            <ContractPDF
+                              contractData={contractData}
+                              formData={janitorialFormData}
+                              companyInfo={companyInfo}
+                              contractNumber={contractNumber}
+                            />
+                          ).toBlob();
+                          
+                          const url = URL.createObjectURL(blob);
+                          const fileName = `${janitorialFormData.facilityName.replace(/[^a-z0-9]/gi, '_')}_Janitorial_Contract.pdf`;
+                          
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = fileName;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          
+                          setTimeout(() => URL.revokeObjectURL(url), 100);
+                        } catch (error) {
+                          console.error('Error generating contract PDF:', error);
+                          alert('Error generating contract PDF. Please try again.');
+                        }
+                      }}
+                      className="flex-1 bg-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-purple-700 transition-colors duration-200"
+                    >
+                      📄 Download Contract PDF
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const companyInfo = {
+                            name: 'Big Bro Pros',
+                            address: '123 Main Street',
+                            city: 'High Point, NC',
+                            phone: '(336) 123-4567',
+                            email: 'bids@bigbropros.com',
+                            website: 'www.bigbropros.com'
+                          };
+                          const contractNumber = `CONTRACT-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+                          
+                          const blob = await pdf(
+                            <ContractPDF
+                              contractData={contractData}
+                              formData={janitorialFormData}
+                              companyInfo={companyInfo}
+                              contractNumber={contractNumber}
+                            />
+                          ).toBlob();
+                          
+                          // Convert blob to base64 for email attachment
+                          const reader = new FileReader();
+                          reader.onloadend = async () => {
+                            const base64data = reader.result as string;
+                            const base64Content = base64data.split(',')[1];
+                            
+                            // Call email API
+                            const response = await fetch('/api/email', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                type: 'contract',
+                                data: {
+                                  clientName: janitorialFormData.contactName,
+                                  clientEmail: janitorialFormData.contactEmail,
+                                  facilityName: janitorialFormData.facilityName,
+                                  monthlyRate: contractData.monthlyRate,
+                                  contractTerm: contractData.contractTerms.length,
+                                  pdfAttachment: {
+                                    filename: `${janitorialFormData.facilityName.replace(/[^a-z0-9]/gi, '_')}_Contract.pdf`,
+                                    content: base64Content
+                                  }
+                                }
+                              })
+                            });
+                            
+                            const result = await response.json();
+                            if (result.success) {
+                              alert('Contract sent successfully!');
+                            } else {
+                              alert(`Error sending email: ${result.error || 'Unknown error'}`);
+                            }
+                          };
+                          reader.readAsDataURL(blob);
+                        } catch (error) {
+                          console.error('Error sending contract email:', error);
+                          alert('Error sending contract email. Please try again.');
+                        }
+                      }}
+                      className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                    >
+                      📧 Email Contract
+                    </button>
                   </div>
                 </div>
               ) : (

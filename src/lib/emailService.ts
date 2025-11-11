@@ -46,6 +46,20 @@ export interface EstimateEmailData {
   estimateUrl: string;
 }
 
+export interface ContractEmailData {
+  clientName: string;
+  clientEmail: string;
+  facilityName: string;
+  monthlyRate: number;
+  contractTerm: number;
+  subject?: string;
+  html?: string;
+  pdfAttachment?: {
+    filename: string;
+    content: string; // base64
+  };
+}
+
 // Main email service class
 export class EmailService {
   private static instance: EmailService;
@@ -116,6 +130,34 @@ export class EmailService {
         to: [data.clientEmail],
         subject: `Your Cleaning Estimate is Ready - ${data.projectDetails.type}`,
         html: this.generateEstimateReadyHTML(data)
+      });
+
+      if (error) {
+        console.error('Resend error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, messageId: result?.id };
+    } catch (error) {
+      console.error('Email send error:', error);
+      return { success: false, error: 'Failed to send email' };
+    }
+  }
+
+  // Send contract to client
+  async sendContract(data: ContractEmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    try {
+      const attachments = data.pdfAttachment ? [{
+        filename: data.pdfAttachment.filename,
+        content: data.pdfAttachment.content // Already base64
+      }] : undefined;
+
+      const { data: result, error } = await resend.emails.send({
+        from: this.fromEmail,
+        to: [data.clientEmail],
+        subject: data.subject || `Janitorial Service Contract - ${data.facilityName}`,
+        html: data.html || this.generateContractEmailHTML(data),
+        attachments
       });
 
       if (error) {
@@ -303,6 +345,74 @@ export class EmailService {
             
             <p>Best regards,<br>
             The Big Bro Pros Team</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Generate contract email HTML
+  private generateContractEmailHTML(data: ContractEmailData): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Janitorial Service Contract</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #7c3aed; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
+          .contract-details { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .detail-row { margin: 10px 0; }
+          .detail-label { font-weight: bold; color: #374151; }
+          .button { display: inline-block; background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Your Janitorial Service Contract</h1>
+            <p>${data.facilityName}</p>
+          </div>
+          
+          <div class="content">
+            <p>Dear ${data.clientName},</p>
+            
+            <p>Thank you for choosing our janitorial services. Please find attached your service contract for <strong>${data.facilityName}</strong>.</p>
+            
+            <div class="contract-details">
+              <h3>Contract Summary</h3>
+              <div class="detail-row">
+                <span class="detail-label">Facility:</span> ${data.facilityName}
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Monthly Rate:</span> $${data.monthlyRate.toLocaleString()}
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Contract Term:</span> ${data.contractTerm} months
+              </div>
+            </div>
+            
+            <p>The attached contract includes all service details, terms and conditions, and pricing information. Please review it carefully and let us know if you have any questions or need any modifications.</p>
+            
+            <p>To proceed with this contract, please sign and return it to us at your earliest convenience.</p>
+            
+            <p>If you have any questions or need to make changes, please contact us at (336) 123-4567 or bids@bigbropros.com.</p>
+            
+            <p>We look forward to providing you with excellent janitorial services!</p>
+            
+            <p>Best regards,<br>
+            The Big Bro Pros Team</p>
+          </div>
+          
+          <div class="footer">
+            <p>Big Bro Pros | Professional Cleaning Services<br>
+            Phone: (336) 123-4567 | Email: bids@bigbropros.com</p>
           </div>
         </div>
       </body>

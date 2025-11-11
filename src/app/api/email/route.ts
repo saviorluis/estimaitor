@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { emailService, QuoteEmailData, ContactFormData, EstimateEmailData } from '@/lib/emailService';
+import { emailService, QuoteEmailData, ContactFormData, EstimateEmailData, ContractEmailData } from '@/lib/emailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
       case 'estimate':
         const estimateResult = await emailService.sendEstimateReady(data as EstimateEmailData);
         return NextResponse.json(estimateResult);
+
+      case 'contract':
+        const contractResult = await emailService.sendContract(data as ContractEmailData);
+        return NextResponse.json(contractResult);
 
       default:
         return NextResponse.json(
