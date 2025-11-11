@@ -35,6 +35,7 @@ const MODE_DESCRIPTIONS = {
 const PROJECT_TYPES = [
   { value: 'restaurant', label: 'Restaurant', icon: '🍽️', description: 'Dining establishments, cafes' },
   { value: 'medical', label: 'Medical Facility', icon: '🏥', description: 'Hospitals, clinics, dental offices' },
+  { value: 'assisted_living', label: 'Assisted Living Facility', icon: '🏘️', description: 'Senior living facilities with multiple bed/baths, cafeteria, laundry, utility rooms' },
   { value: 'office', label: 'Office Building', icon: '🏢', description: 'Corporate offices, coworking spaces' },
   { value: 'retail', label: 'Retail Store', icon: '🛍️', description: 'Shops, boutiques, showrooms' },
   { value: 'industrial', label: 'Industrial', icon: '🏭', description: 'Warehouses, factories, plants' },
@@ -51,7 +52,6 @@ const PROJECT_TYPES = [
   { value: 'fire_station', label: 'Fire Station', icon: '🚒', description: 'Emergency services facilities' },
   { value: 'home_renovation', label: 'Home Renovation', icon: '🏠', description: 'Post-construction cleaning, residential renovation cleanup' },
   { value: 'building_shell', label: 'Building Shell', icon: '🏗️', description: 'Commercial construction cleanup, pre-tenant build-out' },
-  { value: 'assisted_living', label: 'Assisted Living Facility', icon: '🏥', description: 'Senior living facilities with multiple bed/baths, cafeteria, laundry, utility rooms' },
   { value: 'other', label: 'Other', icon: '🏢', description: 'Other commercial spaces' }
 ] as const;
 
