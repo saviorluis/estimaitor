@@ -577,28 +577,58 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
             </>
           ) : (
             <>
-          <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            🏢 Building Size - Total Square Footage
-          </label>
-          <input
-            id="squareFootage"
-            type="number"
-            min="100"
-            max="1000000"
-            {...register('squareFootage', { 
-                  required: serviceType === 'commercial' ? 'Building square footage is required' : false,
-              min: { value: 100, message: 'Minimum 100 sq ft' },
-              max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-            })}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-            placeholder="Enter total building square footage"
-          />
-          <p className="mt-1 text-xs text-green-600 dark:text-green-400">
-            Interior space to be cleaned (offices, hallways, bathrooms, etc.)
-          </p>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Recommended cleaners: {recommendedCleaners}
-          </p>
+              {formValues.projectType === 'assisted_living' ? (
+                <>
+                  <label htmlFor="numberOfBedBaths" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    🏘️ Number of Bed/Bath Units
+                  </label>
+                  <input
+                    id="numberOfBedBaths"
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    max="500"
+                    {...register('numberOfBedBaths', { 
+                      required: 'Number of bed/bath units is required',
+                      min: { value: 1, message: 'Must be at least 1 unit' },
+                      max: { value: 500, message: 'Maximum 500 units' }
+                    })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
+                    placeholder="Enter number of bed/bath units"
+                  />
+                  <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                    Each unit includes one bedroom and one bathroom. Pricing includes base facility fee for cafeteria, laundry, utility rooms, and common areas.
+                  </p>
+                  {errors.numberOfBedBaths && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.numberOfBedBaths.message}</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    🏢 Building Size - Total Square Footage
+                  </label>
+                  <input
+                    id="squareFootage"
+                    type="number"
+                    min="100"
+                    max="1000000"
+                    {...register('squareFootage', { 
+                          required: serviceType === 'commercial' ? 'Building square footage is required' : false,
+                      min: { value: 100, message: 'Minimum 100 sq ft' },
+                      max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                    })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Enter total building square footage"
+                  />
+                  <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                    Interior space to be cleaned (offices, hallways, bathrooms, etc.)
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Recommended cleaners: {recommendedCleaners}
+                  </p>
+                </>
+              )}
             </>
           )}
           
@@ -728,13 +758,14 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
               type="checkbox"
               {...register('needsWindowCleaning')}
               className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
+              defaultChecked={formValues.projectType === 'assisted_living'}
             />
             <label htmlFor="needsWindowCleaning" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               🪟 Add Window Cleaning (+$8 per window)
             </label>
           </div>
           
-          {needsWindowCleaning && (
+          {(needsWindowCleaning || formValues.projectType === 'assisted_living') && (
             <div>
               <label htmlFor="numberOfWindows" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 Number of Standard Windows

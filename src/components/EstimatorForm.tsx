@@ -234,36 +234,66 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        {/* Building Square Footage - Only for traditional cleaning types */}
+        {/* Building Square Footage or Bed/Baths - Only for traditional cleaning types */}
         {!['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType) && (
-          <div>
-            <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              🏢 Building Size - Total Square Footage
-            </label>
-            <input
-              id="squareFootage"
-              type="number"
-              inputMode="numeric"
-              min="100"
-              max="1000000"
-              {...register('squareFootage', { 
-                required: !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType) ? 'Building square footage is required' : false,
-                min: { value: 100, message: 'Minimum 100 sq ft' },
-                max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
-              })}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
-              placeholder="Enter total building square footage for interior cleaning"
-            />
-            <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-              This is the total interior space to be cleaned (offices, hallways, bathrooms, etc.)
-            </p>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Recommended cleaners: {recommendedCleaners}
-            </p>
-            {errors.squareFootage && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
+          <>
+            {formValues.projectType === 'assisted_living' ? (
+              <div>
+                <label htmlFor="numberOfBedBaths" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  🏘️ Number of Bed/Bath Units
+                </label>
+                <input
+                  id="numberOfBedBaths"
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  max="500"
+                  {...register('numberOfBedBaths', { 
+                    required: 'Number of bed/bath units is required',
+                    min: { value: 1, message: 'Must be at least 1 unit' },
+                    max: { value: 500, message: 'Maximum 500 units' }
+                  })}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
+                  placeholder="Enter number of bed/bath units"
+                />
+                <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                  Each unit includes one bedroom and one bathroom. Pricing includes base facility fee for cafeteria, laundry, utility rooms, and common areas.
+                </p>
+                {errors.numberOfBedBaths && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.numberOfBedBaths.message}</p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <label htmlFor="squareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  🏢 Building Size - Total Square Footage
+                </label>
+                <input
+                  id="squareFootage"
+                  type="number"
+                  inputMode="numeric"
+                  min="100"
+                  max="1000000"
+                  {...register('squareFootage', { 
+                    required: !['pressure_washing', 'vct_only', 'window_cleaning_only'].includes(formValues.cleaningType) ? 'Building square footage is required' : false,
+                    min: { value: 100, message: 'Minimum 100 sq ft' },
+                    max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                  })}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
+                  placeholder="Enter total building square footage for interior cleaning"
+                />
+                <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                  This is the total interior space to be cleaned (offices, hallways, bathrooms, etc.)
+                </p>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                  Recommended cleaners: {recommendedCleaners}
+                </p>
+                {errors.squareFootage && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.squareFootage.message}</p>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* VCT Flooring - Show for traditional cleaning types as option, or required for VCT only */}
@@ -679,6 +709,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 type="checkbox"
                 {...register('needsWindowCleaning')}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                defaultChecked={formValues.projectType === 'assisted_living'}
               />
               <label htmlFor="needsWindowCleaning" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Needs Window Cleaning
@@ -686,7 +717,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             </div>
           )}
           
-          {(needsWindowCleaning || formValues.cleaningType === 'window_cleaning_only') && (
+          {(needsWindowCleaning || formValues.cleaningType === 'window_cleaning_only' || formValues.projectType === 'assisted_living') && (
             <div className="space-y-4">
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
