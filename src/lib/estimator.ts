@@ -497,7 +497,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const displayCaseCost = calculateDisplayCaseCost(projectType, numberOfDisplayCases);
-  const paintingCoatsNum = paintingCoats === 2 || paintingCoats === '2' ? 2 : 1;
+  const paintingCoatsNum = Number(paintingCoats) === 2 ? 2 : 1;
   paintingCost = calculatePaintingCost(needsPainting, paintingSquareFootage, paintingType, paintingCoatsNum);
 
   // Business fees (always included)
