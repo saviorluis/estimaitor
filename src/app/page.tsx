@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import EstimatorForm from '@/components/EstimatorForm';
-import SimpleEstimatorForm from '@/components/SimpleEstimatorForm';
+import PressureWashingCalculator from '@/components/PressureWashingCalculator';
+import PaintingCalculator from '@/components/PaintingCalculator';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import AdminThemeMenu from '@/components/AdminThemeMenu';
@@ -63,11 +64,10 @@ interface JanitorialFormData {
   specialRequirements?: string;
 }
 
-// App modes (simple is archived — kept internal, not shown in UI)
-export type AppMode = 'pro' | 'simple' | 'contract';
+// App modes: three separate professional calculators + contract
+export type AppMode = 'cleaning' | 'pressure_washing' | 'painting' | 'contract';
 
-// Modes visible in the mode switcher (simple archived for now)
-const VISIBLE_MODES: AppMode[] = ['pro', 'contract'];
+const VISIBLE_MODES: AppMode[] = ['cleaning', 'pressure_washing', 'painting', 'contract'];
 
 interface ModeConfig {
   title: string;
@@ -78,26 +78,33 @@ interface ModeConfig {
 }
 
 const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
-  pro: {
-    title: 'Professional Mode',
-    subtitle: 'Complete Commercial Cleaning Estimator',
-    description: 'Full-featured calculator with detailed cost breakdowns, markup controls, and professional quote generation.',
+  cleaning: {
+    title: 'Final Cleaning',
+    subtitle: 'Interior / Exterior Cleaning Estimate',
+    description: 'Commercial cleaning calculator: project type, square footage, cleaning type, travel, and quote options.',
     color: 'from-indigo-600 to-indigo-800',
-    features: ['Detailed cost breakdowns', 'Markup controls', 'AI recommendations', 'Professional quotes', 'All calculation options']
+    features: ['Project type', 'Square footage', 'Cleaning type', 'Travel & fees', 'Quote generation']
   },
-  simple: {
-    title: 'Simple Reference Mode',
-    subtitle: 'Quick Price Estimates & Budget Planning',
-    description: 'Streamlined calculator with just 4 essential fields: project type, cleaning type, square footage, and location. Automatic location-based pricing included.',
-    color: 'from-green-600 to-green-800',
-    features: ['4 simple fields', 'Location-based pricing', 'Auto calculations', 'Instant estimates', 'Customer-friendly']
+  pressure_washing: {
+    title: 'Pressure Washing',
+    subtitle: 'Pressure Washing Estimate',
+    description: 'Standalone pressure washing calculator: area, service type, multiple surfaces, travel, and markup.',
+    color: 'from-sky-600 to-sky-800',
+    features: ['Area & service type', 'Multiple surfaces', 'Travel', 'Markup', 'Quote generation']
+  },
+  painting: {
+    title: 'Painting',
+    subtitle: 'Painting Estimate',
+    description: 'Standalone painting calculator: square footage, interior/exterior, coats, travel, and markup.',
+    color: 'from-amber-600 to-amber-800',
+    features: ['Square footage', 'Interior / exterior', 'Coats', 'Travel', 'Quote generation']
   },
   contract: {
-    title: 'Janitorial Contract Generator',
+    title: 'Janitorial Contract',
     subtitle: 'Recurring Service Contract Creation',
-    description: 'Specialized tool for creating ongoing janitorial service contracts with recurring pricing, service schedules, and maintenance agreements.',
+    description: 'Specialized tool for ongoing janitorial contracts with recurring pricing and schedules.',
     color: 'from-purple-600 to-purple-800',
-    features: ['Contract templates', 'Recurring schedules', 'Service level agreements', 'Maintenance contracts', 'Annual pricing']
+    features: ['Contract templates', 'Recurring schedules', 'Service agreements', 'Annual pricing']
   }
 };
 
@@ -111,7 +118,7 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [pastEntries, setPastEntries] = useState<PastEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
-  const [currentMode, setCurrentMode] = useState<AppMode>('pro');
+  const [currentMode, setCurrentMode] = useState<AppMode>('cleaning');
   const [showAdminThemeMenu, setShowAdminThemeMenu] = useState(false);
 
   // Load saved data on initial render
@@ -134,11 +141,12 @@ export default function Home() {
         setPastEntries(JSON.parse(savedEntries));
       }
 
-      if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
-        // Simple is archived — don't restore it; use pro instead
-        setCurrentMode(savedMode === 'simple' ? 'pro' : (savedMode as AppMode));
-      } else if (savedMode === 'wizard') {
-        setCurrentMode('pro');
+      if (savedMode && ['cleaning', 'pressure_washing', 'painting', 'contract'].includes(savedMode)) {
+        setCurrentMode(savedMode as AppMode);
+      } else if (savedMode === 'pro' || savedMode === 'simple' || savedMode === 'wizard') {
+        setCurrentMode('cleaning');
+      } else if (savedMode === 'contract') {
+        setCurrentMode('contract');
       }
     } catch (error) {
       console.error('Error loading saved data:', error);
@@ -157,23 +165,24 @@ export default function Home() {
   const handleEstimateCalculated = (data: EstimateData, formValues: FormData) => {
     setEstimateData(data);
     setFormData(formValues);
-    
-    // Save to past entries
-    const newEntry: PastEntry = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleString(),
-      clientName: formValues.clientName || 'Unnamed Client',
-      projectName: formValues.projectName || 'Unnamed Project',
-      projectType: formValues.projectType,
-      squareFootage: formValues.squareFootage,
-      totalPrice: data.totalPrice,
-      estimateData: data,
-      formData: formValues
-    };
-    
-    const updatedEntries = [newEntry, ...pastEntries].slice(0, 20); // Keep only the 20 most recent entries
-    setPastEntries(updatedEntries);
-    localStorage.setItem(PAST_ENTRIES_KEY, JSON.stringify(updatedEntries));
+
+    // Save to past entries only for cleaning (table is cleaning-specific)
+    if (currentMode === 'cleaning') {
+      const newEntry: PastEntry = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleString(),
+        clientName: formValues.clientName || 'Unnamed Client',
+        projectName: formValues.projectName || 'Unnamed Project',
+        projectType: formValues.projectType,
+        squareFootage: formValues.squareFootage,
+        totalPrice: data.totalPrice,
+        estimateData: data,
+        formData: formValues
+      };
+      const updatedEntries = [newEntry, ...pastEntries].slice(0, 20);
+      setPastEntries(updatedEntries);
+      localStorage.setItem(PAST_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    }
   };
 
   const handleContractGenerated = (data: ContractData, formValues: JanitorialFormData) => {
@@ -257,7 +266,7 @@ export default function Home() {
             {currentConfig.description}
           </p>
           <div className="mt-4 flex justify-center space-x-4">
-            {pastEntries.length > 0 && currentMode === 'pro' && (
+            {pastEntries.length > 0 && currentMode === 'cleaning' && (
               <button
                 onClick={() => setShowPastEntries(!showPastEntries)}
                 className="text-sm text-white bg-black bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded transition-colors"
@@ -278,8 +287,8 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto px-4 mb-12">
-        {/* Past Entries Section - Only show in Pro mode */}
-        {showPastEntries && currentMode === 'pro' && (
+        {/* Past Entries Section - Only show in Cleaning mode */}
+        {showPastEntries && currentMode === 'cleaning' && (
           <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white border-b pb-2">Past Estimates</h2>
             <div className="overflow-x-auto">
@@ -330,14 +339,16 @@ export default function Home() {
           <div className="card h-full">
             {currentMode === 'contract' ? (
               <JanitorialContractForm onContractGenerated={handleContractGenerated} />
-            ) : currentMode === 'simple' ? (
-              <SimpleEstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+            ) : currentMode === 'pressure_washing' ? (
+              <PressureWashingCalculator onEstimateCalculated={handleEstimateCalculated} />
+            ) : currentMode === 'painting' ? (
+              <PaintingCalculator onEstimateCalculated={handleEstimateCalculated} />
             ) : (
               <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             )}
           </div>
           
-          {(estimateData && formData && currentMode !== 'contract') || (contractData && janitorialFormData && currentMode === 'contract') ? (
+          {(estimateData && formData && (currentMode === 'cleaning' || currentMode === 'pressure_washing' || currentMode === 'painting')) || (contractData && janitorialFormData && currentMode === 'contract') ? (
             <div className="card h-full">
               {currentMode === 'contract' && contractData && janitorialFormData ? (
                 <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">

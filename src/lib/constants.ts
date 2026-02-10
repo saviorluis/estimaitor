@@ -229,12 +229,15 @@ export const DISPLAY_CASE = {
   TIME_PER_CASE_HOURS: 0.6
 } as const;
 
-// Painting (separate section)
+// Painting (separate calculator)
 export const PAINTING_RATES = {
   INTERIOR_PER_SQFT: 2.50,
   EXTERIOR_PER_SQFT: 3.00,
   BOTH_DISCOUNT: 0.85, // 15% discount when doing both interior + exterior
-  MINIMUM_JOB: 500
+  MINIMUM_JOB: 500,
+  COAT_MULTIPLIER: 1.4, // 2nd coat adds 40%
+  CEILING_PER_SQFT: 2.75, // Ceilings typically higher
+  ROOM_MINIMUM: 350 // Min per room when pricing by rooms
 } as const;
 
 // Assisted Living Facility Pricing

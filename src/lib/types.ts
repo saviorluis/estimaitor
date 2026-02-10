@@ -103,10 +103,16 @@ export interface FormData {
   // Building shell specific (exterior dimensions)
   exteriorSquareFootage?: number;
 
-  // Painting (separate section at bottom)
+  // Painting (separate calculator at bottom)
   needsPainting?: boolean;
   paintingSquareFootage?: number;
   paintingType?: 'interior' | 'exterior' | 'both';
+  paintingRooms?: number;
+  paintingCoats?: 1 | 2;
+  paintingCeilingHeight?: number; // ft, for ceiling paint
+
+  // Pressure washing (separate calculator at bottom)
+  // needsPressureWashing, pressureWashingArea, pressureWashingType, pressureWashingServices - see above
 }
 
 // ===================== ESTIMATE DATA INTERFACE =====================

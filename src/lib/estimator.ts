@@ -198,11 +198,12 @@ function calculateDisplayCaseCost(projectType: ProjectType, numberOfDisplayCases
 function calculatePaintingCost(
   needsPainting: boolean,
   paintingSquareFootage: number,
-  paintingType: 'interior' | 'exterior' | 'both'
+  paintingType: 'interior' | 'exterior' | 'both',
+  paintingCoats: 1 | 2 = 1
 ): number {
   if (!needsPainting || !paintingSquareFootage || paintingSquareFootage <= 0) return 0;
 
-  const cacheKey = generateCacheKey('painting', paintingSquareFootage, paintingType);
+  const cacheKey = generateCacheKey('painting', paintingSquareFootage, paintingType, paintingCoats);
   if (calculationCache.has(cacheKey)) {
     return calculationCache.get(cacheKey)!;
   }
@@ -216,6 +217,9 @@ function calculatePaintingCost(
     const interiorCost = paintingSquareFootage * PAINTING_RATES.INTERIOR_PER_SQFT;
     const exteriorCost = paintingSquareFootage * PAINTING_RATES.EXTERIOR_PER_SQFT;
     result = Math.max((interiorCost + exteriorCost) * PAINTING_RATES.BOTH_DISCOUNT, PAINTING_RATES.MINIMUM_JOB);
+  }
+  if (paintingCoats === 2) {
+    result *= PAINTING_RATES.COAT_MULTIPLIER;
   }
   calculationCache.set(cacheKey, result);
   return result;
@@ -380,7 +384,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
     numberOfDisplayCases = 0,
     needsPainting = false,
     paintingSquareFootage = 0,
-    paintingType = 'interior'
+    paintingType = 'interior',
+    paintingCoats = 1
   } = formData;
 
   // Normalize gas price once
@@ -492,7 +497,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const displayCaseCost = calculateDisplayCaseCost(projectType, numberOfDisplayCases);
-  paintingCost = calculatePaintingCost(needsPainting, paintingSquareFootage, paintingType);
+  const paintingCoatsNum = paintingCoats === 2 || paintingCoats === '2' ? 2 : 1;
+  paintingCost = calculatePaintingCost(needsPainting, paintingSquareFootage, paintingType, paintingCoatsNum);
 
   // Business fees (always included)
   const schedulingFee = SCHEDULING_FEE;
