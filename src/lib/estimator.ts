@@ -17,6 +17,7 @@ import {
   PRESSURE_WASHING_RATES,
   WINDOW_CLEANING,
   DISPLAY_CASE,
+  PAINTING_RATES,
   ASSISTED_LIVING_PRICING,
   SALES_TAX_RATE,
   MARKUP_PERCENTAGE,
@@ -194,6 +195,32 @@ function calculateDisplayCaseCost(projectType: ProjectType, numberOfDisplayCases
   return result;
 }
 
+function calculatePaintingCost(
+  needsPainting: boolean,
+  paintingSquareFootage: number,
+  paintingType: 'interior' | 'exterior' | 'both'
+): number {
+  if (!needsPainting || !paintingSquareFootage || paintingSquareFootage <= 0) return 0;
+
+  const cacheKey = generateCacheKey('painting', paintingSquareFootage, paintingType);
+  if (calculationCache.has(cacheKey)) {
+    return calculationCache.get(cacheKey)!;
+  }
+
+  let result = 0;
+  if (paintingType === 'interior') {
+    result = Math.max(paintingSquareFootage * PAINTING_RATES.INTERIOR_PER_SQFT, PAINTING_RATES.MINIMUM_JOB);
+  } else if (paintingType === 'exterior') {
+    result = Math.max(paintingSquareFootage * PAINTING_RATES.EXTERIOR_PER_SQFT, PAINTING_RATES.MINIMUM_JOB);
+  } else {
+    const interiorCost = paintingSquareFootage * PAINTING_RATES.INTERIOR_PER_SQFT;
+    const exteriorCost = paintingSquareFootage * PAINTING_RATES.EXTERIOR_PER_SQFT;
+    result = Math.max((interiorCost + exteriorCost) * PAINTING_RATES.BOTH_DISCOUNT, PAINTING_RATES.MINIMUM_JOB);
+  }
+  calculationCache.set(cacheKey, result);
+  return result;
+}
+
 // ===================== PROJECT TYPE TIME MODIFIERS =====================
 
 const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
@@ -350,7 +377,10 @@ export function calculateEstimate(formData: FormData): EstimateData {
     numberOfWindows = 0,
     numberOfLargeWindows = 0,
     numberOfHighAccessWindows = 0,
-    numberOfDisplayCases = 0
+    numberOfDisplayCases = 0,
+    needsPainting = false,
+    paintingSquareFootage = 0,
+    paintingType = 'interior'
   } = formData;
 
   // Normalize gas price once
@@ -366,6 +396,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   let vctCost = 0;
   let pressureWashingCost = 0;
   let windowCleaningCost = 0;
+  let paintingCost = 0;
   let actualSquareFootage = squareFootage;
 
   if (cleaningType === 'vct_only') {
@@ -461,6 +492,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const travelCost = calculateTravelCost(distanceFromOffice);
   const overnightCost = calculateOvernightCost(stayingOvernight, numberOfCleaners, numberOfNights, distanceFromOffice);
   const displayCaseCost = calculateDisplayCaseCost(projectType, numberOfDisplayCases);
+  paintingCost = calculatePaintingCost(needsPainting, paintingSquareFootage, paintingType);
 
   // Business fees (always included)
   const schedulingFee = SCHEDULING_FEE;
@@ -488,15 +520,15 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate totals - business fees should not be subject to urgency multiplier
   const laborCosts = (
     basePrice + vctCost + travelCost + overnightCost + 
-    pressureWashingCost + windowCleaningCost + displayCaseCost
+    pressureWashingCost + windowCleaningCost + paintingCost + displayCaseCost
   ) * urgencyMultiplier;
   
   const businessFees = schedulingFee + invoicingFee + mobilizationFee; // Fixed costs, not subject to urgency
   
   const totalBeforeMarkup = laborCosts + businessFees;
 
-  // Always apply 30% professional markup
-  const markupAmount = totalBeforeMarkup * MARKUP_PERCENTAGE;
+  // Apply 30% professional markup if enabled
+  const markupAmount = applyMarkup ? totalBeforeMarkup * MARKUP_PERCENTAGE : 0;
   const totalWithMarkup = totalBeforeMarkup + markupAmount;
   const salesTax = totalWithMarkup * SALES_TAX_RATE;
   const totalPrice = totalWithMarkup + salesTax;
@@ -567,6 +599,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     timeToCompleteInDays: Math.ceil(estimatedHours / 8), // Assuming 8-hour work days
     pressureWashingCost,
     windowCleaningCost,
+    paintingCost,
     displayCaseCost,
     schedulingFee,
     invoicingFee,

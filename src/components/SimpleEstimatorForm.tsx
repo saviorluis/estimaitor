@@ -24,6 +24,7 @@ interface SimpleFormData {
   needsWindowCleaning: boolean;
   numberOfWindows: number;
   pressureWashingArea: number;
+  applyMarkup?: boolean; // Optional 30% professional markup
   clientName?: string;
   projectName?: string;
   // Room-based pricing for home renovation
@@ -173,6 +174,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
     needsWindowCleaning: false,
     numberOfWindows: 10,
     pressureWashingArea: 1000,
+    applyMarkup: true,
     clientName: '',
     projectName: '',
     pricingMethod: 'square_footage' as 'square_footage' | 'room_based',
@@ -265,7 +267,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
       // Simplified defaults
       hasVCT: false,
       vctSquareFootage: 0,
-      applyMarkup: true,
+      applyMarkup: simpleData.applyMarkup !== undefined ? simpleData.applyMarkup : true,
       numberOfCleaners: getRecommendedCleaners(simpleData.squareFootage || 1000),
       urgencyLevel: 3, // Medium urgency
       
@@ -803,6 +805,25 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           </div>
         </div>
 
+        {/* Pricing Options */}
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <div className="flex items-center space-x-3">
+            <input
+              id="applyMarkup"
+              type="checkbox"
+              {...register('applyMarkup')}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
+            />
+            <label htmlFor="applyMarkup" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Apply 30% Professional Markup
+            </label>
+            <span className="text-xs text-gray-500 dark:text-gray-400">(Overhead, insurance, profit)</span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-7">
+            When applied, 7% sales tax is added after the markup, so the final total is ~39% above the subtotal.
+          </p>
+        </div>
+
         {/* Automatic Calculations Info */}
         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
           <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
@@ -810,7 +831,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           </h4>
           <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
             <p>• Professional crew size optimized for your {serviceType} project ({recommendedCleaners} cleaners)</p>
-            <p>• <strong>30% professional markup included</strong> (overhead, insurance, profit)</p>
+            <p>• <strong>30% professional markup {formValues.applyMarkup ? 'included' : 'optional'}</strong> (overhead, insurance, profit). When applied, 7% sales tax is added after markup (~39% total increase).</p>
             <p>• Standard urgency level (no rush charges)</p>
             <p>• Accurate distance-based travel costs</p>
             <p>• Optional window cleaning available</p>

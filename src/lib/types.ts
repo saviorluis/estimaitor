@@ -102,6 +102,11 @@ export interface FormData {
   
   // Building shell specific (exterior dimensions)
   exteriorSquareFootage?: number;
+
+  // Painting (separate section at bottom)
+  needsPainting?: boolean;
+  paintingSquareFootage?: number;
+  paintingType?: 'interior' | 'exterior' | 'both';
 }
 
 // ===================== ESTIMATE DATA INTERFACE =====================
@@ -118,6 +123,7 @@ export interface EstimateData {
   overnightCost: number;
   pressureWashingCost: number;
   windowCleaningCost: number;
+  paintingCost: number;
   displayCaseCost: number;
   schedulingFee: number;
   invoicingFee: number;

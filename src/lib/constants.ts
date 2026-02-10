@@ -229,6 +229,14 @@ export const DISPLAY_CASE = {
   TIME_PER_CASE_HOURS: 0.6
 } as const;
 
+// Painting (separate section)
+export const PAINTING_RATES = {
+  INTERIOR_PER_SQFT: 2.50,
+  EXTERIOR_PER_SQFT: 3.00,
+  BOTH_DISCOUNT: 0.85, // 15% discount when doing both interior + exterior
+  MINIMUM_JOB: 500
+} as const;
+
 // Assisted Living Facility Pricing
 export const ASSISTED_LIVING_PRICING = {
   COST_PER_BED_BATH: 150, // Cost per bed/bath unit (includes bedroom + bathroom)

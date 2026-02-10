@@ -456,6 +456,19 @@ export default function UnifiedEstimator({
                 />
                 <label className="text-sm font-medium">Overnight Stay Required</label>
               </div>
+              
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  {...register('applyMarkup')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <label className="text-sm font-medium">Apply 30% Professional Markup</label>
+                <span className="text-xs text-gray-500">(Overhead, insurance, profit)</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                When applied, 7% sales tax is added after the markup, so the final total is ~39% above the subtotal.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -783,6 +796,19 @@ export default function UnifiedEstimator({
                   className="w-4 h-4 text-blue-600"
                 />
                 <label className="text-sm font-medium">Overnight Stay Required</label>
+              </div>
+            </div>
+            
+            {/* Pricing Options */}
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  {...register('applyMarkup')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <label className="text-sm font-medium">Apply 30% Professional Markup</label>
+                <span className="text-xs text-gray-600">(Overhead, insurance, profit)</span>
               </div>
             </div>
           </div>

@@ -285,6 +285,15 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               </div>
             )}
 
+            {estimateData.paintingCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Painting</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.paintingCost)}
+                </span>
+              </div>
+            )}
+
             {estimateData.displayCaseCost > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Display Case Cleaning</span>
@@ -321,7 +330,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               </div>
             )}
 
-            {/* Sales Tax */}
+            {/* Sales Tax - applied after markup, so total is ~39% above subtotal when markup is on */}
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
               <span className="text-gray-800 dark:text-gray-200">
@@ -337,6 +346,11 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
                   {formatCurrency(estimateData.totalPrice)}
                 </span>
               </div>
+              {estimateData.markup > 0 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Total = Subtotal + 30% markup + 7% sales tax (~39% above subtotal).
+                </p>
+              )}
             </div>
           </div>
         </div>

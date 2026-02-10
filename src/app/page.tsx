@@ -63,8 +63,11 @@ interface JanitorialFormData {
   specialRequirements?: string;
 }
 
-// App modes
+// App modes (simple is archived — kept internal, not shown in UI)
 export type AppMode = 'pro' | 'simple' | 'contract';
+
+// Modes visible in the mode switcher (simple archived for now)
+const VISIBLE_MODES: AppMode[] = ['pro', 'contract'];
 
 interface ModeConfig {
   title: string;
@@ -132,9 +135,9 @@ export default function Home() {
       }
 
       if (savedMode && ['pro', 'simple', 'contract'].includes(savedMode)) {
-        setCurrentMode(savedMode as AppMode);
+        // Simple is archived — don't restore it; use pro instead
+        setCurrentMode(savedMode === 'simple' ? 'pro' : (savedMode as AppMode));
       } else if (savedMode === 'wizard') {
-        // Fallback: if old 'wizard' mode is saved, default to 'pro'
         setCurrentMode('pro');
       }
     } catch (error) {
@@ -599,7 +602,7 @@ export default function Home() {
             Switch Calculator Mode
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {(Object.keys(MODE_CONFIGS) as AppMode[]).map((mode) => {
+            {VISIBLE_MODES.map((mode) => {
               const config = MODE_CONFIGS[mode];
               const isActive = currentMode === mode;
               
