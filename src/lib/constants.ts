@@ -28,7 +28,7 @@ export const getVCTCostPerSqFt = (vctSquareFootage: number): number => {
 export const SALES_TAX_RATE = 0.07;
 
 // Markup percentage (50% markup = 0.5)
-export const MARKUP_PERCENTAGE = 0.3; // 30% professional markup
+export const MARKUP_PERCENTAGE = 0.2; // 20% professional markup
 
 // ===================== BUSINESS FEES =====================
 
@@ -377,7 +377,8 @@ export const PRESSURE_WASHING_RATES = {
   DRIVEWAY: { rate: 0.20, description: 'Driveway cleaning service' },
   DECK: { rate: 1.00, description: 'Deck cleaning service' },
   TREX: { rate: 1.00, description: 'Trex deck cleaning service' },
-  DAILY_RATE: 1800
+  DAILY_RATE: 1800,
+  CHIMNEY_WASH: 95, // per chimney (exterior chimney wash)
 } as const;
 
 export const PRESSURE_WASHING_CHEMICALS = {

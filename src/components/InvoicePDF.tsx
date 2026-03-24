@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { SCOPE_OF_WORK } from '@/lib/constants';
+import { SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -261,6 +261,10 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   invoiceInfo,
 }) => {
   const logoPath = '/assets/logo.png';
+  const markupMultiplier = estimateData.markup > 0 ? (1 + MARKUP_PERCENTAGE) : 1;
+  const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
+  const salesTax = subtotal * SALES_TAX_RATE;
+  const finalTotal = subtotal + salesTax;
 
   // Get cleaning type display
   const getCleaningTypeDisplay = (type: string): string => {
@@ -355,7 +359,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text>{formatCurrency(
                   (estimateData.basePrice + 
                   (estimateData.vctCost || 0) +
-                  (estimateData.travelCost || 0)) * 1.30
+                  (estimateData.travelCost || 0)) * markupMultiplier
                 )}</Text>
               </View>
             </View>
@@ -367,7 +371,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text>Window Cleaning Services</Text>
                 </View>
                 <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.windowCleaningCost || 0) * 1.30)}</Text>
+                  <Text>{formatCurrency((estimateData.windowCleaningCost || 0) * markupMultiplier)}</Text>
                 </View>
               </View>
             )}
@@ -379,7 +383,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text>Overnight Accommodations</Text>
                 </View>
                 <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.overnightCost || 0) * 1.30)}</Text>
+                  <Text>{formatCurrency((estimateData.overnightCost || 0) * markupMultiplier)}</Text>
                 </View>
               </View>
             )}
@@ -391,7 +395,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text>Pressure Washing Services</Text>
                 </View>
                 <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.pressureWashingCost || 0) * 1.30)}</Text>
+                  <Text>{formatCurrency((estimateData.pressureWashingCost || 0) * markupMultiplier)}</Text>
                 </View>
               </View>
             )}
@@ -403,7 +407,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                   <Text>Display Case Cleaning</Text>
                 </View>
                 <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.displayCaseCost || 0) * 1.30)}</Text>
+                  <Text>{formatCurrency((estimateData.displayCaseCost || 0) * markupMultiplier)}</Text>
                 </View>
               </View>
             )}
@@ -414,7 +418,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text>Scheduling Fee</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency((estimateData.schedulingFee || 0) * 1.30)}</Text>
+                <Text>{formatCurrency((estimateData.schedulingFee || 0) * markupMultiplier)}</Text>
               </View>
             </View>
 
@@ -423,7 +427,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text>Invoicing Fee</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency((estimateData.invoicingFee || 0) * 1.30)}</Text>
+                <Text>{formatCurrency((estimateData.invoicingFee || 0) * markupMultiplier)}</Text>
               </View>
             </View>
 
@@ -433,7 +437,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontWeight: 'bold' }}>Subtotal</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(estimateData.totalBeforeMarkup * 1.30)}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(subtotal)}</Text>
               </View>
             </View>
 
@@ -443,7 +447,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontWeight: 'bold' }}>Sales Tax (7%)</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text style={{ fontWeight: 'bold' }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 0.07)}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{formatCurrency(salesTax)}</Text>
               </View>
             </View>
 
@@ -453,7 +457,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontWeight: 'bold', fontSize: 12 }}>TOTAL</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 1.07)}</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>{formatCurrency(finalTotal)}</Text>
               </View>
             </View>
           </View>
@@ -488,7 +492,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
           border: '1px solid #d0d0d0'
         }}>
           <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Balance Due:</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>{formatCurrency((estimateData.totalBeforeMarkup * 1.30) * 1.07)}</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>{formatCurrency(finalTotal)}</Text>
         </View>
 
         {/* Payment Terms */}

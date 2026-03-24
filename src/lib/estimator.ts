@@ -153,6 +153,11 @@ function calculatePressureWashingCost(
   return result;
 }
 
+function calculateChimneyWashCost(needsChimneyWash: boolean, chimneyCount: number): number {
+  if (!needsChimneyWash || !chimneyCount || chimneyCount <= 0) return 0;
+  return chimneyCount * PRESSURE_WASHING_RATES.CHIMNEY_WASH;
+}
+
 function calculateWindowCleaningCost(
   needsWindowCleaning: boolean,
   numberOfWindows: number = 0,
@@ -385,7 +390,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     needsPainting = false,
     paintingSquareFootage = 0,
     paintingType = 'interior',
-    paintingCoats = 1
+    paintingCoats = 1,
+    needsChimneyWash = false,
+    chimneyCount = 0
   } = formData;
 
   // Normalize gas price once
@@ -400,6 +407,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
   let basePrice = 0;
   let vctCost = 0;
   let pressureWashingCost = 0;
+  let chimneyWashCost = 0;
   let windowCleaningCost = 0;
   let paintingCost = 0;
   let actualSquareFootage = squareFootage;
@@ -424,6 +432,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     actualSquareFootage = pressureWashingArea || 0;
     basePrice = 0; // No base cleaning price for pressure washing only
     pressureWashingCost = calculatePressureWashingCost(true, pressureWashingArea, pressureWashingType);
+    chimneyWashCost = calculateChimneyWashCost(needsChimneyWash, chimneyCount);
   } else if (projectType === 'home_renovation' && formData.pricingMethod === 'room_based' && formData.rooms) {
     // Room-based pricing for home renovation projects
     basePrice = calculateRoomBasedPrice(formData.rooms, cleaningType);
@@ -526,14 +535,14 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Calculate totals - business fees should not be subject to urgency multiplier
   const laborCosts = (
     basePrice + vctCost + travelCost + overnightCost + 
-    pressureWashingCost + windowCleaningCost + paintingCost + displayCaseCost
+    pressureWashingCost + chimneyWashCost + windowCleaningCost + paintingCost + displayCaseCost
   ) * urgencyMultiplier;
   
   const businessFees = schedulingFee + invoicingFee + mobilizationFee; // Fixed costs, not subject to urgency
   
   const totalBeforeMarkup = laborCosts + businessFees;
 
-  // Apply 30% professional markup if enabled
+  // Apply professional markup if enabled
   const markupAmount = applyMarkup ? totalBeforeMarkup * MARKUP_PERCENTAGE : 0;
   const totalWithMarkup = totalBeforeMarkup + markupAmount;
   const salesTax = totalWithMarkup * SALES_TAX_RATE;
@@ -604,6 +613,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     pricePerSquareFoot,
     timeToCompleteInDays: Math.ceil(estimatedHours / 8), // Assuming 8-hour work days
     pressureWashingCost,
+    chimneyWashCost,
     windowCleaningCost,
     paintingCost,
     displayCaseCost,

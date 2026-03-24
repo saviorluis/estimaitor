@@ -113,6 +113,8 @@ export interface FormData {
 
   // Pressure washing (separate calculator at bottom)
   // needsPressureWashing, pressureWashingArea, pressureWashingType, pressureWashingServices - see above
+  needsChimneyWash?: boolean;
+  chimneyCount?: number;
 }
 
 // ===================== ESTIMATE DATA INTERFACE =====================
@@ -128,6 +130,7 @@ export interface EstimateData {
   travelCost: number;
   overnightCost: number;
   pressureWashingCost: number;
+  chimneyWashCost: number;
   windowCleaningCost: number;
   paintingCost: number;
   displayCaseCost: number;

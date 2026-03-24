@@ -44,7 +44,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     vctSquareFootage: 0,
     distanceFromOffice: 20,
     gasPrice: 3.50,
-    applyMarkup: true, // Always apply 30% professional markup
+    applyMarkup: true, // Always apply 20% professional markup
     stayingOvernight: false,
     numberOfNights: 1,
     numberOfCleaners: 3,
@@ -516,7 +516,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
             />
             <label htmlFor="applyMarkup" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Apply 30% Professional Markup
+              Apply 20% Professional Markup
             </label>
             <span className="text-xs text-gray-500 dark:text-gray-400">(Overhead, insurance, profit)</span>
           </div>

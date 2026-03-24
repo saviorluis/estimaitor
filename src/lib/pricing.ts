@@ -9,7 +9,7 @@ import { ProjectType, CleaningType } from './types';
 
 export const BASE_RATE_PER_SQFT = 0.18;
 export const SALES_TAX_RATE = 0.07;
-export const PROFESSIONAL_MARKUP = 0.30; // 30% markup
+export const PROFESSIONAL_MARKUP = 0.20; // 20% markup
 
 // ===================== PROJECT TYPE MULTIPLIERS =====================
 

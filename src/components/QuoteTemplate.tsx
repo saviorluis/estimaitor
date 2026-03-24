@@ -926,10 +926,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded">
             <div className="flex items-center justify-between">
               <span className="text-sm text-green-800 font-medium">✅ Professional Markup (Built-in)</span>
-              <span className="text-sm text-green-700 font-semibold">30%</span>
+              <span className="text-sm text-green-700 font-semibold">20%</span>
             </div>
             <p className="text-xs text-green-600 mt-1">
-              All estimates automatically include 30% professional markup covering overhead, insurance, and profit margins.
+              All estimates automatically include 20% professional markup covering overhead, insurance, and profit margins.
             </p>
           </div>
           

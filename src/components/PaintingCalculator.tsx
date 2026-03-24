@@ -145,7 +145,7 @@ export default function PaintingCalculator({ onEstimateCalculated }: PaintingCal
             {...register('applyMarkup')}
             className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
           />
-          <label htmlFor="applyMarkup" className="text-sm font-medium text-gray-700 dark:text-gray-300">Apply 30% professional markup</label>
+          <label htmlFor="applyMarkup" className="text-sm font-medium text-gray-700 dark:text-gray-300">Apply 20% professional markup</label>
         </div>
 
         <div className="border-t pt-4 space-y-4">

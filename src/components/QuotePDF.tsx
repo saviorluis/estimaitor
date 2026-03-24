@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency, getQuoteCounter, getCapabilityStatementImage } from '@/lib/utils';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK } from '@/lib/constants';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -499,13 +499,11 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
 }) => {
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
-  // Distribute 30% business overhead seamlessly into line items (match estimator)
-  const businessOverheadRate = 0.30; // 30% overhead to match estimator
-  const totalRawCosts = estimateData.totalBeforeMarkup;
-  const overheadAmount = totalRawCosts * businessOverheadRate;
-  
-  // Calculate overhead multiplier for line items
-  const overheadMultiplier = 1 + businessOverheadRate; // 1.30
+  // Keep PDF math in sync with estimator outputs
+  const markupMultiplier = estimateData.markup > 0 ? (1 + MARKUP_PERCENTAGE) : 1;
+  const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
+  const salesTax = subtotal * SALES_TAX_RATE;
+  const finalTotal = subtotal + salesTax;
 
   return (
     <Document>
@@ -693,7 +691,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 {formatCurrency(
                     (estimateData.basePrice + 
                     (estimateData.vctCost || 0) +
-                    (estimateData.travelCost || 0)) * (estimateData.urgencyMultiplier || 1) * overheadMultiplier
+                    (estimateData.travelCost || 0)) * (estimateData.urgencyMultiplier || 1) * markupMultiplier
                 )}
               </Text>
               </View>
@@ -717,7 +715,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.windowCleaningCost || 0) * (estimateData.urgencyMultiplier || 1) * overheadMultiplier)}
+                    {formatCurrency((estimateData.windowCleaningCost || 0) * (estimateData.urgencyMultiplier || 1) * markupMultiplier)}
             </Text>
           </View>
               </View>
@@ -735,7 +733,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.overnightCost || 0) * overheadMultiplier)}
+                    {formatCurrency((estimateData.overnightCost || 0) * markupMultiplier)}
                 </Text>
                 </View>
             </View>
@@ -753,7 +751,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.pressureWashingCost || 0) * overheadMultiplier)}
+                    {formatCurrency((estimateData.pressureWashingCost || 0) * markupMultiplier)}
                   </Text>
                 </View>
               </View>
@@ -770,7 +768,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
                                 <View style={styles.amountCell}>
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.displayCaseCost || 0) * overheadMultiplier)}
+                    {formatCurrency((estimateData.displayCaseCost || 0) * markupMultiplier)}
                   </Text>
                 </View>
             </View>
@@ -786,14 +784,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <View style={styles.amountCell}></View>
             </View>
 
-            {/* Subtotal Row - now includes 25% overhead seamlessly */}
+            {/* Subtotal Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Subtotal</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency(estimateData.totalBeforeMarkup * overheadMultiplier)}
+                  {formatCurrency(subtotal)}
                 </Text>
               </View>
             </View>
@@ -805,7 +803,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                  {formatCurrency((estimateData.totalBeforeMarkup * overheadMultiplier) * 0.07)}
+                  {formatCurrency(salesTax)}
                 </Text>
               </View>
             </View>
@@ -817,7 +815,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', fontSize: 12 }]}>
-                  {formatCurrency((estimateData.totalBeforeMarkup * overheadMultiplier) * 1.07)}
+                  {formatCurrency(finalTotal)}
                 </Text>
               </View>
             </View>

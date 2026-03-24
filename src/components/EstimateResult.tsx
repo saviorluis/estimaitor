@@ -285,6 +285,15 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               </div>
             )}
 
+            {estimateData.chimneyWashCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Chimney Wash</span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.chimneyWashCost)}
+                </span>
+              </div>
+            )}
+
             {estimateData.paintingCost > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Painting</span>
@@ -323,14 +332,14 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
             {/* Markup if applicable */}
             {estimateData.markup > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Business Overhead (30%)</span>
+                <span className="text-gray-600 dark:text-gray-400">Business Overhead (20%)</span>
                 <span className="text-gray-800 dark:text-gray-200">
                   {formatCurrency(estimateData.markup)}
                 </span>
               </div>
             )}
 
-            {/* Sales Tax - applied after markup, so total is ~39% above subtotal when markup is on */}
+            {/* Sales Tax - applied after markup */}
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
               <span className="text-gray-800 dark:text-gray-200">
@@ -348,7 +357,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               </div>
               {estimateData.markup > 0 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Total = Subtotal + 30% markup + 7% sales tax (~39% above subtotal).
+                  Total = Subtotal + 20% markup + 7% sales tax (~28.4% above subtotal).
                 </p>
               )}
             </div>
