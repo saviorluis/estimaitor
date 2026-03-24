@@ -688,91 +688,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                {formatCurrency(
-                    (estimateData.basePrice + 
-                    (estimateData.vctCost || 0) +
-                    (estimateData.travelCost || 0)) * (estimateData.urgencyMultiplier || 1) * markupMultiplier
-                )}
+                {formatCurrency(subtotal)}
               </Text>
               </View>
             </View>
-
-
-
-            {/* Window Cleaning Services Row */}
-            {((formData.needsWindowCleaning || formData.projectType === 'assisted_living') && formData.numberOfWindows > 0) && (
-              <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
-                    Window Cleaning Services - {(() => {
-                      const windowTypes = [];
-                      if (formData.numberOfWindows > 0) windowTypes.push(`${formData.numberOfWindows} standard windows`);
-                      if (formData.numberOfLargeWindows > 0) windowTypes.push(`${formData.numberOfLargeWindows} large windows`);
-                      if (formData.numberOfHighAccessWindows > 0) windowTypes.push(`${formData.numberOfHighAccessWindows} high-access windows`);
-                      return windowTypes.join(', ');
-                    })()}
-                  </Text>
-            </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.windowCleaningCost || 0) * (estimateData.urgencyMultiplier || 1) * markupMultiplier)}
-            </Text>
-          </View>
-              </View>
-            )}
-
-            {/* Overnight Accommodations Row */}
-          {formData.stayingOvernight && (
-              <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Overnight Accommodations</Text>
-                  <Text style={styles.tableCell}>
-                  {formData.numberOfNights} night(s) for {formData.numberOfCleaners} staff members
-                </Text>
-                  <Text style={styles.tableCell}>Includes hotel accommodations, meals & incidentals, and coordination</Text>
-                </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.overnightCost || 0) * markupMultiplier)}
-                </Text>
-                </View>
-            </View>
-          )}
-
-            {/* Pressure Washing Services Row */}
-          {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
-              <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Pressure Washing Services</Text>
-                  <Text style={styles.tableCell}>
-                  {formData.pressureWashingArea.toLocaleString()} sq ft of pressure washing
-                </Text>
-                  <Text style={styles.tableCell}>Includes equipment rental and cleaning solutions</Text>
-                </View>
-                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.pressureWashingCost || 0) * markupMultiplier)}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {/* Display Case Cleaning Row */}
-            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
-              <View style={styles.tableRow}>
-                <View style={styles.descriptionCell}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Display Case Cleaning</Text>
-                  <Text style={styles.tableCell}>
-                    {formData.numberOfDisplayCases} display cases with specialized cleaning
-                  </Text>
-                </View>
-                                <View style={styles.amountCell}>
-                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency((estimateData.displayCaseCost || 0) * markupMultiplier)}
-                  </Text>
-                </View>
-            </View>
-          )}
 
             {/* Includes Statement Row */}
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>

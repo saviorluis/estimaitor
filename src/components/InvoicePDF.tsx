@@ -356,78 +356,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(
-                  (estimateData.basePrice + 
-                  (estimateData.vctCost || 0) +
-                  (estimateData.travelCost || 0)) * markupMultiplier
-                )}</Text>
-              </View>
-            </View>
-
-            {/* Window Cleaning Services */}
-            {formData.needsWindowCleaning && formData.numberOfWindows > 0 && (
-              <View style={styles.tableRow}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text>Window Cleaning Services</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.windowCleaningCost || 0) * markupMultiplier)}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Overnight Accommodations */}
-            {formData.stayingOvernight && (
-              <View style={styles.tableRow}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text>Overnight Accommodations</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.overnightCost || 0) * markupMultiplier)}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Pressure Washing Services */}
-            {formData.needsPressureWashing && formData.pressureWashingArea > 0 && (
-              <View style={styles.tableRow}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text>Pressure Washing Services</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.pressureWashingCost || 0) * markupMultiplier)}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Display Case Cleaning */}
-            {formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0 && (
-              <View style={styles.tableRow}>
-                <View style={[styles.tableCell, styles.descriptionCell]}>
-                  <Text>Display Case Cleaning</Text>
-                </View>
-                <View style={[styles.tableCell, styles.amountCell]}>
-                  <Text>{formatCurrency((estimateData.displayCaseCost || 0) * markupMultiplier)}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Business Fees */}
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>Scheduling Fee</Text>
-              </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency((estimateData.schedulingFee || 0) * markupMultiplier)}</Text>
-              </View>
-            </View>
-
-            <View style={styles.tableRow}>
-              <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>Invoicing Fee</Text>
-              </View>
-              <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency((estimateData.invoicingFee || 0) * markupMultiplier)}</Text>
+                <Text>{formatCurrency(subtotal)}</Text>
               </View>
             </View>
 
