@@ -647,13 +647,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               <Text style={styles.projectText}>
                 Fast food / QSR: {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft
               </Text>
-              <Text style={styles.projectText}>
-                Combined area:{' '}
-                {(
-                  (formData.squareFootage || 0) + (formData.truckStopFastFoodSquareFootage || 0)
-                ).toLocaleString()}{' '}
-                sq ft
-              </Text>
             </>
           ) : formData.projectType !== 'building_shell' ? (
             <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
