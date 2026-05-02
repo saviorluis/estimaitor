@@ -19,6 +19,28 @@ export function getTruckStopSubtotalSplit(
   return { facility, fastFood };
 }
 
+/**
+ * Portion of the quote/invoice subtotal (after same markup as PDF) attributable to window cleaning.
+ * Uses the same proportional split as other add-ons: (window cost × urgency) / totalBeforeMarkup.
+ */
+export function getWindowCleaningQuoteShare(
+  formData: FormData,
+  estimateData: EstimateData,
+  subtotal: number
+): number {
+  if (!formData.needsWindowCleaning || (estimateData.windowCleaningCost ?? 0) <= 0) return 0;
+  const T = estimateData.totalBeforeMarkup || 0;
+  if (T <= 0) return 0;
+  const u = estimateData.urgencyMultiplier || 1;
+  const windowLabor = estimateData.windowCleaningCost * u;
+  return subtotal * (windowLabor / T);
+}
+
+/** Pre-tax total matching estimator: labor + fees + professional markup dollars. */
+export function getQuotePreTaxSubtotal(estimateData: EstimateData): number {
+  return (estimateData.totalBeforeMarkup ?? 0) + (estimateData.markup ?? 0);
+}
+
 // ===================== PERFORMANCE UTILITIES =====================
 
 /**

@@ -1,8 +1,15 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency, getQuoteCounter, getCapabilityStatementImage, getTruckStopSubtotalSplit } from '@/lib/utils';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
+import {
+  formatCurrency,
+  getQuoteCounter,
+  getCapabilityStatementImage,
+  getTruckStopSubtotalSplit,
+  getWindowCleaningQuoteShare,
+  getQuotePreTaxSubtotal
+} from '@/lib/utils';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -497,6 +504,8 @@ interface QuotePDFProps {
     terms: string;
   };
   adjustedPrices: {[key: string]: number};
+  /** Pre-tax total (labor + fees + markup) — must match browser breakdown; keeps PDF in sync when parent passes it */
+  preTaxSubtotal?: number;
 }
 
 const QuotePDF: React.FC<QuotePDFProps> = ({
@@ -505,16 +514,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   companyInfo,
   clientInfo,
   quoteInfo,
-  adjustedPrices
+  adjustedPrices,
+  preTaxSubtotal
 }) => {
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
-  // Keep PDF math in sync with estimator outputs
-  const markupMultiplier = estimateData.markup > 0 ? (1 + MARKUP_PERCENTAGE) : 1;
-  const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
+  const subtotal =
+    preTaxSubtotal !== undefined && preTaxSubtotal >= 0
+      ? preTaxSubtotal
+      : getQuotePreTaxSubtotal(estimateData);
   const salesTax = subtotal * SALES_TAX_RATE;
   const finalTotal = subtotal + salesTax;
-  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotal);
+  const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
+  const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
+  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService);
 
   return (
     <Document>
@@ -748,11 +761,29 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                   </>
                 ) : (
                   <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                    {formatCurrency(subtotal)}
+                    {formatCurrency(subtotalForPrimaryService)}
                   </Text>
                 )}
               </View>
             </View>
+
+            {windowQuoteShare > 0 && (
+              <View style={styles.tableRow}>
+                <View style={styles.descriptionCell}>
+                  <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Window cleaning services</Text>
+                  <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                    {(formData.numberOfWindows || 0).toLocaleString()} standard,{' '}
+                    {(formData.numberOfLargeWindows || 0).toLocaleString()} large,{' '}
+                    {(formData.numberOfHighAccessWindows || 0).toLocaleString()} high-access windows
+                  </Text>
+                </View>
+                <View style={styles.amountCell}>
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                    {formatCurrency(windowQuoteShare)}
+                  </Text>
+                </View>
+              </View>
+            )}
 
             {/* Includes Statement Row */}
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>

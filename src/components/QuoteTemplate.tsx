@@ -12,7 +12,7 @@ import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
-import { SCOPE_OF_WORK } from '@/lib/constants';
+import { SALES_TAX_RATE, SCOPE_OF_WORK } from '@/lib/constants';
 
 // Inline logo component to avoid import issues
 const CompanyLogo = ({ className = "" }: { className?: string }) => {
@@ -372,17 +372,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
     }
     
-    // Business fees (scheduling and invoicing) are included in totals but not shown as line items
-    // They're already included in the estimateData.totalBeforeMarkup from the estimator
-    // Add them directly without showing as separate line items
-    const businessFees = (estimateData.schedulingFee || 0) + (estimateData.invoicingFee || 0);
+    // Scheduling, invoicing, mobilization (same as estimator totalBeforeMarkup composition)
+    const businessFees =
+      (estimateData.schedulingFee || 0) +
+      (estimateData.invoicingFee || 0) +
+      (estimateData.mobilizationFee || 0);
     subtotal += businessFees;
     
-    // Add sales tax
-    const salesTax = subtotal * 0.07;
+    const salesTax = subtotal * SALES_TAX_RATE;
     
     // Return total
     return subtotal + salesTax;
+  };
+
+  const getPreTaxTotalForQuotePdf = (): number => {
+    if (!estimateData) return 0;
+    return calculateAdjustedTotal() / (1 + SALES_TAX_RATE);
   };
 
   // Get cleaning type display name
@@ -426,42 +431,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     try {
       console.log('Creating PDF blob for preview...');
       
-      // Create adjusted estimate data with the EXACT same calculation as the browser preview
-      const adjustedEstimateData = {...estimateData};
-    
-      // Calculate subtotal EXACTLY as shown in the browser preview
-      const subtotal = Object.keys(adjustedPrices).length > 0 
-        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-        : estimateData.totalBeforeMarkup;
-      
-      // Calculate sales tax 
-      const salesTax = subtotal * 0.07;
-      
-      // Set all the values for the PDF
-      adjustedEstimateData.totalBeforeMarkup = subtotal;
-      // Set markup to 0 since we're distributing it across the line items
-      adjustedEstimateData.markup = 0;
-      adjustedEstimateData.salesTax = salesTax;
-      adjustedEstimateData.totalPrice = subtotal + salesTax;
-      
-      // Add adjusted line items to the estimate data
-      if (Object.keys(adjustedPrices).length > 0) {
-        adjustedEstimateData.adjustedLineItems = adjustedPrices;
-      } else {
-        // Ensure the base price includes the cleaning type multiplier
-        adjustedEstimateData.adjustedLineItems = {
-          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
-        };
-      }
-      
       const blob = await pdf(
         <QuotePDF 
-          estimateData={adjustedEstimateData} 
+          estimateData={estimateData} 
           formData={formData} 
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
+          preTaxSubtotal={getPreTaxTotalForQuotePdf()}
         />
       ).toBlob();
       
@@ -490,43 +468,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create a blob from the PDF document
       console.log('Creating PDF blob...');
       
-      // Create adjusted estimate data with the EXACT same calculation as the browser preview
-      const adjustedEstimateData = {...estimateData};
-    
-    // Calculate subtotal EXACTLY as shown in the browser preview
-      // This is a direct copy of the calculation used in the print view
-    const subtotal = Object.keys(adjustedPrices).length > 0 
-      ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-      : estimateData.totalBeforeMarkup;
-    
-    // Calculate sales tax 
-    const salesTax = subtotal * 0.07;
-    
-      // Set all the values for the PDF
-    adjustedEstimateData.totalBeforeMarkup = subtotal;
-      // Set markup to 0 since we're distributing it across the line items
-      adjustedEstimateData.markup = 0;
-    adjustedEstimateData.salesTax = salesTax;
-    adjustedEstimateData.totalPrice = subtotal + salesTax;
-    
-    // Add adjusted line items to the estimate data
-    if (Object.keys(adjustedPrices).length > 0) {
-      adjustedEstimateData.adjustedLineItems = adjustedPrices;
-    } else {
-        // Ensure the base price includes the cleaning type multiplier
-      adjustedEstimateData.adjustedLineItems = {
-          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
-        };
-      }
-      
       const blob = await pdf(
         <QuotePDF 
-          estimateData={adjustedEstimateData} 
+          estimateData={estimateData} 
           formData={formData} 
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
+          preTaxSubtotal={getPreTaxTotalForQuotePdf()}
         />
       ).toBlob();
       
@@ -575,42 +525,18 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const quoteNumberOnly = quoteNumberParts[quoteNumberParts.length - 1] || quoteInfo.quoteNumber;
 
       // Create adjusted estimate data with the EXACT same calculation as the browser preview
-      const adjustedEstimateData = {...estimateData};
-    
-      // Calculate subtotal EXACTLY as shown in the browser preview
-      const subtotal = Object.keys(adjustedPrices).length > 0 
-        ? Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0)
-        : estimateData.totalBeforeMarkup;
-      
-      // Calculate sales tax 
-      const salesTax = subtotal * 0.07;
-      
-      // Set all the values for the PDF
-      adjustedEstimateData.totalBeforeMarkup = subtotal;
-      // Set markup to 0 since we're distributing it across the line items
-      adjustedEstimateData.markup = 0;
-      adjustedEstimateData.salesTax = salesTax;
-      adjustedEstimateData.totalPrice = subtotal + salesTax;
-      
-      // Add adjusted line items to the estimate data
-      if (Object.keys(adjustedPrices).length > 0) {
-        adjustedEstimateData.adjustedLineItems = adjustedPrices;
-      } else {
-        // Ensure the base price includes the cleaning type multiplier
-        adjustedEstimateData.adjustedLineItems = {
-          basePrice: estimateData.basePrice * estimateData.projectTypeMultiplier * estimateData.cleaningTypeMultiplier
-        };
-      }
+      const preTaxPdf = getPreTaxTotalForQuotePdf();
 
       // Generate Quote PDF
       const quoteBlob = await pdf(
         <QuotePDF
-          estimateData={adjustedEstimateData}
+          estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
+          preTaxSubtotal={preTaxPdf}
         />
       ).toBlob();
       zip.file("quote.pdf", quoteBlob);
@@ -618,7 +544,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Work Order PDF (English)
       const workOrderBlob = await pdf(
         <WorkOrderPDF
-          estimateData={adjustedEstimateData}
+          estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -629,7 +555,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Work Order PDF (Spanish)
       const workOrderSpanishBlob = await pdf(
         <WorkOrderPDFSpanish
-          estimateData={adjustedEstimateData}
+          estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -640,7 +566,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Generate Purchase Order PDF
       const purchaseOrderBlob = await pdf(
         <PurchaseOrderPDF
-          estimateData={adjustedEstimateData}
+          estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
@@ -658,11 +584,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
       const invoiceBlob = await pdf(
         <InvoicePDF
-          estimateData={adjustedEstimateData}
+          estimateData={estimateData}
           formData={formData}
           companyInfo={companyInfo}
           quoteInfo={quoteInfo}
           invoiceInfo={invoiceInfo}
+          preTaxSubtotal={preTaxPdf}
         />
       ).toBlob();
       zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);

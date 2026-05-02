@@ -1,8 +1,13 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency, getTruckStopSubtotalSplit } from '@/lib/utils';
-import { SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
+import {
+  formatCurrency,
+  getTruckStopSubtotalSplit,
+  getWindowCleaningQuoteShare,
+  getQuotePreTaxSubtotal
+} from '@/lib/utils';
+import { SCOPE_OF_WORK, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -251,6 +256,7 @@ interface InvoicePDFProps {
     dueDate: string;
     paymentTerms: string;
   };
+  preTaxSubtotal?: number;
 }
 
 const InvoicePDF: React.FC<InvoicePDFProps> = ({
@@ -259,13 +265,18 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   companyInfo,
   quoteInfo,
   invoiceInfo,
+  preTaxSubtotal
 }) => {
   const logoPath = '/assets/logo.png';
-  const markupMultiplier = estimateData.markup > 0 ? (1 + MARKUP_PERCENTAGE) : 1;
-  const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
+  const subtotal =
+    preTaxSubtotal !== undefined && preTaxSubtotal >= 0
+      ? preTaxSubtotal
+      : getQuotePreTaxSubtotal(estimateData);
   const salesTax = subtotal * SALES_TAX_RATE;
   const finalTotal = subtotal + salesTax;
-  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotal);
+  const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
+  const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
+  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService);
 
   // Get cleaning type display
   const getCleaningTypeDisplay = (type: string): string => {
@@ -386,10 +397,26 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                     <Text style={{ marginTop: 6 }}>{formatCurrency(truckStopSplit.fastFood)}</Text>
                   </>
                 ) : (
-                  <Text>{formatCurrency(subtotal)}</Text>
+                  <Text>{formatCurrency(subtotalForPrimaryService)}</Text>
                 )}
               </View>
             </View>
+
+            {windowQuoteShare > 0 && (
+              <View style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.descriptionCell]}>
+                  <Text style={{ fontWeight: 'bold' }}>Window cleaning services</Text>
+                  <Text style={{ fontSize: 9, marginTop: 4 }}>
+                    {(formData.numberOfWindows || 0).toLocaleString()} standard,{' '}
+                    {(formData.numberOfLargeWindows || 0).toLocaleString()} large,{' '}
+                    {(formData.numberOfHighAccessWindows || 0).toLocaleString()} high-access
+                  </Text>
+                </View>
+                <View style={[styles.tableCell, styles.amountCell]}>
+                  <Text>{formatCurrency(windowQuoteShare)}</Text>
+                </View>
+              </View>
+            )}
 
             {/* Subtotal */}
             <View style={[styles.tableRow, { borderTop: '1px solid #ddd', marginTop: 10 }]}>

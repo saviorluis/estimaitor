@@ -137,11 +137,18 @@ export const CLEANING_TYPE_DESCRIPTIONS: Record<CleaningType, string> = {
 
 // ===================== TRAVEL AND LOGISTICS =====================
 
-// New hourly-based travel fee structure
+// Hourly-based travel fee structure (see calculateHourlyTravelFee)
 export const TRAVEL_FEES = {
-  BASE_FEE: 100, // Within 1 hour: $100
-  HOURLY_INCREMENT: 100, // Add $100 for each additional hour
-  AVERAGE_SPEED_MPH: 60 // Average driving speed for time calculations
+  BASE_FEE: 100, // Minimum / first hour bucket
+  HOURLY_INCREMENT: 100, // Each additional billable hour
+  AVERAGE_SPEED_MPH: 60,
+  /** One-way miles at or below: billable distance = one-way only (local jobs). */
+  LOCAL_ONE_WAY_MAX_MILES: 40,
+  /**
+   * One-way miles at or above: billable distance = full round-trip (2× one-way).
+   * Between LOCAL and this value, blend smoothly so mid-distance jobs are not fully doubled.
+   */
+  FULL_ROUND_TRIP_AT_ONE_WAY_MILES: 200
 } as const;
 
 // Legacy constants (kept for backward compatibility during transition)
@@ -296,22 +303,47 @@ export function getRecommendedCleaners(squareFootage: number): number {
   return 15;
 }
 
-// Convert distance to drive time in hours (one way)
+/** Drive time in hours from miles at average speed (used for billing distance). */
 export function getDriveTimeHours(distanceMiles: number): number {
   return distanceMiles / TRAVEL_FEES.AVERAGE_SPEED_MPH;
 }
 
-// Calculate hourly-based travel fee
-export function calculateHourlyTravelFee(distanceMiles: number): number {
-  const driveTimeHours = getDriveTimeHours(distanceMiles);
-  
+/**
+ * Billable miles for travel fee drive-time (not necessarily one-way road miles — the multiplier
+ * ramps return-leg impact between local radius and {@link TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES}).
+ */
+export function getEffectiveTravelMiles(oneWayMilesFromOffice: number): number {
+  const d = Math.max(0, oneWayMilesFromOffice);
+  const L = TRAVEL_FEES.LOCAL_ONE_WAY_MAX_MILES;
+  const F = TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES;
+
+  if (d <= L) {
+    return d;
+  }
+
+  // At/above F mi one-way: fee uses full round-trip distance (2×).
+  if (d >= F) {
+    return d * 2;
+  }
+
+  // Between L and F: ramp multiplier from 1.0 (one-way only) to 2.0 (full round-trip).
+  const span = F - L;
+  const t = span > 0 ? (d - L) / span : 1;
+  const returnLegBlend = Math.min(1, Math.max(0, t));
+  return d * (1 + returnLegBlend);
+}
+
+/** Travel surcharge from office distance (one-way miles); tiers use billable drive time. */
+export function calculateHourlyTravelFee(distanceMilesOneWay: number): number {
+  const effectiveMiles = getEffectiveTravelMiles(distanceMilesOneWay);
+  const driveTimeHours = getDriveTimeHours(effectiveMiles);
+
   if (driveTimeHours <= 1) {
     return TRAVEL_FEES.BASE_FEE;
   }
-  
-  // Round up to next hour for billing purposes
+
   const totalHours = Math.ceil(driveTimeHours);
-  return TRAVEL_FEES.BASE_FEE + ((totalHours - 1) * TRAVEL_FEES.HOURLY_INCREMENT);
+  return TRAVEL_FEES.BASE_FEE + (totalHours - 1) * TRAVEL_FEES.HOURLY_INCREMENT;
 }
 
 // Legacy function (kept for backward compatibility)

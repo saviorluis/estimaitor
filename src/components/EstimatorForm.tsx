@@ -4,7 +4,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
-import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/constants';
+import {
+  getRecommendedCleaners,
+  CLEANING_TYPE_DESCRIPTIONS,
+  calculateHourlyTravelFee,
+  getEffectiveTravelMiles,
+  TRAVEL_FEES
+} from '@/lib/constants';
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
@@ -461,9 +467,30 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             {watchedDistance > 0 && (
               <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-700">
                 <p className="text-xs text-blue-700 dark:text-blue-300">
-                  Drive time: ~{Math.round((watchedDistance / 60) * 10) / 10} hours | 
-                  Travel fee: ${watchedDistance <= 60 ? 100 : 100 + Math.ceil((watchedDistance / 60) - 1) * 100}
+                  One-way drive (~{TRAVEL_FEES.AVERAGE_SPEED_MPH} mph): ~
+                  {Math.round((watchedDistance / TRAVEL_FEES.AVERAGE_SPEED_MPH) * 10) / 10} h · Travel fee:{' '}
+                  {calculateHourlyTravelFee(watchedDistance).toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  })}
                 </p>
+                {watchedDistance > TRAVEL_FEES.LOCAL_ONE_WAY_MAX_MILES && (
+                  <p className="text-xs text-blue-600/90 dark:text-blue-400/90 mt-1">
+                    {watchedDistance >= TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES ? (
+                      <>
+                        At {TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES}+ mi one-way, billable drive distance is full
+                        round-trip ({getEffectiveTravelMiles(watchedDistance).toLocaleString()} mi).
+                      </>
+                    ) : (
+                      <>
+                        Between {TRAVEL_FEES.LOCAL_ONE_WAY_MAX_MILES} and{' '}
+                        {TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES} mi one-way, return travel is phased in (not a full
+                        double until {TRAVEL_FEES.FULL_ROUND_TRIP_AT_ONE_WAY_MILES} mi). Billable miles for the fee:{' '}
+                        {getEffectiveTravelMiles(watchedDistance).toLocaleString()} mi.
+                      </>
+                    )}
+                  </p>
+                )}
               </div>
             )}
           </div>

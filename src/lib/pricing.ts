@@ -4,6 +4,7 @@
  */
 
 import { ProjectType, CleaningType } from './types';
+import { calculateHourlyTravelFee } from './constants';
 
 // ===================== CORE PRICING =====================
 
@@ -116,16 +117,9 @@ export function getVCTCost(squareFootage: number): number {
   }
 }
 
+/** Delegates to constants.calculateHourlyTravelFee (local vs round-trip tiered logic). */
 export function getTravelCost(distanceMiles: number): number {
-  const driveTimeHours = distanceMiles / ADDITIONAL_SERVICES.TRAVEL.AVERAGE_SPEED_MPH;
-  
-  if (driveTimeHours <= 1) {
-    return ADDITIONAL_SERVICES.TRAVEL.BASE_FEE;
-  }
-  
-  const totalHours = Math.ceil(driveTimeHours);
-  return ADDITIONAL_SERVICES.TRAVEL.BASE_FEE + 
-         ((totalHours - 1) * ADDITIONAL_SERVICES.TRAVEL.HOURLY_INCREMENT);
+  return calculateHourlyTravelFee(distanceMiles);
 }
 
 export function getWindowCleaningCost(
