@@ -58,6 +58,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     numberOfLargeWindows: 0,
     numberOfHighAccessWindows: 0,
     numberOfDisplayCases: 0,
+    truckStopIncludesFastFood: false,
+    truckStopFastFoodSquareFootage: 0,
     needsPainting: false,
     paintingSquareFootage: 0,
     paintingType: 'interior' as 'interior' | 'exterior' | 'both',
@@ -197,6 +199,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="church">Church</option>
             <option value="arcade">Arcade</option>
             <option value="coffee_shop">Coffee Shop</option>
+            <option value="truck_stop">Truck Stop</option>
             <option value="fire_station">Fire Station</option>
             <option value="home_renovation">Home Renovation</option>
             <option value="building_shell">Building Shell</option>
@@ -206,6 +209,67 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectType.message}</p>
           )}
         </div>
+
+        {formValues.projectType === 'truck_stop' && (
+          <div className="space-y-3 rounded-md border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/50 p-4">
+            <div className="flex items-start gap-3">
+              <input
+                id="truckStopIncludesFastFood"
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                {...register('truckStopIncludesFastFood', {
+                  onChange: (e) => {
+                    if (!e.target.checked) {
+                      setValue('truckStopFastFoodSquareFootage', 0);
+                    }
+                  }
+                })}
+              />
+              <label htmlFor="truckStopIncludesFastFood" className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-medium">Includes fast food restaurant</span>
+                <span className="block text-gray-600 dark:text-gray-400 mt-0.5">
+                  Enter the QSR area separately from the main truck stop square footage; it is priced and listed on the quote.
+                </span>
+              </label>
+            </div>
+            {formValues.truckStopIncludesFastFood && (
+              <div>
+                <label
+                  htmlFor="truckStopFastFoodSquareFootage"
+                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                >
+                  Fast food / QSR area (sq ft)
+                </label>
+                <input
+                  id="truckStopFastFoodSquareFootage"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
+                  {...register('truckStopFastFoodSquareFootage', {
+                    valueAsNumber: true,
+                    min: { value: 1, message: 'Enter at least 1 sq ft for the fast food area' },
+                    validate: (v, data) => {
+                      if (!data.truckStopIncludesFastFood) return true;
+                      const n = typeof v === 'number' ? v : parseFloat(String(v));
+                      if (n == null || Number.isNaN(n) || n < 1) {
+                        return 'Fast food area square footage is required when QSR is included';
+                      }
+                      return true;
+                    }
+                  })}
+                  className="w-full max-w-xs p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  placeholder="e.g. 1200"
+                />
+                {errors.truckStopFastFoodSquareFootage && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.truckStopFastFoodSquareFootage.message}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Cleaning Type */}
         <div>

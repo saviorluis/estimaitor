@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency, getQuoteCounter, getCapabilityStatementImage } from '@/lib/utils';
+import { formatCurrency, getQuoteCounter, getCapabilityStatementImage, getTruckStopSubtotalSplit } from '@/lib/utils';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
@@ -405,6 +405,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'interactive_toy_store': return 'Interactive Toy Store';
     case 'coffee_shop': return 'Coffee Shop';
     case 'assisted_living': return 'Assisted Living Facility';
+    case 'truck_stop': return 'Truck Stop';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };
@@ -440,6 +441,15 @@ const getScopeOfWork = (formData: FormData): string => {
 
   if (formData.projectType === 'jewelry_store' && formData.numberOfDisplayCases > 0) {
     baseScope += '\n\nDisplay Case Cleaning: Cleaning and maintenance of display cases.';
+  }
+
+  if (
+    formData.projectType === 'truck_stop' &&
+    formData.truckStopIncludesFastFood &&
+    (formData.truckStopFastFoodSquareFootage ?? 0) > 0
+  ) {
+    const ff = (formData.truckStopFastFoodSquareFootage || 0).toLocaleString();
+    baseScope += `\n\nFast Food / QSR Area (${ff} sq ft): Degrease and sanitize kitchen lines, hood zones (exterior surfaces), food prep counters, dining seating, and condiment stations.`;
   }
 
   if (formData.urgencyLevel > 5) {
@@ -504,6 +514,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
   const salesTax = subtotal * SALES_TAX_RATE;
   const finalTotal = subtotal + salesTax;
+  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotal);
 
   return (
     <Document>
@@ -612,9 +623,28 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
           {formData.projectType === 'assisted_living' ? (
             <Text style={styles.projectText}>Bed/Bath Units: {(formData.numberOfBedBaths || 0).toLocaleString()} units</Text>
-          ) : formData.projectType !== 'building_shell' && (
+          ) : formData.projectType !== 'building_shell' &&
+            formData.projectType === 'truck_stop' &&
+            formData.truckStopIncludesFastFood &&
+            (formData.truckStopFastFoodSquareFootage ?? 0) > 0 ? (
+            <>
+              <Text style={styles.projectText}>
+                Truck stop facility: {(formData.squareFootage || 0).toLocaleString()} sq ft
+              </Text>
+              <Text style={styles.projectText}>
+                Fast food / QSR: {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft
+              </Text>
+              <Text style={styles.projectText}>
+                Combined area:{' '}
+                {(
+                  (formData.squareFootage || 0) + (formData.truckStopFastFoodSquareFootage || 0)
+                ).toLocaleString()}{' '}
+                sq ft
+              </Text>
+            </>
+          ) : formData.projectType !== 'building_shell' ? (
             <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
-          )}
+          ) : null}
           <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
           </View>
         </View>
@@ -675,6 +705,26 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       Window cleaning is itemized separately below.
                     </Text>
                   </>
+                ) : truckStopSplit ? (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} — Truck stop facility (
+                      {(formData.squareFootage || 0).toLocaleString()} sq ft)
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                      C-store, fuel plaza, showers, laundry, driver lounge, and common areas. Full scope of work below.
+                    </Text>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', marginTop: 8 }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} — Fast food / QSR (
+                      {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft)
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                      QSR kitchen line (exterior surfaces), dining, and condiment zones per commercial food-service cleaning scope.
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 6 }]}>
+                      {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
+                    </Text>
+                  </>
                 ) : (
                   <>
                     <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
@@ -687,9 +737,20 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 )}
               </View>
               <View style={styles.amountCell}>
-                <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
-                {formatCurrency(subtotal)}
-              </Text>
+                {truckStopSplit ? (
+                  <>
+                    <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                      {formatCurrency(truckStopSplit.facility)}
+                    </Text>
+                    <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold', marginTop: 8 }]}>
+                      {formatCurrency(truckStopSplit.fastFood)}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>
+                    {formatCurrency(subtotal)}
+                  </Text>
+                )}
               </View>
             </View>
 

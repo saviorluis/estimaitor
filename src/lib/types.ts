@@ -22,6 +22,7 @@ export type ProjectType =
   | 'home_renovation'
   | 'building_shell'
   | 'assisted_living'
+  | 'truck_stop'
   | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'final_touchup' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
@@ -83,6 +84,10 @@ export interface FormData {
   // Project-Specific
   numberOfDisplayCases: number;
   numberOfBedBaths?: number; // For assisted living facilities
+  /** Truck stop: on-site fast food / QSR adds kitchen and dining scope */
+  truckStopIncludesFastFood?: boolean;
+  /** Square footage of the fast food / QSR area only (when includes fast food) */
+  truckStopFastFoodSquareFootage?: number;
   
   // Client Information (Optional)
   clientName?: string;
@@ -156,6 +161,11 @@ export interface EstimateData {
   aiRecommendations: string[];
   adjustedLineItems?: Record<string, number>;
   windowCount?: number;
+
+  /** Truck stop: base cleaning $ for main facility sq ft only */
+  truckStopFacilityBasePrice?: number;
+  /** Truck stop: base cleaning $ for fast food sq ft (fast_food rates) */
+  truckStopFastFoodBasePrice?: number;
 }
 
 // ===================== AI RECOMMENDATION TYPES =====================
@@ -251,7 +261,7 @@ export function isValidProjectType(value: string): value is ProjectType {
     'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial',
     'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio',
     'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
-    'coffee_shop', 'fire_station', 'home_renovation', 'building_shell', 'assisted_living', 'other'
+    'coffee_shop', 'fire_station', 'home_renovation', 'building_shell', 'assisted_living', 'truck_stop', 'other'
   ];
   return validTypes.includes(value as ProjectType);
 }

@@ -1,5 +1,24 @@
 import { FormData, EstimateData, CalculationCache, CacheStats } from './types';
 
+/**
+ * Split quote/invoice subtotal across truck-stop facility vs fast-food area using base-price ratios.
+ * Amounts sum to `subtotal` (fast-food share absorbs rounding).
+ */
+export function getTruckStopSubtotalSplit(
+  formData: FormData,
+  estimateData: EstimateData,
+  subtotal: number
+): { facility: number; fastFood: number } | null {
+  if (formData.projectType !== 'truck_stop') return null;
+  const ffBase = estimateData.truckStopFastFoodBasePrice ?? 0;
+  const baseTotal = estimateData.basePrice || 0;
+  if (ffBase <= 0 || baseTotal <= 0) return null;
+  const facBase = estimateData.truckStopFacilityBasePrice ?? 0;
+  const facility = subtotal * (facBase / baseTotal);
+  const fastFood = subtotal - facility;
+  return { facility, fastFood };
+}
+
 // ===================== PERFORMANCE UTILITIES =====================
 
 /**

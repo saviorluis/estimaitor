@@ -186,8 +186,18 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">Square Footage:</span>
-              <span className="font-medium text-gray-800 dark:text-gray-200">
-                {formData.squareFootage.toLocaleString()} sq ft
+              <span className="font-medium text-gray-800 dark:text-gray-200 text-right">
+                {formData.projectType === 'truck_stop' &&
+                formData.truckStopIncludesFastFood &&
+                (formData.truckStopFastFoodSquareFootage ?? 0) > 0 ? (
+                  <span className="block">
+                    Truck stop: {formData.squareFootage.toLocaleString()} sq ft
+                    <br />
+                    Fast food / QSR: {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft
+                  </span>
+                ) : (
+                  <>{formData.squareFootage.toLocaleString()} sq ft</>
+                )}
               </span>
             </div>
             <div className="flex justify-between">

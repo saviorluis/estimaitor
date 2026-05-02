@@ -254,7 +254,8 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   other: 1.0,
   home_renovation: 1.4,
   building_shell: 1.1,
-  assisted_living: 1.3
+  assisted_living: 1.3,
+  truck_stop: 1.36
 } as const;
 
 // ===================== OPTIMIZED HOURS CALCULATION =====================
@@ -411,6 +412,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
   let windowCleaningCost = 0;
   let paintingCost = 0;
   let actualSquareFootage = squareFootage;
+  let truckStopFacilityBasePrice: number | undefined;
+  let truckStopFastFoodBasePrice: number | undefined;
 
   if (cleaningType === 'vct_only') {
     // For VCT only service, use VCT square footage and VCT pricing
@@ -492,7 +495,16 @@ export function calculateEstimate(formData: FormData): EstimateData {
     );
   } else {
     // Traditional cleaning types
-    basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
+    if (projectType === 'truck_stop') {
+      truckStopFacilityBasePrice = calculateBasePrice(squareFootage, 'truck_stop', cleaningType);
+      const ffSqft =
+        formData.truckStopIncludesFastFood ? formData.truckStopFastFoodSquareFootage ?? 0 : 0;
+      truckStopFastFoodBasePrice =
+        ffSqft > 0 ? calculateBasePrice(ffSqft, 'fast_food', cleaningType) : 0;
+      basePrice = truckStopFacilityBasePrice + truckStopFastFoodBasePrice;
+    } else {
+      basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
+    }
     vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
     pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
     windowCleaningCost = calculateWindowCleaningCost(
@@ -513,10 +525,17 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const schedulingFee = SCHEDULING_FEE;
   const invoicingFee = INVOICING_FEE;
 
+  const mobilizationSqFt =
+    projectType === 'truck_stop' &&
+    formData.truckStopIncludesFastFood &&
+    (formData.truckStopFastFoodSquareFootage ?? 0) > 0
+      ? squareFootage + (formData.truckStopFastFoodSquareFootage ?? 0)
+      : squareFootage;
+
   // Calculate mobilization fee
   let mobilizationFee = 0;
   if (formData.mobilizationType === 'auto') {
-    mobilizationFee = calculateMobilizationFee(squareFootage, projectType);
+    mobilizationFee = calculateMobilizationFee(mobilizationSqFt, projectType);
   } else if (formData.mobilizationType === 'small') {
     mobilizationFee = MOBILIZATION_FEES.small;
   } else if (formData.mobilizationType === 'medium') {
@@ -529,7 +548,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     mobilizationFee = formData.customMobilizationFee;
   } else {
     // Default to auto calculation if no option selected
-    mobilizationFee = calculateMobilizationFee(squareFootage, projectType);
+    mobilizationFee = calculateMobilizationFee(mobilizationSqFt, projectType);
   }
 
   // Calculate totals - business fees should not be subject to urgency multiplier
@@ -566,6 +585,13 @@ export function calculateEstimate(formData: FormData): EstimateData {
     const bedBathHours = numberOfBedBaths * ASSISTED_LIVING_PRICING.TIME_PER_BED_BATH_HOURS;
     const facilityBaseHours = 8; // Base hours for cafeteria, laundry, utility, common areas
     baseHours = (bedBathHours + facilityBaseHours) * cleaningModifier;
+  } else if (projectType === 'truck_stop') {
+    baseHours = calculateEstimatedHours(squareFootage, 'truck_stop', cleaningType);
+    const ffSq =
+      formData.truckStopIncludesFastFood ? formData.truckStopFastFoodSquareFootage ?? 0 : 0;
+    if (ffSq > 0) {
+      baseHours += calculateEstimatedHours(ffSq, 'fast_food', cleaningType);
+    }
   } else {
     // Standard square footage-based hours calculation
     baseHours = calculateEstimatedHours(actualSquareFootage, projectType, cleaningType);
@@ -593,7 +619,15 @@ export function calculateEstimate(formData: FormData): EstimateData {
   const estimatedHours = baseHours + additionalHours;
 
   // Calculate price per square foot (use actual relevant footage)
-  const relevantFootage = actualSquareFootage > 0 ? actualSquareFootage : (squareFootage > 0 ? squareFootage : 1);
+  let relevantFootage =
+    actualSquareFootage > 0 ? actualSquareFootage : squareFootage > 0 ? squareFootage : 1;
+  if (
+    projectType === 'truck_stop' &&
+    formData.truckStopIncludesFastFood &&
+    (formData.truckStopFastFoodSquareFootage ?? 0) > 0
+  ) {
+    relevantFootage = squareFootage + (formData.truckStopFastFoodSquareFootage ?? 0);
+  }
   const pricePerSquareFoot = totalPrice / relevantFootage;
 
   // Return optimized estimate data
@@ -620,7 +654,11 @@ export function calculateEstimate(formData: FormData): EstimateData {
     schedulingFee,
     invoicingFee,
     mobilizationFee,
-    aiRecommendations: []
+    aiRecommendations: [],
+    truckStopFacilityBasePrice:
+      projectType === 'truck_stop' ? truckStopFacilityBasePrice ?? 0 : undefined,
+    truckStopFastFoodBasePrice:
+      projectType === 'truck_stop' ? truckStopFastFoodBasePrice ?? 0 : undefined
   };
   
   return estimateData;

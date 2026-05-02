@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getTruckStopSubtotalSplit } from '@/lib/utils';
 import { SCOPE_OF_WORK, MARKUP_PERCENTAGE, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
@@ -265,6 +265,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   const subtotal = estimateData.totalBeforeMarkup * markupMultiplier;
   const salesTax = subtotal * SALES_TAX_RATE;
   const finalTotal = subtotal + salesTax;
+  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotal);
 
   // Get cleaning type display
   const getCleaningTypeDisplay = (type: string): string => {
@@ -287,7 +288,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   };
 
   // Get scope of work based on project type and split into array
-  const scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
+  let scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
+  if (
+    formData.projectType === 'truck_stop' &&
+    formData.truckStopIncludesFastFood &&
+    (formData.truckStopFastFoodSquareFootage ?? 0) > 0
+  ) {
+    const ff = (formData.truckStopFastFoodSquareFootage || 0).toLocaleString();
+    scopeOfWorkText += `\n• Fast Food / QSR Area (${ff} sq ft): Degrease and sanitize kitchen lines, hood zones (exterior surfaces), food prep counters, dining seating, and condiment stations.`;
+  }
   const scopeOfWork = scopeOfWorkText
     .split('\n')
     .filter(line => line.trim())
@@ -353,10 +362,32 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Main Cleaning Service */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text>{getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft</Text>
+                {truckStopSplit ? (
+                  <>
+                    <Text>
+                      {getCleaningTypeDisplay(formData.cleaningType)} — Truck stop facility (
+                      {formData.squareFootage.toLocaleString()} sq ft)
+                    </Text>
+                    <Text style={{ marginTop: 6 }}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} — Fast food / QSR (
+                      {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft)
+                    </Text>
+                  </>
+                ) : (
+                  <Text>
+                    {getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft
+                  </Text>
+                )}
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
-                <Text>{formatCurrency(subtotal)}</Text>
+                {truckStopSplit ? (
+                  <>
+                    <Text>{formatCurrency(truckStopSplit.facility)}</Text>
+                    <Text style={{ marginTop: 6 }}>{formatCurrency(truckStopSplit.fastFood)}</Text>
+                  </>
+                ) : (
+                  <Text>{formatCurrency(subtotal)}</Text>
+                )}
               </View>
             </View>
 

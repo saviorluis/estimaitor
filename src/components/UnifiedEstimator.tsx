@@ -49,6 +49,7 @@ const PROJECT_TYPES = [
   { value: 'church', label: 'Church', icon: '⛪', description: 'Religious facilities' },
   { value: 'arcade', label: 'Arcade', icon: '🎮', description: 'Entertainment venues' },
   { value: 'coffee_shop', label: 'Coffee Shop', icon: '☕', description: 'Coffee shops, cafes' },
+  { value: 'truck_stop', label: 'Truck Stop', icon: '🚛', description: 'Fuel plaza, c-store, showers, laundry, driver lounge' },
   { value: 'fire_station', label: 'Fire Station', icon: '🚒', description: 'Emergency services facilities' },
   { value: 'home_renovation', label: 'Home Renovation', icon: '🏠', description: 'Post-construction cleaning, residential renovation cleanup' },
   { value: 'building_shell', label: 'Building Shell', icon: '🏗️', description: 'Commercial construction cleanup, pre-tenant build-out' },
@@ -139,6 +140,8 @@ export default function UnifiedEstimator({
       numberOfHighAccessWindows: 0,
       numberOfDisplayCases: 0,
       numberOfBedBaths: 0,
+      truckStopIncludesFastFood: false,
+      truckStopFastFoodSquareFootage: 0,
       clientName: '',
       projectName: ''
     }
@@ -258,6 +261,46 @@ export default function UnifiedEstimator({
                 />
                 {errors.squareFootage && (
                   <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
+                )}
+              </div>
+            )}
+
+            {watchedValues.projectType === 'truck_stop' && (
+              <div className="space-y-3 rounded-md border border-gray-200 p-4 bg-gray-50">
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    {...register('truckStopIncludesFastFood', {
+                      onChange: (e) => {
+                        if (!e.target.checked) setValue('truckStopFastFoodSquareFootage', 0);
+                      }
+                    })}
+                    className="mt-1"
+                  />
+                  <span>Includes fast food restaurant (separate QSR square footage)</span>
+                </label>
+                {watchedValues.truckStopIncludesFastFood && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Fast food / QSR area (sq ft)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      {...register('truckStopFastFoodSquareFootage', {
+                        valueAsNumber: true,
+                        validate: (v, data) => {
+                          if (!data.truckStopIncludesFastFood) return true;
+                          const n = typeof v === 'number' ? v : parseFloat(String(v));
+                          if (n == null || Number.isNaN(n) || n < 1) return 'Enter fast food area sq ft';
+                          return true;
+                        }
+                      })}
+                      className="w-full max-w-xs p-2 border border-gray-300 rounded-md"
+                      placeholder="e.g. 1200"
+                    />
+                    {errors.truckStopFastFoodSquareFootage && (
+                      <p className="text-red-500 text-sm mt-1">{errors.truckStopFastFoodSquareFootage.message}</p>
+                    )}
+                  </div>
                 )}
               </div>
             )}

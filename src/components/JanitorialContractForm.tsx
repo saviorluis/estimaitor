@@ -295,6 +295,33 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
       'HVAC vent cleaning in food prep areas'
     ]
   },
+  truck_stop: {
+    daily: [
+      'Clean convenience retail, cold cases, and cashier counters',
+      'Sanitize restrooms and shower facilities; restock supplies',
+      'Maintain launderette floors, folding areas, and lint buildup',
+      'Empty trash and liners in driver lounge and corridors',
+      'Spot clean fuel plaza interior entrances and high-touch surfaces'
+    ],
+    weekly: [
+      'Deep clean shower stalls and locker/changing areas',
+      'Mop and sanitize convenience store aisles and travel corridors',
+      'Clean vending zones and ATM surrounds',
+      'Detail driver lounge seating and glass entries',
+      'Floor care in laundry and restroom zones'
+    ],
+    monthly: [
+      'Deep clean laundry equipment surfaces and lint traps',
+      'Grout and tile maintenance in restrooms and showers',
+      'Deep clean driver lounge fixtures',
+      'Wipe HVAC vents in high-traffic zones'
+    ],
+    quarterly: [
+      'Comprehensive restroom and shower deep sanitization',
+      'Floor refinishing under fuel plaza canopy interior walkways',
+      'Professional deep clean of launderette'
+    ]
+  },
   fire_station: {
     daily: [
       'Clean and maintain apparatus bay floors',
@@ -372,6 +399,7 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   church: 0.70,
   arcade: 1.05,
   coffee_shop: 1.60,
+  truck_stop: 1.22,
   fire_station: 1.30,
   other: 0.85,
   home_renovation: 1.40,
@@ -398,6 +426,7 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   church: 100,
   arcade: 155,
   coffee_shop: 240,
+  truck_stop: 192,
   fire_station: 195,
   other: 125,
   home_renovation: 180,
@@ -746,6 +775,7 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
                 <option value="educational">Educational Facility</option>
                 <option value="industrial">Industrial/Warehouse</option>
                 <option value="hotel">Hotel</option>
+                <option value="truck_stop">Truck Stop</option>
                 <option value="other">Other</option>
               </select>
               {errors.buildingType && (

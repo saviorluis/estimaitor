@@ -51,6 +51,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'kids_fitness': return 'Children\'s Fitness Center';
     case 'bakery': return 'Bakery';
     case 'interactive_toy_store': return 'Interactive Toy Store';
+    case 'truck_stop': return 'Truck Stop';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };
@@ -916,47 +917,116 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
   );
 
   // Cleaning Services (Base + VCT integrated)
-  rows.push(
-    new TableRow({
-      children: [
-        new TableCell({
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${(formData.squareFootage || 0).toLocaleString()} sq ft total cleaning area`,
-                  bold: true,
-                }),
-              ],
-            }),
-            ...(formData.hasVCT ? [
+  const cleaningLineTotal = estimateData.basePrice + estimateData.vctCost;
+  const basePriceTotal = estimateData.basePrice || 0;
+  const truckStopFastFoodBase = estimateData.truckStopFastFoodBasePrice ?? 0;
+  const isTruckStopSplit =
+    formData.projectType === 'truck_stop' && truckStopFastFoodBase > 0 && basePriceTotal > 0;
+
+  if (isTruckStopSplit) {
+    const facilityLineAmount =
+      cleaningLineTotal * ((estimateData.truckStopFacilityBasePrice ?? 0) / basePriceTotal);
+    const fastFoodLineAmount = cleaningLineTotal - facilityLineAmount;
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
               new Paragraph({
                 children: [
-                  new TextRun(`Includes ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing`),
+                  new TextRun({
+                    text: `${getCleaningTypeDisplay(formData.cleaningType)} — Truck stop facility (${(formData.squareFootage || 0).toLocaleString()} sq ft)`,
+                    bold: true,
+                  }),
                 ],
-              })
-            ] : []),
-          ],
-        }),
-        new TableCell({
-          children: [
-            new Paragraph({
-              alignment: AlignmentType.RIGHT,
-              children: [
-                new TextRun(
-                  formatCurrency(
-                    (estimateData.basePrice *
-                    estimateData.projectTypeMultiplier *
-                    estimateData.cleaningTypeMultiplier) + estimateData.vctCost
-                  )
-                ),
-              ],
-            }),
-          ],
-        }),
-      ],
-    })
-  );
+              }),
+              ...(formData.hasVCT ? [
+                new Paragraph({
+                  children: [
+                    new TextRun(`Includes ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing`),
+                  ],
+                })
+              ] : []),
+            ],
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun(formatCurrency(facilityLineAmount)),
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${getCleaningTypeDisplay(formData.cleaningType)} — Fast food / QSR (${(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft)`,
+                    bold: true,
+                  }),
+                ],
+              }),
+            ],
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun(formatCurrency(fastFoodLineAmount)),
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+  } else {
+    rows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `${getCleaningTypeDisplay(formData.cleaningType)} - ${(formData.squareFootage || 0).toLocaleString()} sq ft total cleaning area`,
+                    bold: true,
+                  }),
+                ],
+              }),
+              ...(formData.hasVCT ? [
+                new Paragraph({
+                  children: [
+                    new TextRun(`Includes ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT stripping, waxing & buffing`),
+                  ],
+                })
+              ] : []),
+            ],
+          }),
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun(formatCurrency(cleaningLineTotal)),
+                ],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+  }
 
   // Pressure Washing if applicable
   if (formData.needsPressureWashing) {

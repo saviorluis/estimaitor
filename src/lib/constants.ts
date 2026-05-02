@@ -56,7 +56,7 @@ export const MOBILIZATION_THRESHOLDS = {
 // Function to calculate mobilization fee based on square footage and project type
 export function calculateMobilizationFee(squareFootage: number, projectType: ProjectType): number {
   // Complex projects that require specialized equipment or access
-  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation', 'assisted_living'];
+  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation', 'assisted_living', 'truck_stop'];
   
   if (complexProjects.includes(projectType)) {
     return MOBILIZATION_FEES.complex;
@@ -96,6 +96,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   home_renovation: 1.4,
   building_shell: 1.1,
   assisted_living: 1.5,
+  truck_stop: 1.42,
   other: 1.0
 } as const;
 
@@ -271,6 +272,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   home_renovation: 400,
   building_shell: 800,
   assisted_living: 450,
+  truck_stop: 430,
   other: 500
 } as const;
 
@@ -601,6 +603,14 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Clean and sanitize HVAC vents and air returns
 • Empty and sanitize all trash receptacles
 • Final walk-through inspection to ensure healthcare-grade cleaning standards`),
+
+  truck_stop: createScopeTemplate(`
+• Clean and sanitize fuel plaza / c-store retail, cold cases, and cashier areas
+• Detail clean driver lounge, TV zones, and seating with high-traffic floor care
+• Deep clean and sanitize public restrooms; detail shower stalls, dressing/locker areas, and partition glass
+• Launderette: clean washers, dryers, folding tables, floors, and lint/surface buildup
+• Clean vending, ATM, and entry airlock / vestibule glass and thresholds
+• Empty trash and replace liners; spot-sanitize high-touch points in travel corridors`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas
