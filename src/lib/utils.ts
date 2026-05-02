@@ -477,7 +477,7 @@ export const performanceTimer = new PerformanceTimer();
 export function getCapabilityStatementImage(projectType: string, squareFootage: number): string {
   // If square footage is over 5000 and not a specific type, show big jobs
   if (squareFootage > 5000 && 
-      !['restaurant', 'fast_food', 'medical', 'retail'].includes(projectType)) {
+      !['restaurant', 'fast_food', 'medical', 'retail', 'hardware_store'].includes(projectType)) {
     return '/images/Big jobs.png';
   }
 
@@ -489,6 +489,7 @@ export function getCapabilityStatementImage(projectType: string, squareFootage: 
     case 'medical':
       return '/images/medical.png';
     case 'retail':
+    case 'hardware_store':
       return '/images/Retail.png';
     default:
       // For all other cases, use the big jobs image if over 5000 sq ft

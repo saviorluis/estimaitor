@@ -43,6 +43,7 @@ const PROJECT_TYPES = [
   { value: 'hotel', label: 'Hotel', icon: '🏨', description: 'Hotels, hospitality venues' },
   { value: 'jewelry_store', label: 'Jewelry Store', icon: '💎', description: 'Jewelry stores, luxury retail' },
   { value: 'grocery_store', label: 'Grocery Store', icon: '🛒', description: 'Supermarkets, food stores' },
+  { value: 'hardware_store', label: 'Hardware Store', icon: '🔧', description: 'Home improvement, lumber, building supply' },
   { value: 'yoga_studio', label: 'Yoga Studio', icon: '🧘', description: 'Fitness studios, wellness centers' },
   { value: 'kids_fitness', label: 'Kids Fitness', icon: '🏃', description: 'Children\'s activity centers' },
   { value: 'bakery', label: 'Bakery', icon: '🥖', description: 'Bakeries, pastry shops' },

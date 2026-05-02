@@ -24,6 +24,7 @@ export const PROJECT_MULTIPLIERS: Record<ProjectType, number> = {
   hotel: 1.35,
   jewelry_store: 1.4,
   grocery_store: 1.3,
+  hardware_store: 1.2,
   yoga_studio: 1.15,
   kids_fitness: 1.25,
   bakery: 1.35,

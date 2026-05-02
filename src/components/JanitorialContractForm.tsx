@@ -230,6 +230,31 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
     monthly: ['Deep facility cleaning', 'Cooler area organization'],
     quarterly: ['Professional deep cleaning', 'Floor refinishing']
   },
+  hardware_store: {
+    daily: [
+      'Sweep and dust sales floor and main aisles',
+      'Empty trash and replace liners',
+      'Clean checkout, contractor desk, and service counters',
+      'Spot-clean entrance glass and vestibules',
+      'Sanitize restrooms and restock supplies'
+    ],
+    weekly: [
+      'Mop hard floors and detail high-traffic zones',
+      'Dust shelving faces and displays (non-inventory surfaces)',
+      'Clean break room and employee areas',
+      'Vacuum or dust lumber yard / receiving office as applicable'
+    ],
+    monthly: [
+      'Deep clean restrooms and grout',
+      'Clean air vents and light fixtures in sales areas',
+      'Detail cleaning of storage and receiving zones'
+    ],
+    quarterly: [
+      'Strip and wax sales floor zones',
+      'Deep clean warehouse-style aisles',
+      'Wash storefront and interior display windows'
+    ]
+  },
   yoga_studio: {
     daily: ['Studio cleaning', 'Equipment sanitization', 'Restroom care'],
     weekly: ['Deep studio cleaning', 'Reception area maintenance', 'Floor care'],
@@ -392,6 +417,7 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   hotel: 1.75,
   jewelry_store: 1.25,
   grocery_store: 1.10,
+  hardware_store: 1.02,
   yoga_studio: 0.90,
   kids_fitness: 1.00,
   bakery: 1.80,
@@ -419,6 +445,7 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   hotel: 275,
   jewelry_store: 175,
   grocery_store: 165,
+  hardware_store: 158,
   yoga_studio: 135,
   kids_fitness: 145,
   bakery: 280,
@@ -772,6 +799,7 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
                 <option value="medical">Medical Facility</option>
                 <option value="restaurant">Restaurant</option>
                 <option value="retail">Retail Store</option>
+                <option value="hardware_store">Hardware Store</option>
                 <option value="educational">Educational Facility</option>
                 <option value="industrial">Industrial/Warehouse</option>
                 <option value="hotel">Hotel</option>

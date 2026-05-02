@@ -104,7 +104,7 @@ const CapabilityStatement: React.FC<CapabilityStatementProps> = ({ formData }) =
   const getRelevantProjects = () => {
     // If square footage is over 5000 and not a specific type, show large projects
     if (formData.squareFootage > 5000 && 
-        !['restaurant', 'fast_food', 'medical', 'retail'].includes(formData.projectType)) {
+        !['restaurant', 'fast_food', 'medical', 'retail', 'hardware_store'].includes(formData.projectType)) {
       return LARGE_PROJECTS;
     }
 
@@ -116,6 +116,7 @@ const CapabilityStatement: React.FC<CapabilityStatementProps> = ({ formData }) =
       case 'medical':
         return MEDICAL_PROJECTS;
       case 'retail':
+      case 'hardware_store':
         return RETAIL_PROJECTS;
       default:
         return LARGE_PROJECTS;

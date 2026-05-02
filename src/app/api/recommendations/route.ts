@@ -43,6 +43,10 @@ function generateRecommendations(data: AIRecommendationRequest): string[] {
       recommendations.push('Prioritize entrance areas and display surfaces');
       recommendations.push('Use glass cleaners for display cases and windows');
       break;
+    case 'hardware_store':
+      recommendations.push('Plan extra dusting for aisles, shelving, and lumber-yard-adjacent zones');
+      recommendations.push('Protect inventory when cleaning near merchandise and tool displays');
+      break;
     case 'industrial':
       recommendations.push('Bring heavy-duty cleaning equipment for concrete floors');
       recommendations.push('Consider pressure washing for heavily soiled areas');
@@ -107,7 +111,7 @@ function generateRecommendations(data: AIRecommendationRequest): string[] {
       recommendations.push('Consider specialized high-access window cleaning equipment or subcontractors');
     }
     
-    if (data.projectType === 'retail' || data.projectType === 'jewelry_store') {
+    if (data.projectType === 'retail' || data.projectType === 'jewelry_store' || data.projectType === 'hardware_store') {
       recommendations.push('Pay special attention to display windows and entrance glass for retail appeal');
     }
   }

@@ -11,6 +11,7 @@ export type ProjectType =
   | 'hotel'
   | 'jewelry_store'
   | 'grocery_store'
+  | 'hardware_store'
   | 'yoga_studio'
   | 'kids_fitness'
   | 'bakery'
@@ -259,7 +260,7 @@ export interface CacheStats {
 export function isValidProjectType(value: string): value is ProjectType {
   const validTypes: ProjectType[] = [
     'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial',
-    'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio',
+    'educational', 'hotel', 'jewelry_store', 'grocery_store', 'hardware_store', 'yoga_studio',
     'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
     'coffee_shop', 'fire_station', 'home_renovation', 'building_shell', 'assisted_living', 'truck_stop', 'other'
   ];

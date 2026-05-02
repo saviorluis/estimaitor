@@ -50,7 +50,7 @@ const ROOM_TYPES = [
 const RESIDENTIAL_TYPES: ProjectType[] = ['home_renovation', 'building_shell', 'other', 'office', 'hotel', 'educational', 'retail', 'industrial']; // Residential property types
 const COMMERCIAL_TYPES: ProjectType[] = [
   'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial', 
-  'educational', 'hotel', 'jewelry_store', 'grocery_store', 'yoga_studio', 
+  'educational', 'hotel', 'jewelry_store', 'grocery_store', 'hardware_store', 'yoga_studio', 
   'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
   'truck_stop',
   'home_renovation', 'building_shell', 'other'
@@ -84,6 +84,7 @@ const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string
     case 'hotel': return 'Hotel/Hospitality';
     case 'jewelry_store': return 'Jewelry Store';
     case 'grocery_store': return 'Grocery Store';
+    case 'hardware_store': return 'Hardware Store';
     case 'yoga_studio': return 'Yoga Studio';
     case 'kids_fitness': return 'Kids Fitness Center';
     case 'bakery': return 'Bakery';

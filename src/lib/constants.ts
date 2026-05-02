@@ -85,6 +85,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   hotel: 1.35,
   jewelry_store: 1.4,
   grocery_store: 1.3,
+  hardware_store: 1.2,
   yoga_studio: 1.15,
   kids_fitness: 1.25,
   bakery: 1.35,
@@ -268,6 +269,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   hotel: 425,
   jewelry_store: 350,
   grocery_store: 480,
+  hardware_store: 520,
   yoga_studio: 500,
   kids_fitness: 450,
   bakery: 430,
@@ -527,6 +529,13 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Clean and sanitize food preparation areas
 • Special attention to produce and deli sections
 • Clean break rooms and employee areas`),
+
+  hardware_store: createScopeTemplate(`
+• Detail clean aisles, sales floor, and checkout/service counters
+• Dust shelving, pegboard, and merchandise displays (non-inventory surfaces)
+• Clean contractor desk, tool rental counter, and receiving/will-call zones as applicable
+• Spot-clean entrance glass, vestibules, and high-traffic flooring
+• Clean break rooms, restrooms, and employee areas`),
 
   yoga_studio: createScopeTemplate(`
 • Detail clean yoga rooms and meditation spaces

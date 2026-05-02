@@ -408,6 +408,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     switch (type) {
       case 'jewelry_store': return 'Jewelry Store';
       case 'grocery_store': return 'Grocery Store';
+      case 'hardware_store': return 'Hardware Store';
       case 'fast_food': return 'Fast Food Restaurant';
       case 'yoga_studio': return 'Yoga Studio';
       case 'kids_fitness': return 'Children\'s Fitness Center';

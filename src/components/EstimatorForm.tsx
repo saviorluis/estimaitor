@@ -198,6 +198,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="hotel">Hotel</option>
             <option value="jewelry_store">Jewelry Store</option>
             <option value="grocery_store">Grocery Store</option>
+            <option value="hardware_store">Hardware Store</option>
             <option value="yoga_studio">Yoga Studio</option>
             <option value="kids_fitness">Kids Fitness</option>
             <option value="bakery">Bakery</option>
