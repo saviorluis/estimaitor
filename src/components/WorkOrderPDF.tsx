@@ -1,8 +1,9 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
-import { SCOPE_OF_WORK } from '@/lib/constants';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import { SCOPE_OF_WORK, splitPrincipalAndVctSqFt } from '@/lib/constants';
+import { formatDate, formatCurrency, getProjectTypeDisplay } from '@/lib/utils';
+import { isUsableImageSrc } from '@/lib/companySettings';
 
 // Register fonts
 Font.register({
@@ -237,6 +238,7 @@ interface WorkOrderPDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
   };
   quoteInfo: {
     projectName: string;
@@ -251,7 +253,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   companyInfo,
   quoteInfo,
 }) => {
-  const logoPath = '/assets/logo.png';
+  const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
 
   // Early return for undefined data
   if (!estimateData || !formData) {
@@ -277,7 +279,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
     .split('\n')
     .filter(line => line.trim())
     .map(line => line.replace('• ', '').trim())
-    .map(line => line.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`))
+    .map(line => line.replace('___ Sq Ft ___', `${(formData.hasVCT ? splitPrincipalAndVctSqFt(formData.squareFootage || 0, true, formData.vctSquareFootage || 0).principal : (formData.squareFootage || 0)).toLocaleString()} Sq Ft`))
     .map(line => line.replace('___PROJECT_NAME___', quoteInfo.projectName))
     .map(line => {
       if (line.includes('___WINDOW_COUNT___')) {
@@ -322,7 +324,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             <Text style={styles.sectionTitle}>Project Details</Text>
             <Text style={styles.infoText}>Project Name: {quoteInfo.projectName}</Text>
             <Text style={styles.infoText}>Location: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.infoText}>Project Type: {formData.projectType.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</Text>
+            <Text style={styles.infoText}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
           </View>
 
           {/* Cleaner Information */}
@@ -367,6 +369,28 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             <View style={styles.startDateField}>
               <Text style={styles.dateLabel}>Start Date:</Text>
               <View style={styles.handwrittenField} />
+            </View>
+          </View>
+        </View>
+
+        {/* Subcontractor punch list obligation */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Subcontractor Terms — Punch List</Text>
+          <View style={styles.feesSection}>
+            <View style={styles.feeItem}>
+              <Text style={styles.feeTitle}>Touch-up day (required)</Text>
+              <Text style={styles.feeDescription}>
+                • Finishing this job includes one (1) scheduled return visit for punch-list touch-ups as directed by the supervisor or general contractor.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • Subcontractor must appear on the agreed punch-list date to correct items documented on a written punch list. This visit is part of the contracted scope and compensation.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • Missing the scheduled punch-list day without prior written approval may result in payment withholding or back-charges per company policy.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • Work outside the written punch list or extra return trips requires written approval (change order) before performance.
+              </Text>
             </View>
           </View>
         </View>

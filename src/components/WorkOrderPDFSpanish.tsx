@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/
 import { EstimateData, FormData } from '@/lib/types';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 import { formatDate, formatCurrency } from '@/lib/utils';
+import { isUsableImageSrc } from '@/lib/companySettings';
 
 // Register fonts
 Font.register({
@@ -238,6 +239,7 @@ interface WorkOrderPDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
   };
   quoteInfo: {
     projectName: string;
@@ -252,7 +254,7 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
   companyInfo,
   quoteInfo,
 }) => {
-  const logoPath = '/assets/logo.png';
+  const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
 
   // Early return for undefined data
   if (!estimateData || !formData) {
@@ -358,6 +360,28 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
             <View style={styles.startDateField}>
               <Text style={styles.dateLabel}>Fecha de Inicio:</Text>
               <View style={styles.handwrittenField} />
+            </View>
+          </View>
+        </View>
+
+        {/* Lista de pendientes (punch list) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Términos para Subcontratistas — Lista de Pendientes</Text>
+          <View style={styles.feesSection}>
+            <View style={styles.feeItem}>
+              <Text style={styles.feeTitle}>Día de retoques (obligatorio)</Text>
+              <Text style={styles.feeDescription}>
+                • Completar este trabajo incluye una (1) visita de regreso programada para retoques según la lista de pendientes, indicada por el supervisor o contratista general.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • El subcontratista debe presentarse en la fecha acordada para corregir únicamente los puntos documentados por escrito en la lista de pendientes. Esta visita forma parte del alcance y la compensación convenidos.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • No asistir el día programado sin aprobación previa por escrito puede dar lugar a retención de pago o cargos revertidos según la política de la empresa.
+              </Text>
+              <Text style={styles.feeDescription}>
+                • Trabajo fuera de la lista escrita o visitas adicionales requieren aprobación por escrito (orden de cambio) antes de ejecutarse.
+              </Text>
             </View>
           </View>
         </View>

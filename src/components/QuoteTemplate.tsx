@@ -13,14 +13,15 @@ import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
 import { SALES_TAX_RATE, SCOPE_OF_WORK } from '@/lib/constants';
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
+import { getLogoSrc } from '@/lib/companySettings';
 
-// Inline logo component to avoid import issues
-const CompanyLogo = ({ className = "" }: { className?: string }) => {
+const CompanyLogo = ({ src, className = "" }: { src: string; className?: string }) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <img 
-        src="/assets/logo.png" 
-        alt="BBPS Logo"
+        src={src} 
+        alt="Company logo"
         className="w-full h-full object-contain"
         style={{ maxWidth: '100%', maxHeight: '100%' }}
       />
@@ -35,6 +36,8 @@ interface CompanyInfo {
   phone: string;
   email: string;
   website: string;
+  logoSrc?: string;
+  capabilityStatementSrc?: string;
 }
 
 interface QuoteTemplateProps {
@@ -43,6 +46,7 @@ interface QuoteTemplateProps {
 }
 
 const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData }) => {
+  const { settings, documentCompanyInfo } = useCompanySettings();
   // State for custom markup percentage
   const [markupPercentage, setMarkupPercentage] = useState<number>(0);
   const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
@@ -50,41 +54,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   // Remove the showCoverPage state since it's always true for quotes
 
-  // Early return if data isn't fully loaded
-  if (!estimateData || !formData) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <p className="text-xl text-gray-600">Loading quote data...</p>
-          <p className="text-sm text-gray-500 mt-2">Please wait while we prepare your quote.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Company information state - initialize from localStorage if available
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => {
-    // Only run this code on the client side
-    if (typeof window !== 'undefined') {
-      const savedCompanyInfo = localStorage.getItem('quoteCompanyInfo');
-      return savedCompanyInfo ? JSON.parse(savedCompanyInfo) : {
-        name: "Big Brother Property Solutions",
-        address: "1200 Eastchester Dr.",
-        city: "High Point, NC 27265",
-        phone: "(336) 624-7442",
-        email: "bids@bigbroprops.com",
-        website: "www.bigbrotherpropertysolutions.com"
-      };
-    }
-    return {
-      name: "Big Brother Property Solutions",
-      address: "1200 Eastchester Dr.",
-      city: "High Point, NC 27265",
-      phone: "(336) 624-7442",
-      email: "bids@bigbroprops.com",
-      website: "www.bigbrotherpropertysolutions.com"
-    };
-  });
+  // Company information — settings supply defaults; quote edits stay local to this quote
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => documentCompanyInfo);
 
   // State to track if company info is being edited
   const [editingCompanyInfo, setEditingCompanyInfo] = useState(false);
@@ -135,11 +106,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   // Update total when estimate changes
   useEffect(() => {
+    if (!estimateData) return;
     setQuoteInfo(prev => ({
       ...prev,
       total: estimateData.totalPrice
     }));
-  }, [estimateData.totalPrice]);
+  }, [estimateData?.totalPrice]);
+
+  useEffect(() => {
+    setCompanyInfo(documentCompanyInfo);
+  }, [documentCompanyInfo]);
 
   // Handle company information changes
   const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,11 +125,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       [name]: value
     };
     setCompanyInfo(updatedCompanyInfo);
-    
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('quoteCompanyInfo', JSON.stringify(updatedCompanyInfo));
-    }
+  };
+
+  const pdfCompanyInfo = {
+    ...companyInfo,
+    logoSrc: getLogoSrc(settings),
+    capabilityStatementSrc: settings.capabilityStatementDataUrl || undefined,
   };
 
   // Handle client information changes
@@ -196,13 +173,13 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     // Update the quote number in the quoteInfo state
     setQuoteInfo(prev => ({
       ...prev,
-      quoteNumber: `Q-${new Date().getFullYear()}-${newCounter}`
+      quoteNumber: `${settings.quotePrefix || 'Q'}-${new Date().getFullYear()}-${newCounter}`
     }));
   };
 
-  // Calculate adjusted prices with markup
+      // Calculate adjusted prices with markup
   useEffect(() => {
-    if (!estimateData) return;
+    if (!estimateData || !formData) return;
 
     // Get all the line items
       const lineItems = [
@@ -407,7 +384,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const getProjectTypeDisplay = (type: string): string => {
     switch (type) {
       case 'jewelry_store': return 'Jewelry Store';
-      case 'grocery_store': return 'Grocery Store';
+      case 'grocery_store': return 'Organic Grocery Store';
       case 'hardware_store': return 'Hardware Store';
       case 'fast_food': return 'Fast Food Restaurant';
       case 'yoga_studio': return 'Yoga Studio';
@@ -436,7 +413,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <QuotePDF 
           estimateData={estimateData} 
           formData={formData} 
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
@@ -473,7 +450,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <QuotePDF 
           estimateData={estimateData} 
           formData={formData} 
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
@@ -533,7 +510,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <QuotePDF
           estimateData={estimateData}
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           adjustedPrices={adjustedPrices}
@@ -547,7 +524,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <WorkOrderPDF
           estimateData={estimateData}
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           quoteInfo={quoteInfo}
         />
       ).toBlob();
@@ -558,7 +535,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <WorkOrderPDFSpanish
           estimateData={estimateData}
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           quoteInfo={quoteInfo}
         />
       ).toBlob();
@@ -569,7 +546,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <PurchaseOrderPDF
           estimateData={estimateData}
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           quoteInfo={quoteInfo}
         />
       ).toBlob();
@@ -587,7 +564,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <InvoicePDF
           estimateData={estimateData}
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           quoteInfo={quoteInfo}
           invoiceInfo={invoiceInfo}
           preTaxSubtotal={preTaxPdf}
@@ -606,7 +583,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       const changeOrderBlob = await pdf(
         <ChangeOrderPDF
           formData={formData}
-          companyInfo={companyInfo}
+          companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           changeOrderInfo={changeOrderInfo}
         />
@@ -644,7 +621,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     };
   }, []);
 
-
+  if (!estimateData || !formData) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-xl text-gray-600">Loading quote data...</p>
+          <p className="text-sm text-gray-500 mt-2">Please wait while we prepare your quote.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print:my-0 print:max-w-none">
@@ -675,7 +661,10 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       {/* Your Company Information - Hidden when printing */}
       <div className="mb-6 print:hidden">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold border-b pb-1">Your Company Information</h3>
+          <div>
+            <h3 className="text-lg font-semibold border-b pb-1">Your Company Information</h3>
+            <p className="text-xs text-gray-500 mt-1">From Settings. Logo and capability statement are set there too.</p>
+          </div>
           <button
             onClick={() => setEditingCompanyInfo(!editingCompanyInfo)}
             className="text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded"
@@ -684,7 +673,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </button>
         </div>
 
-        <div className="flex">
+        <div className="flex gap-4 items-start">
+          <CompanyLogo src={getLogoSrc(settings)} className="w-20 h-20 shrink-0 rounded-md bg-gray-50 dark:bg-slate-800 p-1" />
           {editingCompanyInfo ? (
             <div className="grid grid-cols-2 gap-4 w-full">
               <div>

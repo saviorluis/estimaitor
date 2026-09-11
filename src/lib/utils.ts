@@ -1,4 +1,26 @@
-import { FormData, EstimateData, CalculationCache, CacheStats } from './types';
+import { FormData, EstimateData, CalculationCache, CacheStats, ProjectType } from './types';
+
+/** Human-readable project type for quotes, work orders, and PDFs */
+export function getProjectTypeDisplay(type: ProjectType | string): string {
+  switch (type) {
+    case 'jewelry_store': return 'Jewelry Store';
+    case 'grocery_store': return 'Organic Grocery Store';
+    case 'hardware_store': return 'Hardware Store';
+    case 'fast_food': return 'Fast Food Restaurant';
+    case 'yoga_studio': return 'Yoga Studio';
+    case 'kids_fitness': return "Children's Fitness Center";
+    case 'bakery': return 'Bakery';
+    case 'interactive_toy_store': return 'Interactive Toy Store';
+    case 'coffee_shop': return 'Coffee Shop';
+    case 'assisted_living': return 'Assisted Living Facility';
+    case 'truck_stop': return 'Truck Stop';
+    default:
+      return String(type)
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+  }
+}
 
 /**
  * Split quote/invoice subtotal across truck-stop facility vs fast-food area using base-price ratios.
@@ -383,7 +405,19 @@ export function incrementQuoteCounter(): number {
 export function generateQuoteNumber(): string {
   const year = new Date().getFullYear();
   const counter = getQuoteCounter();
-  return `Q-${year}-${counter}`;
+  let prefix = 'Q';
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('estimaitor_company_settings');
+      if (stored) {
+        const parsed = JSON.parse(stored) as { quotePrefix?: string };
+        if (parsed.quotePrefix) prefix = parsed.quotePrefix;
+      }
+    } catch {
+      // keep default prefix
+    }
+  }
+  return `${prefix}-${year}-${counter}`;
 }
 
 /**
@@ -475,7 +509,6 @@ export class PerformanceTimer {
 export const performanceTimer = new PerformanceTimer(); 
 
 export function getCapabilityStatementImage(projectType: string, squareFootage: number): string {
-  // If square footage is over 5000 and not a specific type, show big jobs
   if (squareFootage > 5000 && 
       !['restaurant', 'fast_food', 'medical', 'retail', 'hardware_store'].includes(projectType)) {
     return '/images/Big jobs.png';

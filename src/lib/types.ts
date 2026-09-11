@@ -167,6 +167,10 @@ export interface EstimateData {
   truckStopFacilityBasePrice?: number;
   /** Truck stop: base cleaning $ for fast food sq ft (fast_food rates) */
   truckStopFastFoodBasePrice?: number;
+  /** Interior cleaning sq ft after VCT is pulled out of the building total */
+  principalSquareFootage?: number;
+  /** VCT sq ft actually billed (capped so it cannot exceed building size) */
+  billedVctSquareFootage?: number;
 }
 
 // ===================== AI RECOMMENDATION TYPES =====================

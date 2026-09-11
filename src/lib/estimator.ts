@@ -6,6 +6,8 @@ import {
   CLEANING_TYPE_MULTIPLIERS,
   CLEANING_TYPE_TIME_MULTIPLIERS,
   getVCTCostPerSqFt,
+  splitPrincipalAndVctSqFt,
+  VCT_SQFT_PER_HOUR,
   getTravelRate,
   calculateHourlyTravelFee,
   getDriveTimeHours,
@@ -415,10 +417,14 @@ export function calculateEstimate(formData: FormData): EstimateData {
   let actualSquareFootage = squareFootage;
   let truckStopFacilityBasePrice: number | undefined;
   let truckStopFastFoodBasePrice: number | undefined;
+  let principalSquareFootage = squareFootage;
+  let billedVctSquareFootage = 0;
 
   if (cleaningType === 'vct_only') {
     // For VCT only service, use VCT square footage and VCT pricing
     actualSquareFootage = vctSquareFootage || 0;
+    principalSquareFootage = 0;
+    billedVctSquareFootage = actualSquareFootage;
     basePrice = 0; // No base cleaning price for VCT only
     vctCost = actualSquareFootage * getVCTCostPerSqFt(actualSquareFootage);
   } else if (cleaningType === 'window_cleaning_only') {
@@ -495,18 +501,23 @@ export function calculateEstimate(formData: FormData): EstimateData {
       numberOfHighAccessWindows
     );
   } else {
-    // Traditional cleaning types
+    // Traditional cleaning: VCT area is pulled out of building sq ft (not stacked on top)
+    const floorSplit = splitPrincipalAndVctSqFt(squareFootage, hasVCT, vctSquareFootage || 0);
+    principalSquareFootage = floorSplit.principal;
+    billedVctSquareFootage = floorSplit.vct;
+    actualSquareFootage = floorSplit.principal;
+
     if (projectType === 'truck_stop') {
-      truckStopFacilityBasePrice = calculateBasePrice(squareFootage, 'truck_stop', cleaningType);
+      truckStopFacilityBasePrice = calculateBasePrice(floorSplit.principal, 'truck_stop', cleaningType);
       const ffSqft =
         formData.truckStopIncludesFastFood ? formData.truckStopFastFoodSquareFootage ?? 0 : 0;
       truckStopFastFoodBasePrice =
         ffSqft > 0 ? calculateBasePrice(ffSqft, 'fast_food', cleaningType) : 0;
       basePrice = truckStopFacilityBasePrice + truckStopFastFoodBasePrice;
     } else {
-      basePrice = calculateBasePrice(squareFootage, projectType, cleaningType);
+      basePrice = calculateBasePrice(floorSplit.principal, projectType, cleaningType);
     }
-    vctCost = hasVCT ? (vctSquareFootage || 0) * getVCTCostPerSqFt(vctSquareFootage || 0) : 0;
+    vctCost = billedVctSquareFootage > 0 ? billedVctSquareFootage * getVCTCostPerSqFt(billedVctSquareFootage) : 0;
     pressureWashingCost = calculatePressureWashingCost(needsPressureWashing, pressureWashingArea, pressureWashingType);
     windowCleaningCost = calculateWindowCleaningCost(
       needsWindowCleaning,
@@ -587,7 +598,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     const facilityBaseHours = 8; // Base hours for cafeteria, laundry, utility, common areas
     baseHours = (bedBathHours + facilityBaseHours) * cleaningModifier;
   } else if (projectType === 'truck_stop') {
-    baseHours = calculateEstimatedHours(squareFootage, 'truck_stop', cleaningType);
+    baseHours = calculateEstimatedHours(principalSquareFootage, 'truck_stop', cleaningType);
     const ffSq =
       formData.truckStopIncludesFastFood ? formData.truckStopFastFoodSquareFootage ?? 0 : 0;
     if (ffSq > 0) {
@@ -616,6 +627,10 @@ export function calculateEstimate(formData: FormData): EstimateData {
     numberOfDisplayCases
   );
   }
+
+  if (cleaningType !== 'vct_only' && billedVctSquareFootage > 0) {
+    additionalHours += billedVctSquareFootage / VCT_SQFT_PER_HOUR;
+  }
   
   const estimatedHours = baseHours + additionalHours;
 
@@ -628,6 +643,13 @@ export function calculateEstimate(formData: FormData): EstimateData {
     (formData.truckStopFastFoodSquareFootage ?? 0) > 0
   ) {
     relevantFootage = squareFootage + (formData.truckStopFastFoodSquareFootage ?? 0);
+  }
+  if (
+    billedVctSquareFootage > 0 &&
+    cleaningType !== 'vct_only' &&
+    squareFootage > 0
+  ) {
+    relevantFootage = squareFootage;
   }
   const pricePerSquareFoot = totalPrice / relevantFootage;
 
@@ -659,7 +681,9 @@ export function calculateEstimate(formData: FormData): EstimateData {
     truckStopFacilityBasePrice:
       projectType === 'truck_stop' ? truckStopFacilityBasePrice ?? 0 : undefined,
     truckStopFastFoodBasePrice:
-      projectType === 'truck_stop' ? truckStopFastFoodBasePrice ?? 0 : undefined
+      projectType === 'truck_stop' ? truckStopFastFoodBasePrice ?? 0 : undefined,
+    principalSquareFootage,
+    billedVctSquareFootage,
   };
   
   return estimateData;

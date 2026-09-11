@@ -1,16 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import EstimatorForm from '@/components/EstimatorForm';
 import PressureWashingCalculator from '@/components/PressureWashingCalculator';
 import PaintingCalculator from '@/components/PaintingCalculator';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import AdminThemeMenu from '@/components/AdminThemeMenu';
+import SettingsPanel from '@/components/SettingsPanel';
 import ContractPDF from '@/components/ContractPDF';
 import { EstimateData, FormData } from '@/lib/types';
 import { pdf } from '@react-pdf/renderer';
 import { emailService } from '@/lib/emailService';
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
+import { darkenHex, DEFAULT_BRAND_COLOR, isValidBrandColor } from '@/lib/companySettings';
 
 // Storage keys for saved data
 const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
@@ -111,6 +115,7 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
 import Image from 'next/image';
 
 export default function Home() {
+  const { settings } = useCompanySettings();
   const [estimateData, setEstimateData] = useState<EstimateData | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
   const [contractData, setContractData] = useState<ContractData | null>(null);
@@ -120,6 +125,7 @@ export default function Home() {
   const [showPastEntries, setShowPastEntries] = useState(false);
   const [currentMode, setCurrentMode] = useState<AppMode>('cleaning');
   const [showAdminThemeMenu, setShowAdminThemeMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Load saved data on initial render
   useEffect(() => {
@@ -254,11 +260,27 @@ export default function Home() {
     );
   }
 
+  const brandColor = isValidBrandColor(settings.brandColor) ? settings.brandColor : DEFAULT_BRAND_COLOR;
+  const headerStyle = {
+    background: `linear-gradient(to right, ${brandColor}, ${darkenHex(brandColor, 0.22)})`,
+  };
+
   return (
     <main className="flex flex-col min-h-screen">
-      <header className={`py-8 bg-gradient-to-r ${currentConfig.color} text-white rounded-xl shadow-lg mb-8`}>
+      <header className="relative py-8 text-white rounded-xl shadow-lg mb-8" style={headerStyle}>
+        <button
+          type="button"
+          onClick={() => setShowSettings(true)}
+          className="absolute top-4 left-4 p-2 rounded-lg bg-black/20 hover:bg-black/30 transition-colors"
+          aria-label="Open settings"
+        >
+          <Settings className="w-6 h-6" />
+        </button>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2">EstimAItor</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">{settings.appName || 'EstimAItor'}</h1>
+          {settings.name && (
+            <p className="text-sm opacity-80 mb-1">{settings.name}{settings.estimatorName ? ` · ${settings.estimatorName}` : ''}</p>
+          )}
           <p className="text-xl opacity-90 mb-2">
             {currentConfig.subtitle}
           </p>
@@ -665,8 +687,11 @@ export default function Home() {
         </div>
 
         <footer className="mt-12 text-center text-sm text-gray-500 py-6 border-t border-gray-200 dark:border-gray-700">
-          <p>© 2023 EstimAItor - Commercial Cleaning Estimation Tool</p>
-          <p className="mt-1">Prices based on East Coast rates • Home Base: High Point, NC</p>
+          <p>© {new Date().getFullYear()} {settings.appName || 'EstimAItor'}{settings.name ? ` · ${settings.name}` : ''}</p>
+          <p className="mt-1">
+            Prices based on East Coast rates
+            {settings.homeBase ? ` • Home Base: ${settings.homeBase}` : ''}
+          </p>
           <p className="mt-1">Current Mode: <span className="font-semibold">{currentConfig.title}</span></p>
         </footer>
         {/* Admin Access Logo */}
@@ -690,11 +715,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Admin Theme Menu */}
       <AdminThemeMenu 
         isOpen={showAdminThemeMenu} 
         onClose={() => setShowAdminThemeMenu(false)} 
       />
+      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </main>
   );
 } 

@@ -195,6 +195,14 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
                     <br />
                     Fast food / QSR: {(formData.truckStopFastFoodSquareFootage || 0).toLocaleString()} sq ft
                   </span>
+                ) : formData.hasVCT && (estimateData.billedVctSquareFootage || 0) > 0 ? (
+                  <span className="block">
+                    Building: {formData.squareFootage.toLocaleString()} sq ft
+                    <br />
+                    Principal clean: {(estimateData.principalSquareFootage ?? Math.max(0, formData.squareFootage - (formData.vctSquareFootage || 0))).toLocaleString()} sq ft
+                    <br />
+                    VCT: {(estimateData.billedVctSquareFootage || 0).toLocaleString()} sq ft
+                  </span>
                 ) : (
                   <>{formData.squareFootage.toLocaleString()} sq ft</>
                 )}
@@ -246,18 +254,28 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">
-                {formData.hasVCT ? 
-                  `Cleaning Services (${formData.squareFootage.toLocaleString()} sq ft + ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft VCT)` :
-                  `Base Price (${formatCurrency(PROJECT_TYPE_MULTIPLIERS[formData.projectType] * CLEANING_TYPE_MULTIPLIERS[formData.cleaningType] * 0.18)}/sq ft)`
+                {formData.hasVCT && (estimateData.billedVctSquareFootage || 0) > 0
+                  ? `Principal cleaning (${(estimateData.principalSquareFootage ?? 0).toLocaleString()} sq ft)`
+                  : `Base Price (${formatCurrency(PROJECT_TYPE_MULTIPLIERS[formData.projectType] * CLEANING_TYPE_MULTIPLIERS[formData.cleaningType] * 0.18)}/sq ft)`
                 }
               </span>
               <span className="text-gray-800 dark:text-gray-200 flex items-center">
                 <span className="text-red-400 text-sm mr-2">
                   {formatCurrency(estimateData.basePrice * 0.6)}
                 </span>
-                {formatCurrency(estimateData.basePrice + estimateData.vctCost)}
+                {formatCurrency(estimateData.basePrice)}
               </span>
             </div>
+            {formData.hasVCT && estimateData.vctCost > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">
+                  VCT strip/wax ({(estimateData.billedVctSquareFootage || formData.vctSquareFootage || 0).toLocaleString()} sq ft)
+                </span>
+                <span className="text-gray-800 dark:text-gray-200">
+                  {formatCurrency(estimateData.vctCost)}
+                </span>
+              </div>
+            )}
 
             {estimateData.windowCleaningCost > 0 && (
               <div className="flex justify-between">
@@ -379,7 +397,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
           <div className="flex flex-wrap gap-4">
             <button
               onClick={toggleQuote}
-              className="flex-1 min-w-[200px] bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
+              className="flex-1 min-w-[200px] brand-fill text-white px-6 py-3 rounded-md hover:opacity-95 focus:ring-2 focus:ring-offset-2 transition-colors duration-200 font-medium"
             >
               {showQuote ? 'Hide Quote' : 'Generate Quote'}
             </button>

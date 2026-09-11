@@ -7,6 +7,7 @@ import {
   getWindowCleaningQuoteShare,
   getQuotePreTaxSubtotal
 } from '@/lib/utils';
+import { isUsableImageSrc } from '@/lib/companySettings';
 import { SCOPE_OF_WORK, SALES_TAX_RATE } from '@/lib/constants';
 
 // Register fonts
@@ -242,6 +243,7 @@ interface InvoicePDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
   };
   quoteInfo: {
     quoteNumber: string;
@@ -267,7 +269,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   invoiceInfo,
   preTaxSubtotal
 }) => {
-  const logoPath = '/assets/logo.png';
+  const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
   const subtotal =
     preTaxSubtotal !== undefined && preTaxSubtotal >= 0
       ? preTaxSubtotal

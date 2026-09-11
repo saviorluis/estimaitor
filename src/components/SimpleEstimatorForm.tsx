@@ -83,7 +83,7 @@ const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string
     case 'educational': return 'Educational Facility';
     case 'hotel': return 'Hotel/Hospitality';
     case 'jewelry_store': return 'Jewelry Store';
-    case 'grocery_store': return 'Grocery Store';
+    case 'grocery_store': return 'Organic Grocery Store';
     case 'hardware_store': return 'Hardware Store';
     case 'yoga_studio': return 'Yoga Studio';
     case 'kids_fitness': return 'Kids Fitness Center';
@@ -479,7 +479,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                 <option value="educational">Educational Facility</option>
                 <option value="hotel">Hotel</option>
                 <option value="jewelry_store">Jewelry Store</option>
-                <option value="grocery_store">Grocery Store</option>
+                <option value="grocery_store">Organic Grocery Store</option>
                 <option value="yoga_studio">Yoga Studio</option>
                 <option value="kids_fitness">Kids Fitness</option>
                 <option value="bakery">Bakery</option>

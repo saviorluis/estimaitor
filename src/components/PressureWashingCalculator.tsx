@@ -201,7 +201,7 @@ export default function PressureWashingCalculator({ onEstimateCalculated }: Pres
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-sky-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
+          className="w-full brand-fill text-white py-3 px-6 rounded-lg font-medium hover:opacity-95 disabled:opacity-50 transition-colors"
         >
           Calculate Pressure Washing Estimate
         </button>

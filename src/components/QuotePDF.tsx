@@ -9,7 +9,8 @@ import {
   getWindowCleaningQuoteShare,
   getQuotePreTaxSubtotal
 } from '@/lib/utils';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, SALES_TAX_RATE } from '@/lib/constants';
+import { isUsableImageSrc } from '@/lib/companySettings';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, SALES_TAX_RATE, splitPrincipalAndVctSqFt } from '@/lib/constants';
 
 // Register fonts
 Font.register({
@@ -404,7 +405,7 @@ const getCleaningTypeDisplay = (type: string): string => {
 const getProjectTypeDisplay = (type: string): string => {
   switch (type) {
     case 'jewelry_store': return 'Jewelry Store';
-    case 'grocery_store': return 'Grocery Store';
+    case 'grocery_store': return 'Organic Grocery Store';
     case 'hardware_store': return 'Hardware Store';
     case 'fast_food': return 'Fast Food Restaurant';
     case 'yoga_studio': return 'Yoga Studio';
@@ -428,15 +429,21 @@ const getScopeOfWork = (formData: FormData): string => {
   const scope = PROJECT_SCOPES[formData.projectType];
   if (!scope) return 'No specific scope of work defined for this project type.';
 
-  let baseScope = scope.replace('___ Sq Ft ___', `${(formData.squareFootage || 0).toLocaleString()} Sq Ft`);
+  const floorSplit = splitPrincipalAndVctSqFt(
+    formData.squareFootage || 0,
+    Boolean(formData.hasVCT),
+    formData.vctSquareFootage || 0
+  );
+  const scopeSqFt = formData.hasVCT ? floorSplit.principal : (formData.squareFootage || 0);
+  let baseScope = scope.replace('___ Sq Ft ___', `${scopeSqFt.toLocaleString()} Sq Ft`);
   baseScope += ' Includes all necessary equipment, supplies, labor, and travel expenses.';
 
   if (formData.cleaningType === 'rough_final_touchup') {
     baseScope += '\n\nThree-Stage Cleaning Schedule:\n• Rough Clean: During construction\n• Final Clean: After construction completion\n• Touch-up Clean: Before client move-in/opening';
   }
 
-  if (formData.hasVCT) {
-    baseScope += `\n\nVCT Flooring Services: Professional stripping, waxing, and buffing of ${(formData.vctSquareFootage || 0).toLocaleString()} sq ft of vinyl composition tile flooring.`;
+  if (formData.hasVCT && floorSplit.vct > 0) {
+    baseScope += `\n\nVCT Flooring Services: Professional stripping, waxing, and buffing of ${floorSplit.vct.toLocaleString()} sq ft of vinyl composition tile (this area is excluded from the principal cleaning square footage above).`;
   }
 
   if (formData.needsPressureWashing && formData.pressureWashingArea > 0) {
@@ -487,6 +494,8 @@ interface QuotePDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
+    capabilityStatementSrc?: string;
   };
   clientInfo: {
     name: string;
@@ -518,6 +527,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   adjustedPrices,
   preTaxSubtotal
 }) => {
+  const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
+  const capabilitySrc = isUsableImageSrc(companyInfo.capabilityStatementSrc)
+    ? companyInfo.capabilityStatementSrc
+    : getCapabilityStatementImage(formData.projectType, formData.squareFootage);
+  const floorSplit = splitPrincipalAndVctSqFt(
+    formData.squareFootage || 0,
+    Boolean(formData.hasVCT),
+    formData.vctSquareFootage || 0
+  );
   const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
   const subtotal =
@@ -536,7 +554,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={{ flex: 1, padding: 40 }}>
           {/* Logo */}
           <View style={{ alignItems: 'center', marginBottom: 30 }}>
-            <Image src="/assets/logo.png" style={{ width: 120, height: 120 }} />
+            <Image src={logoSrc} style={{ width: 120, height: 120 }} />
           </View>
           
           {/* Title */}
@@ -591,7 +609,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
       {/* Capability Statement Page */}
       <Page size="LETTER" style={styles.page}>
         <Image
-          src={getCapabilityStatementImage(formData.projectType, formData.squareFootage)}
+          src={capabilitySrc}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </Page>
@@ -600,7 +618,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         <View style={styles.header}>
           <View style={styles.leftSide}>
             <View style={styles.logoAndCompany}>
-              <Image src="/assets/logo.png" style={[styles.logo, { width: 120, height: 120 }]} />
+              <Image src={logoSrc} style={[styles.logo, { width: 120, height: 120 }]} />
               <View style={{ marginLeft: 15 }}>
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.address}</Text>
@@ -650,7 +668,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
               </Text>
             </>
           ) : formData.projectType !== 'building_shell' ? (
-            <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+            formData.hasVCT && floorSplit.vct > 0 ? (
+              <>
+                <Text style={styles.projectText}>Building: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+                <Text style={styles.projectText}>Principal cleaning: {floorSplit.principal.toLocaleString()} sq ft</Text>
+                <Text style={styles.projectText}>VCT strip/wax: {floorSplit.vct.toLocaleString()} sq ft</Text>
+              </>
+            ) : (
+              <Text style={styles.projectText}>Square Footage: {(formData.squareFootage || 0).toLocaleString()} sq ft</Text>
+            )
           ) : null}
           <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
           </View>
@@ -712,6 +738,21 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                       Window cleaning is itemized separately below.
                     </Text>
                   </>
+                ) : formData.projectType === 'grocery_store' ? (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getCleaningTypeDisplay(formData.cleaningType)} — Organic Grocery Store (
+                      {(formData.squareFootage || 0).toLocaleString()} sq ft)
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 2 }]}>
+                      Post-construction final clean for natural/organic grocery (e.g. Sprouts): produce and wet racks,
+                      deli/bakery/meat counters, bulk bins, vitamin aisle, refrigerated cases, checkout, and back-of-house.
+                      Full final-cleaning scope below.
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8, marginTop: 6 }]}>
+                      {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
+                    </Text>
+                  </>
                 ) : truckStopSplit ? (
                   <>
                     <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
@@ -735,7 +776,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 ) : (
                   <>
                     <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
-                      {getCleaningTypeDisplay(formData.cleaningType)} - {formData.squareFootage.toLocaleString()} sq ft
+                      {getCleaningTypeDisplay(formData.cleaningType)} - {formData.hasVCT && floorSplit.vct > 0
+                        ? `${floorSplit.principal.toLocaleString()} sq ft principal + ${floorSplit.vct.toLocaleString()} sq ft VCT`
+                        : `${formData.squareFootage.toLocaleString()} sq ft`}
                     </Text>
                     <Text style={[styles.tableCell, { fontSize: 8 }]}>
                       {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}

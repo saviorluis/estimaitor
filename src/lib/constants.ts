@@ -24,6 +24,31 @@ export const getVCTCostPerSqFt = (vctSquareFootage: number): number => {
   }
 };
 
+/** Strip/wax production rate used only for time estimates (not pricing). */
+export const VCT_SQFT_PER_HOUR = 400;
+
+/**
+ * VCT is part of the building, not extra on top.
+ * 10,000 building + 3,000 VCT → 7,000 principal clean + 3,000 VCT.
+ */
+export function splitPrincipalAndVctSqFt(
+  totalSquareFootage: number,
+  hasVCT: boolean,
+  vctSquareFootage: number
+): { principal: number; vct: number; total: number } {
+  const total = Math.max(0, Number(totalSquareFootage) || 0);
+  if (!hasVCT) {
+    return { principal: total, vct: 0, total };
+  }
+  const requested = Math.max(0, Number(vctSquareFootage) || 0);
+  const vct = Math.min(requested, total);
+  return {
+    principal: Math.max(0, total - vct),
+    vct,
+    total,
+  };
+}
+
 // Sales tax rate
 export const SALES_TAX_RATE = 0.07;
 
@@ -524,11 +549,14 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Clean break rooms and employee areas`),
 
   grocery_store: createScopeTemplate(`
-• Detail clean checkout areas and service counters
-• Clean and sanitize shopping cart areas
-• Clean and sanitize food preparation areas
-• Special attention to produce and deli sections
-• Clean break rooms and employee areas`),
+• Remove construction dust, debris, and residue from sales aisles and traffic paths
+• Detail clean checkout lanes, self-checkout stations, and service counters
+• Clean and sanitize shopping cart and basket staging areas
+• Special attention to open produce displays, wet racks, and refrigerated floral (post-build)
+• Clean and sanitize deli, bakery, meat/seafood, and prepared-foods service counters
+• Detail clean bulk-bin stations and vitamin/supplement aisles
+• Wipe refrigerated case fronts, freezer doors, and dairy glass (exterior; remove stickers/film)
+• Clean break rooms, restrooms, and back-of-house areas for store opening readiness`),
 
   hardware_store: createScopeTemplate(`
 • Detail clean aisles, sales floor, and checkout/service counters

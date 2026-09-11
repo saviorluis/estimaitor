@@ -1,6 +1,7 @@
 import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { CompanySettingsProvider } from '@/contexts/CompanySettingsContext';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -38,9 +39,11 @@ export default function RootLayout({
       </head>
       <body className="h-full bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
         <ThemeProvider>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </div>
+          <CompanySettingsProvider>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </div>
+          </CompanySettingsProvider>
         </ThemeProvider>
       </body>
     </html>

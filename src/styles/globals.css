@@ -26,6 +26,8 @@
   --font-secondary: Inter, system-ui, sans-serif;
   --border-radius: 0.375rem;
   --spacing-compact: 1;
+  --brand-primary: #4f46e5;
+  --brand-primary-dark: #4338ca;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -62,7 +64,21 @@ body {
   }
 
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors;
+    @apply text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors;
+    background-color: var(--brand-primary);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--brand-primary-dark);
+  }
+
+  .brand-fill {
+    background-color: var(--brand-primary);
+    transition: background-color 0.15s ease;
+  }
+
+  .brand-fill:hover {
+    background-color: var(--brand-primary-dark);
   }
 
   .btn-secondary {

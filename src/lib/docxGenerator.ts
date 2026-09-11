@@ -45,7 +45,7 @@ const getCleaningTypeDisplay = (type: string): string => {
 const getProjectTypeDisplay = (type: string): string => {
   switch (type) {
     case 'jewelry_store': return 'Jewelry Store';
-    case 'grocery_store': return 'Grocery Store';
+    case 'grocery_store': return 'Organic Grocery Store';
     case 'hardware_store': return 'Hardware Store';
     case 'fast_food': return 'Fast Food Restaurant';
     case 'yoga_studio': return 'Yoga Studio';

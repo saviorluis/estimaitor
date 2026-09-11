@@ -167,7 +167,7 @@ export default function PaintingCalculator({ onEstimateCalculated }: PaintingCal
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-amber-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-amber-700 disabled:opacity-50 transition-colors"
+          className="w-full brand-fill text-white py-3 px-6 rounded-lg font-medium hover:opacity-95 disabled:opacity-50 transition-colors"
         >
           Calculate Painting Estimate
         </button>

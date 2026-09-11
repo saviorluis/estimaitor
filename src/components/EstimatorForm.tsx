@@ -9,7 +9,8 @@ import {
   CLEANING_TYPE_DESCRIPTIONS,
   calculateHourlyTravelFee,
   getEffectiveTravelMiles,
-  TRAVEL_FEES
+  TRAVEL_FEES,
+  splitPrincipalAndVctSqFt
 } from '@/lib/constants';
 
 interface EstimatorFormProps {
@@ -197,7 +198,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="educational">Educational Facility</option>
             <option value="hotel">Hotel</option>
             <option value="jewelry_store">Jewelry Store</option>
-            <option value="grocery_store">Grocery Store</option>
+            <option value="grocery_store">Organic Grocery Store</option>
             <option value="hardware_store">Hardware Store</option>
             <option value="yoga_studio">Yoga Studio</option>
             <option value="kids_fitness">Kids Fitness</option>
@@ -416,7 +417,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 {watch('hasVCT') && (
                   <div>
                     <label htmlFor="vctSquareFootage" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                      VCT Square Footage
+                      VCT Square Footage (included in building size)
                     </label>
                     <input
                       id="vctSquareFootage"
@@ -427,11 +428,35 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                       {...register('vctSquareFootage', { 
                         required: watch('hasVCT') ? 'VCT square footage is required when VCT is selected' : false,
                         min: { value: 0, message: 'VCT square footage cannot be negative' },
-                        max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' }
+                        max: { value: 1000000, message: 'Maximum 1,000,000 sq ft' },
+                        validate: (value) => {
+                          const building = Number(formValues.squareFootage) || 0;
+                          const vct = Number(value) || 0;
+                          if (building > 0 && vct > building) {
+                            return 'VCT sq ft cannot be more than the building square footage';
+                          }
+                          return true;
+                        }
                       })}
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 text-lg"
                       placeholder="Enter VCT square footage"
                     />
+                    {(() => {
+                      const split = splitPrincipalAndVctSqFt(
+                        Number(formValues.squareFootage) || 0,
+                        true,
+                        Number(formValues.vctSquareFootage) || 0
+                      );
+                      return (
+                        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-slate-800 rounded-md p-3">
+                          Building {split.total.toLocaleString()} sq ft splits into{' '}
+                          <span className="font-medium">{split.principal.toLocaleString()} sq ft principal cleaning</span>
+                          {' + '}
+                          <span className="font-medium">{split.vct.toLocaleString()} sq ft VCT strip/wax</span>.
+                          VCT is not billed on top of the full building.
+                        </p>
+                      );
+                    })()}
                     {errors.vctSquareFootage && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vctSquareFootage.message}</p>
                     )}
@@ -783,7 +808,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-lg"
+          className="w-full brand-fill text-white py-3 px-6 rounded-md hover:opacity-95 focus:ring-2 focus:ring-offset-2 transition-colors duration-200 font-medium text-lg"
         >
           Calculate Estimate
         </button>

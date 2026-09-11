@@ -2,6 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { EstimateData, FormData } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
+import { isUsableImageSrc } from '@/lib/companySettings';
 
 // Register fonts
 Font.register({
@@ -168,6 +169,7 @@ interface ChangeOrderPDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
   };
   clientInfo: {
     name: string;
@@ -198,7 +200,7 @@ const ChangeOrderPDF: React.FC<ChangeOrderPDFProps> = ({
           <View style={styles.companyInfo}>
             <View style={styles.companyHeader}>
               <View style={styles.logoContainer}>
-                <Image src="/assets/logo.png" style={styles.logo} />
+                <Image src={isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png'} style={styles.logo} />
               </View>
             </View>
             <Text style={styles.companyName}>{companyInfo.name}</Text>
