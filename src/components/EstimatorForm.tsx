@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import {
   getRecommendedCleaners,
   CLEANING_TYPE_DESCRIPTIONS,
@@ -21,6 +22,7 @@ interface EstimatorFormProps {
 const STORAGE_KEY = 'estimaitor_form_data';
 
 export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
+  const { salesTaxRate } = useCompanySettings();
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Get saved form data from localStorage (memoized) - excludes client-specific info
@@ -135,9 +137,9 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       gasPrice: typeof data.gasPrice === 'string' ? parseFloat(data.gasPrice) : data.gasPrice
     };
     
-    const estimate = calculateEstimate(formData);
+    const estimate = calculateEstimate(formData, salesTaxRate);
     onEstimateCalculated(estimate, formData);
-  }, [onEstimateCalculated]);
+  }, [onEstimateCalculated, salesTaxRate]);
 
   // Memoized urgency description function
   const getUrgencyDescription = useCallback((level: number): string => {

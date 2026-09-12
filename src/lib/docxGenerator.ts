@@ -1,6 +1,7 @@
 import { Document, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType, HeadingLevel, ImageRun, Packer } from 'docx';
 import { EstimateData, FormData } from './types';
 import { formatCurrency } from './utils';
+import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from './salesTax';
 
 interface CompanyInfo {
   name: string;
@@ -1306,7 +1307,7 @@ function createServiceDetailsTable(estimateData: EstimateData, formData: FormDat
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "Sales Tax (7%)",
+                  text: `Sales Tax (${formatSalesTaxPercent(resolveEstimateSalesTaxRate(estimateData))})`,
                 }),
               ],
             }),

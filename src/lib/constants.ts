@@ -49,8 +49,7 @@ export function splitPrincipalAndVctSqFt(
   };
 }
 
-// Sales tax rate
-export const SALES_TAX_RATE = 0.07;
+export { SALES_TAX_RATE, getSalesTaxRate, formatSalesTaxPercent } from './salesTax';
 
 // Markup percentage (50% markup = 0.5)
 export const MARKUP_PERCENTAGE = 0.2; // 20% professional markup

@@ -1,3 +1,5 @@
+import { DEFAULT_TAX_STATE, normalizeStateCode } from './salesTax';
+
 export const COMPANY_SETTINGS_KEY = 'estimaitor_company_settings';
 export const COMPANY_LOGO_KEY = 'estimaitor_company_logo';
 export const COMPANY_CAPABILITY_KEY = 'estimaitor_company_capability';
@@ -38,7 +40,7 @@ export const EMPTY_COMPANY_SETTINGS: CompanySettings = {
   name: '',
   address: '',
   city: '',
-  state: '',
+  state: DEFAULT_TAX_STATE,
   zip: '',
   phone: '',
   email: '',
@@ -112,15 +114,17 @@ export function normalizeCompanySettings(raw: Partial<CompanySettings>): Company
     quotePrefix: raw.quotePrefix || FALLBACK_COMPANY_SETTINGS.quotePrefix,
     logoDataUrl: raw.logoDataUrl || '',
     capabilityStatementDataUrl: raw.capabilityStatementDataUrl || '',
+    state: normalizeStateCode(raw.state ?? FALLBACK_COMPANY_SETTINGS.state),
   };
 
   if (/,\s*[A-Za-z]{2}/.test(merged.city)) {
     const parsed = parseCityStateZip(merged.city);
     merged.city = parsed.city || merged.city;
-    if (parsed.state) merged.state = parsed.state;
+    if (parsed.state) merged.state = normalizeStateCode(parsed.state);
     if (parsed.zip) merged.zip = parsed.zip;
   }
 
+  merged.state = normalizeStateCode(merged.state);
   return merged;
 }
 

@@ -10,7 +10,13 @@ import {
   getQuotePreTaxSubtotal
 } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
-import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, SALES_TAX_RATE, splitPrincipalAndVctSqFt } from '@/lib/constants';
+import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, splitPrincipalAndVctSqFt } from '@/lib/constants';
+import {
+  getPressureWashingLineTitle,
+  getPressureWashingScopeText,
+  isPressureWashingJob,
+} from '@/lib/pressureWashDocs';
+import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
 
 // Register fonts
 Font.register({
@@ -421,6 +427,9 @@ const getProjectTypeDisplay = (type: string): string => {
 
 // Get scope of work text
 const getScopeOfWork = (formData: FormData): string => {
+  if (isPressureWashingJob(formData)) {
+    return `${getPressureWashingScopeText(formData)}\nIncludes all necessary equipment, supplies, labor, and travel expenses.`;
+  }
   // Skip scope of work for window_cleaning_only cleaning type
   if (formData.cleaningType === 'window_cleaning_only') {
     return '';
@@ -542,7 +551,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     preTaxSubtotal !== undefined && preTaxSubtotal >= 0
       ? preTaxSubtotal
       : getQuotePreTaxSubtotal(estimateData);
-  const salesTax = subtotal * SALES_TAX_RATE;
+  const taxRate = resolveEstimateSalesTaxRate(estimateData);
+  const salesTax = subtotal * taxRate;
   const finalTotal = subtotal + salesTax;
   const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
   const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
@@ -559,10 +569,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           
           {/* Title */}
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#2563eb' }}>
-                POST CONSTRUCTION
+                {isPressureWashingJob(formData) ? 'PRESSURE WASHING' : 'POST CONSTRUCTION'}
               </Text>
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, color: '#2563eb' }}>
-                CLEANING PROPOSAL
+                {isPressureWashingJob(formData) ? 'PROPOSAL' : 'CLEANING PROPOSAL'}
           </Text>
 
           {/* Center Content */}
@@ -606,13 +616,14 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
       </Page>
 
-      {/* Capability Statement Page */}
+      {!isPressureWashingJob(formData) && (
       <Page size="LETTER" style={styles.page}>
         <Image
           src={capabilitySrc}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       </Page>
+      )}
 
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
@@ -652,6 +663,18 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.sectionTitle}>Project Information</Text>
           <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
           <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
+          {isPressureWashingJob(formData) ? (
+            <>
+              <Text style={styles.projectText}>Service: Pressure Washing</Text>
+              <Text style={styles.projectText}>{getPressureWashingLineTitle(formData)}</Text>
+              {formData.needsChimneyWash && (formData.chimneyCount || 0) > 0 ? (
+                <Text style={styles.projectText}>
+                  Chimneys: {(formData.chimneyCount || 0).toLocaleString()}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <>
           <Text style={styles.projectText}>Type: {getProjectTypeDisplay(formData.projectType)}</Text>
           {formData.projectType === 'assisted_living' ? (
             <Text style={styles.projectText}>Bed/Bath Units: {(formData.numberOfBedBaths || 0).toLocaleString()} units</Text>
@@ -679,6 +702,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             )
           ) : null}
           <Text style={styles.projectText}>Cleaning Type: {getCleaningTypeDisplay(formData.cleaningType)}</Text>
+            </>
+          )}
           </View>
         </View>
 
@@ -700,7 +725,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                {formData.projectType === 'building_shell' ? (
+                {isPressureWashingJob(formData) ? (
+                  <>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
+                      {getPressureWashingLineTitle(formData)}
+                    </Text>
+                    <Text style={[styles.tableCell, { fontSize: 8 }]}>
+                      {getScopeOfWork(formData).replace('Includes all necessary equipment, supplies, labor, and travel expenses.', '')}
+                    </Text>
+                  </>
+                ) : formData.projectType === 'building_shell' ? (
                   <>
                     <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>
                       {getCleaningTypeDisplay(formData.cleaningType)} - Building Shell Structural Cleanup
@@ -847,7 +881,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                         {/* Sales Tax Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
-                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Sales Tax (7%)</Text>
+                <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Sales Tax ({formatSalesTaxPercent(taxRate)})</Text>
               </View>
               <View style={styles.amountCell}>
                 <Text style={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}>

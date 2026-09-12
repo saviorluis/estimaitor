@@ -5,9 +5,8 @@
 
 import { FormData, EstimateData } from './types';
 import { calculateEstimate as originalCalculateEstimate } from './estimator';
+import { SALES_TAX_RATE } from './salesTax';
 
-// Re-export the original calculation function to maintain exact pricing
-export function calculateEstimate(formData: FormData): EstimateData {
-  // Use the original calculation logic to ensure pricing stays exactly the same
-  return originalCalculateEstimate(formData);
+export function calculateEstimate(formData: FormData, salesTaxRate: number = SALES_TAX_RATE): EstimateData {
+  return originalCalculateEstimate(formData, salesTaxRate);
 }

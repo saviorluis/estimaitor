@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator'; // Use original calculations
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
+import { formatSalesTaxPercent } from '@/lib/salesTax';
 import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS } from '@/lib/constants';
 
 interface UnifiedEstimatorProps {
@@ -114,6 +116,7 @@ export default function UnifiedEstimator({
   mode = 'simple',
   theme = 'light' 
 }: UnifiedEstimatorProps) {
+  const { salesTaxRate } = useCompanySettings();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<string[]>([]);
@@ -161,7 +164,7 @@ export default function UnifiedEstimator({
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
     try {
-      const estimateData = calculateEstimate(data);
+      const estimateData = calculateEstimate(data, salesTaxRate);
       onEstimateCalculated(estimateData, data);
     } catch (error) {
       console.error('Calculation error:', error);
@@ -511,7 +514,7 @@ export default function UnifiedEstimator({
                 <span className="text-xs text-gray-500">(Overhead, insurance, profit)</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                When applied, 7% sales tax is added after the markup, so the final total is ~39% above the subtotal.
+                When applied, {formatSalesTaxPercent(salesTaxRate)} sales tax is added after the markup.
               </p>
             </div>
 

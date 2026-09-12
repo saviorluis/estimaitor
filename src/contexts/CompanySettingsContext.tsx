@@ -10,6 +10,7 @@ import {
   toDocumentCompanyInfo,
   type DocumentCompanyInfo,
 } from '@/lib/companySettings';
+import { getSalesTaxRate } from '@/lib/salesTax';
 
 interface SaveResult {
   ok: boolean;
@@ -19,6 +20,7 @@ interface SaveResult {
 interface CompanySettingsContextType {
   settings: CompanySettings;
   documentCompanyInfo: DocumentCompanyInfo;
+  salesTaxRate: number;
   updateSettings: (patch: Partial<CompanySettings>) => SaveResult;
   replaceSettings: (next: CompanySettings) => SaveResult;
 }
@@ -82,14 +84,17 @@ export const CompanySettingsProvider: React.FC<{ children: React.ReactNode }> = 
     ]
   );
 
+  const salesTaxRate = useMemo(() => getSalesTaxRate(settings.state), [settings.state]);
+
   const value = useMemo(
     () => ({
       settings,
       documentCompanyInfo,
+      salesTaxRate,
       updateSettings,
       replaceSettings,
     }),
-    [settings, documentCompanyInfo, updateSettings, replaceSettings]
+    [settings, documentCompanyInfo, salesTaxRate, updateSettings, replaceSettings]
   );
 
   return <CompanySettingsContext.Provider value={value}>{children}</CompanySettingsContext.Provider>;

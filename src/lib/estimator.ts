@@ -21,7 +21,6 @@ import {
   DISPLAY_CASE,
   PAINTING_RATES,
   ASSISTED_LIVING_PRICING,
-  SALES_TAX_RATE,
   MARKUP_PERCENTAGE,
   URGENCY_MULTIPLIERS,
   SCHEDULING_FEE,
@@ -29,6 +28,7 @@ import {
   calculateRoomBasedPrice,
   calculateRoomBasedHours
 } from './constants';
+import { SALES_TAX_RATE } from './salesTax';
 
 // ===================== CALCULATION CACHE =====================
 
@@ -368,7 +368,7 @@ function calculateAdditionalHours(
 
 // ===================== MAIN CALCULATION FUNCTION =====================
 
-export function calculateEstimate(formData: FormData): EstimateData {
+export function calculateEstimate(formData: FormData, salesTaxRate: number = SALES_TAX_RATE): EstimateData {
   // Destructure with optimized access
   const {
     projectType,
@@ -576,7 +576,8 @@ export function calculateEstimate(formData: FormData): EstimateData {
   // Apply professional markup if enabled
   const markupAmount = applyMarkup ? totalBeforeMarkup * MARKUP_PERCENTAGE : 0;
   const totalWithMarkup = totalBeforeMarkup + markupAmount;
-  const salesTax = totalWithMarkup * SALES_TAX_RATE;
+  const taxRate = Number.isFinite(salesTaxRate) ? salesTaxRate : SALES_TAX_RATE;
+  const salesTax = totalWithMarkup * taxRate;
   const totalPrice = totalWithMarkup + salesTax;
 
   // Calculate hours using appropriate method for different project types
@@ -665,6 +666,7 @@ export function calculateEstimate(formData: FormData): EstimateData {
     totalBeforeMarkup,
     markup: markupAmount,
     salesTax,
+    salesTaxRate: taxRate,
     totalPrice,
     estimatedHours,
     pricePerSquareFoot,

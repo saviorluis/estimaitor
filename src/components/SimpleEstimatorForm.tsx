@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
+import { formatSalesTaxPercent } from '@/lib/salesTax';
 import { getRecommendedCleaners, CLEANING_TYPE_DESCRIPTIONS, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
 
 interface SimpleEstimatorFormProps {
@@ -151,6 +153,7 @@ const CITY_LOCATIONS = {
 const SIMPLE_STORAGE_KEY = 'estimaitor_simple_form_data';
 
 export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEstimatorFormProps) {
+  const { salesTaxRate } = useCompanySettings();
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Get saved form data from localStorage
@@ -294,9 +297,9 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
   // Form submission handler
   const onSubmit: SubmitHandler<SimpleFormData> = useCallback((data) => {
     const fullFormData = convertToFullFormData(data);
-    const estimate = calculateEstimate(fullFormData);
+    const estimate = calculateEstimate(fullFormData, salesTaxRate);
     onEstimateCalculated(estimate, fullFormData);
-  }, [onEstimateCalculated, convertToFullFormData]);
+  }, [onEstimateCalculated, convertToFullFormData, salesTaxRate]);
 
   // Show loading state
   if (!isLoaded) {
@@ -824,7 +827,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
             <span className="text-xs text-gray-500 dark:text-gray-400">(Overhead, insurance, profit)</span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-7">
-            When applied, 7% sales tax is added after the markup, so the final total is ~39% above the subtotal.
+            When applied, {formatSalesTaxPercent(salesTaxRate)} sales tax is added after the markup.
           </p>
         </div>
 
@@ -835,7 +838,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
           </h4>
           <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
             <p>• Professional crew size optimized for your {serviceType} project ({recommendedCleaners} cleaners)</p>
-            <p>• <strong>30% professional markup {formValues.applyMarkup ? 'included' : 'optional'}</strong> (overhead, insurance, profit). When applied, 7% sales tax is added after markup (~39% total increase).</p>
+            <p>• <strong>30% professional markup {formValues.applyMarkup ? 'included' : 'optional'}</strong> (overhead, insurance, profit). When applied, {formatSalesTaxPercent(salesTaxRate)} sales tax is added after markup.</p>
             <p>• Standard urgency level (no rush charges)</p>
             <p>• Accurate distance-based travel costs</p>
             <p>• Optional window cleaning available</p>

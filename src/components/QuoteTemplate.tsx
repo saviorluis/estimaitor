@@ -12,7 +12,9 @@ import PurchaseOrderPDF from './PurchaseOrderPDF';
 import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
-import { SALES_TAX_RATE, SCOPE_OF_WORK } from '@/lib/constants';
+import { SCOPE_OF_WORK } from '@/lib/constants';
+import { resolveEstimateSalesTaxRate } from '@/lib/salesTax';
+import { isPressureWashingJob } from '@/lib/pressureWashDocs';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { getLogoSrc } from '@/lib/companySettings';
 
@@ -97,9 +99,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     quoteNumber: generateQuoteNumber(),
     date: formatDate(new Date()),
     validUntil: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)), // 30 days from now
-    projectName: '',
+    projectName: formData.projectName || '',
     projectAddress: '',
-    notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
+    notes: isPressureWashingJob(formData)
+      ? 'This quote includes all labor, equipment, water, and chemicals needed to complete the specified pressure washing services.'
+      : 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
     terms: defaultTerms,
     total: 0 // Initialize total
   });
@@ -112,6 +116,11 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       total: estimateData.totalPrice
     }));
   }, [estimateData?.totalPrice]);
+
+  useEffect(() => {
+    if (!formData?.projectName) return;
+    setQuoteInfo((prev) => (prev.projectName ? prev : { ...prev, projectName: formData.projectName || '' }));
+  }, [formData?.projectName]);
 
   useEffect(() => {
     setCompanyInfo(documentCompanyInfo);
@@ -356,7 +365,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       (estimateData.mobilizationFee || 0);
     subtotal += businessFees;
     
-    const salesTax = subtotal * SALES_TAX_RATE;
+    const taxRate = resolveEstimateSalesTaxRate(estimateData);
+    const salesTax = subtotal * taxRate;
     
     // Return total
     return subtotal + salesTax;
@@ -364,7 +374,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   const getPreTaxTotalForQuotePdf = (): number => {
     if (!estimateData) return 0;
-    return calculateAdjustedTotal() / (1 + SALES_TAX_RATE);
+    return calculateAdjustedTotal() / (1 + resolveEstimateSalesTaxRate(estimateData));
   };
 
   // Get cleaning type display name
@@ -519,7 +529,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       ).toBlob();
       zip.file("quote.pdf", quoteBlob);
 
-      // Generate Work Order PDF (English)
       const workOrderBlob = await pdf(
         <WorkOrderPDF
           estimateData={estimateData}
@@ -528,20 +537,20 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
         />
       ).toBlob();
-      zip.file(`${quoteInfo.projectName} Work Order.pdf`, workOrderBlob);
+      zip.file(`${quoteInfo.projectName || 'Project'} Work Order.pdf`, workOrderBlob);
 
-      // Generate Work Order PDF (Spanish)
-      const workOrderSpanishBlob = await pdf(
-        <WorkOrderPDFSpanish
-          estimateData={estimateData}
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          quoteInfo={quoteInfo}
-        />
-      ).toBlob();
-      zip.file(`${quoteInfo.projectName} Work Order Spanish.pdf`, workOrderSpanishBlob);
+      if (!isPressureWashingJob(formData)) {
+        const workOrderSpanishBlob = await pdf(
+          <WorkOrderPDFSpanish
+            estimateData={estimateData}
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            quoteInfo={quoteInfo}
+          />
+        ).toBlob();
+        zip.file(`${quoteInfo.projectName || 'Project'} Work Order Spanish.pdf`, workOrderSpanishBlob);
+      }
 
-      // Generate Purchase Order PDF
       const purchaseOrderBlob = await pdf(
         <PurchaseOrderPDF
           estimateData={estimateData}
@@ -550,7 +559,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           quoteInfo={quoteInfo}
         />
       ).toBlob();
-      zip.file(`${quoteInfo.projectName} Purchase Order.pdf`, purchaseOrderBlob);
+      zip.file(`${quoteInfo.projectName || 'Project'} Purchase Order.pdf`, purchaseOrderBlob);
 
       // Generate Invoice PDF
       const invoiceInfo = {
@@ -570,25 +579,26 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           preTaxSubtotal={preTaxPdf}
         />
       ).toBlob();
-      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName} Invoice.pdf`, invoiceBlob);
+      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName || 'Project'} Invoice.pdf`, invoiceBlob);
 
-      // Generate Change Order PDF
-      const changeOrderInfo = {
-        orderNumber: quoteInfo.quoteNumber,
-        date: formatDate(new Date()),
-        projectName: quoteInfo.projectName,
-        projectAddress: quoteInfo.projectAddress,
-      };
+      if (!isPressureWashingJob(formData)) {
+        const changeOrderInfo = {
+          orderNumber: quoteInfo.quoteNumber,
+          date: formatDate(new Date()),
+          projectName: quoteInfo.projectName,
+          projectAddress: quoteInfo.projectAddress,
+        };
 
-      const changeOrderBlob = await pdf(
-        <ChangeOrderPDF
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          clientInfo={clientInfo}
-          changeOrderInfo={changeOrderInfo}
-        />
-      ).toBlob();
-      zip.file(`${quoteInfo.projectName} Change Order.pdf`, changeOrderBlob);
+        const changeOrderBlob = await pdf(
+          <ChangeOrderPDF
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            clientInfo={clientInfo}
+            changeOrderInfo={changeOrderInfo}
+          />
+        ).toBlob();
+        zip.file(`${quoteInfo.projectName || 'Project'} Change Order.pdf`, changeOrderBlob);
+      }
 
       // Generate and save the zip file
       const content = await zip.generateAsync({ type: "blob" });
@@ -653,7 +663,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             onClick={handlePackageDownload}
             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
           >
-            Download Package
+            {isPressureWashingJob(formData) ? 'Download Package (Quote, WO, PO, Invoice)' : 'Download Package'}
           </button>
         </div>
       </div>

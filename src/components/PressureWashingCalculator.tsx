@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
+import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 
 interface PressureWashingCalculatorProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
@@ -52,6 +53,7 @@ const defaultFormData = (overrides: Partial<FormData>): FormData => ({
 });
 
 export default function PressureWashingCalculator({ onEstimateCalculated }: PressureWashingCalculatorProps) {
+  const { salesTaxRate } = useCompanySettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<PressureWashingFormValues>({
@@ -81,7 +83,7 @@ export default function PressureWashingCalculator({ onEstimateCalculated }: Pres
       clientName: data.clientName,
       projectName: data.projectName
     });
-    const estimate = calculateEstimate(formData);
+    const estimate = calculateEstimate(formData, salesTaxRate);
     onEstimateCalculated(estimate, formData);
     setIsSubmitting(false);
   };

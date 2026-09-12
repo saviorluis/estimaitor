@@ -8,7 +8,9 @@ import {
   getQuotePreTaxSubtotal
 } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
-import { SCOPE_OF_WORK, SALES_TAX_RATE } from '@/lib/constants';
+import { SCOPE_OF_WORK } from '@/lib/constants';
+import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
+import { getPressureWashingLineTitle, isPressureWashingJob } from '@/lib/pressureWashDocs';
 
 // Register fonts
 Font.register({
@@ -274,7 +276,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
     preTaxSubtotal !== undefined && preTaxSubtotal >= 0
       ? preTaxSubtotal
       : getQuotePreTaxSubtotal(estimateData);
-  const salesTax = subtotal * SALES_TAX_RATE;
+  const taxRate = resolveEstimateSalesTaxRate(estimateData);
+  const salesTax = subtotal * taxRate;
   const finalTotal = subtotal + salesTax;
   const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
   const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
@@ -375,7 +378,17 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Main Cleaning Service */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                {truckStopSplit ? (
+                {isPressureWashingJob(formData) ? (
+                  <>
+                    <Text>{getPressureWashingLineTitle(formData)}</Text>
+                    {formData.needsChimneyWash && (formData.chimneyCount || 0) > 0 ? (
+                      <Text style={{ marginTop: 6 }}>
+                        Exterior chimney wash — {(formData.chimneyCount || 0).toLocaleString()} chimney
+                        {(formData.chimneyCount || 0) === 1 ? '' : 's'}
+                      </Text>
+                    ) : null}
+                  </>
+                ) : truckStopSplit ? (
                   <>
                     <Text>
                       {getCleaningTypeDisplay(formData.cleaningType)} — Truck stop facility (
@@ -433,7 +446,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             {/* Sales Tax */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
-                <Text style={{ fontWeight: 'bold' }}>Sales Tax (7%)</Text>
+                <Text style={{ fontWeight: 'bold' }}>Sales Tax ({formatSalesTaxPercent(taxRate)})</Text>
               </View>
               <View style={[styles.tableCell, styles.amountCell]}>
                 <Text style={{ fontWeight: 'bold' }}>{formatCurrency(salesTax)}</Text>

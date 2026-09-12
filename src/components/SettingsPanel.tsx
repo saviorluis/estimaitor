@@ -9,6 +9,7 @@ import {
   EMPTY_COMPANY_SETTINGS,
   fileToCompressedDataUrl,
 } from '@/lib/companySettings';
+import { US_STATES, formatSalesTaxPercent, getSalesTaxRate } from '@/lib/salesTax';
 import { getQuoteCounter } from '@/lib/utils';
 
 type SettingsTab = 'company' | 'documents' | 'appearance' | 'preferences';
@@ -112,6 +113,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             <>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 This is the source of truth for quote packages. Fill this in once instead of retyping it on every estimate.
+                Sales tax on estimates uses the combined average rate for the company home state.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="sm:col-span-2">
@@ -129,7 +131,20 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <label>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">State</span>
-                    <input className={fieldClass} value={settings.state} onChange={handleText('state')} />
+                    <select
+                      className={fieldClass}
+                      value={settings.state}
+                      onChange={(e) => updateSettings({ state: e.target.value })}
+                    >
+                      {US_STATES.map((item) => (
+                        <option key={item.code} value={item.code}>
+                          {item.name} ({item.code})
+                        </option>
+                      ))}
+                    </select>
+                    <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
+                      Sales tax: {formatSalesTaxPercent(getSalesTaxRate(settings.state))}
+                    </span>
                   </label>
                   <label>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">ZIP</span>

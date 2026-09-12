@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import EstimatorForm from '@/components/EstimatorForm';
 import PressureWashingCalculator from '@/components/PressureWashingCalculator';
-import PaintingCalculator from '@/components/PaintingCalculator';
 import JanitorialContractForm from '@/components/JanitorialContractForm';
 import EstimateResult from '@/components/EstimateResult';
 import AdminThemeMenu from '@/components/AdminThemeMenu';
 import SettingsPanel from '@/components/SettingsPanel';
 import ContractPDF from '@/components/ContractPDF';
 import { EstimateData, FormData } from '@/lib/types';
+import { calculateEstimate } from '@/lib/estimator';
+import { getSalesTaxRate } from '@/lib/salesTax';
+import { isPressureWashingJob } from '@/lib/pressureWashDocs';
 import { pdf } from '@react-pdf/renderer';
 import { emailService } from '@/lib/emailService';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
@@ -68,10 +70,10 @@ interface JanitorialFormData {
   specialRequirements?: string;
 }
 
-// App modes: three separate professional calculators + contract
-export type AppMode = 'cleaning' | 'pressure_washing' | 'painting' | 'contract';
+// App modes: cleaning + pressure washing + optional janitorial contract
+export type AppMode = 'cleaning' | 'pressure_washing' | 'contract';
 
-const VISIBLE_MODES: AppMode[] = ['cleaning', 'pressure_washing', 'painting', 'contract'];
+const VISIBLE_MODES: AppMode[] = ['cleaning', 'pressure_washing', 'contract'];
 
 interface ModeConfig {
   title: string;
@@ -95,13 +97,6 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
     description: 'Standalone pressure washing calculator: area, service type, multiple surfaces, travel, and markup.',
     color: 'from-sky-600 to-sky-800',
     features: ['Area & service type', 'Multiple surfaces', 'Travel', 'Markup', 'Quote generation']
-  },
-  painting: {
-    title: 'Painting',
-    subtitle: 'Painting Estimate',
-    description: 'Standalone painting calculator: square footage, interior/exterior, coats, travel, and markup.',
-    color: 'from-amber-600 to-amber-800',
-    features: ['Square footage', 'Interior / exterior', 'Coats', 'Travel', 'Quote generation']
   },
   contract: {
     title: 'Janitorial Contract',
@@ -147,7 +142,7 @@ export default function Home() {
         setPastEntries(JSON.parse(savedEntries));
       }
 
-      if (savedMode && ['cleaning', 'pressure_washing', 'painting', 'contract'].includes(savedMode)) {
+      if (savedMode && ['cleaning', 'pressure_washing', 'contract'].includes(savedMode)) {
         setCurrentMode(savedMode as AppMode);
       } else if (savedMode === 'pro' || savedMode === 'simple' || savedMode === 'wizard') {
         setCurrentMode('cleaning');
@@ -167,6 +162,17 @@ export default function Home() {
       localStorage.setItem(APP_MODE_KEY, currentMode);
     }
   }, [currentMode, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded || !formData) return;
+    const next = calculateEstimate(formData, getSalesTaxRate(settings.state));
+    setEstimateData(next);
+    try {
+      localStorage.setItem(ESTIMATE_STORAGE_KEY, JSON.stringify(next));
+    } catch (error) {
+      console.error('Error updating estimate tax:', error);
+    }
+  }, [isLoaded, settings.state, formData]);
 
   const handleEstimateCalculated = (data: EstimateData, formValues: FormData) => {
     setEstimateData(data);
@@ -363,14 +369,15 @@ export default function Home() {
               <JanitorialContractForm onContractGenerated={handleContractGenerated} />
             ) : currentMode === 'pressure_washing' ? (
               <PressureWashingCalculator onEstimateCalculated={handleEstimateCalculated} />
-            ) : currentMode === 'painting' ? (
-              <PaintingCalculator onEstimateCalculated={handleEstimateCalculated} />
             ) : (
               <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
             )}
           </div>
           
-          {(estimateData && formData && (currentMode === 'cleaning' || currentMode === 'pressure_washing' || currentMode === 'painting')) || (contractData && janitorialFormData && currentMode === 'contract') ? (
+          {(estimateData && formData && (
+            (currentMode === 'cleaning' && !isPressureWashingJob(formData)) ||
+            (currentMode === 'pressure_washing' && isPressureWashingJob(formData))
+          )) || (contractData && janitorialFormData && currentMode === 'contract') ? (
             <div className="card h-full">
               {currentMode === 'contract' && contractData && janitorialFormData ? (
                 <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">

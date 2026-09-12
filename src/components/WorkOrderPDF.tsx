@@ -4,6 +4,7 @@ import { EstimateData, FormData } from '@/lib/types';
 import { SCOPE_OF_WORK, splitPrincipalAndVctSqFt } from '@/lib/constants';
 import { formatDate, formatCurrency, getProjectTypeDisplay } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
+import { getPressureWashingScopeLines, isPressureWashingJob } from '@/lib/pressureWashDocs';
 
 // Register fonts
 Font.register({
@@ -261,7 +262,8 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   }
 
   // Get scope of work based on project type and split into array
-  const scopeOfWorkText = SCOPE_OF_WORK[formData.projectType] || '';
+  const isPw = isPressureWashingJob(formData);
+  const scopeOfWorkText = isPw ? '' : (SCOPE_OF_WORK[formData.projectType] || '');
   const totalWindows = (formData.numberOfWindows || 0) + (formData.numberOfLargeWindows || 0) + (formData.numberOfHighAccessWindows || 0);
   
   // Debug: Log the window values to help identify the issue
@@ -275,7 +277,9 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
   // Debug: Log the original scope text
   console.log('Original scope text:', scopeOfWorkText);
   
-  const scopeOfWork = scopeOfWorkText
+  const scopeOfWork = isPw
+    ? getPressureWashingScopeLines(formData)
+    : scopeOfWorkText
     .split('\n')
     .filter(line => line.trim())
     .map(line => line.replace('• ', '').trim())
@@ -324,7 +328,7 @@ const WorkOrderPDF: React.FC<WorkOrderPDFProps> = ({
             <Text style={styles.sectionTitle}>Project Details</Text>
             <Text style={styles.infoText}>Project Name: {quoteInfo.projectName}</Text>
             <Text style={styles.infoText}>Location: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.infoText}>Project Type: {getProjectTypeDisplay(formData.projectType)}</Text>
+            <Text style={styles.infoText}>Project Type: {isPressureWashingJob(formData) ? 'Pressure Washing' : getProjectTypeDisplay(formData.projectType)}</Text>
           </View>
 
           {/* Cleaner Information */}

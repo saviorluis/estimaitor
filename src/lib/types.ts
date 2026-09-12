@@ -151,6 +151,8 @@ export interface EstimateData {
   totalBeforeMarkup: number;
   markup: number;
   salesTax: number;
+  /** Combined sales tax rate used for this estimate (from Settings home state). */
+  salesTaxRate?: number;
   totalPrice: number;
   
   // Time and Metrics

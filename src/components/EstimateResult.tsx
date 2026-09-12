@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
+import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
 import QuoteTemplate from './QuoteTemplate';
 
 interface EstimateResultProps {
@@ -369,7 +370,9 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
 
             {/* Sales Tax - applied after markup */}
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Sales Tax (7%)</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                Sales Tax ({formatSalesTaxPercent(resolveEstimateSalesTaxRate(estimateData))})
+              </span>
               <span className="text-gray-800 dark:text-gray-200">
                 {formatCurrency(estimateData.salesTax)}
               </span>
@@ -385,7 +388,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               </div>
               {estimateData.markup > 0 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Total = Subtotal + 20% markup + 7% sales tax (~28.4% above subtotal).
+                  Total = Subtotal + 20% markup + {formatSalesTaxPercent(resolveEstimateSalesTaxRate(estimateData))} sales tax.
                 </p>
               )}
             </div>
