@@ -347,6 +347,30 @@ const SERVICE_SCOPES: Record<ProjectType, ServiceScope> = {
       'Professional deep clean of launderette'
     ]
   },
+  luxury_garage: {
+    daily: [
+      'Sweep/mop vehicle bays and loft floors',
+      'Spot-clean garage-door glass and entry glass',
+      'Empty trash and wipe high-touch hardware',
+      'Spot-clean loft stairs, rails, and interior glass'
+    ],
+    weekly: [
+      'Detail clean garage doors (glass, frames, accessible tracks)',
+      'Clean interior and exterior windows and loft glazing',
+      'Dust high-bay fixtures and HVAC registers as accessible',
+      'Mop epoxy/polished concrete in bays and loft'
+    ],
+    monthly: [
+      'Full interior glass: rails, partitions, mirrors, balcony glazing',
+      'Deep dust concrete walls and metal roof structure as accessible',
+      'Detail loft office/entertainment area'
+    ],
+    quarterly: [
+      'Professional high-access window and garage-door glass',
+      'Deep floor care in bays and loft',
+      'Comprehensive dusting of high surfaces'
+    ]
+  },
   fire_station: {
     daily: [
       'Clean and maintain apparatus bay floors',
@@ -426,6 +450,7 @@ const MONTHLY_RATES_PER_SQFT: Record<ProjectType, number> = {
   arcade: 1.05,
   coffee_shop: 1.60,
   truck_stop: 1.22,
+  luxury_garage: 1.25,
   fire_station: 1.30,
   other: 0.85,
   home_renovation: 1.40,
@@ -454,6 +479,7 @@ const MONTHLY_RATES_PER_ROOM: Record<ProjectType, number> = {
   arcade: 155,
   coffee_shop: 240,
   truck_stop: 192,
+  luxury_garage: 175,
   fire_station: 195,
   other: 125,
   home_renovation: 180,
@@ -804,6 +830,7 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
                 <option value="industrial">Industrial/Warehouse</option>
                 <option value="hotel">Hotel</option>
                 <option value="truck_stop">Truck Stop</option>
+                <option value="luxury_garage">Luxury Garage</option>
                 <option value="other">Other</option>
               </select>
               {errors.buildingType && (

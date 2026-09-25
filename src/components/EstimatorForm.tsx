@@ -210,6 +210,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="arcade">Arcade</option>
             <option value="coffee_shop">Coffee Shop</option>
             <option value="truck_stop">Truck Stop</option>
+            <option value="luxury_garage">Luxury Garage</option>
             <option value="fire_station">Fire Station</option>
             <option value="home_renovation">Home Renovation</option>
             <option value="building_shell">Building Shell</option>
@@ -219,6 +220,13 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.projectType.message}</p>
           )}
         </div>
+
+        {formValues.projectType === 'luxury_garage' && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 -mt-2">
+            Count loft plus both bays in square footage. A typical independent suite is about 2,250 sq ft
+            (high bay, standard bay, loft). Scope includes garage doors, windows, interior glass, and sweep/mop.
+          </p>
+        )}
 
         {formValues.projectType === 'truck_stop' && (
           <div className="space-y-3 rounded-md border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/50 p-4">

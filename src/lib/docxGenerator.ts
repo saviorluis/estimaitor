@@ -54,6 +54,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'bakery': return 'Bakery';
     case 'interactive_toy_store': return 'Interactive Toy Store';
     case 'truck_stop': return 'Truck Stop';
+    case 'luxury_garage': return 'Luxury Garage';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };

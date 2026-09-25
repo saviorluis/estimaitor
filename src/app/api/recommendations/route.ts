@@ -65,6 +65,11 @@ function generateRecommendations(data: AIRecommendationRequest): string[] {
       recommendations.push('Use microfiber cloths to avoid scratching delicate surfaces');
       recommendations.push('Pay special attention to security fixtures and lighting');
       break;
+    case 'luxury_garage':
+      recommendations.push('Plan glass-safe cleaning for garage doors, loft windows, and interior rail glass');
+      recommendations.push('Sweep and mop bays plus loft; allow extra time for high-bay dusting');
+      recommendations.push('Include loft square footage with both vehicle bays in the bid');
+      break;
   }
   
   // Recommendations based on cleaning type

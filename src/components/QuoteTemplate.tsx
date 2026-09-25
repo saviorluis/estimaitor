@@ -14,7 +14,12 @@ import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPD
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 import { resolveEstimateSalesTaxRate } from '@/lib/salesTax';
-import { isPressureWashingJob } from '@/lib/pressureWashDocs';
+import {
+  isPressureWashingJob,
+  PRESSURE_WASHING_INVOICE_PAYMENT_TERMS,
+  PRESSURE_WASHING_QUOTE_NOTES,
+  PRESSURE_WASHING_QUOTE_TERMS,
+} from '@/lib/pressureWashDocs';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { getLogoSrc } from '@/lib/companySettings';
 
@@ -102,9 +107,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     projectName: formData.projectName || '',
     projectAddress: '',
     notes: isPressureWashingJob(formData)
-      ? 'This quote includes all labor, equipment, water, and chemicals needed to complete the specified pressure washing services.'
+      ? PRESSURE_WASHING_QUOTE_NOTES
       : 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
-    terms: defaultTerms,
+    terms: isPressureWashingJob(formData) ? PRESSURE_WASHING_QUOTE_TERMS : defaultTerms,
     total: 0 // Initialize total
   });
 
@@ -402,6 +407,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       case 'bakery': return 'Bakery';
       case 'interactive_toy_store': return 'Interactive Toy Store';
       case 'truck_stop': return 'Truck Stop';
+      case 'luxury_garage': return 'Luxury Garage';
       default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
     }
   };
@@ -566,7 +572,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         invoiceNumber: quoteInfo.quoteNumber,
         date: formatDate(new Date()),
         dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
-        paymentTerms: "Net 15 - Payment due within 15 days of invoice date. A late payment fee of 10% of the total invoice amount will be added if payment is not received by the due date.",
+        paymentTerms: isPressureWashingJob(formData)
+          ? PRESSURE_WASHING_INVOICE_PAYMENT_TERMS
+          : "Net 15 - Payment due within 15 days of invoice date. A late payment fee of 10% of the total invoice amount will be added if payment is not received by the due date.",
       };
 
       const invoiceBlob = await pdf(

@@ -80,7 +80,7 @@ export const MOBILIZATION_THRESHOLDS = {
 // Function to calculate mobilization fee based on square footage and project type
 export function calculateMobilizationFee(squareFootage: number, projectType: ProjectType): number {
   // Complex projects that require specialized equipment or access
-  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation', 'assisted_living', 'truck_stop'];
+  const complexProjects: ProjectType[] = ['medical', 'industrial', 'building_shell', 'home_renovation', 'assisted_living', 'truck_stop', 'luxury_garage'];
   
   if (complexProjects.includes(projectType)) {
     return MOBILIZATION_FEES.complex;
@@ -122,6 +122,7 @@ export const PROJECT_TYPE_MULTIPLIERS: Record<ProjectType, number> = {
   building_shell: 1.1,
   assisted_living: 1.5,
   truck_stop: 1.42,
+  luxury_garage: 1.4,
   other: 1.0
 } as const;
 
@@ -306,6 +307,7 @@ export const PRODUCTIVITY_RATES: Record<ProjectType, number> = {
   building_shell: 800,
   assisted_living: 450,
   truck_stop: 430,
+  luxury_garage: 380,
   other: 500
 } as const;
 
@@ -679,6 +681,16 @@ export const SCOPE_OF_WORK: Record<ProjectType, string> = {
 • Launderette: clean washers, dryers, folding tables, floors, and lint/surface buildup
 • Clean vending, ATM, and entry airlock / vestibule glass and thresholds
 • Empty trash and replace liners; spot-sanitize high-touch points in travel corridors`),
+
+  luxury_garage: createScopeTemplate(`
+• Sweep/mop vehicle bays, high bay, and loft hard surfaces (epoxy, polished concrete, or specified flooring)
+• Clean frameless/glass garage doors (glass, frames, tracks, and accessible hardware)
+• Clean all windows: exterior, interior, high/market glazing, and loft glass
+• Detail interior glass: stair/rail glass, partitions, mirrors, and balcony glazing
+• Dust and wipe loft office/entertainment area, floating stairs, and railings
+• Remove construction dust from concrete walls, metal roof structure, and glass
+• Wipe HVAC registers, LED fixtures, and high surfaces in tall bays as accessible
+• Spot-clean entry/security doors, thresholds, and high-touch hardware`),
 
   other: createScopeTemplate(`
 • Detail clean all work areas

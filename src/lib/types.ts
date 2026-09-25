@@ -24,6 +24,7 @@ export type ProjectType =
   | 'building_shell'
   | 'assisted_living'
   | 'truck_stop'
+  | 'luxury_garage'
   | 'other';
 
 export type CleaningType = 'rough' | 'final' | 'final_touchup' | 'rough_final' | 'rough_final_touchup' | 'pressure_washing' | 'vct_only' | 'window_cleaning_only';
@@ -268,7 +269,7 @@ export function isValidProjectType(value: string): value is ProjectType {
     'restaurant', 'fast_food', 'medical', 'retail', 'office', 'industrial',
     'educational', 'hotel', 'jewelry_store', 'grocery_store', 'hardware_store', 'yoga_studio',
     'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
-    'coffee_shop', 'fire_station', 'home_renovation', 'building_shell', 'assisted_living', 'truck_stop', 'other'
+    'coffee_shop', 'fire_station', 'home_renovation', 'building_shell', 'assisted_living', 'truck_stop', 'luxury_garage', 'other'
   ];
   return validTypes.includes(value as ProjectType);
 }

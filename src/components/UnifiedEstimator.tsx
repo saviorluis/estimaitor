@@ -44,6 +44,7 @@ const PROJECT_TYPES = [
   { value: 'educational', label: 'Educational', icon: '🎓', description: 'Schools, universities, training centers' },
   { value: 'hotel', label: 'Hotel', icon: '🏨', description: 'Hotels, hospitality venues' },
   { value: 'jewelry_store', label: 'Jewelry Store', icon: '💎', description: 'Jewelry stores, luxury retail' },
+  { value: 'luxury_garage', label: 'Luxury Garage', icon: '🏎️', description: 'Showroom garage suites: bays, loft, glass doors and windows' },
   { value: 'grocery_store', label: 'Organic Grocery Store', icon: '🛒', description: 'Natural/organic markets (e.g. Sprouts, Whole Foods)' },
   { value: 'hardware_store', label: 'Hardware Store', icon: '🔧', description: 'Home improvement, lumber, building supply' },
   { value: 'yoga_studio', label: 'Yoga Studio', icon: '🧘', description: 'Fitness studios, wellness centers' },
@@ -267,6 +268,12 @@ export default function UnifiedEstimator({
                   <p className="text-red-500 text-sm mt-1">{errors.squareFootage.message}</p>
                 )}
               </div>
+            )}
+
+            {watchedValues.projectType === 'luxury_garage' && (
+              <p className="text-sm text-gray-600 md:col-span-2">
+                Include loft plus both bays in square footage (typical suite ~2,250 sq ft). Scope covers garage doors, windows, interior glass, and sweep/mop.
+              </p>
             )}
 
             {watchedValues.projectType === 'truck_stop' && (
@@ -671,6 +678,11 @@ export default function UnifiedEstimator({
                   </option>
                 ))}
               </select>
+              {watchedValues.projectType === 'luxury_garage' && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Include loft plus both bays (~2,250 sq ft typical). Scope: garage doors, windows, interior glass, sweep/mop.
+                </p>
+              )}
             </div>
 
             {/* Square Footage or Bed/Baths based on project type */}

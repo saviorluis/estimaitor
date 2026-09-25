@@ -258,7 +258,8 @@ const PROJECT_TYPE_TIME_MODIFIERS: Record<ProjectType, number> = {
   home_renovation: 1.4,
   building_shell: 1.1,
   assisted_living: 1.3,
-  truck_stop: 1.36
+  truck_stop: 1.36,
+  luxury_garage: 1.4
 } as const;
 
 // ===================== OPTIMIZED HOURS CALCULATION =====================

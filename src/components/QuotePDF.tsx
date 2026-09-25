@@ -421,6 +421,7 @@ const getProjectTypeDisplay = (type: string): string => {
     case 'coffee_shop': return 'Coffee Shop';
     case 'assisted_living': return 'Assisted Living Facility';
     case 'truck_stop': return 'Truck Stop';
+    case 'luxury_garage': return 'Luxury Garage';
     default: return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   }
 };
@@ -860,7 +861,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', textAlign: 'center' }]}>
-                  Includes all necessary equipment, supplies, labor, and travel expenses.
+                  {isPressureWashingJob(formData)
+                    ? 'Includes labor, equipment, chemicals as specified, rinse, and travel as quoted. Washable surface only — not lot size or interior cleaning.'
+                    : 'Includes all necessary equipment, supplies, labor, and travel expenses.'}
                 </Text>
               </View>
               <View style={styles.amountCell}></View>
@@ -905,18 +908,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
 
         {/* Terms and Conditions */}
-        <View style={[styles.section, { marginTop: 20 }]}>
+        <View style={[styles.section, { marginTop: 16 }]}>
           <Text style={styles.sectionTitle}>Terms & Conditions</Text>
-          <Text style={styles.termsText}>
-            1. Payment Terms: Net 15 - Payment due within 15 days of completion.{'\n'}
-            2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.{'\n'}
-            3. Rescheduling Fee: A $200 mobilization fee will be charged for rescheduling due to poor planning or site readiness issues.{'\n'}
-            4. Scope: This quote covers only the services explicitly described.{'\n'}
-            5. Additional Services: Any services not specified will be quoted separately.{'\n'}
-            6. Access: Client must provide necessary access to the property.{'\n'}
-            7. Utilities: Working electricity and water must be available on-site.{'\n'}
-            8. Quote Validity: This quote is valid for 30 days from the date issued.
-          </Text>
+          {(quoteInfo.terms || '')
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line, index) => (
+              <Text key={index} style={[styles.termsText, { fontSize: 8, lineHeight: 1.35, marginTop: 2 }]}>
+                {line}
+              </Text>
+            ))}
         </View>
 
         {/* Signature Section */}

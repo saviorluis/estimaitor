@@ -14,6 +14,7 @@ export function getProjectTypeDisplay(type: ProjectType | string): string {
     case 'coffee_shop': return 'Coffee Shop';
     case 'assisted_living': return 'Assisted Living Facility';
     case 'truck_stop': return 'Truck Stop';
+    case 'luxury_garage': return 'Luxury Garage';
     default:
       return String(type)
         .split('_')

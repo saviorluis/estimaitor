@@ -55,6 +55,7 @@ const COMMERCIAL_TYPES: ProjectType[] = [
   'educational', 'hotel', 'jewelry_store', 'grocery_store', 'hardware_store', 'yoga_studio', 
   'kids_fitness', 'bakery', 'interactive_toy_store', 'church', 'arcade', 
   'truck_stop',
+  'luxury_garage',
   'home_renovation', 'building_shell', 'other'
 ];
 
@@ -94,6 +95,7 @@ const getProjectTypeName = (type: ProjectType, serviceType: ServiceType): string
     case 'church': return 'Church/Religious';
     case 'arcade': return 'Arcade/Entertainment';
     case 'truck_stop': return 'Truck Stop';
+    case 'luxury_garage': return 'Luxury Garage';
     case 'home_renovation': return 'Home Renovation';
     case 'building_shell': return 'Building Shell';
     case 'other': return 'Other Commercial';
@@ -491,6 +493,7 @@ export default function SimpleEstimatorForm({ onEstimateCalculated }: SimpleEsti
                 <option value="arcade">Arcade</option>
                 <option value="coffee_shop">Coffee Shop</option>
                 <option value="truck_stop">Truck Stop</option>
+                <option value="luxury_garage">Luxury Garage</option>
                 <option value="fire_station">Fire Station</option>
                 <option value="home_renovation">🏠 Home Renovation</option>
                 <option value="other">Other Commercial</option>
