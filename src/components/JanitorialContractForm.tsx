@@ -1096,20 +1096,20 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
                 ${pricingPreview.monthlyRate.toLocaleString()}
               </p>
               {pricingPreview.pricePerSqFt && (
-                <p className="text-xs text-gray-500">${pricingPreview.pricePerSqFt.toFixed(2)}/sq ft</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">${pricingPreview.pricePerSqFt.toFixed(2)}/sq ft</p>
               )}
               {pricingPreview.pricePerRoom && (
-                <p className="text-xs text-gray-500">${pricingPreview.pricePerRoom.toFixed(2)}/room</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">${pricingPreview.pricePerRoom.toFixed(2)}/room</p>
               )}
             </div>
             
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-300">Annual Rate</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                 ${pricingPreview.annualRate.toLocaleString()}
               </p>
               {pricingPreview.contractTerms.annualDiscount > 0 && (
-                <p className="text-xs text-green-600">{pricingPreview.contractTerms.annualDiscount}% contract discount applied</p>
+                <p className="text-xs text-green-800 dark:text-green-400">{pricingPreview.contractTerms.annualDiscount}% contract discount applied</p>
               )}
             </div>
             
@@ -1118,7 +1118,7 @@ export default function JanitorialContractForm({ onContractGenerated }: Janitori
               <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {pricingPreview.schedule.estimatedHours}
               </p>
-              <p className="text-xs text-gray-500">hours per {serviceFrequency === 'daily' ? 'week' : serviceFrequency}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">hours per {serviceFrequency === 'daily' ? 'week' : serviceFrequency}</p>
             </div>
           </div>
         </div>

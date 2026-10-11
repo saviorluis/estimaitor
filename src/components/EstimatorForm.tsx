@@ -765,7 +765,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     setValue('clientName', '');
                     setValue('projectName', '');
                   }}
-                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                  className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded transition-colors"
                 >
                   Clear Fields
                 </button>
@@ -779,7 +779,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     setValue('projectName', '');
                     alert('Cleared all saved client data!');
                   }}
-                  className="text-xs px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded transition-colors"
+                  className="text-xs px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded transition-colors"
                 >
                   Reset Saved Data
                 </button>

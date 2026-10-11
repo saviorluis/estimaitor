@@ -6,7 +6,6 @@ import { CompanySettingsProvider } from '@/contexts/CompanySettingsContext';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
   themeColor: '#4f46e5',
 };
 

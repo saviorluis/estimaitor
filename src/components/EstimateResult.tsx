@@ -261,7 +261,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
                 }
               </span>
               <span className="text-gray-800 dark:text-gray-200 flex items-center">
-                <span className="text-red-400 text-sm mr-2">
+                <span className="text-red-600 dark:text-red-400 text-sm mr-2">
                   {formatCurrency(estimateData.basePrice * 0.6)}
                 </span>
                 {formatCurrency(estimateData.basePrice)}

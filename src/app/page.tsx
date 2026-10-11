@@ -14,7 +14,6 @@ import { calculateEstimate } from '@/lib/estimator';
 import { getSalesTaxRate } from '@/lib/salesTax';
 import { isPressureWashingJob } from '@/lib/pressureWashDocs';
 import { pdf } from '@react-pdf/renderer';
-import { emailService } from '@/lib/emailService';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { darkenHex, DEFAULT_BRAND_COLOR, isValidBrandColor } from '@/lib/companySettings';
 
@@ -418,10 +417,10 @@ export default function Home() {
                           ${contractData.monthlyRate.toLocaleString()}
                         </p>
                         {contractData.pricePerSqFt && (
-                          <p className="text-sm text-gray-500">${contractData.pricePerSqFt.toFixed(2)}/sq ft/month</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">${contractData.pricePerSqFt.toFixed(2)}/sq ft/month</p>
                         )}
                         {contractData.pricePerRoom && (
-                          <p className="text-sm text-gray-500">${contractData.pricePerRoom.toFixed(2)}/room/month</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">${contractData.pricePerRoom.toFixed(2)}/room/month</p>
                         )}
                       </div>
                       <div className="text-center">
@@ -430,7 +429,7 @@ export default function Home() {
                           ${contractData.annualRate.toLocaleString()}
                         </p>
                         {contractData.contractTerms.annualDiscount > 0 && (
-                          <p className="text-sm text-green-600">
+                          <p className="text-sm text-green-700 dark:text-green-400">
                             {contractData.contractTerms.annualDiscount}% contract discount applied
                           </p>
                         )}
@@ -474,7 +473,7 @@ export default function Home() {
                             <li key={index}>• {task}</li>
                           ))}
                           {contractData.serviceScope.daily.length > 3 && (
-                            <li className="text-gray-500">+ {contractData.serviceScope.daily.length - 3} more tasks...</li>
+                            <li className="text-gray-500 dark:text-gray-400">+ {contractData.serviceScope.daily.length - 3} more tasks...</li>
                           )}
                         </ul>
                       </div>
@@ -487,7 +486,7 @@ export default function Home() {
                           {contractData.serviceScope.monthly.slice(0, 1).map((task: string, index: number) => (
                             <li key={index}>• {task}</li>
                           ))}
-                          <li className="text-gray-500">+ Complete scope in full contract...</li>
+                          <li className="text-gray-500 dark:text-gray-400">+ Complete scope in full contract...</li>
                         </ul>
                       </div>
                     </div>
@@ -598,7 +597,7 @@ export default function Home() {
                           alert('Error sending contract email. Please try again.');
                         }
                       }}
-                      className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                      className="flex-1 bg-green-700 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-800 transition-colors duration-200"
                     >
                       📧 Email Contract
                     </button>
@@ -693,7 +692,7 @@ export default function Home() {
           </div>
         </div>
 
-        <footer className="mt-12 text-center text-sm text-gray-500 py-6 border-t border-gray-200 dark:border-gray-700">
+        <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400 py-6 border-t border-gray-200 dark:border-gray-700">
           <p>© {new Date().getFullYear()} {settings.appName || 'EstimAItor'}{settings.name ? ` · ${settings.name}` : ''}</p>
           <p className="mt-1">
             Prices based on East Coast rates

@@ -669,7 +669,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </button>
           <button
             onClick={handlePackageDownload}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+            className="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition-colors font-medium shadow-sm"
           >
             {isPressureWashingJob(formData) ? 'Download Package (Quote, WO, PO, Invoice)' : 'Download Package'}
           </button>
@@ -696,7 +696,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           {editingCompanyInfo ? (
             <div className="grid grid-cols-2 gap-4 w-full">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
+                <label className="block text-sm font-medium text-gray-700">Company Name</label>
                 <input
                   type="text"
                   name="name"
@@ -706,7 +706,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                <label className="block text-sm font-medium text-gray-700">Phone</label>
                 <input
                   type="text"
                   name="phone"
@@ -716,7 +716,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
                 <input
                   type="text"
                   name="address"
@@ -726,7 +726,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="text"
                   name="email"
@@ -736,7 +736,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
+                <label className="block text-sm font-medium text-gray-700">City</label>
                 <input
                   type="text"
                   name="city"
@@ -746,7 +746,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+                <label className="block text-sm font-medium text-gray-700">Website</label>
                 <input
                   type="text"
                   name="website"
@@ -792,7 +792,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         <h3 className="text-lg font-semibold mb-2 border-b pb-1">Client Information (For Quote)</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Client Name</label>
+            <label className="block text-sm font-medium text-gray-700">Client Name</label>
             <input
               type="text"
               name="name"
@@ -803,7 +803,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+            <label className="block text-sm font-medium text-gray-700">Phone</label>
             <input
               type="text"
               name="phone"
@@ -814,7 +814,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company</label>
+            <label className="block text-sm font-medium text-gray-700">Company</label>
             <input
               type="text"
               name="company"
@@ -825,7 +825,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="text"
               name="email"
@@ -836,7 +836,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+            <label className="block text-sm font-medium text-gray-700">Address</label>
             <input
               type="text"
               name="address"
@@ -865,15 +865,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               <span className="text-sm text-green-800 font-medium">✅ Professional Markup (Built-in)</span>
               <span className="text-sm text-green-700 font-semibold">20%</span>
             </div>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-xs text-green-700 mt-1">
               All estimates automatically include 20% professional markup covering overhead, insurance, and profit margins.
             </p>
           </div>
           
           {/* Additional Adjustment Controls */}
           <div className="flex items-center">
-            <label className="text-sm font-medium text-gray-700 mr-3">Additional Adjustment:</label>
+            <label htmlFor="markupAdjustment" className="text-sm font-medium text-gray-700 mr-3">Additional Adjustment:</label>
             <input
+              id="markupAdjustment"
               type="number"
               min="-50"
               max="100"
@@ -893,18 +894,19 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-600 mt-2">
             Use positive values to increase prices further, or negative values to provide discounts while maintaining profitability.
           </p>
         </div>
         
         {/* Quote Counter Input */}
         <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="quoteCounter" className="block text-sm font-medium text-gray-700 mb-2">
             Quote Number
           </label>
           <div className="flex items-center">
             <input
+              id="quoteCounter"
               type="number"
               min="1"
               step="1"
@@ -937,7 +939,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
         
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Name</label>
+            <label className="block text-sm font-medium text-gray-700">Project Name</label>
             <input
               type="text"
               name="projectName"
@@ -948,7 +950,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quote Number</label>
+            <label className="block text-sm font-medium text-gray-700">Quote Number</label>
             <input
               type="text"
               name="quoteNumber"
@@ -959,7 +961,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Address</label>
+            <label className="block text-sm font-medium text-gray-700">Project Address</label>
             <input
               type="text"
               name="projectAddress"
@@ -970,7 +972,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until</label>
+            <label className="block text-sm font-medium text-gray-700">Valid Until</label>
             <input
               type="text"
               name="validUntil"
@@ -981,7 +983,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+            <label className="block text-sm font-medium text-gray-700">Notes</label>
             <textarea
               name="notes"
               value={quoteInfo.notes}
@@ -992,7 +994,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Terms & Conditions</label>
+            <label className="block text-sm font-medium text-gray-700">Terms & Conditions</label>
             <textarea
               name="terms"
               value={quoteInfo.terms}
