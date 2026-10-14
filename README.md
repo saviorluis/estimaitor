@@ -64,7 +64,6 @@ The estimator uses average commercial cleaning rates for the East Coast region (
 
 - Node.js 14.x or higher
 - npm or yarn
-- OpenAI API key (for AI recommendations)
 
 ### Installation
 
@@ -83,11 +82,11 @@ npm install
 yarn install
 ```
 
-3. Set up environment variables
-   Create a `.env.local` file in the root directory with your OpenAI API key:
+3. (Optional) Set up email
+   To send janitorial contracts by email, create a `.env.local` file with a Resend API key:
 
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+RESEND_API_KEY=your_resend_api_key_here
 ```
 
 4. Start the development server
@@ -160,9 +159,7 @@ The form includes validation and sends notifications to your team when new inqui
 - TypeScript
 - Tailwind CSS
 - React Hook Form
-- OpenAI API
 - PDF generation
-- Word document generation
 - Geolocation API
 - Form validation
 

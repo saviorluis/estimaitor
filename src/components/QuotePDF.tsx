@@ -523,7 +523,6 @@ interface QuotePDFProps {
     notes: string;
     terms: string;
   };
-  adjustedPrices: {[key: string]: number};
   /** Pre-tax total (labor + fees + markup) — must match browser breakdown; keeps PDF in sync when parent passes it */
   preTaxSubtotal?: number;
 }
@@ -534,7 +533,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   companyInfo,
   clientInfo,
   quoteInfo,
-  adjustedPrices,
   preTaxSubtotal
 }) => {
   const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
@@ -546,7 +544,6 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     Boolean(formData.hasVCT),
     formData.vctSquareFootage || 0
   );
-  const totalAmount = Object.values(adjustedPrices).reduce((sum, price) => sum + price, 0);
 
   const subtotal =
     preTaxSubtotal !== undefined && preTaxSubtotal >= 0

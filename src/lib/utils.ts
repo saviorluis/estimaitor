@@ -64,6 +64,24 @@ export function getQuotePreTaxSubtotal(estimateData: EstimateData): number {
   return (estimateData.totalBeforeMarkup ?? 0) + (estimateData.markup ?? 0);
 }
 
+export const QUOTE_ADJUSTMENT_MIN_PERCENT = -50;
+export const QUOTE_ADJUSTMENT_MAX_PERCENT = 100;
+
+export function clampQuoteAdjustmentPercent(percent: number): number {
+  if (!Number.isFinite(percent)) return 0;
+  return Math.min(QUOTE_ADJUSTMENT_MAX_PERCENT, Math.max(QUOTE_ADJUSTMENT_MIN_PERCENT, percent));
+}
+
+/** Pre-tax quote subtotal after the quote screen's additional adjustment, applied to the whole subtotal. */
+export function getAdjustedQuotePreTaxSubtotal(estimateData: EstimateData, adjustmentPercent: number): number {
+  return getQuotePreTaxSubtotal(estimateData) * (1 + clampQuoteAdjustmentPercent(adjustmentPercent) / 100);
+}
+
+/** True when the adjusted subtotal is below the job's cost before the professional markup. */
+export function isQuoteBelowCost(estimateData: EstimateData, adjustmentPercent: number): boolean {
+  return getAdjustedQuotePreTaxSubtotal(estimateData, adjustmentPercent) < (estimateData.totalBeforeMarkup ?? 0) - 0.005;
+}
+
 // ===================== PERFORMANCE UTILITIES =====================
 
 /**

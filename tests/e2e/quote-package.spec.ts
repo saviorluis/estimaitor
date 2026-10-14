@@ -115,3 +115,77 @@ test.describe('Pressure Washing mode: estimate -> four-document wash package', (
     expect(invoice.text).toContain('Due upon completion');
   });
 });
+
+test.describe('Quote adjustment and client details flow into every document', () => {
+  test('+10% adjustment, client name on quote and invoice Bill To, no hardcoded suite', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#clientName').fill('Sample Client LLC');
+    await page.locator('#projectName').fill('Sample Office Fitout');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+
+    await expect(page.locator('input[name="name"]').first()).toHaveValue('Sample Client LLC');
+    // 0%: estimator subtotal $1,953.60 / total $2,090.35
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$1,953.60');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$2,090.35');
+    // +10% of the whole subtotal: $1,953.60 x 1.1 = $2,148.96; tax $150.43; total $2,299.39
+    await page.locator('#markupAdjustment').fill('10');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$2,148.96');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$2,299.39');
+    await expect(page.getByTestId('below-cost-warning')).toHaveCount(0);
+
+    const entries = await readZipDownload(await downloadPackage(page, 'Download Package'));
+    const quote = entries.find((e) => e.name === 'quote.pdf')!;
+    const invoice = entries.find((e) => e.name.endsWith('Invoice.pdf'))!;
+
+    for (const doc of [quote, invoice]) {
+      expect(doc.text, doc.name).toContain('$2,148.96');
+      expect(doc.text, doc.name).toContain('$150.43');
+      expect(doc.text, doc.name).toContain('$2,299.39');
+      expect(doc.text, doc.name).not.toContain('$2,090.35');
+    }
+    expect(quote.text).toContain('Sample Client LLC');
+
+    const billTo = invoice.text.slice(invoice.text.indexOf('Bill To'), invoice.text.indexOf('Project Location'));
+    expect(billTo).toContain('Sample Client LLC');
+    expect(billTo).not.toContain('Big Brother Property Solutions');
+    expect(invoice.text).not.toMatch(/Ste\.? ?203/);
+  });
+
+  test("a previous client's saved details are not carried onto a different client's quote", async ({ page }) => {
+    await page.addInitScript(() => {
+      if (!sessionStorage.getItem('seeded')) {
+        localStorage.setItem(
+          'quoteClientInfo',
+          JSON.stringify({ name: 'Old Client Co', company: 'Old Co', address: '9 Old Rd', email: 'old@example.com', phone: '555-0199' })
+        );
+        sessionStorage.setItem('seeded', '1');
+      }
+    });
+    await openEstimator(page);
+    await page.locator('#clientName').fill('New Client Inc');
+    await page.locator('#projectName').fill('New Job');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+
+    const entries = await readZipDownload(await downloadPackage(page, 'Download Package'));
+    for (const doc of entries.filter((e) => /quote\.pdf|Invoice\.pdf/.test(e.name))) {
+      expect(doc.text, doc.name).toContain('New Client Inc');
+      expect(doc.text, doc.name).not.toContain('Old Client Co');
+      expect(doc.text, doc.name).not.toContain('9 Old Rd');
+      expect(doc.text, doc.name).not.toContain('old@example.com');
+    }
+  });
+
+  test('a discount past the markup shows a below-cost warning', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('Discount Check');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    await page.locator('#markupAdjustment').fill('-16');
+    await expect(page.getByTestId('below-cost-warning')).toHaveCount(0);
+    await page.locator('#markupAdjustment').fill('-17');
+    await expect(page.getByTestId('below-cost-warning')).toContainText('below cost');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$1,621.49'); // 1,953.60 x 0.83
+  });
+});

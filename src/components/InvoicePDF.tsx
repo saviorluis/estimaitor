@@ -260,6 +260,13 @@ interface InvoicePDFProps {
     dueDate: string;
     paymentTerms: string;
   };
+  clientInfo?: {
+    name?: string;
+    company?: string;
+    address?: string;
+    email?: string;
+    phone?: string;
+  };
   preTaxSubtotal?: number;
 }
 
@@ -269,8 +276,16 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   companyInfo,
   quoteInfo,
   invoiceInfo,
+  clientInfo,
   preTaxSubtotal
 }) => {
+  const billToLines = [
+    clientInfo?.name,
+    clientInfo?.company,
+    clientInfo?.address,
+    clientInfo?.phone ? `Phone: ${clientInfo.phone}` : '',
+    clientInfo?.email ? `Email: ${clientInfo.email}` : '',
+  ].filter((line): line is string => Boolean(line && line.trim()));
   const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
   const subtotal =
     preTaxSubtotal !== undefined && preTaxSubtotal >= 0
@@ -330,7 +345,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               </View>
               <View>
                 <Text style={styles.companyName}>{companyInfo.name}</Text>
-                <Text style={styles.companyDetails}>{companyInfo.address}, Ste. 203</Text>
+                <Text style={styles.companyDetails}>{companyInfo.address}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.city}</Text>
                 <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
                 <Text style={styles.companyDetails}>{companyInfo.email}</Text>
@@ -349,11 +364,13 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
         <View style={styles.infoGrid}>
           <View style={styles.infoColumn}>
             <Text style={styles.sectionTitle}>Bill To</Text>
-            <Text style={styles.infoValue}>{companyInfo.name}</Text>
-            <Text style={styles.infoValue}>{companyInfo.address}, Ste. 203</Text>
-            <Text style={styles.infoValue}>{companyInfo.city}</Text>
-            <Text style={styles.infoValue}>Phone: {companyInfo.phone}</Text>
-            <Text style={styles.infoValue}>Email: {companyInfo.email}</Text>
+            {billToLines.length > 0 ? (
+              billToLines.map((line, i) => (
+                <Text key={i} style={styles.infoValue}>{line}</Text>
+              ))
+            ) : (
+              <Text style={styles.infoValue}>______________________________</Text>
+            )}
           </View>
           <View style={styles.infoColumn}>
             <Text style={styles.sectionTitle}>Project Location</Text>
@@ -470,7 +487,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
           <View style={{ width: '100%' }}>
             <Text style={styles.sectionTitle}>Payment Information</Text>
             <Text>Please make checks payable to: {companyInfo.name}</Text>
-            <Text style={{ marginTop: 5 }}>{companyInfo.address}, Ste 203</Text>
+            <Text style={{ marginTop: 5 }}>{companyInfo.address}</Text>
             <Text>{companyInfo.city}</Text>
           </View>
         </View>

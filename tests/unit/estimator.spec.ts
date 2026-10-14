@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { calculateEstimate } from '../../src/lib/estimator';
 import { calculateHourlyTravelFee, calculateMobilizationFee } from '../../src/lib/constants';
 import { getSalesTaxRate } from '../../src/lib/salesTax';
-import { getQuotePreTaxSubtotal } from '../../src/lib/utils';
+import { getQuotePreTaxSubtotal, getAdjustedQuotePreTaxSubtotal, isQuoteBelowCost } from '../../src/lib/utils';
 import type { FormData } from '../../src/lib/types';
 
 /**
@@ -214,5 +214,66 @@ test.describe('Shared fee rules (src/lib/constants.ts)', () => {
     expect(calculateMobilizationFee(10001, 'office')).toBe(400);
     expect(calculateMobilizationFee(1000, 'medical')).toBe(500);
     expect(calculateMobilizationFee(1000, 'luxury_garage')).toBe(500);
+  });
+});
+
+test.describe('Quote screen additional adjustment (src/lib/utils.ts)', () => {
+  // Rule: the adjustment scales the whole pre-tax subtotal (labor, fees, and markup).
+
+  test('0% leaves the estimator subtotal unchanged', () => {
+    const e = calculateEstimate(form({}), NC_TAX);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 0), 1953.6);
+    expect(isQuoteBelowCost(e, 0)).toBe(false);
+  });
+
+  test('+10% raises the whole subtotal and keeps the built-in 20% markup', () => {
+    const e = calculateEstimate(form({}), NC_TAX);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 10), 1953.6 * 1.1); // 2,148.96
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 10), 2148.96);
+    expect(getAdjustedQuotePreTaxSubtotal(e, 1)).toBeGreaterThan(getAdjustedQuotePreTaxSubtotal(e, 0));
+  });
+
+  test('-10% discounts the whole subtotal', () => {
+    const e = calculateEstimate(form({}), NC_TAX);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, -10), 1758.24);
+  });
+
+  test('project and cleaning multipliers are not applied twice', () => {
+    const e = calculateEstimate(
+      form({
+        projectType: 'restaurant',
+        cleaningType: 'rough_final',
+        squareFootage: 3500,
+        hasVCT: true,
+        vctSquareFootage: 2000,
+        distanceFromOffice: 60,
+        urgencyLevel: 5,
+        needsWindowCleaning: true,
+        numberOfWindows: 10,
+        numberOfLargeWindows: 4,
+        numberOfHighAccessWindows: 2,
+      }),
+      NC_TAX
+    );
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 10), (8307.510816 / 1.07) * 1.1);
+  });
+
+  test('with markup off, the adjustment applies to the unmarked subtotal', () => {
+    const e = calculateEstimate(form({ applyMarkup: false }), NC_TAX);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 10), 1628 * 1.1);
+    expect(isQuoteBelowCost(e, -1)).toBe(true);
+  });
+
+  test('below-cost flag trips past the 20% markup (about -16.7%)', () => {
+    const e = calculateEstimate(form({}), NC_TAX); // cost $1,628, quoted $1,953.60
+    expect(isQuoteBelowCost(e, -16)).toBe(false);
+    expect(isQuoteBelowCost(e, -17)).toBe(true);
+  });
+
+  test('out-of-range and invalid adjustments are clamped to -50%..+100%', () => {
+    const e = calculateEstimate(form({}), NC_TAX);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, 500), 1953.6 * 2);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, -90), 1953.6 * 0.5);
+    expectMoney(getAdjustedQuotePreTaxSubtotal(e, NaN), 1953.6);
   });
 });

@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
-import { formatDate, formatCurrency, generateQuoteNumber, getQuoteCounter, incrementQuoteCounter } from '@/lib/utils';
+import {
+  formatDate,
+  formatCurrency,
+  generateQuoteNumber,
+  getQuoteCounter,
+  incrementQuoteCounter,
+  getAdjustedQuotePreTaxSubtotal,
+  isQuoteBelowCost,
+  clampQuoteAdjustmentPercent,
+  QUOTE_ADJUSTMENT_MIN_PERCENT,
+  QUOTE_ADJUSTMENT_MAX_PERCENT,
+} from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -56,7 +67,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   const { settings, documentCompanyInfo } = useCompanySettings();
   // State for custom markup percentage
   const [markupPercentage, setMarkupPercentage] = useState<number>(0);
-  const [adjustedPrices, setAdjustedPrices] = useState<{[key: string]: number}>({});
   // State for quote counter
   const [quoteCounter, setQuoteCounter] = useState<number>(() => getQuoteCounter());
   // Remove the showCoverPage state since it's always true for quotes
@@ -69,24 +79,17 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   // Client information state - initialize from localStorage if available
   const [clientInfo, setClientInfo] = useState(() => {
-    // Only run this code on the client side
+    const emptyClient = { name: '', company: '', address: '', email: '', phone: '' };
+    let saved = emptyClient;
     if (typeof window !== 'undefined') {
       const savedClientInfo = localStorage.getItem('quoteClientInfo');
-      return savedClientInfo ? JSON.parse(savedClientInfo) : {
-        name: '',
-        company: '',
-        address: '',
-        email: '',
-        phone: '',
-      };
+      if (savedClientInfo) saved = { ...emptyClient, ...JSON.parse(savedClientInfo) };
     }
-    return {
-      name: '',
-      company: '',
-      address: '',
-      email: '',
-      phone: '',
-    };
+    const estimatorClientName = (formData.clientName || '').trim();
+    if (!estimatorClientName) return saved;
+    // Saved details belong to whichever client was quoted last; don't carry them onto a different client.
+    if (estimatorClientName !== (saved.name || '').trim()) return { ...emptyClient, name: estimatorClientName };
+    return saved;
   });
 
   // Default terms and conditions
@@ -170,8 +173,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   // Handle markup percentage change
   const handleMarkupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    const newValue = isNaN(value) ? 0 : value;
+    const newValue = clampQuoteAdjustmentPercent(parseFloat(e.target.value));
     setMarkupPercentage(newValue);
     
     // Save to localStorage
@@ -191,195 +193,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     }));
   };
 
-      // Calculate adjusted prices with markup
-  useEffect(() => {
-    if (!estimateData || !formData) return;
-
-    // Get all the line items
-      const lineItems = [
-        {
-          key: 'basePrice',
-        value: (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)
-        }
-      ];
-
-      if (formData.hasVCT) {
-        lineItems.push({ key: 'vctCost', value: estimateData.vctCost || 0 });
-      }
-
-      if (formData.needsPressureWashing) {
-        lineItems.push({ key: 'pressureWashingCost', value: estimateData.pressureWashingCost || 0 });
-      }
-
-      lineItems.push({ key: 'travelCost', value: estimateData.travelCost || 0 });
-
-      if (formData.stayingOvernight) {
-        lineItems.push({ key: 'overnightCost', value: estimateData.overnightCost || 0 });
-      }
-
-      if (estimateData.urgencyMultiplier > 1) {
-        const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-          (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-          ((estimateData.urgencyMultiplier || 1) - 1);
-        lineItems.push({ key: 'urgencyCost', value: urgencyCost });
-      }
-
-      if (formData.needsWindowCleaning) {
-        lineItems.push({ key: 'windowCleaningCost', value: estimateData.windowCleaningCost || 0 });
-      }
-
-    // Display case cleaning for jewelry stores
-      if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-        lineItems.push({ key: 'displayCaseCost', value: estimateData.displayCaseCost || 0 });
-      }
-
-      // Business fees (scheduling and invoicing) are included in totals but not shown as line items
-      const businessFees = (estimateData.schedulingFee || 0) + (estimateData.invoicingFee || 0);
-
-    // Calculate totals - line items total for markup distribution, full total for final calculation
-    const lineItemsTotal = lineItems.reduce((sum, item) => sum + item.value, 0);
-    const totalBeforeMarkup = lineItemsTotal + businessFees;
-      
-    // If markup percentage is 0, and there's no built-in markup, use original prices
-    if (markupPercentage === 0 && estimateData.markup === 0) {
-        setAdjustedPrices({});
-        return;
-      }
-
-    // If there's no custom markup but there is built-in markup, use the original prices
-    // since the totalPrice already includes the markup
-    if (markupPercentage === 0 && estimateData.markup > 0) {
-      setAdjustedPrices({});
-      return;
-    }
-
-    // Calculate markup amount on line items only (business fees don't get markup applied)
-    const markupAmount = lineItemsTotal * (markupPercentage / 100);
-    
-    // Distribute markup proportionally across line items only
-      const adjustedPrices: {[key: string]: number} = {};
-      lineItems.forEach(item => {
-      const proportion = lineItemsTotal > 0 ? item.value / lineItemsTotal : 0;
-      const itemMarkup = markupAmount * proportion;
-      adjustedPrices[item.key] = item.value + itemMarkup;
-      });
-
-      // Balance window cleaning pricing with base price
-    const balancedPrices = balancePricing(adjustedPrices, lineItems, lineItemsTotal);
-      if (Object.keys(balancedPrices).length > 0) {
-        setAdjustedPrices(balancedPrices);
-      } else {
-        setAdjustedPrices(adjustedPrices);
-      }
-  }, [estimateData, formData, markupPercentage]);
-
-  // Function to balance window cleaning pricing with base cleaning cost
-  const balancePricing = (
-    adjustedPrices: {[key: string]: number}, 
-    lineItems: Array<{key: string, value: number}>, 
-    lineItemsTotal: number
-  ): {[key: string]: number} => {
-    const result = {...adjustedPrices};
-    
-    // Find the base price and window cleaning items
-    const basePrice = lineItems.find(item => item.key === 'basePrice');
-    const windowCleaning = lineItems.find(item => item.key === 'windowCleaningCost');
-    
-    // Only balance if both exist and window cleaning is being charged
-    if (basePrice && windowCleaning && windowCleaning.value > 0 && formData.needsWindowCleaning) {
-      // Only apply if markup has been applied
-      if (markupPercentage > 0) {
-        // Calculate original markup for window cleaning (based on line items only, not business fees)
-        const windowProportion = lineItemsTotal > 0 ? windowCleaning.value / lineItemsTotal : 0;
-        const windowMarkup = (lineItemsTotal * (markupPercentage / 100)) * windowProportion;
-        
-        // Calculate how much to transfer (50% of the window cleaning markup)
-        const transferAmount = windowMarkup * 0.5;
-        
-        // Remove the transfer amount from window cleaning
-        result['windowCleaningCost'] = adjustedPrices['windowCleaningCost'] - transferAmount;
-        
-        // Add the transfer amount to base price
-        result['basePrice'] = adjustedPrices['basePrice'] + transferAmount;
-        
-        return result;
-      }
-    }
-    
-    return {};
-  };
-
-  // Get adjusted price for a line item
-  const getAdjustedPrice = (key: string, originalPrice: number): number => {
-    return adjustedPrices[key] !== undefined ? adjustedPrices[key] : originalPrice;
-  };
-
-  // Calculate adjusted total
-  const calculateAdjustedTotal = (): number => {
-    if (!estimateData || Object.keys(adjustedPrices).length === 0) {
-      return estimateData?.totalPrice || 0;
-    }
-
-    // Sum all adjusted prices
-    let subtotal = 0;
-    
-    // Base price
-    subtotal += getAdjustedPrice('basePrice', 
-      (estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1));
-    
-    // VCT cost
-    if (formData.hasVCT) {
-      subtotal += getAdjustedPrice('vctCost', estimateData.vctCost || 0);
-    }
-    
-    // Pressure washing
-    if (formData.needsPressureWashing) {
-      subtotal += getAdjustedPrice('pressureWashingCost', estimateData.pressureWashingCost || 0);
-    }
-    
-    // Travel cost
-    subtotal += getAdjustedPrice('travelCost', estimateData.travelCost || 0);
-    
-    // Overnight cost
-    if (formData.stayingOvernight) {
-      subtotal += getAdjustedPrice('overnightCost', estimateData.overnightCost || 0);
-    }
-    
-    // Urgency cost
-    if (estimateData.urgencyMultiplier > 1) {
-      const urgencyCost = (((estimateData.basePrice || 0) * (estimateData.projectTypeMultiplier || 1) * (estimateData.cleaningTypeMultiplier || 1)) +
-        (estimateData.vctCost || 0) + (estimateData.travelCost || 0) + (estimateData.overnightCost || 0) + (estimateData.pressureWashingCost || 0)) *
-        ((estimateData.urgencyMultiplier || 1) - 1);
-      subtotal += getAdjustedPrice('urgencyCost', urgencyCost);
-    }
-    
-    // Window cleaning
-    if (formData.needsWindowCleaning) {
-      subtotal += getAdjustedPrice('windowCleaningCost', estimateData.windowCleaningCost || 0);
-    }
-    
-    // Display case cleaning for jewelry stores
-    if (formData.projectType === 'jewelry_store' && estimateData.displayCaseCost > 0) {
-      subtotal += getAdjustedPrice('displayCaseCost', estimateData.displayCaseCost || 0);
-    }
-    
-    // Scheduling, invoicing, mobilization (same as estimator totalBeforeMarkup composition)
-    const businessFees =
-      (estimateData.schedulingFee || 0) +
-      (estimateData.invoicingFee || 0) +
-      (estimateData.mobilizationFee || 0);
-    subtotal += businessFees;
-    
-    const taxRate = resolveEstimateSalesTaxRate(estimateData);
-    const salesTax = subtotal * taxRate;
-    
-    // Return total
-    return subtotal + salesTax;
-  };
-
   const getPreTaxTotalForQuotePdf = (): number => {
     if (!estimateData) return 0;
-    return calculateAdjustedTotal() / (1 + resolveEstimateSalesTaxRate(estimateData));
+    return getAdjustedQuotePreTaxSubtotal(estimateData, markupPercentage);
   };
 
   // Get cleaning type display name
@@ -432,7 +248,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
-          adjustedPrices={adjustedPrices}
           preTaxSubtotal={getPreTaxTotalForQuotePdf()}
         />
       ).toBlob();
@@ -469,7 +284,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
-          adjustedPrices={adjustedPrices}
           preTaxSubtotal={getPreTaxTotalForQuotePdf()}
         />
       ).toBlob();
@@ -529,7 +343,6 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={pdfCompanyInfo}
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
-          adjustedPrices={adjustedPrices}
           preTaxSubtotal={preTaxPdf}
         />
       ).toBlob();
@@ -584,6 +397,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           companyInfo={pdfCompanyInfo}
           quoteInfo={quoteInfo}
           invoiceInfo={invoiceInfo}
+          clientInfo={clientInfo}
           preTaxSubtotal={preTaxPdf}
         />
       ).toBlob();
@@ -876,8 +690,8 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             <input
               id="markupAdjustment"
               type="number"
-              min="-50"
-              max="100"
+              min={QUOTE_ADJUSTMENT_MIN_PERCENT}
+              max={QUOTE_ADJUSTMENT_MAX_PERCENT}
               step="1"
               value={markupPercentage}
               onChange={handleMarkupChange}
@@ -895,8 +709,22 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             </div>
           </div>
           <p className="text-xs text-gray-600 mt-2">
-            Use positive values to increase prices further, or negative values to provide discounts while maintaining profitability.
+            Applies to the whole quote subtotal. Use positive values to increase the price or negative values to discount it.
           </p>
+          {estimateData && (
+            <p className="text-sm text-gray-700 mt-2" data-testid="adjusted-quote-total">
+              Quote subtotal: <span className="font-semibold">{formatCurrency(getPreTaxTotalForQuotePdf())}</span>
+              {' · '}Total with tax:{' '}
+              <span className="font-semibold">
+                {formatCurrency(getPreTaxTotalForQuotePdf() * (1 + resolveEstimateSalesTaxRate(estimateData)))}
+              </span>
+            </p>
+          )}
+          {estimateData && isQuoteBelowCost(estimateData, markupPercentage) && (
+            <p className="text-sm font-medium text-red-700 mt-1" role="alert" data-testid="below-cost-warning">
+              This discount prices the job below cost ({formatCurrency(estimateData.totalBeforeMarkup)} before markup).
+            </p>
+          )}
         </div>
         
         {/* Quote Counter Input */}

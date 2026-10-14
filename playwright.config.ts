@@ -35,7 +35,6 @@ export default defineConfig({
     timeout: 180_000,
     env: {
       RESEND_API_KEY: '',
-      OPENAI_API_KEY: '',
     },
   },
 });
