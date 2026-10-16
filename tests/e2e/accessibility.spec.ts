@@ -52,6 +52,29 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('heading', { name: 'Janitorial Contract Summary' }).waitFor();
       expect(await scan(page, testInfo, `${colorScheme}-contract`)).toEqual([]);
     });
+
+    test('prospects list, detail with a saved lead, empty state and phone map have no WCAG A/AA violations', async ({ page }, testInfo) => {
+      await page.goto('/prospects');
+      await page.getByRole('list', { name: 'Prospect results' }).waitFor();
+      expect(await scan(page, testInfo, `${colorScheme}-prospects-list`)).toEqual([]);
+
+      await page.getByRole('list', { name: 'Prospect results' }).getByRole('button', { name: /Quillmark Medical Pavilion/ }).click();
+      await page.getByRole('button', { name: 'Save as lead' }).click();
+      await page.getByLabel('Follow-up date').fill('2020-01-01');
+      await page.getByLabel('Add a note').fill('Left a voicemail.');
+      await page.getByRole('button', { name: 'Add note' }).click();
+      await page.getByRole('list', { name: 'Lead notes' }).waitFor();
+      expect(await scan(page, testInfo, `${colorScheme}-prospects-detail`)).toEqual([]);
+
+      await page.goto('/prospects?q=zzzz');
+      await page.getByRole('heading', { name: 'No prospects match' }).waitFor();
+      expect(await scan(page, testInfo, `${colorScheme}-prospects-empty`)).toEqual([]);
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/prospects?view=map');
+      await page.getByTestId('sample-map').waitFor();
+      expect(await scan(page, testInfo, `${colorScheme}-prospects-phone-map`)).toEqual([]);
+    });
   });
 }
 

@@ -2,6 +2,7 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CompanySettingsProvider } from '@/contexts/CompanySettingsContext';
+import AppNav from '@/components/AppNav';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -40,6 +41,7 @@ export default function RootLayout({
         <ThemeProvider>
           <CompanySettingsProvider>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <AppNav />
               {children}
             </div>
           </CompanySettingsProvider>
