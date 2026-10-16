@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readZipDownload, expectValidPdf, openEstimator, switchMode, downloadPackage } from '../helpers/quote';
 
 /**
@@ -187,5 +187,194 @@ test.describe('Quote adjustment and client details flow into every document', ()
     await page.locator('#markupAdjustment').fill('-17');
     await expect(page.getByTestId('below-cost-warning')).toContainText('below cost');
     await expect(page.getByTestId('adjusted-quote-total')).toContainText('$1,621.49'); // 1,953.60 x 0.83
+  });
+});
+
+test.describe('Cent-accurate totals on the final-cleaning quote', () => {
+  test('-42% prints a subtotal and tax that add up to the total on screen, quote and invoice', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('Rounding Check');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    // $1,953.60 x 0.58 = $1,133.088 -> $1,133.09; 7% tax $79.32; total $1,212.41 (unrounded math printed $1,212.40)
+    await page.locator('#markupAdjustment').fill('-42');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$1,133.09');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$1,212.41');
+
+    const entries = await readZipDownload(await downloadPackage(page, 'Download Package'));
+    for (const doc of entries.filter((e) => /quote\.pdf|Invoice\.pdf/.test(e.name))) {
+      expect(doc.text, doc.name).toContain('$1,133.09');
+      expect(doc.text, doc.name).toContain('$79.32');
+      expect(doc.text, doc.name).toContain('$1,212.41');
+      expect(doc.text, doc.name).not.toContain('$1,212.40');
+    }
+  });
+});
+
+test.describe('Final-cleaning project address', () => {
+  test('address entered once fills the quote, both PDFs and the package name', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('Address Check');
+    await page.locator('#projectStreet').fill('12 Main St');
+    await page.locator('#projectCity').fill('High Point');
+    await page.locator('#projectState').selectOption('NC');
+    await page.locator('#projectZip').fill('27265');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+
+    await expect(page.locator('[name="projectAddress"]')).toHaveValue('12 Main St, High Point, NC 27265');
+
+    const download = await downloadPackage(page, 'Download Package');
+    expect(download.suggestedFilename()).toMatch(/^Address Check .+ High Point, NC\.zip$/);
+    const entries = await readZipDownload(download);
+    for (const doc of entries.filter((e) => /quote\.pdf|Invoice\.pdf/.test(e.name))) {
+      expect(doc.text.replace(/·?\s+/g, ' '), doc.name).toContain('12 Main St, High Point, NC 27265');
+    }
+  });
+
+  test('address is optional, validates ZIP, and is not remembered between visits', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectZip').fill('2726');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: '5-digit ZIP' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Generate Quote' })).toHaveCount(0);
+
+    await page.locator('#projectStreet').fill('9 Private Ln');
+    await page.locator('#projectCity').fill('Greensboro');
+    await page.locator('#projectZip').fill('27401');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await expect(page.getByRole('button', { name: 'Generate Quote' })).toBeVisible();
+
+    await page.reload();
+    await page.getByRole('heading', { name: 'Estimate Calculator' }).waitFor();
+    await expect(page.locator('#projectStreet')).toHaveValue('');
+    await expect(page.locator('#projectCity')).toHaveValue('');
+    await expect(page.locator('#projectZip')).toHaveValue('');
+    const saved = await page.evaluate(() => localStorage.getItem('estimaitor_form_data') || '');
+    expect(saved).not.toContain('9 Private Ln');
+  });
+
+  test('without an address the quote address starts blank and the package name is unchanged', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('No Address');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    await expect(page.locator('[name="projectAddress"]')).toHaveValue('');
+    const download = await downloadPackage(page, 'Download Package');
+    expect(download.suggestedFilename()).toMatch(/^No Address .+ Location\.zip$/);
+  });
+});
+
+async function fillProjectAddress(page: Page, street: string, city: string, state: string, zip: string) {
+  await page.locator('#projectStreet').fill(street);
+  await page.locator('#projectCity').fill(city);
+  await page.locator('#projectState').selectOption(state);
+  await page.locator('#projectZip').fill(zip);
+}
+
+const readPastEntries = (page: Page) =>
+  page.evaluate(() => JSON.parse(localStorage.getItem('estimaitor_past_entries') || '[]'));
+
+test.describe('Project address and past-estimate history', () => {
+  test('new history entries keep client and project details but not the structured address', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#clientName').fill('History Client');
+    await page.locator('#projectName').fill('History Job');
+    await fillProjectAddress(page, '77 Hidden Way', 'Burlington', 'NC', '27215');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    // The open quote still has the address.
+    await expect(page.locator('[name="projectAddress"]')).toHaveValue('77 Hidden Way, Burlington, NC 27215');
+
+    const entries = await readPastEntries(page);
+    expect(entries).toHaveLength(1);
+    const [entry] = entries;
+    expect(entry.clientName).toBe('History Client');
+    expect(entry.projectName).toBe('History Job');
+    expect(entry.formData.clientName).toBe('History Client');
+    expect(entry.formData.projectName).toBe('History Job');
+    expect(entry.formData.squareFootage).toBe(5000);
+    for (const key of ['projectStreet', 'projectCity', 'projectState', 'projectZip']) {
+      expect(entry.formData, key).not.toHaveProperty(key);
+    }
+    expect(JSON.stringify(entries)).not.toMatch(/77 Hidden Way|Burlington|27215/);
+
+    // Reopening the saved estimate still works; its quote starts without an address.
+    await page.reload();
+    await page.getByRole('heading', { name: 'Estimate Calculator' }).waitFor();
+    await page.getByRole('button', { name: /Show Past Entries/ }).click();
+    await page.getByRole('row', { name: /History Client/ }).getByRole('button', { name: 'Load' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    await expect(page.locator('input[name="name"]').first()).toHaveValue('History Client');
+    await expect(page.locator('[name="projectAddress"]')).toHaveValue('');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$2,090.35');
+  });
+
+  test('older history entries that already contain an address remain loadable and unchanged', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#clientName').fill('Legacy Client');
+    await page.locator('#projectName').fill('Legacy Job');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).waitFor();
+
+    // Simulate an entry saved before the address was stripped from history.
+    await page.evaluate(() => {
+      const entries = JSON.parse(localStorage.getItem('estimaitor_past_entries') || '[]');
+      entries[0].formData = {
+        ...entries[0].formData,
+        projectStreet: '5 Legacy Ct',
+        projectCity: 'Asheboro',
+        projectState: 'NC',
+        projectZip: '27203',
+      };
+      localStorage.setItem('estimaitor_past_entries', JSON.stringify(entries));
+    });
+    const before = await readPastEntries(page);
+
+    await page.reload();
+    await page.getByRole('heading', { name: 'Estimate Calculator' }).waitFor();
+    await page.getByRole('button', { name: /Show Past Entries/ }).click();
+    await page.getByRole('row', { name: /Legacy Client/ }).getByRole('button', { name: 'Load' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    await expect(page.locator('input[name="name"]').first()).toHaveValue('Legacy Client');
+    await expect(page.locator('[name="projectAddress"]')).toHaveValue('5 Legacy Ct, Asheboro, NC 27203');
+    await expect(page.getByTestId('adjusted-quote-total')).toContainText('$2,090.35');
+
+    expect(await readPastEntries(page)).toEqual(before);
+  });
+});
+
+test.describe('Quote Project Address sync on recalculation', () => {
+  test('a manually edited quote address is kept when the form address changes and the estimate recalculates', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('Manual Address');
+    await fillProjectAddress(page, '12 Main St', 'High Point', 'NC', '27265');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    const quoteAddress = page.locator('[name="projectAddress"]');
+    await expect(quoteAddress).toHaveValue('12 Main St, High Point, NC 27265');
+
+    await quoteAddress.fill('Gate 4, 12 Main St, High Point, NC');
+    await fillProjectAddress(page, '400 Oak Ave', 'Greensboro', 'NC', '27401');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+
+    await expect(quoteAddress).toHaveValue('Gate 4, 12 Main St, High Point, NC');
+  });
+
+  test('an unedited quote address follows the new form address after recalculation', async ({ page }) => {
+    await openEstimator(page);
+    await page.locator('#projectName').fill('Synced Address');
+    await fillProjectAddress(page, '12 Main St', 'High Point', 'NC', '27265');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    const quoteAddress = page.locator('[name="projectAddress"]');
+    await expect(quoteAddress).toHaveValue('12 Main St, High Point, NC 27265');
+
+    await fillProjectAddress(page, '400 Oak Ave', 'Greensboro', 'NC', '27401');
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+
+    await expect(quoteAddress).toHaveValue('400 Oak Ave, Greensboro, NC 27401');
+    const download = await downloadPackage(page, 'Download Package');
+    expect(download.suggestedFilename()).toMatch(/^Synced Address .+ Greensboro, NC\.zip$/);
   });
 });

@@ -3,13 +3,11 @@ import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/
 import { EstimateData, FormData } from '@/lib/types';
 import {
   formatCurrency,
-  getTruckStopSubtotalSplit,
-  getWindowCleaningQuoteShare,
-  getQuotePreTaxSubtotal
+  getQuoteDocumentAmounts
 } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
 import { SCOPE_OF_WORK } from '@/lib/constants';
-import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
+import { formatSalesTaxPercent } from '@/lib/salesTax';
 import { getPressureWashingLineTitle, isPressureWashingJob } from '@/lib/pressureWashDocs';
 
 // Register fonts
@@ -287,16 +285,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
     clientInfo?.email ? `Email: ${clientInfo.email}` : '',
   ].filter((line): line is string => Boolean(line && line.trim()));
   const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
-  const subtotal =
-    preTaxSubtotal !== undefined && preTaxSubtotal >= 0
-      ? preTaxSubtotal
-      : getQuotePreTaxSubtotal(estimateData);
-  const taxRate = resolveEstimateSalesTaxRate(estimateData);
-  const salesTax = subtotal * taxRate;
-  const finalTotal = subtotal + salesTax;
-  const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
-  const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
-  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService);
+  const {
+    subtotal,
+    taxRate,
+    salesTax,
+    finalTotal,
+    windowQuoteShare,
+    subtotalForPrimaryService,
+    truckStopSplit,
+  } = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
 
   // Get cleaning type display
   const getCleaningTypeDisplay = (type: string): string => {

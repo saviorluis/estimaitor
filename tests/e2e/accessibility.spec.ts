@@ -55,6 +55,39 @@ for (const colorScheme of ['light', 'dark'] as const) {
   });
 }
 
+test('project address validation errors are linked to their fields for screen readers', async ({ page }, testInfo) => {
+  await openEstimator(page);
+  await page.locator('#projectStreet').fill('9'.repeat(121));
+  await page.locator('#projectCity').fill('C'.repeat(61));
+  await page.locator('#projectZip').fill('123');
+  await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+
+  const expected = [
+    ['projectStreet', 'Street is too long'],
+    ['projectCity', 'City is too long'],
+    ['projectZip', 'Use a 5-digit ZIP (or ZIP+4)'],
+  ] as const;
+  for (const [id, message] of expected) {
+    const field = page.locator(`#${id}`);
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+    await expect(field).toHaveAttribute('aria-describedby', `${id}-error`);
+    await expect(field).toHaveAccessibleDescription(message);
+    await expect(page.locator(`#${id}-error`)).toHaveAttribute('role', 'alert');
+  }
+  expect(await scan(page, testInfo, 'address-errors')).toEqual([]);
+
+  // Fixing a field removes its error and its description link.
+  await page.locator('#projectStreet').fill('12 Main St');
+  await page.locator('#projectCity').fill('High Point');
+  await page.locator('#projectZip').fill('27265');
+  await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+  for (const [id] of expected) {
+    await expect(page.locator(`#${id}`)).toHaveAttribute('aria-invalid', 'false');
+    await expect(page.locator(`#${id}`)).not.toHaveAttribute('aria-describedby', /.+/);
+    await expect(page.locator(`#${id}-error`)).toHaveCount(0);
+  }
+});
+
 test('viewport allows pinch-zoom', async ({ page }) => {
   await page.goto('/');
   const content = await page.locator('meta[name="viewport"]').getAttribute('content');

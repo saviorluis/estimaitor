@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import {
   formatDate,
@@ -9,6 +9,8 @@ import {
   getQuoteCounter,
   incrementQuoteCounter,
   getAdjustedQuotePreTaxSubtotal,
+  formatProjectAddress,
+  getQuoteDocumentAmounts,
   isQuoteBelowCost,
   clampQuoteAdjustmentPercent,
   QUOTE_ADJUSTMENT_MIN_PERCENT,
@@ -24,7 +26,6 @@ import InvoicePDF from './InvoicePDF';
 import ChangeOrderPDF from './ChangeOrderPDF'; // Added import for ChangeOrderPDF
 import WorkOrderPDFSpanish from './WorkOrderPDFSpanish';
 import { SCOPE_OF_WORK } from '@/lib/constants';
-import { resolveEstimateSalesTaxRate } from '@/lib/salesTax';
 import {
   isPressureWashingJob,
   PRESSURE_WASHING_INVOICE_PAYMENT_TERMS,
@@ -108,7 +109,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     date: formatDate(new Date()),
     validUntil: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)), // 30 days from now
     projectName: formData.projectName || '',
-    projectAddress: '',
+    projectAddress: formatProjectAddress(formData),
     notes: isPressureWashingJob(formData)
       ? PRESSURE_WASHING_QUOTE_NOTES
       : 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
@@ -129,6 +130,18 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (!formData?.projectName) return;
     setQuoteInfo((prev) => (prev.projectName ? prev : { ...prev, projectName: formData.projectName || '' }));
   }, [formData?.projectName]);
+
+  const estimatorProjectAddress = formatProjectAddress(formData);
+  const lastEstimatorProjectAddress = useRef(estimatorProjectAddress);
+  useEffect(() => {
+    const previous = lastEstimatorProjectAddress.current;
+    lastEstimatorProjectAddress.current = estimatorProjectAddress;
+    setQuoteInfo((prev) => {
+      const current = prev.projectAddress.trim();
+      if (current && current !== previous) return prev;
+      return { ...prev, projectAddress: estimatorProjectAddress };
+    });
+  }, [estimatorProjectAddress]);
 
   useEffect(() => {
     setCompanyInfo(documentCompanyInfo);
@@ -197,6 +210,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     if (!estimateData) return 0;
     return getAdjustedQuotePreTaxSubtotal(estimateData, markupPercentage);
   };
+  const quoteAmounts = getQuoteDocumentAmounts(formData, estimateData, getPreTaxTotalForQuotePdf());
 
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
@@ -431,7 +445,12 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       
       // Create filename: project name + quote number (without year) + city, state
       const projectName = quoteInfo.projectName.trim() || 'Project';
-      const cityState = city && state ? `${city}, ${state}` : (quoteInfo.projectAddress.trim() || 'Location');
+      const usesEstimatorAddress =
+        Boolean(formData.projectCity?.trim() && formData.projectState?.trim()) &&
+        quoteInfo.projectAddress.trim() === formatProjectAddress(formData);
+      const cityState = usesEstimatorAddress
+        ? `${formData.projectCity!.trim()}, ${formData.projectState!.trim()}`
+        : city && state ? `${city}, ${state}` : (quoteInfo.projectAddress.trim() || 'Location');
       const fileName = `${projectName} ${quoteNumberOnly} ${cityState}.zip`;
       saveAs(content, fileName);
 
@@ -713,11 +732,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </p>
           {estimateData && (
             <p className="text-sm text-gray-700 mt-2" data-testid="adjusted-quote-total">
-              Quote subtotal: <span className="font-semibold">{formatCurrency(getPreTaxTotalForQuotePdf())}</span>
+              Quote subtotal: <span className="font-semibold">{formatCurrency(quoteAmounts.subtotal)}</span>
               {' · '}Total with tax:{' '}
-              <span className="font-semibold">
-                {formatCurrency(getPreTaxTotalForQuotePdf() * (1 + resolveEstimateSalesTaxRate(estimateData)))}
-              </span>
+              <span className="font-semibold">{formatCurrency(quoteAmounts.finalTotal)}</span>
             </p>
           )}
           {estimateData && isQuoteBelowCost(estimateData, markupPercentage) && (

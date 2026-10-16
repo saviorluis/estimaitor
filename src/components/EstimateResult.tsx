@@ -5,6 +5,7 @@ import { EstimateData, FormData } from '@/lib/types';
 import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS, TEST_MODE, TEST_SCENARIOS } from '@/lib/constants';
 import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
 import QuoteTemplate from './QuoteTemplate';
+import { getEstimateDisplayTotals } from '@/lib/utils';
 
 interface EstimateResultProps {
   estimateData: EstimateData;
@@ -109,6 +110,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
   }
 
   const { formatCurrency, formatHours, getProjectTypeName, getCleaningTypeName } = calculatedValues;
+  const displayTotals = getEstimateDisplayTotals(formData, estimateData);
 
   return (
     <div className="space-y-6">
@@ -353,7 +355,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               <div className="flex justify-between font-medium">
                 <span className="text-gray-700 dark:text-gray-300">Subtotal</span>
                 <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.totalBeforeMarkup)}
+                  {formatCurrency(displayTotals.subtotal)}
                 </span>
               </div>
             </div>
@@ -363,7 +365,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Business Overhead (20%)</span>
                 <span className="text-gray-800 dark:text-gray-200">
-                  {formatCurrency(estimateData.markup)}
+                  {formatCurrency(displayTotals.markup)}
                 </span>
               </div>
             )}
@@ -374,7 +376,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
                 Sales Tax ({formatSalesTaxPercent(resolveEstimateSalesTaxRate(estimateData))})
               </span>
               <span className="text-gray-800 dark:text-gray-200">
-                {formatCurrency(estimateData.salesTax)}
+                {formatCurrency(displayTotals.salesTax)}
               </span>
             </div>
 
@@ -383,7 +385,7 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
               <div className="flex justify-between text-xl font-bold">
                 <span className="text-gray-800 dark:text-gray-200">Total</span>
                 <span className="text-green-600 dark:text-green-400 text-2xl">
-                  {formatCurrency(estimateData.totalPrice)}
+                  {formatCurrency(displayTotals.total)}
                 </span>
               </div>
               {estimateData.markup > 0 && (

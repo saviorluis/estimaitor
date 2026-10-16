@@ -2,7 +2,16 @@ import { test, expect } from '@playwright/test';
 import { calculateEstimate } from '../../src/lib/estimator';
 import { calculateHourlyTravelFee, calculateMobilizationFee } from '../../src/lib/constants';
 import { getSalesTaxRate } from '../../src/lib/salesTax';
-import { getQuotePreTaxSubtotal, getAdjustedQuotePreTaxSubtotal, isQuoteBelowCost } from '../../src/lib/utils';
+import {
+  getQuotePreTaxSubtotal,
+  getAdjustedQuotePreTaxSubtotal,
+  isQuoteBelowCost,
+  roundToCents,
+  getQuoteDocumentAmounts,
+  getEstimateDisplayTotals,
+  formatCurrency,
+  formatProjectAddress,
+} from '../../src/lib/utils';
 import type { FormData } from '../../src/lib/types';
 
 /**
@@ -275,5 +284,102 @@ test.describe('Quote screen additional adjustment (src/lib/utils.ts)', () => {
     expectMoney(getAdjustedQuotePreTaxSubtotal(e, 500), 1953.6 * 2);
     expectMoney(getAdjustedQuotePreTaxSubtotal(e, -90), 1953.6 * 0.5);
     expectMoney(getAdjustedQuotePreTaxSubtotal(e, NaN), 1953.6);
+  });
+});
+
+const cents = (amount: number) => Math.round(amount * 100);
+const printedCents = (amount: number) => Math.round(Number(formatCurrency(amount).replace(/[$,]/g, '')) * 100);
+const isWholeCents = (amount: number) => Math.abs(amount * 100 - Math.round(amount * 100)) < 1e-6;
+
+test.describe('Cent-accurate totals (src/lib/utils.ts)', () => {
+  test('roundToCents rounds half up and survives float noise', () => {
+    expect(roundToCents(1.005)).toBe(1.01);
+    expect(roundToCents(2.675)).toBe(2.68);
+    expect(roundToCents(79.3163)).toBe(79.32);
+    expect(roundToCents(1133.085)).toBe(1133.09);
+    expect(roundToCents(0)).toBe(0);
+  });
+
+  test('final cleaning: printed subtotal + tax always equals the printed total, -50%..+100%', () => {
+    let legacyMismatches = 0;
+    let checked = 0;
+    const failures: string[] = [];
+    for (let sqft = 800; sqft <= 30000; sqft += 997) {
+      for (const overrides of [{}, { applyMarkup: false }, { hasVCT: true, vctSquareFootage: Math.floor(sqft / 3) }]) {
+        const f = form({ squareFootage: sqft, ...overrides });
+        const e = calculateEstimate(f, NC_TAX);
+        for (let adj = -50; adj <= 100; adj++) {
+          const raw = getAdjustedQuotePreTaxSubtotal(e, adj);
+          const a = getQuoteDocumentAmounts(f, e, raw);
+          const ok =
+            isWholeCents(a.subtotal) &&
+            isWholeCents(a.salesTax) &&
+            isWholeCents(a.finalTotal) &&
+            cents(a.subtotal) + cents(a.salesTax) === cents(a.finalTotal) &&
+            printedCents(a.subtotal) + printedCents(a.salesTax) === printedCents(a.finalTotal) &&
+            cents(a.salesTax) === Math.round(cents(a.subtotal) * NC_TAX);
+          if (!ok) failures.push(`${sqft} sq ft ${JSON.stringify(overrides)} ${adj}%: ${JSON.stringify(a)}`);
+          if (printedCents(raw) + printedCents(raw * NC_TAX) !== printedCents(raw * (1 + NC_TAX))) legacyMismatches++;
+          checked++;
+        }
+      }
+    }
+    expect(failures).toEqual([]);
+    expect(checked).toBeGreaterThan(10000);
+    // The old unrounded math printed parts that did not add up to the total in some of these cases.
+    expect(legacyMismatches).toBeGreaterThan(0);
+  });
+
+  test('estimate screen: cost + markup + tax adds up to the total, matching the quote at 0%', () => {
+    for (let sqft = 800; sqft <= 30000; sqft += 1499) {
+      const f = form({ squareFootage: sqft, distanceFromOffice: 55, hasVCT: true, vctSquareFootage: 333 });
+      const e = calculateEstimate(f, NC_TAX);
+      const d = getEstimateDisplayTotals(f, e);
+      const q = getQuoteDocumentAmounts(f, e);
+      expect(cents(d.subtotal) + cents(d.markup)).toBe(cents(q.subtotal));
+      expect(cents(d.subtotal) + cents(d.markup) + cents(d.salesTax)).toBe(cents(d.total));
+      expect(d.total).toBe(q.finalTotal);
+      expect(Math.abs(d.total - e.totalPrice)).toBeLessThan(0.011);
+    }
+  });
+
+  test('window share and primary service split stay in whole cents and add up', () => {
+    const f = form({ needsWindowCleaning: true, numberOfWindows: 37, numberOfLargeWindows: 5, numberOfHighAccessWindows: 3 });
+    const e = calculateEstimate(f, NC_TAX);
+    const a = getQuoteDocumentAmounts(f, e, getAdjustedQuotePreTaxSubtotal(e, 7));
+    expect(a.windowQuoteShare).toBeGreaterThan(0);
+    expect(isWholeCents(a.windowQuoteShare) && isWholeCents(a.subtotalForPrimaryService)).toBe(true);
+    expect(cents(a.windowQuoteShare) + cents(a.subtotalForPrimaryService)).toBe(cents(a.subtotal));
+  });
+
+  test('pressure washing keeps its existing unrounded document math', () => {
+    const f = form({
+      projectType: 'other',
+      cleaningType: 'pressure_washing',
+      squareFootage: 0,
+      numberOfCleaners: 2,
+      numberOfNights: 0,
+      needsPressureWashing: true,
+      pressureWashingArea: 2000,
+    });
+    const e = calculateEstimate(f, NC_TAX);
+    const raw = getAdjustedQuotePreTaxSubtotal(e, 3.3);
+    const a = getQuoteDocumentAmounts(f, e, raw);
+    expect(a.subtotal).toBe(raw);
+    expect(a.salesTax).toBe(raw * NC_TAX);
+    expect(a.finalTotal).toBe(raw + raw * NC_TAX);
+    const d = getEstimateDisplayTotals(f, e);
+    expect(d).toEqual({ subtotal: e.totalBeforeMarkup, markup: e.markup, salesTax: e.salesTax, total: e.totalPrice });
+    expect(formatCurrency(getQuoteDocumentAmounts(f, e).finalTotal)).toBe('$1,037.47');
+  });
+});
+
+test.describe('Project address formatting (src/lib/utils.ts)', () => {
+  test('joins street, city, state and ZIP and skips blanks', () => {
+    expect(formatProjectAddress(form({ projectStreet: ' 12 Main St ', projectCity: 'High Point', projectState: 'NC', projectZip: '27265' })))
+      .toBe('12 Main St, High Point, NC 27265');
+    expect(formatProjectAddress(form({ projectCity: 'Greensboro', projectState: 'NC' }))).toBe('Greensboro, NC');
+    expect(formatProjectAddress(form({ projectStreet: '5 Elm Rd' }))).toBe('5 Elm Rd');
+    expect(formatProjectAddress(form({}))).toBe('');
   });
 });

@@ -5,9 +5,7 @@ import {
   formatCurrency,
   getQuoteCounter,
   getCapabilityStatementImage,
-  getTruckStopSubtotalSplit,
-  getWindowCleaningQuoteShare,
-  getQuotePreTaxSubtotal
+  getQuoteDocumentAmounts
 } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
 import { PROJECT_SCOPES, PRESSURE_WASHING_RATES, PRESSURE_WASHING_PAYMENT_TERMS, SCOPE_OF_WORK, splitPrincipalAndVctSqFt } from '@/lib/constants';
@@ -16,7 +14,7 @@ import {
   getPressureWashingScopeText,
   isPressureWashingJob,
 } from '@/lib/pressureWashDocs';
-import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
+import { formatSalesTaxPercent } from '@/lib/salesTax';
 
 // Register fonts
 Font.register({
@@ -545,16 +543,15 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     formData.vctSquareFootage || 0
   );
 
-  const subtotal =
-    preTaxSubtotal !== undefined && preTaxSubtotal >= 0
-      ? preTaxSubtotal
-      : getQuotePreTaxSubtotal(estimateData);
-  const taxRate = resolveEstimateSalesTaxRate(estimateData);
-  const salesTax = subtotal * taxRate;
-  const finalTotal = subtotal + salesTax;
-  const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, subtotal);
-  const subtotalForPrimaryService = Math.max(0, subtotal - windowQuoteShare);
-  const truckStopSplit = getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService);
+  const {
+    subtotal,
+    taxRate,
+    salesTax,
+    finalTotal,
+    windowQuoteShare,
+    subtotalForPrimaryService,
+    truckStopSplit,
+  } = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
 
   return (
     <Document>

@@ -1,4 +1,6 @@
 import { FormData, EstimateData, CalculationCache, CacheStats, ProjectType } from './types';
+import { isPressureWashingJob } from './pressureWashDocs';
+import { resolveEstimateSalesTaxRate } from './salesTax';
 
 /** Human-readable project type for quotes, work orders, and PDFs */
 export function getProjectTypeDisplay(type: ProjectType | string): string {
@@ -75,6 +77,92 @@ export function clampQuoteAdjustmentPercent(percent: number): number {
 /** Pre-tax quote subtotal after the quote screen's additional adjustment, applied to the whole subtotal. */
 export function getAdjustedQuotePreTaxSubtotal(estimateData: EstimateData, adjustmentPercent: number): number {
   return getQuotePreTaxSubtotal(estimateData) * (1 + clampQuoteAdjustmentPercent(adjustmentPercent) / 100);
+}
+
+/** One-line project address from the estimator's structured fields, e.g. "12 Main St, High Point, NC 27265". */
+export function formatProjectAddress(formData: FormData): string {
+  const clean = (value?: string) => (value || '').trim();
+  const stateZip = [clean(formData.projectState), clean(formData.projectZip)].filter(Boolean).join(' ');
+  return [clean(formData.projectStreet), clean(formData.projectCity), stateZip].filter(Boolean).join(', ');
+}
+
+export function roundToCents(amount: number): number {
+  return Math.round(Number((amount * 100).toFixed(6))) / 100;
+}
+
+/** Final-cleaning documents use cent-accurate totals; pressure washing keeps its legacy unrounded math. */
+export function usesCentAccurateTotals(formData: FormData): boolean {
+  return !isPressureWashingJob(formData);
+}
+
+export interface QuoteDocumentAmounts {
+  subtotal: number;
+  taxRate: number;
+  salesTax: number;
+  finalTotal: number;
+  windowQuoteShare: number;
+  subtotalForPrimaryService: number;
+  truckStopSplit: { facility: number; fastFood: number } | null;
+}
+
+/**
+ * Amounts printed on the quote PDF and invoice. When cent-accurate, every printed figure is
+ * rounded to the cent first and the parts are summed, so subtotal + tax always equals the total.
+ */
+export function getQuoteDocumentAmounts(
+  formData: FormData,
+  estimateData: EstimateData,
+  preTaxSubtotal?: number
+): QuoteDocumentAmounts {
+  const rawSubtotal =
+    preTaxSubtotal !== undefined && preTaxSubtotal >= 0 ? preTaxSubtotal : getQuotePreTaxSubtotal(estimateData);
+  const taxRate = resolveEstimateSalesTaxRate(estimateData);
+
+  if (!usesCentAccurateTotals(formData)) {
+    const salesTax = rawSubtotal * taxRate;
+    const windowQuoteShare = getWindowCleaningQuoteShare(formData, estimateData, rawSubtotal);
+    const subtotalForPrimaryService = Math.max(0, rawSubtotal - windowQuoteShare);
+    return {
+      subtotal: rawSubtotal,
+      taxRate,
+      salesTax,
+      finalTotal: rawSubtotal + salesTax,
+      windowQuoteShare,
+      subtotalForPrimaryService,
+      truckStopSplit: getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService),
+    };
+  }
+
+  const subtotal = roundToCents(rawSubtotal);
+  const salesTax = roundToCents(subtotal * taxRate);
+  const windowQuoteShare = roundToCents(getWindowCleaningQuoteShare(formData, estimateData, subtotal));
+  const subtotalForPrimaryService = roundToCents(Math.max(0, subtotal - windowQuoteShare));
+  const split = getTruckStopSubtotalSplit(formData, estimateData, subtotalForPrimaryService);
+  const facility = split ? roundToCents(split.facility) : 0;
+  return {
+    subtotal,
+    taxRate,
+    salesTax,
+    finalTotal: roundToCents(subtotal + salesTax),
+    windowQuoteShare,
+    subtotalForPrimaryService,
+    truckStopSplit: split ? { facility, fastFood: roundToCents(subtotalForPrimaryService - facility) } : null,
+  };
+}
+
+/** Totals block on the estimate result screen; cent-accurate amounts sum exactly to the total. */
+export function getEstimateDisplayTotals(formData: FormData, estimateData: EstimateData) {
+  if (!usesCentAccurateTotals(formData)) {
+    return {
+      subtotal: estimateData.totalBeforeMarkup,
+      markup: estimateData.markup,
+      salesTax: estimateData.salesTax,
+      total: estimateData.totalPrice,
+    };
+  }
+  const { subtotal: preTax, salesTax, finalTotal } = getQuoteDocumentAmounts(formData, estimateData);
+  const subtotal = roundToCents(estimateData.totalBeforeMarkup ?? 0);
+  return { subtotal, markup: roundToCents(preTax - subtotal), salesTax, total: finalTotal };
 }
 
 /** True when the adjusted subtotal is below the job's cost before the professional markup. */

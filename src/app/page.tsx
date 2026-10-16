@@ -12,6 +12,7 @@ import ContractPDF from '@/components/ContractPDF';
 import { EstimateData, FormData } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
 import { getSalesTaxRate } from '@/lib/salesTax';
+import { getEstimateDisplayTotals } from '@/lib/utils';
 import { isPressureWashingJob } from '@/lib/pressureWashDocs';
 import { pdf } from '@react-pdf/renderer';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
@@ -179,6 +180,8 @@ export default function Home() {
 
     // Save to past entries only for cleaning (table is cleaning-specific)
     if (currentMode === 'cleaning') {
+      // The job-site address stays with the open quote only; history keeps the rest of the form.
+      const { projectStreet, projectCity, projectState, projectZip, ...historyFormData } = formValues;
       const newEntry: PastEntry = {
         id: Date.now().toString(),
         date: new Date().toLocaleString(),
@@ -188,7 +191,7 @@ export default function Home() {
         squareFootage: formValues.squareFootage,
         totalPrice: data.totalPrice,
         estimateData: data,
-        formData: formValues
+        formData: historyFormData
       };
       const updatedEntries = [newEntry, ...pastEntries].slice(0, 20);
       setPastEntries(updatedEntries);
@@ -339,7 +342,7 @@ export default function Home() {
                       <td className="py-2 px-4">{entry.projectName}</td>
                       <td className="py-2 px-4">{entry.projectType.replace('_', ' ')}</td>
                       <td className="py-2 px-4 text-right">{entry.squareFootage.toLocaleString()}</td>
-                      <td className="py-2 px-4 text-right">${entry.totalPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      <td className="py-2 px-4 text-right">${(entry.formData && entry.estimateData ? getEstimateDisplayTotals(entry.formData, entry.estimateData).total : entry.totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                       <td className="py-2 px-4 flex justify-center space-x-2">
                         <button 
                           onClick={() => handleLoadPastEntry(entry)}

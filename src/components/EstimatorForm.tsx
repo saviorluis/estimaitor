@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
+import { US_STATES } from '@/lib/salesTax';
 import {
   getRecommendedCleaners,
   CLEANING_TYPE_DESCRIPTIONS,
@@ -34,7 +35,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       if (savedData) {
         const parsedData = JSON.parse(savedData);
         // Exclude client-specific information from loaded data
-        const { clientName, projectName, ...technicalData } = parsedData;
+        const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, ...technicalData } = parsedData;
         return technicalData;
       }
       return {};
@@ -117,7 +118,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     
     // Save form data to localStorage (excluding client-specific information)
     try {
-      const { clientName, projectName, ...technicalData } = formValues;
+      const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, ...technicalData } = formValues;
       const formDataToSave = {
         ...technicalData,
         gasPrice: typeof formValues.gasPrice === 'string' 
@@ -764,6 +765,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                   onClick={() => {
                     setValue('clientName', '');
                     setValue('projectName', '');
+                    setValue('projectStreet', '');
+                    setValue('projectCity', '');
+                    setValue('projectState', '');
+                    setValue('projectZip', '');
                   }}
                   className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded transition-colors"
                 >
@@ -777,6 +782,10 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     // Clear the current form client fields
                     setValue('clientName', '');
                     setValue('projectName', '');
+                    setValue('projectStreet', '');
+                    setValue('projectCity', '');
+                    setValue('projectState', '');
+                    setValue('projectZip', '');
                     alert('Cleared all saved client data!');
                   }}
                   className="text-xs px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded transition-colors"
@@ -812,6 +821,93 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 />
               </div>
             </div>
+
+            <fieldset className="mt-4">
+              <legend className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Project Address</legend>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div className="md:col-span-6">
+                  <label htmlFor="projectStreet" className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">
+                    Street
+                  </label>
+                  <input
+                    id="projectStreet"
+                    type="text"
+                    autoComplete="street-address"
+                    {...register('projectStreet', { maxLength: { value: 120, message: 'Street is too long' } })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="123 Main St"
+                    aria-invalid={errors.projectStreet ? 'true' : 'false'}
+                    aria-describedby={errors.projectStreet ? 'projectStreet-error' : undefined}
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label htmlFor="projectCity" className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">
+                    City
+                  </label>
+                  <input
+                    id="projectCity"
+                    type="text"
+                    autoComplete="address-level2"
+                    {...register('projectCity', { maxLength: { value: 60, message: 'City is too long' } })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="High Point"
+                    aria-invalid={errors.projectCity ? 'true' : 'false'}
+                    aria-describedby={errors.projectCity ? 'projectCity-error' : undefined}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <label htmlFor="projectState" className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">
+                    State
+                  </label>
+                  <select
+                    id="projectState"
+                    autoComplete="address-level1"
+                    {...register('projectState')}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="">—</option>
+                    {US_STATES.map(({ code, name }) => (
+                      <option key={code} value={code}>
+                        {code} – {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="projectZip" className="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">
+                    ZIP
+                  </label>
+                  <input
+                    id="projectZip"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    {...register('projectZip', {
+                      pattern: { value: /^\s*\d{5}(-\d{4})?\s*$/, message: 'Use a 5-digit ZIP (or ZIP+4)' },
+                    })}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                    placeholder="27265"
+                    aria-invalid={errors.projectZip ? 'true' : 'false'}
+                    aria-describedby={errors.projectZip ? 'projectZip-error' : undefined}
+                  />
+                </div>
+              </div>
+              {errors.projectStreet && (
+                <p id="projectStreet-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                  {errors.projectStreet.message}
+                </p>
+              )}
+              {errors.projectCity && (
+                <p id="projectCity-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                  {errors.projectCity.message}
+                </p>
+              )}
+              {errors.projectZip && (
+                <p id="projectZip-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                  {errors.projectZip.message}
+                </p>
+              )}
+            </fieldset>
           </div>
         </div>
 

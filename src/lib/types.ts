@@ -94,6 +94,12 @@ export interface FormData {
   // Client Information (Optional)
   clientName?: string;
   projectName?: string;
+
+  // Project address (final-cleaning estimator; optional)
+  projectStreet?: string;
+  projectCity?: string;
+  projectState?: string;
+  projectZip?: string;
   
   // Room-based pricing (for home renovation projects)
   pricingMethod?: PricingMethod;
