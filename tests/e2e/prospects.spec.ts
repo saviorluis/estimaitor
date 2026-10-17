@@ -22,7 +22,7 @@ test.describe('Prospects page (/prospects)', () => {
     await expect(page.getByText('Sample data', { exact: true })).toHaveCount(25);
     await expect(page.getByText('Demo with fictional sample data')).toBeVisible();
     await expect(page.locator('[data-marker-id]')).toHaveCount(25);
-    await expect(page.getByText('Sample map · schematic, not to scale')).toBeVisible();
+    await expect(page.getByText('Schematic map · not to scale')).toBeVisible();
 
     const nav = page.getByRole('navigation', { name: 'Main' });
     await expect(nav.getByRole('link', { name: 'Prospects' })).toHaveAttribute('aria-current', 'page');

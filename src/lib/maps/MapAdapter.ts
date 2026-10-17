@@ -15,6 +15,8 @@ export interface MapMarker {
   tone: MarkerTone;
   /** Shown with a ring so saved leads stand out. */
   saved?: boolean;
+  /** 'manual' for prospects you entered; sample markers are drawn differently so the two never blur. */
+  origin?: 'sample' | 'manual';
 }
 
 export interface MapAdapterProps {

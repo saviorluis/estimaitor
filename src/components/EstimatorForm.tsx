@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { US_STATES } from '@/lib/salesTax';
+import { takeDraftEstimateHandoff, type DraftEstimateHandoff } from '@/lib/prospects/estimateHandoff';
+import { COUNT_CONFIDENCE_LABELS } from '@/lib/prospects/types';
 import {
   getRecommendedCleaners,
   CLEANING_TYPE_DESCRIPTIONS,
@@ -25,6 +27,8 @@ const STORAGE_KEY = 'estimaitor_form_data';
 export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
   const { salesTaxRate } = useCompanySettings();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [prospectDraft, setProspectDraft] = useState<DraftEstimateHandoff | null>(null);
+  const draftHandoff = useRef<DraftEstimateHandoff | null | undefined>(undefined);
 
   // Get saved form data from localStorage (memoized) - excludes client-specific info
   const getSavedFormData = useCallback((): Partial<FormData> => {
@@ -103,8 +107,20 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     if (Object.keys(savedData).length > 0) {
       reset(savedData as FormData);
     }
+    // A draft started from a saved prospect fills in identity fields only; pricing inputs are left alone.
+    // The handoff is removed on first read, so keep it for the remount React does in development.
+    if (draftHandoff.current === undefined) draftHandoff.current = takeDraftEstimateHandoff(window.localStorage);
+    const draft = draftHandoff.current;
+    if (draft) {
+      if (draft.projectName) setValue('projectName', draft.projectName);
+      setValue('projectStreet', draft.projectStreet);
+      setValue('projectCity', draft.projectCity);
+      setValue('projectState', draft.projectState);
+      setValue('projectZip', draft.projectZip);
+      setProspectDraft(draft);
+    }
     setIsLoaded(true);
-  }, [getSavedFormData, reset]);
+  }, [getSavedFormData, reset, setValue]);
 
   // Combined effect for form updates and localStorage saving
   useEffect(() => {
@@ -177,7 +193,44 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">
         Estimate Calculator
       </h2>
-      
+
+      {prospectDraft && (
+        <section
+          aria-labelledby="prospect-draft-heading"
+          className="mb-6 rounded-lg border border-sky-300 bg-sky-50 p-4 text-sm text-sky-950 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100"
+          data-testid="prospect-draft-banner"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 id="prospect-draft-heading" className="font-semibold">
+              Draft from prospect: {prospectDraft.prospectLabel}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setProspectDraft(null)}
+              className="shrink-0 rounded-md border border-sky-300 px-2 py-1 text-xs font-medium hover:bg-sky-100 dark:border-sky-700 dark:hover:bg-sky-900"
+            >
+              Dismiss
+            </button>
+          </div>
+          <p className="mt-1">
+            The project name and address below were copied from your prospect record and can be edited. Nothing has been priced,
+            saved as a quote, or sent. Enter the job details and calculate as usual; this estimator sets the price.
+          </p>
+          {prospectDraft.windowCountReference && (
+            <p className="mt-2">
+              <span className="font-medium">Window count from your research (reference only, not applied):</span>{' '}
+              {prospectDraft.windowCountReference.count.toLocaleString('en-US')} ·{' '}
+              {COUNT_CONFIDENCE_LABELS[prospectDraft.windowCountReference.confidence] || 'Unverified'}
+            </p>
+          )}
+          {prospectDraft.notes && (
+            <p className="mt-2 whitespace-pre-line">
+              <span className="font-medium">Prospect notes:</span> {prospectDraft.notes}
+            </p>
+          )}
+        </section>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
 

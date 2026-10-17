@@ -92,14 +92,24 @@ export default function SampleMap({ markers, selectedId, highlightedId, onSelect
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ pointerId: number; x: number; y: number; moved: boolean } | null>(null);
 
-  const worldW = (BOUNDS.maxLng - BOUNDS.minLng) * LNG_SCALE;
-  const worldH = BOUNDS.maxLat - BOUNDS.minLat;
+  // The Triad view widens to fit any entered coordinates outside it, so no marker lands off-map.
+  const bounds = markers.reduce(
+    (b, m) => ({
+      minLat: Math.min(b.minLat, m.lat),
+      maxLat: Math.max(b.maxLat, m.lat),
+      minLng: Math.min(b.minLng, m.lng),
+      maxLng: Math.max(b.maxLng, m.lng),
+    }),
+    BOUNDS
+  );
+  const worldW = (bounds.maxLng - bounds.minLng) * LNG_SCALE;
+  const worldH = bounds.maxLat - bounds.minLat;
   const scale = Math.max(0, Math.min((width - PADDING * 2) / worldW, (height - PADDING * 2) / worldH));
   const offsetX = (width - worldW * scale) / 2;
   const offsetY = (height - worldH * scale) / 2;
   const projectBase = (lat: number, lng: number) => ({
-    x: offsetX + (lng - BOUNDS.minLng) * LNG_SCALE * scale,
-    y: offsetY + (BOUNDS.maxLat - lat) * scale,
+    x: offsetX + (lng - bounds.minLng) * LNG_SCALE * scale,
+    y: offsetY + (bounds.maxLat - lat) * scale,
   });
   const project = (lat: number, lng: number) => {
     const p = projectBase(lat, lng);
@@ -234,6 +244,8 @@ export default function SampleMap({ markers, selectedId, highlightedId, onSelect
           const Icon = TONE_ICON[m.tone];
           const colors = TONE_MARKER[m.tone];
           const size = selected ? 38 : highlighted ? 34 : 28;
+          const manual = m.origin === 'manual';
+          const name = `${m.label}${manual ? ' (your data)' : ''}${m.saved ? ' (saved lead)' : ''}`;
           return (
             <div
               key={m.id}
@@ -242,16 +254,17 @@ export default function SampleMap({ markers, selectedId, highlightedId, onSelect
             >
               <button
                 type="button"
-                aria-label={m.saved ? `${m.label} (saved lead)` : m.label}
+                aria-label={name}
                 aria-pressed={selected}
                 data-marker-id={m.id}
+                data-origin={manual ? 'manual' : 'sample'}
                 data-highlighted={highlighted ? 'true' : undefined}
                 onClick={() => onSelect(m.id)}
                 onMouseEnter={() => onHighlight(m.id)}
                 onMouseLeave={() => onHighlight(null)}
                 onFocus={() => onHighlight(m.id)}
                 onBlur={() => onHighlight(null)}
-                className={`relative flex items-center justify-center rounded-full border-2 border-white shadow-md transition-all motion-reduce:transition-none focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-primary)] dark:border-slate-900 ${
+                className={`relative flex items-center justify-center ${manual ? 'rounded-md' : 'rounded-full'} border-2 border-white shadow-md transition-all motion-reduce:transition-none focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-primary)] dark:border-slate-900 ${
                   selected ? 'ring-4 ring-[var(--brand-primary)]' : ''
                 }`}
                 style={{ width: size, height: size, backgroundColor: colors.fill }}
@@ -296,8 +309,14 @@ export default function SampleMap({ markers, selectedId, highlightedId, onSelect
       </div>
 
       <div className="pointer-events-none absolute bottom-3 left-3 z-40 rounded-lg bg-white/95 px-3 py-2 text-xs shadow-sm dark:bg-slate-800/95">
-        <p className="font-semibold text-slate-800 dark:text-slate-100">Sample map · schematic, not to scale</p>
+        <p className="font-semibold text-slate-800 dark:text-slate-100">Schematic map · not to scale</p>
         <ul className="mt-1 flex flex-wrap gap-3">
+          {markers.some((m) => m.origin === 'manual') && (
+            <li className="flex items-center gap-1 text-slate-700 dark:text-slate-200">
+              <span className="h-2.5 w-2.5 rounded-sm bg-slate-700 dark:bg-slate-200" aria-hidden="true" />
+              Square: your data
+            </li>
+          )}
           {(Object.keys(TONE_LABELS) as MarkerTone[]).map((tone) => (
             <li key={tone} className="flex items-center gap-1 text-slate-700 dark:text-slate-200">
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: TONE_MARKER[tone].fill }} aria-hidden="true" />

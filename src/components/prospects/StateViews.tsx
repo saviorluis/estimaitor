@@ -34,6 +34,29 @@ export function EmptyState({ onClear, savedOnly }: { onClear: () => void; savedO
   );
 }
 
+export function NoDataState({ onAdd, onShowSample }: { onAdd?: () => void; onShowSample?: () => void }) {
+  return (
+    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-600 dark:bg-slate-800">
+      <h3 className="font-semibold text-slate-900 dark:text-white">No prospects yet</h3>
+      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+        Add a real prospect to start. {onShowSample ? 'Sample data is hidden, not deleted.' : ''}
+      </p>
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        {onAdd && (
+          <button type="button" onClick={onAdd} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+            Add prospect
+          </button>
+        )}
+        {onShowSample && (
+          <button type="button" onClick={onShowSample} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700">
+            Show sample data
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">

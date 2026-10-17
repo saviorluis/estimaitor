@@ -119,16 +119,24 @@ test.describe('Prospect filters (src/lib/prospects/filters.ts)', () => {
   });
 
   test('URL state round-trips and ignores unknown values', () => {
-    const state = { query: 'medical', segment: 'commercial' as const, savedOnly: true, selectedId: 'sp-quillmark-medical', view: 'map' as const };
+    const state = {
+      query: 'medical',
+      segment: 'commercial' as const,
+      savedOnly: true,
+      selectedId: 'sp-quillmark-medical',
+      view: 'map' as const,
+      edit: 'new',
+    };
     const search = buildProspectSearch(state);
     expect(parseProspectUrlState(new URLSearchParams(search))).toEqual(state);
-    expect(buildProspectSearch({ query: '  ', segment: 'all', savedOnly: false, selectedId: null, view: 'list' })).toBe('');
+    expect(buildProspectSearch({ query: '  ', segment: 'all', savedOnly: false, selectedId: null, view: 'list', edit: null })).toBe('');
     expect(parseProspectUrlState(new URLSearchParams('type=bogus&view=globe&saved=yes'))).toEqual({
       query: '',
       segment: 'all',
       savedOnly: false,
       selectedId: null,
       view: 'list',
+      edit: null,
     });
   });
 });

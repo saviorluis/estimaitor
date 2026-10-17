@@ -1,28 +1,34 @@
 'use client';
 
-import { Bookmark, Building2, CalendarClock, HardHat, Home, MapPin } from 'lucide-react';
-import { getSegment } from '@/lib/prospects/filters';
-import { LEAD_STATUS_LABELS, type Prospect, type SavedLead } from '@/lib/prospects/types';
+import { Bookmark, Building2, CalendarClock, HardHat, Home, MapPin, MapPinOff } from 'lucide-react';
+import { getSegment, prospectName } from '@/lib/prospects/filters';
+import { LEAD_STATUS_LABELS, PROSPECT_STATUS_LABELS, type AnyProspect, type SavedLead } from '@/lib/prospects/types';
 import { TONE_LABELS, TONE_PILL, formatIsoDate, formatNumber } from './styles';
 
 const TONE_ICON = { commercial: Building2, residential: Home, construction: HardHat };
 
 interface ProspectCardProps {
-  prospect: Prospect;
+  prospect: AnyProspect;
   lead?: SavedLead;
   highlighted: boolean;
   onSelect: (id: string) => void;
   onHighlight: (id: string | null) => void;
 }
 
-export function prospectSummary(prospect: Prospect): string {
+export function prospectSummary(prospect: AnyProspect): string {
+  if (prospect.kind === 'manual') {
+    if (prospect.windowCount === undefined) return 'Window count not entered';
+    const qualifier = prospect.countConfidence === 'verified' ? 'verified' : 'estimated';
+    return `${formatNumber(prospect.windowCount)} windows (${qualifier})`;
+  }
   return prospect.kind === 'property' ? prospect.buildingType.value : prospect.projectType;
 }
 
 export default function ProspectCard({ prospect, lead, highlighted, onSelect, onHighlight }: ProspectCardProps) {
   const tone = getSegment(prospect);
   const Icon = TONE_ICON[tone];
-  const sqft = prospect.squareFootage?.value;
+  const manual = prospect.kind === 'manual' ? prospect : null;
+  const sqft = prospect.kind === 'manual' ? prospect.squareFootage : prospect.squareFootage?.value;
   const dateLine =
     prospect.kind === 'construction'
       ? prospect.bidDeadline
@@ -30,7 +36,9 @@ export default function ProspectCard({ prospect, lead, highlighted, onSelect, on
         : prospect.estimatedCompletion
           ? `Est. completion ${formatIsoDate(prospect.estimatedCompletion.value)}`
           : null
-      : null;
+      : manual?.followUpAt
+        ? `Follow up ${formatIsoDate(manual.followUpAt)}`
+        : null;
 
   return (
     <button
@@ -53,19 +61,37 @@ export default function ProspectCard({ prospect, lead, highlighted, onSelect, on
           <Icon className="h-3.5 w-3.5" aria-hidden="true" />
           {TONE_LABELS[tone]}
         </span>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-          Sample data
-        </span>
+        {manual ? (
+          <span className="rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-medium text-white">Your data</span>
+        ) : (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+            Sample data
+          </span>
+        )}
       </div>
-      <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-white">{prospect.name}</h3>
+      <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-white">{prospectName(prospect)}</h3>
       <p className="mt-0.5 flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
         <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        {manual && manual.name ? `${manual.address.line1}, ` : ''}
         {prospect.address.city}, {prospect.address.state}
       </p>
       <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">
         {prospectSummary(prospect)}
         {sqft ? <span className="text-slate-600 dark:text-slate-300"> · {formatNumber(sqft)} sq ft</span> : null}
       </p>
+      {manual && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-full bg-slate-900 px-2 py-0.5 font-medium text-white dark:bg-white dark:text-slate-900">
+            {PROSPECT_STATUS_LABELS[manual.status]}
+          </span>
+          {!manual.coordinates && (
+            <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <MapPinOff className="h-3.5 w-3.5" aria-hidden="true" />
+              Not on map
+            </span>
+          )}
+        </div>
+      )}
       {(dateLine || lead) && (
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           {dateLine && (
