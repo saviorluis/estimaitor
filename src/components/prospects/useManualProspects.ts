@@ -12,10 +12,12 @@ import {
   type WriteResult,
 } from '@/lib/prospects/manualStore';
 import { buildManualProspect, type ManualProspectFields } from '@/lib/prospects/manualProspectForm';
-import type { ManualProspect } from '@/lib/prospects/types';
+import { applyStatusChange, mergeEdit, undoStatusChange, type StatusChange } from '@/lib/prospects/manualUpdates';
+import type { ManualProspect, ProspectStatus } from '@/lib/prospects/types';
 
 export type ManualStatus = 'loading' | 'ready' | 'unreadable';
 export type SaveResult = { ok: true; prospect: ManualProspect } | { ok: false; error: string };
+export type StatusChangeResult = { ok: true; change: StatusChange } | { ok: false; error: string };
 
 export function useManualProspects() {
   const [status, setStatus] = useState<ManualStatus>('loading');
@@ -42,6 +44,10 @@ export function useManualProspects() {
       const latest = readManualProspects(window.localStorage);
       if (!latest.ok) return latest;
       const next = change(latest.prospects);
+      if (next === latest.prospects) {
+        setProspects(next);
+        return { ok: true };
+      }
       const result = writeManualProspects(window.localStorage, next);
       if (result.ok) setProspects(next);
       return result;
@@ -66,12 +72,40 @@ export function useManualProspects() {
       const result = commit((current) =>
         current.map((p) => {
           if (p.id !== id) return p;
-          box.saved = buildManualProspect(fields, { id, createdAt: p.createdAt, updatedAt: new Date().toISOString() });
+          box.saved = mergeEdit(p, buildManualProspect(fields, { id, createdAt: p.createdAt, updatedAt: new Date().toISOString() }));
           return box.saved;
         })
       );
       if (!result.ok) return result;
       return box.saved ? { ok: true, prospect: box.saved } : { ok: false, error: 'This prospect no longer exists.' };
+    },
+    [commit]
+  );
+
+  const updateStatus = useCallback(
+    (id: string, next: ProspectStatus): StatusChangeResult => {
+      const box: { change?: StatusChange | null } = {};
+      const result = commit((current) => {
+        const applied = applyStatusChange(current, id, next);
+        box.change = applied.change;
+        return applied.change ? applied.prospects : current;
+      });
+      if (!result.ok) return result;
+      return box.change ? { ok: true, change: box.change } : { ok: false, error: 'The status was not changed.' };
+    },
+    [commit]
+  );
+
+  const undoStatus = useCallback(
+    (change: StatusChange): WriteResult => {
+      let restored = false;
+      const result = commit((current) => {
+        const undone = undoStatusChange(current, change);
+        restored = undone.restored;
+        return undone.restored ? undone.prospects : current;
+      });
+      if (!result.ok) return result;
+      return restored ? { ok: true } : { ok: false, error: 'Not undone: this prospect was changed after that update.' };
     },
     [commit]
   );
@@ -90,6 +124,8 @@ export function useManualProspects() {
     prospects,
     create,
     update,
+    updateStatus,
+    undoStatus,
     remove,
     editable: status === 'ready',
     showSampleData: settings.showSampleData,

@@ -33,7 +33,7 @@ test.describe('Prospects page (/prospects)', () => {
     await expect(page).toHaveURL(/\/prospects$/);
   });
 
-  test('search, type tabs and counts combine, live in the URL, and survive a reload', async ({ page }) => {
+  test('search and type tabs combine; the type is in the URL, the search text never is, and both survive a reload', async ({ page }) => {
     await openProspects(page);
     await tab(page, 'Construction').click();
     await expect(tab(page, 'Construction')).toHaveAttribute('aria-pressed', 'true');
@@ -44,7 +44,8 @@ test.describe('Prospects page (/prospects)', () => {
     await expect(tab(page, 'All')).toContainText(/\d+/);
     await expect(page.locator('[data-marker-id]')).toHaveCount(3);
     await expect(page).toHaveURL(/[?&]type=construction/);
-    await expect(page).toHaveURL(/[?&]q=greensboro/);
+    await page.waitForFunction(() => window.history.state?.pi?.query === 'greensboro');
+    expect(page.url()).not.toContain('greensboro');
 
     await page.reload();
     await expect(page.getByTestId('prospects-loading')).toHaveCount(0);
@@ -54,7 +55,9 @@ test.describe('Prospects page (/prospects)', () => {
     await page.getByLabel('Search prospects').fill('no such place zzz');
     await expect(page.getByRole('heading', { name: 'No prospects match' })).toBeVisible();
     await expect(page.getByTestId('result-count')).toHaveText('0 prospects');
-    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page.getByTestId('empty-state')).toContainText('Search: “no such place zzz”');
+    await expect(page.getByTestId('empty-state')).toContainText('Type: Construction');
+    await page.getByTestId('empty-state').getByRole('button', { name: 'Clear all filters' }).click();
     await expect(results(page)).toHaveCount(25);
     await expect(page).toHaveURL(/\/prospects$/);
   });
@@ -69,7 +72,7 @@ test.describe('Prospects page (/prospects)', () => {
     await marker(page, 'sp-tinmoor-hotel').click();
     await expect(detail(page).getByRole('heading', { level: 2 })).toHaveText('Tinmoor Suites Hotel');
     await expect(marker(page, 'sp-tinmoor-hotel')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page).toHaveURL(/[?&]id=sp-tinmoor-hotel/);
+    await expect(page).toHaveURL(/\/prospects$/);
 
     // Choosing another marker swaps the detail; Back then returns to the list in one step.
     await marker(page, 'sp-wrenfield-coffee').click();

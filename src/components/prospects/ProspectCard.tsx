@@ -2,6 +2,7 @@
 
 import { Bookmark, Building2, CalendarClock, HardHat, Home, MapPin, MapPinOff } from 'lucide-react';
 import { getSegment, prospectName } from '@/lib/prospects/filters';
+import { hasValidCoordinates } from '@/lib/prospects/insights';
 import { LEAD_STATUS_LABELS, PROSPECT_STATUS_LABELS, type AnyProspect, type SavedLead } from '@/lib/prospects/types';
 import { TONE_LABELS, TONE_PILL, formatIsoDate, formatNumber } from './styles';
 
@@ -84,7 +85,7 @@ export default function ProspectCard({ prospect, lead, highlighted, onSelect, on
           <span className="rounded-full bg-slate-900 px-2 py-0.5 font-medium text-white dark:bg-white dark:text-slate-900">
             {PROSPECT_STATUS_LABELS[manual.status]}
           </span>
-          {!manual.coordinates && (
+          {!hasValidCoordinates(manual.coordinates) && (
             <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
               <MapPinOff className="h-3.5 w-3.5" aria-hidden="true" />
               Not on map

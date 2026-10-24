@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { SAMPLE_PROSPECTS } from '../../src/lib/prospects/sampleData';
 import {
+  DEFAULT_URL_STATE,
   buildProspectSearch,
   countBySegment,
   filterProspects,
   getSegment,
   matchesQuery,
   parseProspectUrlState,
+  type ProspectUrlState,
 } from '../../src/lib/prospects/filters';
 import {
   LEADS_STORAGE_KEY,
@@ -118,26 +120,28 @@ test.describe('Prospect filters (src/lib/prospects/filters.ts)', () => {
     expect(counts.all).toBe(filterProspects(SAMPLE_PROSPECTS, { query: 'greensboro', segment: 'all', savedOnly: false }).length);
   });
 
-  test('URL state round-trips and ignores unknown values', () => {
-    const state = {
-      query: 'medical',
-      segment: 'commercial' as const,
+  test('URL state round-trips view settings only and ignores unknown values', () => {
+    const state: ProspectUrlState = {
+      segment: 'commercial',
       savedOnly: true,
-      selectedId: 'sp-quillmark-medical',
-      view: 'map' as const,
-      edit: 'new',
+      view: 'map',
+      scope: 'mine',
+      status: 'ready_to_quote',
+      source: 'site_visit',
+      confidence: 'high',
+      mapped: 'unmapped',
+      sort: 'followup',
+      next: 'followup_due',
     };
     const search = buildProspectSearch(state);
     expect(parseProspectUrlState(new URLSearchParams(search))).toEqual(state);
-    expect(buildProspectSearch({ query: '  ', segment: 'all', savedOnly: false, selectedId: null, view: 'list', edit: null })).toBe('');
-    expect(parseProspectUrlState(new URLSearchParams('type=bogus&view=globe&saved=yes'))).toEqual({
-      query: '',
-      segment: 'all',
-      savedOnly: false,
-      selectedId: null,
-      view: 'list',
-      edit: null,
-    });
+    expect(Array.from(new URLSearchParams(search).keys()).sort()).toEqual(
+      ['confidence', 'data', 'map', 'next', 'saved', 'sort', 'source', 'status', 'type', 'view']
+    );
+    expect(buildProspectSearch(DEFAULT_URL_STATE)).toBe('');
+    expect(
+      parseProspectUrlState(new URLSearchParams('type=bogus&view=globe&saved=yes&status=x&sort=price&next=y&q=medical&id=sp-1&edit=new'))
+    ).toEqual(DEFAULT_URL_STATE);
   });
 });
 

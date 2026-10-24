@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { AlertTriangle, ArrowLeft, ChevronDown } from 'lucide-react';
 import { US_STATES } from '@/lib/salesTax';
 import { prospectName } from '@/lib/prospects/filters';
@@ -54,15 +54,26 @@ interface ProspectFormProps {
   onSave: (fields: ManualProspectFields) => SaveResult;
   onSaved: (id: string) => void;
   onCancel: () => void;
+  /** 'coords' opens More details with the latitude field focused, for adding a map position. */
+  initialFocus?: 'coords';
 }
 
 const ProspectForm = forwardRef<HTMLHeadingElement, ProspectFormProps>(function ProspectForm(
-  { mode, initialDraft, editingId, existing, onSave, onSaved, onCancel },
+  { mode, initialDraft, editingId, existing, onSave, onSaved, onCancel, initialFocus },
   headingRef
 ) {
   const [draft, setDraft] = useState(initialDraft);
   const [submitted, setSubmitted] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(initialFocus === 'coords');
+  useEffect(() => {
+    if (initialFocus !== 'coords') return;
+    const frame = requestAnimationFrame(() => {
+      const lat = document.getElementById(fieldId('lat'));
+      lat?.scrollIntoView({ block: 'center' });
+      lat?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [initialFocus]);
   const [duplicateAck, setDuplicateAck] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);

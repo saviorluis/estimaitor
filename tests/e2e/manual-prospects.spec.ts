@@ -87,8 +87,8 @@ test.describe('Real prospect entry (/prospects)', () => {
   test('validates, creates, saves and reloads a real prospect, kept apart from sample data', async ({ page }) => {
     await openProspects(page);
     await page.getByRole('button', { name: 'Add Prospect' }).click();
-    await expect(page).toHaveURL(/[?&]edit=new/);
     await expect(page.getByRole('heading', { name: 'Add prospect' })).toBeFocused();
+    await expect(page).toHaveURL(/\/prospects$/);
 
     await page.getByRole('button', { name: 'Save prospect' }).click();
     const summary = page.getByTestId('form-error-summary');
@@ -164,12 +164,12 @@ test.describe('Real prospect entry (/prospects)', () => {
     await page.locator('#pf-countConfidence-verified').check();
     await page.getByRole('button', { name: 'Save changes' }).click();
 
-    await expect(page).not.toHaveURL(/edit=/);
+    await expect(page).not.toHaveURL(/edit=|id=/);
     const count = detail(page).locator('[data-fact="Estimated window count"]');
     await expect(count).toContainText('90');
     await expect(count.locator('[data-fact-kind]')).toHaveAttribute('data-fact-kind', 'verified');
     await expect(count).toContainText('marked verified by you');
-    await expect(detail(page).locator('[data-fact="Status"]')).toContainText('Ready to quote');
+    await expect(detail(page).locator('#quick-status')).toHaveValue('ready_to_quote');
 
     const [p] = (await stored(page))!.prospects;
     expect(p.createdAt).toBe('2026-10-01T12:00:00.000Z');

@@ -4,22 +4,36 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Eye, EyeOff, Info, List, Map as MapIcon, Plus } from 'lucide-react';
 import {
+  DEFAULT_URL_STATE,
+  LEGACY_URL_PARAMS,
+  SEGMENTS,
   buildProspectSearch,
   countBySegment,
   filterProspects,
   getSegment,
+  isYourDataOnly,
   parseProspectUrlState,
   prospectCoordinates,
   prospectName,
+  sortManualProspects,
   type ProspectUrlState,
 } from '@/lib/prospects/filters';
 import { buildDraftEstimateHandoff, writeDraftEstimateHandoff } from '@/lib/prospects/estimateHandoff';
+import { NEXT_ACTIONS, countNextActions, countStatuses, localDate } from '@/lib/prospects/insights';
 import { draftFromProspect, emptyDraft } from '@/lib/prospects/manualProspectForm';
 import { loadProspects } from '@/lib/prospects/repository';
-import type { AnyProspect, ManualProspect, Prospect } from '@/lib/prospects/types';
+import {
+  COUNT_CONFIDENCE_LABELS,
+  MANUAL_SOURCE_LABELS,
+  PROSPECT_STATUS_LABELS,
+  type AnyProspect,
+  type ManualProspect,
+  type Prospect,
+} from '@/lib/prospects/types';
 import type { MapMarker } from '@/lib/maps/MapAdapter';
-import FilterBar from './FilterBar';
+import FilterBar, { type ActiveFilter } from './FilterBar';
 import ManualProspectDetail from './ManualProspectDetail';
+import PipelineSummary from './PipelineSummary';
 import ProspectCard from './ProspectCard';
 import ProspectDetail from './ProspectDetail';
 import ProspectForm from './ProspectForm';
@@ -33,6 +47,30 @@ type LoadState = { status: 'loading' } | { status: 'ready'; prospects: Prospect[
 const DESKTOP_QUERY = '(min-width: 1024px)';
 /** Same key the estimator page reads to restore its mode; a draft estimate always opens the final-cleaning form. */
 const APP_MODE_KEY = 'estimaitor_app_mode';
+const MAX_QUERY = 100;
+
+/**
+ * Selection, the open form and search text live in the browser history entry, not the URL,
+ * so they work with Back and reload but never appear in a shared or bookmarked link.
+ */
+interface NavState {
+  selectedId: string | null;
+  edit: string | null;
+  query: string;
+  focus: 'coords' | null;
+}
+const EMPTY_NAV: NavState = { selectedId: null, edit: null, query: '', focus: null };
+
+function readNav(state: unknown): NavState {
+  const pi = state && typeof state === 'object' ? (state as { pi?: Partial<NavState> }).pi : undefined;
+  if (!pi || typeof pi !== 'object') return EMPTY_NAV;
+  return {
+    selectedId: typeof pi.selectedId === 'string' ? pi.selectedId : null,
+    edit: typeof pi.edit === 'string' ? pi.edit : null,
+    query: typeof pi.query === 'string' ? pi.query.slice(0, MAX_QUERY) : '',
+    focus: pi.focus === 'coords' ? 'coords' : null,
+  };
+}
 
 function useIsDesktop(): boolean | null {
   const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
@@ -56,6 +94,10 @@ export default function ProspectsExplorer() {
   const urlStateRef = useRef(urlState);
   urlStateRef.current = urlState;
 
+  const [nav, setNav] = useState<NavState>(EMPTY_NAV);
+  const navRef = useRef(nav);
+  const [navReady, setNavReady] = useState(false);
+
   const [load, setLoad] = useState<LoadState>({ status: 'loading' });
   const leads = useLeads();
   const manual = useManualProspects();
@@ -63,35 +105,70 @@ export default function ProspectsExplorer() {
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [handoffError, setHandoffError] = useState<string | null>(null);
 
-  // The search box updates results immediately; the URL follows after a short pause.
-  const [queryInput, setQueryInput] = useState(urlState.query);
-  const syncedQuery = useRef(urlState.query);
+  // The search box updates results immediately; the history entry follows after a short pause.
+  const [queryInput, setQueryInput] = useState('');
+  const syncedQuery = useRef('');
+
+  const applyNav = (next: NavState) => {
+    navRef.current = next;
+    setNav(next);
+    syncedQuery.current = next.query;
+    setQueryInput(next.query);
+  };
 
   // Next 14 syncs useSearchParams with the History API, so filters update without a server round-trip.
-  const navigate = useCallback(
-    (patch: Partial<ProspectUrlState>, mode: 'push' | 'replace') => {
-      const url = `${pathname}${buildProspectSearch({ ...urlStateRef.current, ...patch })}`;
-      if (mode === 'push') window.history.pushState(null, '', url);
-      else window.history.replaceState(null, '', url);
+  const go = useCallback(
+    (patch: { view?: Partial<ProspectUrlState>; nav?: Partial<NavState> }, mode: 'push' | 'replace') => {
+      const nextNav = { ...navRef.current, ...patch.nav };
+      const url = `${pathname}${buildProspectSearch({ ...urlStateRef.current, ...patch.view })}`;
+      if (mode === 'push') window.history.pushState({ pi: nextNav }, '', url);
+      else window.history.replaceState({ pi: nextNav }, '', url);
+      navRef.current = nextNav;
+      setNav(nextNav);
     },
     [pathname]
   );
+  const setView = useCallback((view: Partial<ProspectUrlState>) => go({ view }, 'replace'), [go]);
 
   useEffect(() => {
-    if (urlState.query !== syncedQuery.current) {
-      syncedQuery.current = urlState.query;
-      setQueryInput(urlState.query);
-    }
-  }, [urlState.query]);
+    const params = new URLSearchParams(window.location.search);
+    const stored = readNav(window.history.state);
+    const hasLegacy = LEGACY_URL_PARAMS.some((key) => params.has(key));
+    const initial: NavState = hasLegacy
+      ? {
+          selectedId: params.get('id') || stored.selectedId,
+          edit: params.get('edit') || stored.edit,
+          query: (params.get('q') ?? stored.query).slice(0, MAX_QUERY),
+          focus: null,
+        }
+      : stored;
+    applyNav(initial);
+    setNavReady(true);
+    // Older links carried the search text and record id in the URL; move them into history and drop them from the address bar.
+    // Deferred so it runs once Next's history integration is in place.
+    const timer = hasLegacy
+      ? setTimeout(() => {
+          LEGACY_URL_PARAMS.forEach((key) => params.delete(key));
+          const search = params.toString();
+          window.history.replaceState({ pi: initial }, '', `${window.location.pathname}${search ? `?${search}` : ''}`);
+        }, 0)
+      : undefined;
+    const onPopState = (e: PopStateEvent) => applyNav(readNav(e.state));
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
 
   useEffect(() => {
     if (queryInput === syncedQuery.current) return;
     const timer = setTimeout(() => {
       syncedQuery.current = queryInput;
-      navigate({ query: queryInput }, 'replace');
+      go({ nav: { query: queryInput } }, 'replace');
     }, 250);
     return () => clearTimeout(timer);
-  }, [queryInput, navigate]);
+  }, [queryInput, go]);
 
   const fetchProspects = useCallback(() => {
     setLoad({ status: 'loading' });
@@ -114,14 +191,25 @@ export default function ProspectsExplorer() {
     [leads.savedIds, manual.prospects]
   );
 
-  const filter = { query: queryInput, segment: urlState.segment, savedOnly: urlState.savedOnly };
-  const results = filterProspects(prospects, filter, savedIds);
-  const counts = countBySegment(prospects, { query: queryInput, savedOnly: urlState.savedOnly }, savedIds);
-  const selected = urlState.selectedId ? prospects.find((p) => p.id === urlState.selectedId) || null : null;
+  const today = localDate(new Date());
+  const filter = {
+    query: queryInput,
+    segment: urlState.segment,
+    savedOnly: urlState.savedOnly,
+    scope: urlState.scope,
+    status: urlState.status,
+    source: urlState.source,
+    confidence: urlState.confidence,
+    mapped: urlState.mapped,
+    next: urlState.next,
+  };
+  const results = filterProspects(prospects, filter, savedIds, today);
+  const counts = countBySegment(prospects, filter, savedIds, today);
+  const selected = nav.selectedId ? prospects.find((p) => p.id === nav.selectedId) || null : null;
 
   const editing: ManualProspect | null =
-    urlState.edit && urlState.edit !== 'new' ? manual.prospects.find((p) => p.id === urlState.edit) || null : null;
-  const formMode: 'new' | 'edit' | null = !manual.editable ? null : urlState.edit === 'new' ? 'new' : editing ? 'edit' : null;
+    nav.edit && nav.edit !== 'new' ? manual.prospects.find((p) => p.id === nav.edit) || null : null;
+  const formMode: 'new' | 'edit' | null = !manual.editable ? null : nav.edit === 'new' ? 'new' : editing ? 'edit' : null;
 
   const markers: MapMarker[] = useMemo(() => {
     const shown = selected && !results.includes(selected) ? [...results, selected] : results;
@@ -151,12 +239,12 @@ export default function ProspectsExplorer() {
 
   const select = useCallback(
     (id: string) => {
-      if (urlStateRef.current.selectedId === id) return;
-      const alreadyOpen = Boolean(urlStateRef.current.selectedId);
+      if (navRef.current.selectedId === id) return;
+      const alreadyOpen = Boolean(navRef.current.selectedId);
       if (!alreadyOpen) openedHere.current = true;
-      navigate({ selectedId: id }, alreadyOpen ? 'replace' : 'push');
+      go({ nav: { selectedId: id } }, alreadyOpen ? 'replace' : 'push');
     },
-    [navigate]
+    [go]
   );
 
   const close = useCallback(() => {
@@ -164,13 +252,13 @@ export default function ProspectsExplorer() {
       openedHere.current = false;
       window.history.back();
     } else {
-      navigate({ selectedId: null }, 'replace');
+      go({ nav: { selectedId: null } }, 'replace');
     }
-  }, [navigate]);
+  }, [go]);
 
-  const openForm = (edit: string) => {
+  const openForm = (edit: string, focus: NavState['focus'] = null) => {
     formOpenedHere.current = true;
-    navigate({ edit }, 'push');
+    go({ nav: { edit, focus } }, 'push');
   };
 
   const closeForm = () => {
@@ -178,7 +266,7 @@ export default function ProspectsExplorer() {
       formOpenedHere.current = false;
       window.history.back();
     } else {
-      navigate({ edit: null }, 'replace');
+      go({ nav: { edit: null, focus: null } }, 'replace');
     }
   };
 
@@ -189,9 +277,9 @@ export default function ProspectsExplorer() {
       return;
     }
     // A new record replaces the form entry, so Back from its detail returns to the list.
-    if (formOpenedHere.current && !urlStateRef.current.selectedId) openedHere.current = true;
+    if (formOpenedHere.current && !navRef.current.selectedId) openedHere.current = true;
     formOpenedHere.current = false;
-    navigate({ edit: null, selectedId: id }, 'replace');
+    go({ nav: { edit: null, focus: null, selectedId: id } }, 'replace');
   };
 
   const deleteSelected = (id: string) => {
@@ -199,7 +287,7 @@ export default function ProspectsExplorer() {
     if (result.ok) {
       lastSelectedId.current = null;
       openedHere.current = false;
-      navigate({ selectedId: null, edit: null }, 'replace');
+      go({ nav: { selectedId: null, edit: null, focus: null } }, 'replace');
       requestAnimationFrame(() => document.getElementById('prospect-search')?.focus());
     }
     return result;
@@ -221,11 +309,11 @@ export default function ProspectsExplorer() {
   };
 
   useEffect(() => {
-    if (formMode) {
+    if (formMode && nav.focus !== 'coords') {
       formHeadingRef.current?.focus();
       window.scrollTo({ top: 0 });
     }
-  }, [formMode]);
+  }, [formMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (formMode) return;
@@ -235,14 +323,14 @@ export default function ProspectsExplorer() {
       if (isDesktop === false) window.scrollTo({ top: 0 });
       return;
     }
-    if (!urlState.selectedId) openedHere.current = false;
+    if (!nav.selectedId) openedHere.current = false;
     const previous = lastSelectedId.current;
     lastSelectedId.current = null;
     if (previous) {
       const card = document.querySelector<HTMLElement>(`[data-prospect-id="${previous}"]`);
       (card || document.getElementById('prospect-search'))?.focus();
     }
-  }, [selected?.id, urlState.selectedId, isDesktop, formMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected?.id, nav.selectedId, isDesktop, formMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selected || formMode) return;
@@ -258,12 +346,40 @@ export default function ProspectsExplorer() {
   const clearFilters = () => {
     setQueryInput('');
     syncedQuery.current = '';
-    navigate({ query: '', segment: 'all', savedOnly: false }, 'replace');
+    const { view, sort } = urlStateRef.current;
+    go({ view: { ...DEFAULT_URL_STATE, view, sort }, nav: { query: '' } }, 'replace');
   };
 
-  const ready = load.status !== 'loading' && manual.status !== 'loading' && isDesktop !== null;
-  const manualResults = results.filter((p) => p.kind === 'manual');
+  const activeFilters: ActiveFilter[] = [];
+  if (queryInput.trim()) activeFilters.push({ key: 'query', label: `Search: “${queryInput.trim()}”`, onRemove: () => setQueryInput('') });
+  if (urlState.segment !== 'all')
+    activeFilters.push({ key: 'type', label: `Type: ${SEGMENTS.find((s) => s.id === urlState.segment)?.label}`, onRemove: () => setView({ segment: 'all' }) });
+  if (urlState.savedOnly) activeFilters.push({ key: 'saved', label: 'Saved leads only', onRemove: () => setView({ savedOnly: false }) });
+  if (urlState.scope !== 'all')
+    activeFilters.push({ key: 'data', label: urlState.scope === 'mine' ? 'Your prospects only' : 'Sample data only', onRemove: () => setView({ scope: 'all' }) });
+  if (urlState.next)
+    activeFilters.push({ key: 'next', label: `Next action: ${NEXT_ACTIONS.find((a) => a.id === urlState.next)?.label}`, onRemove: () => setView({ next: null }) });
+  if (urlState.status)
+    activeFilters.push({ key: 'status', label: `Status: ${PROSPECT_STATUS_LABELS[urlState.status]}`, onRemove: () => setView({ status: null }) });
+  if (urlState.source)
+    activeFilters.push({ key: 'source', label: `Source: ${MANUAL_SOURCE_LABELS[urlState.source]}`, onRemove: () => setView({ source: null }) });
+  if (urlState.confidence)
+    activeFilters.push({
+      key: 'confidence',
+      label: `Count: ${COUNT_CONFIDENCE_LABELS[urlState.confidence]}`,
+      onRemove: () => setView({ confidence: null }),
+    });
+  if (urlState.mapped !== 'all')
+    activeFilters.push({ key: 'map', label: urlState.mapped === 'mapped' ? 'On map' : 'Not on map', onRemove: () => setView({ mapped: 'all' }) });
+
+  const ready = navReady && load.status !== 'loading' && manual.status !== 'loading' && isDesktop !== null;
+  const manualResults = sortManualProspects(
+    results.filter((p): p is ManualProspect => p.kind === 'manual'),
+    urlState.sort
+  );
   const sampleResults = results.filter((p) => p.kind !== 'manual');
+  const unmappedCount = manualResults.filter((p) => !prospectCoordinates(p)).length;
+  const hasYourProspects = manual.prospects.length > 0;
 
   const renderCards = (items: AnyProspect[], label: string) => (
     <ul className="space-y-3" aria-label={label}>
@@ -272,7 +388,7 @@ export default function ProspectsExplorer() {
           <ProspectCard
             prospect={p}
             lead={leads.byProspect.get(p.id)}
-            highlighted={highlightedId === p.id || urlState.selectedId === p.id}
+            highlighted={highlightedId === p.id || nav.selectedId === p.id}
             onSelect={select}
             onHighlight={setHighlightedId}
           />
@@ -292,8 +408,8 @@ export default function ProspectsExplorer() {
       onShowSample={manual.showSampleData ? undefined : () => manual.setShowSampleData(true)}
     />
   ) : results.length === 0 ? (
-    <EmptyState onClear={clearFilters} savedOnly={urlState.savedOnly} />
-  ) : manual.prospects.length === 0 ? (
+    <EmptyState onClear={clearFilters} filters={activeFilters.map((f) => f.label)} yoursOnly={isYourDataOnly(filter)} />
+  ) : !hasYourProspects ? (
     <div data-testid="prospect-results">{renderCards(results, 'Prospect results')}</div>
   ) : (
     <div className="space-y-5" data-testid="prospect-results">
@@ -327,22 +443,43 @@ export default function ProspectsExplorer() {
         onClose={close}
         closeLabel={isDesktop ? 'Back to results' : 'Back'}
         onEdit={() => openForm(selected.id)}
+        onAddCoordinates={() => openForm(selected.id, 'coords')}
         onDelete={() => deleteSelected(selected.id)}
         onCreateDraftEstimate={() => createDraftEstimate(selected)}
+        onStatusChange={(status) => manual.updateStatus(selected.id, status)}
+        onUndoStatus={manual.undoStatus}
       />
     ) : (
       <ProspectDetail ref={headingRef} prospect={selected} leads={leads} onClose={close} closeLabel={isDesktop ? 'Back to results' : 'Back'} />
     ));
 
   const map = (
-    <SampleMap
-      markers={ready ? markers : []}
-      selectedId={urlState.selectedId}
-      highlightedId={highlightedId}
-      onSelect={select}
-      onHighlight={setHighlightedId}
-      ariaLabel="Schematic map of prospects"
-    />
+    <div className="relative h-full">
+      <SampleMap
+        markers={ready ? markers : []}
+        selectedId={nav.selectedId}
+        highlightedId={highlightedId}
+        onSelect={select}
+        onHighlight={setHighlightedId}
+        ariaLabel="Schematic map of prospects"
+      />
+      {ready && unmappedCount > 0 && (
+        <p
+          className="absolute left-3 top-3 z-40 max-w-[calc(100%-5rem)] rounded-lg bg-white/95 px-3 py-2 text-xs text-slate-800 shadow-sm dark:bg-slate-800/95 dark:text-slate-100"
+          data-testid="unmapped-note"
+        >
+          {unmappedCount} of your prospects in these results {unmappedCount === 1 ? "isn't" : "aren't"} on the map.
+          {urlState.mapped !== 'unmapped' && (
+            <>
+              {' '}
+              <button type="button" onClick={() => setView({ mapped: 'unmapped', view: 'list' })} className={LINK_BUTTON}>
+                Show unmapped
+              </button>
+            </>
+          )}
+        </p>
+      )}
+    </div>
   );
 
   const showMobileDetail = isDesktop === false && selected;
@@ -411,17 +548,29 @@ export default function ProspectsExplorer() {
           )}
         </div>
       )}
+      {!formMode && ready && hasYourProspects && (
+        <PipelineSummary
+          nextCounts={countNextActions(manual.prospects, today)}
+          statusCounts={countStatuses(manual.prospects)}
+          activeNext={urlState.next}
+          activeStatus={urlState.status}
+          onNextChange={(next) => setView({ next })}
+          onStatusChange={(status) => setView({ status })}
+        />
+      )}
       {!formMode && (
         <FilterBar
           query={queryInput}
           onQueryChange={setQueryInput}
-          segment={urlState.segment}
-          onSegmentChange={(segment) => navigate({ segment }, 'replace')}
+          view={urlState}
+          onViewChange={setView}
           counts={counts}
-          savedOnly={urlState.savedOnly}
-          onSavedOnlyChange={(savedOnly) => navigate({ savedOnly }, 'replace')}
           savedCount={savedIds.size}
           resultCount={results.length}
+          sampleHidden={!manual.showSampleData}
+          hasYourProspects={hasYourProspects}
+          activeFilters={activeFilters}
+          onClearAll={clearFilters}
         />
       )}
     </header>
@@ -433,7 +582,7 @@ export default function ProspectsExplorer() {
         {header}
         <div className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-4 sm:p-6 dark:border-slate-700 dark:bg-slate-800">
           <ProspectForm
-            key={urlState.edit || 'new'}
+            key={`${nav.edit || 'new'}-${nav.focus || ''}`}
             ref={formHeadingRef}
             mode={formMode}
             initialDraft={editing ? draftFromProspect(editing) : emptyDraft()}
@@ -442,6 +591,7 @@ export default function ProspectsExplorer() {
             onSave={(fields) => (editing ? manual.update(editing.id, fields) : manual.create(fields))}
             onSaved={onSaved}
             onCancel={closeForm}
+            initialFocus={nav.focus || undefined}
           />
         </div>
       </div>
@@ -474,7 +624,7 @@ export default function ProspectsExplorer() {
                   key={view}
                   type="button"
                   aria-pressed={active}
-                  onClick={() => navigate({ view }, 'replace')}
+                  onClick={() => setView({ view })}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium ${
                     active ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-700 dark:text-slate-300'
                   }`}

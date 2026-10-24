@@ -1,14 +1,19 @@
 'use client';
 
-import { forwardRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, Building2, Calculator, ExternalLink, HardHat, Home, MapPin, Pencil, Trash2 } from 'lucide-react';
+import { forwardRef, useEffect, useState, type ReactNode } from 'react';
+import { ArrowLeft, Building2, Calculator, ExternalLink, HardHat, Home, MapPin, MapPinPlus, Pencil, Trash2 } from 'lucide-react';
 import { getSegment, prospectName } from '@/lib/prospects/filters';
+import { hasValidCoordinates } from '@/lib/prospects/insights';
+import type { StatusChange } from '@/lib/prospects/manualUpdates';
 import {
   COUNT_CONFIDENCE_LABELS,
   MANUAL_SOURCE_LABELS,
+  PROSPECT_STATUSES,
   PROSPECT_STATUS_LABELS,
   type ManualProspect,
+  type ProspectStatus,
 } from '@/lib/prospects/types';
+import type { StatusChangeResult } from './useManualProspects';
 import FactBadge from './FactBadge';
 import { TONE_LABELS, TONE_PILL, formatIsoDate, formatNumber } from './styles';
 
@@ -61,14 +66,47 @@ interface ManualProspectDetailProps {
   onEdit: () => void;
   onDelete: () => { ok: boolean; error?: string };
   onCreateDraftEstimate: () => void;
+  onAddCoordinates: () => void;
+  onStatusChange: (status: ProspectStatus) => StatusChangeResult;
+  onUndoStatus: (change: StatusChange) => { ok: boolean; error?: string };
 }
 
+/** Undo stays offered for this long after a quick status change. */
+const UNDO_WINDOW_MS = 10_000;
+
 const ManualProspectDetail = forwardRef<HTMLHeadingElement, ManualProspectDetailProps>(function ManualProspectDetail(
-  { prospect, editable, onClose, closeLabel, onEdit, onDelete, onCreateDraftEstimate },
+  { prospect, editable, onClose, closeLabel, onEdit, onDelete, onCreateDraftEstimate, onAddCoordinates, onStatusChange, onUndoStatus },
   headingRef
 ) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [undoChange, setUndoChange] = useState<StatusChange | null>(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const mapped = hasValidCoordinates(prospect.coordinates);
+
+  useEffect(() => {
+    if (!undoChange) return;
+    const timer = setTimeout(() => setUndoChange(null), UNDO_WINDOW_MS);
+    return () => clearTimeout(timer);
+  }, [undoChange]);
+
+  const changeStatus = (status: ProspectStatus) => {
+    const result = onStatusChange(status);
+    if (result.ok) {
+      setUndoChange(result.change);
+      setStatusMessage(`Status changed to ${PROSPECT_STATUS_LABELS[status]}.`);
+    } else {
+      setUndoChange(null);
+      setStatusMessage(result.error);
+    }
+  };
+
+  const undo = () => {
+    if (!undoChange) return;
+    const result = onUndoStatus(undoChange);
+    setStatusMessage(result.ok ? `Status restored to ${PROSPECT_STATUS_LABELS[undoChange.previous.status]}.` : result.error || 'Not undone.');
+    setUndoChange(null);
+  };
   const tone = getSegment(prospect);
   const Icon = TONE_ICON[tone];
   const verifiedCount = prospect.countConfidence === 'verified';
@@ -114,10 +152,16 @@ const ManualProspectDetail = forwardRef<HTMLHeadingElement, ManualProspectDetail
           <span>
             {prospect.address.line1}, {prospect.address.city}, {prospect.address.state} {prospect.address.zip}
             <span className="block text-xs">
-              {prospect.coordinates ? 'Map position: coordinates you entered' : 'No coordinates, so this prospect is not on the map'}
+              {mapped ? 'Map position: coordinates you entered' : 'No coordinates, so this prospect is not on the map'}
             </span>
           </span>
         </p>
+        {!mapped && editable && (
+          <button type="button" onClick={onAddCoordinates} className={`${BUTTON} mt-2`}>
+            <MapPinPlus className="h-4 w-4" aria-hidden="true" />
+            Add coordinates
+          </button>
+        )}
       </header>
 
       <div className="flex flex-wrap gap-2">
@@ -188,10 +232,40 @@ const ManualProspectDetail = forwardRef<HTMLHeadingElement, ManualProspectDetail
             {unverified}
           </Row>
         )}
-        <Row label="Status">
-          <span className="font-medium text-slate-900 dark:text-white">{PROSPECT_STATUS_LABELS[prospect.status]}</span>
-          {prospect.followUpAt && <p className={META}>Follow up {formatIsoDate(prospect.followUpAt)}</p>}
-        </Row>
+        <div className="py-3" data-fact="Status">
+          <dt>
+            <label htmlFor="quick-status" className={DT}>
+              Status
+            </label>
+          </dt>
+          <dd className="mt-1">
+            <select
+              id="quick-status"
+              value={prospect.status}
+              disabled={!editable}
+              onChange={(e) => changeStatus(e.target.value as ProspectStatus)}
+              className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+            >
+              {PROSPECT_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {PROSPECT_STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+            <p role="status" className="mt-1 min-h-[1.25rem] text-xs text-slate-700 dark:text-slate-200" data-testid="status-message">
+              {statusMessage}
+              {undoChange && (
+                <>
+                  {' '}
+                  <button type="button" onClick={undo} className="font-medium text-indigo-700 underline dark:text-indigo-300">
+                    Undo
+                  </button>
+                </>
+              )}
+            </p>
+            {prospect.followUpAt && <p className={META}>Follow up {formatIsoDate(prospect.followUpAt)}</p>}
+          </dd>
+        </div>
       </dl>
 
       {prospect.preliminaryPrice && (
