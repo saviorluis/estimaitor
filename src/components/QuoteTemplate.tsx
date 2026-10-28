@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { EstimateData, FormData } from '@/lib/types';
 import {
   formatDate,
@@ -34,6 +34,13 @@ import {
 } from '@/lib/pressureWashDocs';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { getLogoSrc } from '@/lib/companySettings';
+import {
+  buildProposal,
+  formatProposalTerms,
+  resolveServiceType,
+  type DocumentKind,
+} from '@/lib/proposals';
+import ProposalSummary from './proposal/ProposalSummary';
 
 const CompanyLogo = ({ src, className = "" }: { src: string; className?: string }) => {
   return (
@@ -62,6 +69,37 @@ interface CompanyInfo {
 interface QuoteTemplateProps {
   estimateData: EstimateData;
   formData: FormData;
+}
+
+// Default terms and conditions
+const DEFAULT_CLEANING_TERMS = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.
+2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
+3. Scope: This quote covers only the services explicitly described.
+4. Additional Services: Any services not specified will be quoted separately.
+5. Access: Client must provide necessary access to the property.
+6. Utilities: Working electricity and water must be available on-site.
+7. Quote Validity: This quote is valid for 30 days from the date issued.
+8. Reschedule/Site Access Policy: If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip.`;
+
+const LEGACY_PACKAGE_DOCUMENTS: DocumentKind[] = ['quote', 'work_order', 'work_order_es', 'purchase_order', 'invoice', 'change_order'];
+const PRESSURE_WASHING_PACKAGE_DOCUMENTS: DocumentKind[] = ['quote', 'work_order', 'purchase_order', 'invoice'];
+
+function getDefaultQuoteText(job: FormData, estimate: EstimateData) {
+  const proposalDefaults = estimate ? buildProposal(job, estimate) : null;
+  if (proposalDefaults) {
+    const extra = (job.quoteNotes || '').trim();
+    return {
+      notes: [proposalDefaults.quoteNotes, extra].filter(Boolean).join('\n\n'),
+      terms: formatProposalTerms(proposalDefaults.terms),
+    };
+  }
+  if (isPressureWashingJob(job)) {
+    return { notes: PRESSURE_WASHING_QUOTE_NOTES, terms: PRESSURE_WASHING_QUOTE_TERMS };
+  }
+  return {
+    notes: 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
+    terms: DEFAULT_CLEANING_TERMS,
+  };
 }
 
 const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData }) => {
@@ -93,29 +131,25 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     return saved;
   });
 
-  // Default terms and conditions
-  const defaultTerms = `1. Payment Terms: Net 15 - Payment due within 15 days of completion.
-2. Cancellation Policy: 48-hour notice required for cancellation or rescheduling.
-3. Scope: This quote covers only the services explicitly described.
-4. Additional Services: Any services not specified will be quoted separately.
-5. Access: Client must provide necessary access to the property.
-6. Utilities: Working electricity and water must be available on-site.
-7. Quote Validity: This quote is valid for 30 days from the date issued.
-8. Reschedule/Site Access Policy: If reschedule is required due to site not being ready or poor planning on client's end, a minimum fee of $250 will be charged for the return trip.`;
-
   // Quote information state
-  const [quoteInfo, setQuoteInfo] = useState({
+  const [quoteInfo, setQuoteInfo] = useState(() => ({
     quoteNumber: generateQuoteNumber(),
     date: formatDate(new Date()),
     validUntil: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)), // 30 days from now
     projectName: formData.projectName || '',
     projectAddress: formatProjectAddress(formData),
-    notes: isPressureWashingJob(formData)
-      ? PRESSURE_WASHING_QUOTE_NOTES
-      : 'This quote includes all labor, materials, equipment, and supplies needed to complete the specified cleaning services.',
-    terms: isPressureWashingJob(formData) ? PRESSURE_WASHING_QUOTE_TERMS : defaultTerms,
+    ...getDefaultQuoteText(formData, estimateData),
     total: 0 // Initialize total
-  });
+  }));
+
+  // Notes and terms are per-service; reseed them when a recalculation switches the service.
+  const serviceType = resolveServiceType(formData);
+  const lastServiceType = useRef(serviceType);
+  useEffect(() => {
+    if (lastServiceType.current === serviceType) return;
+    lastServiceType.current = serviceType;
+    setQuoteInfo((prev) => ({ ...prev, ...getDefaultQuoteText(formData, estimateData) }));
+  }, [serviceType, formData, estimateData]);
 
   // Update total when estimate changes
   useEffect(() => {
@@ -211,6 +245,23 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     return getAdjustedQuotePreTaxSubtotal(estimateData, markupPercentage);
   };
   const quoteAmounts = getQuoteDocumentAmounts(formData, estimateData, getPreTaxTotalForQuotePdf());
+  const proposal = useMemo(
+    () =>
+      estimateData
+        ? buildProposal(formData, estimateData, {
+            preTaxSubtotal: getAdjustedQuotePreTaxSubtotal(estimateData, markupPercentage),
+          })
+        : null,
+    [formData, estimateData, markupPercentage]
+  );
+  const shownAmounts = proposal?.amounts
+    ? { subtotal: proposal.amounts.subtotal, finalTotal: proposal.amounts.total }
+    : quoteAmounts;
+  const packageDocuments: DocumentKind[] = proposal
+    ? proposal.documents
+    : isPressureWashingJob(formData)
+    ? PRESSURE_WASHING_PACKAGE_DOCUMENTS
+    : LEGACY_PACKAGE_DOCUMENTS;
 
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
@@ -263,6 +314,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           preTaxSubtotal={getPreTaxTotalForQuotePdf()}
+          proposal={proposal}
         />
       ).toBlob();
       
@@ -299,6 +351,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           clientInfo={clientInfo}
           quoteInfo={quoteInfo}
           preTaxSubtotal={getPreTaxTotalForQuotePdf()}
+          proposal={proposal}
         />
       ).toBlob();
       
@@ -349,75 +402,91 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       // Create adjusted estimate data with the EXACT same calculation as the browser preview
       const preTaxPdf = getPreTaxTotalForQuotePdf();
 
-      // Generate Quote PDF
-      const quoteBlob = await pdf(
-        <QuotePDF
-          estimateData={estimateData}
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          clientInfo={clientInfo}
-          quoteInfo={quoteInfo}
-          preTaxSubtotal={preTaxPdf}
-        />
-      ).toBlob();
-      zip.file("quote.pdf", quoteBlob);
+      const projectLabel = quoteInfo.projectName || 'Project';
+      const includes = (kind: DocumentKind) => packageDocuments.includes(kind);
 
-      const workOrderBlob = await pdf(
-        <WorkOrderPDF
-          estimateData={estimateData}
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          quoteInfo={quoteInfo}
-        />
-      ).toBlob();
-      zip.file(`${quoteInfo.projectName || 'Project'} Work Order.pdf`, workOrderBlob);
+      if (includes('quote')) {
+        const quoteBlob = await pdf(
+          <QuotePDF
+            estimateData={estimateData}
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            clientInfo={clientInfo}
+            quoteInfo={quoteInfo}
+            preTaxSubtotal={preTaxPdf}
+            proposal={proposal}
+          />
+        ).toBlob();
+        zip.file("quote.pdf", quoteBlob);
+      }
 
-      if (!isPressureWashingJob(formData)) {
+      if (includes('work_order')) {
+        const workOrderBlob = await pdf(
+          <WorkOrderPDF
+            estimateData={estimateData}
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            quoteInfo={quoteInfo}
+            proposal={proposal}
+          />
+        ).toBlob();
+        zip.file(`${projectLabel} Work Order.pdf`, workOrderBlob);
+      }
+
+      if (includes('work_order_es')) {
         const workOrderSpanishBlob = await pdf(
           <WorkOrderPDFSpanish
             estimateData={estimateData}
             formData={formData}
             companyInfo={pdfCompanyInfo}
             quoteInfo={quoteInfo}
+            proposal={proposal}
           />
         ).toBlob();
-        zip.file(`${quoteInfo.projectName || 'Project'} Work Order Spanish.pdf`, workOrderSpanishBlob);
+        zip.file(`${projectLabel} Work Order Spanish.pdf`, workOrderSpanishBlob);
       }
 
-      const purchaseOrderBlob = await pdf(
-        <PurchaseOrderPDF
-          estimateData={estimateData}
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          quoteInfo={quoteInfo}
-        />
-      ).toBlob();
-      zip.file(`${quoteInfo.projectName || 'Project'} Purchase Order.pdf`, purchaseOrderBlob);
+      if (includes('purchase_order')) {
+        const purchaseOrderBlob = await pdf(
+          <PurchaseOrderPDF
+            estimateData={estimateData}
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            quoteInfo={quoteInfo}
+            proposal={proposal}
+          />
+        ).toBlob();
+        zip.file(`${projectLabel} Purchase Order.pdf`, purchaseOrderBlob);
+      }
 
-      // Generate Invoice PDF
-      const invoiceInfo = {
-        invoiceNumber: quoteInfo.quoteNumber,
-        date: formatDate(new Date()),
-        dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
-        paymentTerms: isPressureWashingJob(formData)
-          ? PRESSURE_WASHING_INVOICE_PAYMENT_TERMS
-          : "Net 15 - Payment due within 15 days of invoice date. A late payment fee of 10% of the total invoice amount will be added if payment is not received by the due date.",
-      };
+      if (includes('invoice')) {
+        const invoiceInfo = {
+          invoiceNumber: quoteInfo.quoteNumber,
+          date: formatDate(new Date()),
+          dueDate: formatDate(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)), // 15 days from now
+          paymentTerms: proposal
+            ? proposal.invoicePaymentTerms
+            : isPressureWashingJob(formData)
+            ? PRESSURE_WASHING_INVOICE_PAYMENT_TERMS
+            : "Net 15 - Payment due within 15 days of invoice date. A late payment fee of 10% of the total invoice amount will be added if payment is not received by the due date.",
+        };
 
-      const invoiceBlob = await pdf(
-        <InvoicePDF
-          estimateData={estimateData}
-          formData={formData}
-          companyInfo={pdfCompanyInfo}
-          quoteInfo={quoteInfo}
-          invoiceInfo={invoiceInfo}
-          clientInfo={clientInfo}
-          preTaxSubtotal={preTaxPdf}
-        />
-      ).toBlob();
-      zip.file(`${quoteNumberOnly} ${quoteInfo.projectName || 'Project'} Invoice.pdf`, invoiceBlob);
+        const invoiceBlob = await pdf(
+          <InvoicePDF
+            estimateData={estimateData}
+            formData={formData}
+            companyInfo={pdfCompanyInfo}
+            quoteInfo={quoteInfo}
+            invoiceInfo={invoiceInfo}
+            clientInfo={clientInfo}
+            preTaxSubtotal={preTaxPdf}
+            proposal={proposal}
+          />
+        ).toBlob();
+        zip.file(`${quoteNumberOnly} ${projectLabel} Invoice.pdf`, invoiceBlob);
+      }
 
-      if (!isPressureWashingJob(formData)) {
+      if (includes('change_order')) {
         const changeOrderInfo = {
           orderNumber: quoteInfo.quoteNumber,
           date: formatDate(new Date()),
@@ -732,9 +801,9 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           </p>
           {estimateData && (
             <p className="text-sm text-gray-700 mt-2" data-testid="adjusted-quote-total">
-              Quote subtotal: <span className="font-semibold">{formatCurrency(quoteAmounts.subtotal)}</span>
+              Quote subtotal: <span className="font-semibold">{formatCurrency(shownAmounts.subtotal)}</span>
               {' · '}Total with tax:{' '}
-              <span className="font-semibold">{formatCurrency(quoteAmounts.finalTotal)}</span>
+              <span className="font-semibold">{formatCurrency(shownAmounts.finalTotal)}</span>
             </p>
           )}
           {estimateData && isQuoteBelowCost(estimateData, markupPercentage) && (
@@ -744,6 +813,19 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           )}
         </div>
         
+        {proposal && (
+          <section
+            aria-labelledby="proposal-preview-heading"
+            className="mb-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+            data-testid="proposal-preview"
+          >
+            <h4 id="proposal-preview-heading" className="mb-3 text-base font-semibold text-gray-800 dark:text-gray-200">
+              {proposal.documentTitle} preview
+            </h4>
+            <ProposalSummary proposal={proposal} showSections />
+          </section>
+        )}
+
         {/* Quote Counter Input */}
         <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
           <label htmlFor="quoteCounter" className="block text-sm font-medium text-gray-700 mb-2">

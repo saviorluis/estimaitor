@@ -257,6 +257,12 @@ export const WINDOW_CLEANING = {
   MAX_TOTAL_HOURS: 40
 } as const;
 
+/**
+ * Window-cleaning-only jobs: minimum window labor before markup. Replaces the size/project-type
+ * mobilization fee; only the shortfall below this amount is charged.
+ */
+export const WINDOW_CLEANING_MINIMUM_CHARGE = 150;
+
 // Display Case Cleaning
 export const DISPLAY_CASE = {
   COST_PER_CASE: 30,

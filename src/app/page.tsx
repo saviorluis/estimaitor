@@ -14,6 +14,12 @@ import { calculateEstimate } from '@/lib/estimator';
 import { getSalesTaxRate } from '@/lib/salesTax';
 import { getEstimateDisplayTotals } from '@/lib/utils';
 import { isPressureWashingJob } from '@/lib/pressureWashDocs';
+import {
+  buildProposal,
+  getWindowCounts,
+  normalizeWindowCounts,
+  resolveServiceType,
+} from '@/lib/proposals';
 import { pdf } from '@react-pdf/renderer';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { darkenHex, DEFAULT_BRAND_COLOR, isValidBrandColor } from '@/lib/companySettings';
@@ -35,6 +41,26 @@ interface PastEntry {
   totalPrice: number;
   estimateData: EstimateData;
   formData: FormData;
+}
+
+/** The job-site address stays with the open quote only; history keeps the rest of the form. */
+function toHistoryFormData(formValues: FormData): FormData {
+  const { projectStreet, projectCity, projectState, projectZip, ...historyFormData } = formValues;
+  void projectStreet;
+  void projectCity;
+  void projectState;
+  void projectZip;
+  return historyFormData;
+}
+
+const formatMoney = (amount: number) =>
+  `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+function formatEntryTotal(entry: PastEntry): string {
+  if (!entry.formData || !entry.estimateData) return formatMoney(entry.totalPrice);
+  const proposal = buildProposal(entry.formData, entry.estimateData);
+  if (proposal) return formatMoney(proposal.amounts.total);
+  return formatMoney(getEstimateDisplayTotals(entry.formData, entry.estimateData).total);
 }
 
 // Types for contract data (imported from JanitorialContractForm)
@@ -135,7 +161,7 @@ export default function Home() {
       
       if (savedEstimate && savedForm) {
         setEstimateData(JSON.parse(savedEstimate));
-        setFormData(JSON.parse(savedForm));
+        setFormData(normalizeWindowCounts(JSON.parse(savedForm)));
       }
       
       if (savedEntries) {
@@ -174,14 +200,14 @@ export default function Home() {
     }
   }, [isLoaded, settings.state, formData]);
 
-  const handleEstimateCalculated = (data: EstimateData, formValues: FormData) => {
+  const handleEstimateCalculated = (data: EstimateData, submitted: FormData) => {
+    const formValues = submitted;
     setEstimateData(data);
     setFormData(formValues);
 
     // Save to past entries only for cleaning (table is cleaning-specific)
     if (currentMode === 'cleaning') {
-      // The job-site address stays with the open quote only; history keeps the rest of the form.
-      const { projectStreet, projectCity, projectState, projectZip, ...historyFormData } = formValues;
+      const historyFormData = toHistoryFormData(formValues);
       const newEntry: PastEntry = {
         id: Date.now().toString(),
         date: new Date().toLocaleString(),
@@ -221,7 +247,7 @@ export default function Home() {
   // Function to load a past entry
   const handleLoadPastEntry = (entry: PastEntry) => {
     setEstimateData(entry.estimateData);
-    setFormData(entry.formData);
+    setFormData(normalizeWindowCounts(entry.formData));
     localStorage.setItem(ESTIMATE_STORAGE_KEY, JSON.stringify(entry.estimateData));
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(entry.formData));
     setShowPastEntries(false);
@@ -329,7 +355,7 @@ export default function Home() {
                     <th className="py-2 px-4 text-left">Client</th>
                     <th className="py-2 px-4 text-left">Project</th>
                     <th className="py-2 px-4 text-left">Type</th>
-                    <th className="py-2 px-4 text-right">Square Footage</th>
+                    <th className="py-2 px-4 text-right">Size</th>
                     <th className="py-2 px-4 text-right">Total</th>
                     <th className="py-2 px-4 text-center">Actions</th>
                   </tr>
@@ -340,9 +366,20 @@ export default function Home() {
                       <td className="py-2 px-4">{entry.date}</td>
                       <td className="py-2 px-4">{entry.clientName}</td>
                       <td className="py-2 px-4">{entry.projectName}</td>
-                      <td className="py-2 px-4">{entry.projectType.replace('_', ' ')}</td>
-                      <td className="py-2 px-4 text-right">{entry.squareFootage.toLocaleString()}</td>
-                      <td className="py-2 px-4 text-right">${(entry.formData && entry.estimateData ? getEstimateDisplayTotals(entry.formData, entry.estimateData).total : entry.totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      {entry.formData && resolveServiceType(entry.formData) === 'window_cleaning' ? (
+                        <>
+                          <td className="py-2 px-4">Window Cleaning</td>
+                          <td className="py-2 px-4 text-right">
+                            {getWindowCounts(entry.formData).total.toLocaleString()} windows
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="py-2 px-4">{entry.projectType.replace('_', ' ')}</td>
+                          <td className="py-2 px-4 text-right">{entry.squareFootage.toLocaleString()} sq ft</td>
+                        </>
+                      )}
+                      <td className="py-2 px-4 text-right">{formatEntryTotal(entry)}</td>
                       <td className="py-2 px-4 flex justify-center space-x-2">
                         <button 
                           onClick={() => handleLoadPastEntry(entry)}

@@ -4,6 +4,8 @@ import { EstimateData, FormData } from '@/lib/types';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
+import type { ProposalDocument } from '@/lib/proposals';
+import { ProposalFactLines } from './proposal/ProposalPdfParts';
 
 // Register fonts
 Font.register({
@@ -246,6 +248,8 @@ interface WorkOrderPDFProps {
     projectAddress: string;
     notes: string;
   };
+  /** Resolved proposal for template-driven services; when present it supplies the crew scope and terms. */
+  proposal?: ProposalDocument | null;
 }
 
 const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
@@ -253,7 +257,9 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
   formData,
   companyInfo,
   quoteInfo,
+  proposal,
 }) => {
+  const crew = proposal?.crew.es;
   const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
 
   // Early return for undefined data
@@ -311,8 +317,14 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
             <Text style={styles.sectionTitle}>Detalles del Proyecto</Text>
             <Text style={styles.infoText}>Nombre del Proyecto: {quoteInfo.projectName}</Text>
             <Text style={styles.infoText}>Ubicación: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.infoText}>Tipo de Proyecto: {formData.projectType.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</Text>
-            <Text style={styles.infoText}>Área Total: {formData.squareFootage} pies cuadrados</Text>
+            {crew ? (
+              <ProposalFactLines facts={crew.facts} textStyle={styles.infoText} />
+            ) : (
+              <>
+                <Text style={styles.infoText}>Tipo de Proyecto: {formData.projectType.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</Text>
+                <Text style={styles.infoText}>Área Total: {formData.squareFootage} pies cuadrados</Text>
+              </>
+            )}
           </View>
 
           {/* Cleaner Information */}
@@ -330,14 +342,31 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Alcance del Trabajo</Text>
           <View style={styles.scopeOfWork}>
-            {scopeOfWork.map((item: string, index: number) => (
-              <Text key={index} style={styles.bulletPoint}>• {item}</Text>
-            ))}
-            {(formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows) > 0 && (
-              <Text style={styles.bulletPoint}>• Limpiar {formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} ventanas</Text>
+            {crew ? (
+              crew.scopeOfWork.map((item, index) => (
+                <Text key={index} style={[styles.bulletPoint, { fontSize: 11 }]}>• {item}</Text>
+              ))
+            ) : (
+              <>
+                {scopeOfWork.map((item: string, index: number) => (
+                  <Text key={index} style={styles.bulletPoint}>• {item}</Text>
+                ))}
+                {(formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows) > 0 && (
+                  <Text style={styles.bulletPoint}>• Limpiar {formData.numberOfWindows + formData.numberOfLargeWindows + formData.numberOfHighAccessWindows} ventanas</Text>
+                )}
+              </>
             )}
           </View>
         </View>
+
+        {crew && crew.excluded.length > 0 && (
+          <View style={styles.section} wrap={false}>
+            <Text style={styles.sectionTitle}>{crew.excludedTitle}</Text>
+            {crew.excluded.map((item, index) => (
+              <Text key={index} style={[styles.bulletPoint, { fontSize: 10, marginBottom: 4 }]}>• {item}</Text>
+            ))}
+          </View>
+        )}
 
         <View style={styles.divider} />
 
@@ -364,7 +393,19 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
           </View>
         </View>
 
-        {/* Lista de pendientes (punch list) */}
+        {crew ? (
+          crew.sections.map((section) => (
+            <View key={section.title} style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              <View style={styles.feesSection}>
+                {section.lines.map((line, index) => (
+                  <Text key={index} style={styles.feeDescription}>• {line}</Text>
+                ))}
+              </View>
+            </View>
+          ))
+        ) : (
+        /* Lista de pendientes (punch list) */
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Términos para Subcontratistas — Lista de Pendientes</Text>
           <View style={styles.feesSection}>
@@ -385,6 +426,7 @@ const WorkOrderPDFSpanish: React.FC<WorkOrderPDFProps> = ({
             </View>
           </View>
         </View>
+        )}
 
         {/* Fees Section */}
         <View style={styles.section}>

@@ -6,6 +6,8 @@ import { PROJECT_TYPE_MULTIPLIERS, CLEANING_TYPE_MULTIPLIERS, TEST_MODE, TEST_SC
 import { formatSalesTaxPercent, resolveEstimateSalesTaxRate } from '@/lib/salesTax';
 import QuoteTemplate from './QuoteTemplate';
 import { getEstimateDisplayTotals } from '@/lib/utils';
+import { buildProposal } from '@/lib/proposals';
+import ProposalSummary from './proposal/ProposalSummary';
 
 interface EstimateResultProps {
   estimateData: EstimateData;
@@ -49,6 +51,11 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
       }
     };
   }, [estimateData, formData]);
+
+  const proposal = useMemo(
+    () => (estimateData && formData ? buildProposal(formData, estimateData) : null),
+    [estimateData, formData]
+  );
 
   // Save estimate and form data when they change (optimized)
   useEffect(() => {
@@ -119,10 +126,34 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
         <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
           Estimate Results
         </h2>
-
         {/* Test validation feedback */}
         {TEST_MODE && getTestValidation()}
 
+        {proposal ? (
+          <>
+            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">{proposal.displayName}</h3>
+            <ProposalSummary proposal={proposal} />
+            <div className="border-t mt-6 pt-4">
+              <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Internal Details</h3>
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm" data-testid="internal-estimate-details">
+                {([
+                  ['Estimated Hours', `${formatHours(estimateData.estimatedHours)} hours`],
+                  ['Time to Complete', `${estimateData.timeToCompleteInDays} day(s)`],
+                  ['Distance', `${formData.distanceFromOffice} miles`],
+                  ['Urgency Level', `${formData.urgencyLevel}/10`],
+                  ['Cost Before Markup', formatCurrency(displayTotals.subtotal)],
+                  ['Business Overhead (20%)', formatCurrency(displayTotals.markup)],
+                ] as const).map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-3">
+                    <dt className="text-gray-600 dark:text-gray-400">{label}</dt>
+                    <dd className="font-medium text-gray-800 dark:text-gray-200">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </>
+        ) : (
+        <>
         {/* Base Price */}
         <div className="mb-4">
           <h3 className="font-semibold text-gray-700 dark:text-gray-300">Base Price</h3>
@@ -396,6 +427,8 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
             </div>
           </div>
         </div>
+        </>
+        )}
 
         {/* Action Buttons */}
         <div className="border-t pt-6">

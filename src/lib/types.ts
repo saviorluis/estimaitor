@@ -31,6 +31,10 @@ export type CleaningType = 'rough' | 'final' | 'final_touchup' | 'rough_final' |
 
 export type PricingMethod = 'square_footage' | 'room_based';
 
+export type WindowServiceSides = 'exterior' | 'interior' | 'interior_exterior';
+
+export type WindowCustomerType = 'residential' | 'commercial';
+
 export type RoomType = 
   | 'bedroom'
   | 'bathroom'
@@ -82,6 +86,10 @@ export interface FormData {
   numberOfWindows: number;
   numberOfLargeWindows: number;
   numberOfHighAccessWindows: number;
+  /** Window-cleaning jobs: which sides of the glass are cleaned. Absent on estimates saved before it existed. */
+  windowServiceSides?: WindowServiceSides;
+  /** Window-cleaning jobs: drives scope wording and access assumptions. Absent on older saved estimates. */
+  windowCustomerType?: WindowCustomerType;
   
   // Project-Specific
   numberOfDisplayCases: number;
@@ -94,6 +102,8 @@ export interface FormData {
   // Client Information (Optional)
   clientName?: string;
   projectName?: string;
+  /** Seeded onto the quote editor; never a contract or approval. */
+  quoteNotes?: string;
 
   // Project address (final-cleaning estimator; optional)
   projectStreet?: string;

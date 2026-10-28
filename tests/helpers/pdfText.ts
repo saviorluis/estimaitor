@@ -106,9 +106,7 @@ function literalToBytes(lit: string): number[] {
   return inner.split('').map((ch) => ch.charCodeAt(0) & 0xff);
 }
 
-export function extractPdfText(pdf: Buffer): string {
-  const objects = parseObjects(pdf);
-
+function extractTextFromObjects(objects: Map<number, PdfObject>, streamNums?: number[]): string {
   const fontCMaps = new Map<number, CMap>();
   for (const [num, obj] of Array.from(objects)) {
     const ref = /\/ToUnicode\s+(\d+)\s+0\s+R/.exec(obj.dict);
@@ -126,8 +124,12 @@ export function extractPdfText(pdf: Buffer): string {
     }
   }
 
+  const streams = streamNums
+    ? streamNums.map((num) => objects.get(num)).filter((obj): obj is PdfObject => Boolean(obj))
+    : Array.from(objects.values());
+
   const lines: string[] = [];
-  for (const obj of Array.from(objects.values())) {
+  for (const obj of streams) {
     if (!obj.stream || /\/(Length1|Subtype\s*\/(Image|XML)|Type\s*\/(XObject|Metadata))/.test(obj.dict)) continue;
     const content = obj.stream.toString('latin1');
     if (!/\bT[Jj]\b/.test(content)) continue;
@@ -153,6 +155,38 @@ export function extractPdfText(pdf: Buffer): string {
     if (line) lines.push(line);
   }
   return lines.join('\n');
+}
+
+export function extractPdfText(pdf: Buffer): string {
+  return extractTextFromObjects(parseObjects(pdf));
+}
+
+function pageContentRefs(dict: string): number[] {
+  const array = /\/Contents\s*\[([^\]]+)\]/.exec(dict);
+  if (array) {
+    return Array.from(array[1].matchAll(/(\d+)\s+0\s+R/g)).map((m) => Number(m[1]));
+  }
+  const single = /\/Contents\s+(\d+)\s+0\s+R/.exec(dict);
+  return single ? [Number(single[1])] : [];
+}
+
+/** Page texts in document order. Used to assert totals and payment stay together. */
+export function extractPdfPageTexts(pdf: Buffer): string[] {
+  const objects = parseObjects(pdf);
+  const pageNums: number[] = [];
+  for (const kids of Array.from(pdf.toString('latin1').matchAll(/\/Kids\s*\[([^\]]+)\]/g))) {
+    for (const ref of Array.from(kids[1].matchAll(/(\d+)\s+0\s+R/g))) {
+      const num = Number(ref[1]);
+      const obj = objects.get(num);
+      if (obj && /\/Type\s*\/Page\b/.test(obj.dict) && !pageNums.includes(num)) pageNums.push(num);
+    }
+  }
+  if (pageNums.length === 0) {
+    for (const [num, obj] of Array.from(objects)) {
+      if (/\/Type\s*\/Page\b/.test(obj.dict)) pageNums.push(num);
+    }
+  }
+  return pageNums.map((num) => extractTextFromObjects(objects, pageContentRefs(objects.get(num)!.dict)));
 }
 
 export function countPdfPages(pdf: Buffer): number {

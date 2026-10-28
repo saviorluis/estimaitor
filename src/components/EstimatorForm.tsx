@@ -8,13 +8,15 @@ import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { US_STATES } from '@/lib/salesTax';
 import { takeDraftEstimateHandoff, type DraftEstimateHandoff } from '@/lib/prospects/estimateHandoff';
 import { COUNT_CONFIDENCE_LABELS } from '@/lib/prospects/types';
+import { getWindowCounts, normalizeWindowCounts } from '@/lib/proposals';
 import {
   getRecommendedCleaners,
   CLEANING_TYPE_DESCRIPTIONS,
   calculateHourlyTravelFee,
   getEffectiveTravelMiles,
   TRAVEL_FEES,
-  splitPrincipalAndVctSqFt
+  splitPrincipalAndVctSqFt,
+  WINDOW_CLEANING_MINIMUM_CHARGE
 } from '@/lib/constants';
 
 interface EstimatorFormProps {
@@ -100,6 +102,9 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     needsPressureWashing,
     needsWindowCleaning
   } = formValues;
+  const isWindowOnly = formValues.cleaningType === 'window_cleaning_only';
+  const requiredForWindowJob = (message: string) => (value: unknown, data: FormData) =>
+    data.cleaningType !== 'window_cleaning_only' || Boolean(value) || message;
 
   // Load saved form data on component mount
   useEffect(() => {
@@ -149,11 +154,11 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
 
   // Optimized form submission handler
   const onSubmit: SubmitHandler<FormData> = useCallback((data) => {
-    const formData = {
+    const formData = normalizeWindowCounts({
       ...data,
       gasPrice: typeof data.gasPrice === 'string' ? parseFloat(data.gasPrice) : data.gasPrice
-    };
-    
+    });
+
     const estimate = calculateEstimate(formData, salesTaxRate);
     onEstimateCalculated(estimate, formData);
   }, [onEstimateCalculated, salesTaxRate]);
@@ -234,8 +239,8 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
 
-        {/* Project Type */}
-        <div>
+        {/* Project Type (window-only jobs are described by customer type instead) */}
+        <div hidden={isWindowOnly}>
           <label htmlFor="projectType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Project Type
           </label>
@@ -275,14 +280,14 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
           )}
         </div>
 
-        {formValues.projectType === 'luxury_garage' && (
+        {formValues.projectType === 'luxury_garage' && !isWindowOnly && (
           <p className="text-sm text-gray-600 dark:text-gray-400 -mt-2">
             Count loft plus both bays in square footage. A typical independent suite is about 2,250 sq ft
             (high bay, standard bay, loft). Scope includes garage doors, windows, interior glass, and sweep/mop.
           </p>
         )}
 
-        {formValues.projectType === 'truck_stop' && (
+        {formValues.projectType === 'truck_stop' && !isWindowOnly && (
           <div className="space-y-3 rounded-md border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/50 p-4">
             <div className="flex items-start gap-3">
               <input
@@ -723,8 +728,83 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             </div>
           )}
           
+          {isWindowOnly && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <fieldset
+                data-needs-input={!formValues.windowCustomerType || undefined}
+                aria-describedby={errors.windowCustomerType ? 'windowCustomerType-error' : undefined}
+              >
+                <legend className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Customer Type</legend>
+                <div className="space-y-2">
+                  {([
+                    ['residential', 'Residential'],
+                    ['commercial', 'Commercial / Storefront'],
+                  ] as const).map(([value, label]) => (
+                    <label key={value} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="radio"
+                        value={value}
+                        {...register('windowCustomerType', {
+                          validate: requiredForWindowJob('Select the customer type'),
+                        })}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                {errors.windowCustomerType && (
+                  <p id="windowCustomerType-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                    {errors.windowCustomerType.message}
+                  </p>
+                )}
+              </fieldset>
+              <fieldset
+                data-needs-input={!formValues.windowServiceSides || undefined}
+                aria-describedby={errors.windowServiceSides ? 'windowServiceSides-error' : undefined}
+              >
+                <legend className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Service Sides</legend>
+                <div className="space-y-2">
+                  {([
+                    ['exterior', 'Exterior Only'],
+                    ['interior', 'Interior Only'],
+                    ['interior_exterior', 'Interior + Exterior'],
+                  ] as const).map(([value, label]) => (
+                    <label key={value} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="radio"
+                        value={value}
+                        {...register('windowServiceSides', {
+                          validate: requiredForWindowJob('Select which sides of the glass are cleaned'),
+                        })}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Printed on the proposal. Pricing is per window and does not change with this choice yet.
+                </p>
+                {errors.windowServiceSides && (
+                  <p id="windowServiceSides-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                    {errors.windowServiceSides.message}
+                  </p>
+                )}
+              </fieldset>
+            </div>
+          )}
+
           {(needsWindowCleaning || formValues.cleaningType === 'window_cleaning_only' || formValues.projectType === 'assisted_living') && (
             <div className="space-y-4">
+              {isWindowOnly && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Each window type with a count above zero is listed as its own line on the quote and invoice. Window
+                  cleaning has a{' '}
+                  {WINDOW_CLEANING_MINIMUM_CHARGE.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} minimum
+                  (before markup); a smaller job gets a separate minimum service charge line for the difference.
+                </p>
+              )}
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -736,7 +816,11 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                     type="number"
                     min="0"
                     {...register('numberOfWindows', { 
-                      min: { value: 0, message: 'Cannot be negative' }
+                      min: { value: 0, message: 'Cannot be negative' },
+                      validate: (_value, data) =>
+                        data.cleaningType !== 'window_cleaning_only' ||
+                        getWindowCounts(data).total > 0 ||
+                        'Enter the standard, large, and high-access counts.',
                     })}
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
                     placeholder="0"

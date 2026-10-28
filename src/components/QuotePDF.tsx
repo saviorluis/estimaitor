@@ -15,6 +15,8 @@ import {
   isPressureWashingJob,
 } from '@/lib/pressureWashDocs';
 import { formatSalesTaxPercent } from '@/lib/salesTax';
+import type { ProposalDocument } from '@/lib/proposals';
+import { ProposalFactLines, ProposalLineItemRows, ProposalTextSection } from './proposal/ProposalPdfParts';
 
 // Register fonts
 Font.register({
@@ -523,6 +525,8 @@ interface QuotePDFProps {
   };
   /** Pre-tax total (labor + fees + markup) — must match browser breakdown; keeps PDF in sync when parent passes it */
   preTaxSubtotal?: number;
+  /** Resolved proposal for template-driven services; when present it supplies all service content. */
+  proposal?: ProposalDocument | null;
 }
 
 const QuotePDF: React.FC<QuotePDFProps> = ({
@@ -531,7 +535,8 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
   companyInfo,
   clientInfo,
   quoteInfo,
-  preTaxSubtotal
+  preTaxSubtotal,
+  proposal
 }) => {
   const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
   const capabilitySrc = isUsableImageSrc(companyInfo.capabilityStatementSrc)
@@ -543,15 +548,17 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
     formData.vctSquareFootage || 0
   );
 
-  const {
-    subtotal,
-    taxRate,
-    salesTax,
-    finalTotal,
-    windowQuoteShare,
-    subtotalForPrimaryService,
-    truckStopSplit,
-  } = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
+  const legacyAmounts = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
+  const { windowQuoteShare, subtotalForPrimaryService, truckStopSplit } = legacyAmounts;
+  const { subtotal, taxRate, salesTax, finalTotal } = proposal?.amounts
+    ? { ...proposal.amounts, finalTotal: proposal.amounts.total }
+    : legacyAmounts;
+
+  const coverTitle: [string, string] =
+    proposal?.coverTitle ??
+    (isPressureWashingJob(formData) ? ['PRESSURE WASHING', 'PROPOSAL'] : ['POST CONSTRUCTION', 'CLEANING PROPOSAL']);
+  const showCapabilityStatement = proposal ? proposal.showCapabilityStatement : !isPressureWashingJob(formData);
+  const notes = (quoteInfo.notes || '').trim();
 
   return (
     <Document>
@@ -564,10 +571,10 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           
           {/* Title */}
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#2563eb' }}>
-                {isPressureWashingJob(formData) ? 'PRESSURE WASHING' : 'POST CONSTRUCTION'}
+                {coverTitle[0]}
               </Text>
           <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40, color: '#2563eb' }}>
-                {isPressureWashingJob(formData) ? 'PROPOSAL' : 'CLEANING PROPOSAL'}
+                {coverTitle[1]}
           </Text>
 
           {/* Center Content */}
@@ -611,7 +618,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
       </Page>
 
-      {!isPressureWashingJob(formData) && (
+      {showCapabilityStatement && (
       <Page size="LETTER" style={styles.page}>
         <Image
           src={capabilitySrc}
@@ -658,7 +665,9 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           <Text style={styles.sectionTitle}>Project Information</Text>
           <Text style={styles.projectText}>Project: {quoteInfo.projectName}</Text>
           <Text style={styles.projectText}>Address: {quoteInfo.projectAddress}</Text>
-          {isPressureWashingJob(formData) ? (
+          {proposal ? (
+            <ProposalFactLines facts={proposal.projectFacts} textStyle={styles.projectText} />
+          ) : isPressureWashingJob(formData) ? (
             <>
               <Text style={styles.projectText}>Service: Pressure Washing</Text>
               <Text style={styles.projectText}>{getPressureWashingLineTitle(formData)}</Text>
@@ -717,6 +726,18 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
             </View>
           </View>
 
+            {proposal ? (
+              <ProposalLineItemRows
+                items={proposal.lineItems}
+                rowStyle={styles.tableRow}
+                descriptionCellStyle={styles.descriptionCell}
+                amountCellStyle={styles.amountCell}
+                titleStyle={[styles.tableCell, { fontWeight: 'bold' }]}
+                captionStyle={[styles.tableCell, { fontSize: 8, paddingTop: 0 }]}
+                amountStyle={[styles.tableCell, { textAlign: 'right', fontWeight: 'bold' }]}
+              />
+            ) : (
+            <>
             {/* Main Cleaning Service Row */}
             <View style={styles.tableRow}>
               <View style={styles.descriptionCell}>
@@ -850,12 +871,16 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
                 </View>
               </View>
             )}
+            </>
+            )}
 
             {/* Includes Statement Row */}
             <View style={[styles.tableRow, { borderTop: 'none', marginTop: 10 }]}>
               <View style={styles.descriptionCell}>
                 <Text style={[styles.tableCell, { fontSize: 8, fontStyle: 'italic', textAlign: 'center' }]}>
-                  {isPressureWashingJob(formData)
+                  {proposal
+                    ? proposal.pricingNote
+                    : isPressureWashingJob(formData)
                     ? 'Includes labor, equipment, chemicals as specified, rinse, and travel as quoted. Washable surface only — not lot size or interior cleaning.'
                     : 'Includes all necessary equipment, supplies, labor, and travel expenses.'}
                 </Text>
@@ -901,6 +926,41 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
         </View>
 
+        {proposal && (
+          <>
+            {([
+              ['Scope of Work', proposal.scopeOfWork],
+              ['Included', proposal.included],
+              [proposal.excludedTitle, proposal.excluded],
+              ['Assumptions', proposal.assumptions],
+            ] as const).map(([title, lines]) => (
+              <ProposalTextSection
+                key={title}
+                title={title}
+                lines={[...lines]}
+                sectionStyle={[styles.section, { marginTop: 4, marginBottom: 0, paddingVertical: 4 }]}
+                titleStyle={styles.sectionTitle}
+                lineStyle={[styles.termsText, { fontSize: 9, lineHeight: 1.35, marginTop: 2 }]}
+              />
+            ))}
+          </>
+        )}
+
+        {notes ? (
+          <View style={[styles.section, { marginTop: 8 }]} wrap={false}>
+            <Text style={styles.sectionTitle}>Notes</Text>
+            {notes
+              .split('\n')
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line, index) => (
+                <Text key={index} style={[styles.termsText, { fontSize: 9, lineHeight: 1.35, marginTop: 2 }]}>
+                  {line}
+                </Text>
+              ))}
+          </View>
+        ) : null}
+
         {/* Terms and Conditions */}
         <View style={[styles.section, { marginTop: 16 }]}>
           <Text style={styles.sectionTitle}>Terms & Conditions</Text>
@@ -916,7 +976,7 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
         </View>
 
         {/* Signature Section */}
-        <View style={styles.signatureSection}>
+        <View style={styles.signatureSection} wrap={false}>
           <View style={styles.signatureBox}>
             <Text style={styles.signatureTitle}>Acceptance</Text>
             <View style={styles.signatureLine}></View>

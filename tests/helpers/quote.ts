@@ -22,6 +22,13 @@ export async function readZipDownload(download: Download): Promise<ZipEntry[]> {
   return entries;
 }
 
+export async function readPdfDownload(download: Download): Promise<ZipEntry> {
+  const path = await download.path();
+  if (!path) throw new Error('Download did not produce a file');
+  const bytes = readFileSync(path);
+  return { name: download.suggestedFilename(), bytes, text: extractPdfText(bytes), pages: countPdfPages(bytes) };
+}
+
 export function expectValidPdf(entry: ZipEntry) {
   expect(entry.bytes.subarray(0, 5).toString('latin1'), `${entry.name} is a PDF`).toBe('%PDF-');
   expect(entry.pages, `${entry.name} has pages`).toBeGreaterThan(0);

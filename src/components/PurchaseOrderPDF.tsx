@@ -5,6 +5,8 @@ import { SCOPE_OF_WORK, splitPrincipalAndVctSqFt } from '@/lib/constants';
 import { formatDate, formatCurrency, getProjectTypeDisplay } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
 import { getPressureWashingScopeLines, isPressureWashingJob } from '@/lib/pressureWashDocs';
+import type { ProposalDocument } from '@/lib/proposals';
+import { ProposalFactLines } from './proposal/ProposalPdfParts';
 
 // Register fonts
 Font.register({
@@ -203,6 +205,8 @@ interface PurchaseOrderPDFProps {
     projectAddress: string;
     notes: string;
   };
+  /** Resolved proposal for template-driven services; when present it supplies the work description and terms. */
+  proposal?: ProposalDocument | null;
 }
 
 const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
@@ -210,7 +214,9 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
   formData,
   companyInfo,
   quoteInfo,
+  proposal,
 }) => {
+  const crew = proposal?.crew.en;
   const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
 
   // Early return for undefined data
@@ -264,7 +270,11 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
             <Text style={styles.sectionTitle}>Project Details</Text>
             <Text style={styles.infoText}>Project Name: {quoteInfo.projectName}</Text>
             <Text style={styles.infoText}>Location: {quoteInfo.projectAddress}</Text>
-            <Text style={styles.infoText}>Project Type: {isPressureWashingJob(formData) ? 'Pressure Washing' : getProjectTypeDisplay(formData.projectType)}</Text>
+            {crew ? (
+              <ProposalFactLines facts={crew.facts} textStyle={styles.infoText} />
+            ) : (
+              <Text style={styles.infoText}>Project Type: {isPressureWashingJob(formData) ? 'Pressure Washing' : getProjectTypeDisplay(formData.projectType)}</Text>
+            )}
           </View>
 
           {/* Cleaner Information */}
@@ -282,13 +292,22 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Work Description</Text>
           <View style={styles.scopeOfWork}>
-            {scopeOfWork.map((item: string, index: number) => (
+            {(crew ? crew.scopeOfWork : scopeOfWork).map((item: string, index: number) => (
               <View key={index} style={styles.bulletPoint}>
-                <Text>• {item}</Text>
+                <Text style={crew ? { fontSize: 11 } : undefined}>• {item}</Text>
               </View>
             ))}
           </View>
         </View>
+
+        {crew && crew.excluded.length > 0 && (
+          <View style={styles.section} wrap={false}>
+            <Text style={styles.sectionTitle}>{crew.excludedTitle}</Text>
+            {crew.excluded.map((item, index) => (
+              <Text key={index} style={[styles.infoText, { paddingLeft: 15 }]}>• {item}</Text>
+            ))}
+          </View>
+        )}
 
         <View style={styles.divider} />
 
@@ -312,6 +331,16 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
           </>
         )}
 
+        {crew ? (
+          crew.sections.map((section) => (
+            <View key={section.title} style={styles.section} wrap={false}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              {section.lines.map((line, index) => (
+                <Text key={index} style={styles.infoText}>{line}</Text>
+              ))}
+            </View>
+          ))
+        ) : (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Subcontractor Terms — Punch List</Text>
           <Text style={styles.infoText}>
@@ -320,6 +349,7 @@ const PurchaseOrderPDF: React.FC<PurchaseOrderPDFProps> = ({
             Work beyond the written list requires approval before performance.
           </Text>
         </View>
+        )}
 
         {/* Signature Section */}
         <View style={styles.signatureSection}>

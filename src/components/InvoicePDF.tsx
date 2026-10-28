@@ -9,6 +9,8 @@ import { isUsableImageSrc } from '@/lib/companySettings';
 import { SCOPE_OF_WORK } from '@/lib/constants';
 import { formatSalesTaxPercent } from '@/lib/salesTax';
 import { getPressureWashingLineTitle, isPressureWashingJob } from '@/lib/pressureWashDocs';
+import type { ProposalDocument } from '@/lib/proposals';
+import { ProposalFactLines, ProposalLineItemRows } from './proposal/ProposalPdfParts';
 
 // Register fonts
 Font.register({
@@ -26,13 +28,14 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
-    padding: 30,
+    padding: 26,
+    paddingBottom: 36,
     fontFamily: 'Roboto',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: 10,
     alignItems: 'flex-start',
   },
   companyInfo: {
@@ -44,17 +47,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   logoContainer: {
-    width: 150,
-    height: 75,
-    marginRight: 12,
+    width: 56,
+    height: 56,
+    marginRight: 10,
     marginBottom: 0,
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
   },
   logo: {
-    maxWidth: '100%',
-    maxHeight: '100%',
+    width: 56,
+    height: 56,
     objectFit: 'contain',
     objectPosition: 'left top',
   },
@@ -71,30 +74,30 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   invoiceTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#0066CC',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   invoiceDetails: {
     fontSize: 10,
     marginBottom: 3,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 6,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 4,
     color: '#1e40af',
     borderBottomWidth: 1,
     borderBottomColor: '#CCCCCC',
-    paddingBottom: 5,
+    paddingBottom: 2,
   },
   infoGrid: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 8,
     alignItems: 'flex-start',
   },
   infoColumn: {
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 10,
-    marginBottom: 5,
+    marginBottom: 3,
   },
   table: {
     display: 'flex',
@@ -111,7 +114,16 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: '#CCCCCC',
-    marginBottom: 20,
+    marginBottom: 0,
+  },
+  totalsTable: {
+    display: 'flex',
+    width: 'auto',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: '#CCCCCC',
+    marginBottom: 8,
   },
   tableRow: {
     flexDirection: 'row',
@@ -122,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
   },
   tableCell: {
-    padding: 8,
+    padding: 5,
     fontSize: 10,
   },
   descriptionCell: {
@@ -198,9 +210,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 30,
-    right: 30,
+    bottom: 16,
+    left: 26,
+    right: 26,
     textAlign: 'center',
     fontSize: 8,
     color: '#666666',
@@ -266,6 +278,8 @@ interface InvoicePDFProps {
     phone?: string;
   };
   preTaxSubtotal?: number;
+  /** Resolved proposal for template-driven services; when present it supplies the line items. */
+  proposal?: ProposalDocument | null;
 }
 
 const InvoicePDF: React.FC<InvoicePDFProps> = ({
@@ -275,7 +289,8 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
   quoteInfo,
   invoiceInfo,
   clientInfo,
-  preTaxSubtotal
+  preTaxSubtotal,
+  proposal
 }) => {
   const billToLines = [
     clientInfo?.name,
@@ -285,15 +300,11 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
     clientInfo?.email ? `Email: ${clientInfo.email}` : '',
   ].filter((line): line is string => Boolean(line && line.trim()));
   const logoPath = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
-  const {
-    subtotal,
-    taxRate,
-    salesTax,
-    finalTotal,
-    windowQuoteShare,
-    subtotalForPrimaryService,
-    truckStopSplit,
-  } = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
+  const legacyAmounts = getQuoteDocumentAmounts(formData, estimateData, preTaxSubtotal);
+  const { windowQuoteShare, subtotalForPrimaryService, truckStopSplit } = legacyAmounts;
+  const { subtotal, taxRate, salesTax, finalTotal } = proposal?.amounts
+    ? { ...proposal.amounts, finalTotal: proposal.amounts.total }
+    : legacyAmounts;
 
   // Get cleaning type display
   const getCleaningTypeDisplay = (type: string): string => {
@@ -373,6 +384,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
             <Text style={styles.sectionTitle}>Project Location</Text>
             <Text style={styles.infoValue}>{quoteInfo.projectName}</Text>
             <Text style={styles.infoValue}>{quoteInfo.projectAddress}</Text>
+            {proposal ? <ProposalFactLines facts={proposal.projectFacts} textStyle={styles.infoValue} /> : null}
           </View>
         </View>
 
@@ -389,6 +401,16 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               </View>
             </View>
 
+            {proposal ? (
+              <ProposalLineItemRows
+                items={proposal.lineItems}
+                rowStyle={styles.tableRow}
+                descriptionCellStyle={[styles.tableCell, styles.descriptionCell]}
+                amountCellStyle={[styles.tableCell, styles.amountCell]}
+                captionStyle={{ fontSize: 9, marginTop: 4 }}
+              />
+            ) : (
+            <>
             {/* Main Cleaning Service */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
@@ -446,9 +468,15 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 </View>
               </View>
             )}
+            </>
+            )}
+          </View>
+        </View>
 
-            {/* Subtotal */}
-            <View style={[styles.tableRow, { borderTop: '1px solid #ddd', marginTop: 10 }]}>
+        {/* Totals and payment stay together so a short leftover gap cannot strand the payment block. */}
+        <View wrap={false}>
+          <View style={styles.totalsTable}>
+            <View style={[styles.tableRow, { borderTop: '1px solid #ddd' }]}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={{ fontWeight: 'bold' }}>Subtotal</Text>
               </View>
@@ -456,8 +484,6 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontWeight: 'bold' }}>{formatCurrency(subtotal)}</Text>
               </View>
             </View>
-
-            {/* Sales Tax */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={{ fontWeight: 'bold' }}>Sales Tax ({formatSalesTaxPercent(taxRate)})</Text>
@@ -466,8 +492,6 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
                 <Text style={{ fontWeight: 'bold' }}>{formatCurrency(salesTax)}</Text>
               </View>
             </View>
-
-            {/* Total */}
             <View style={styles.tableRow}>
               <View style={[styles.tableCell, styles.descriptionCell]}>
                 <Text style={{ fontWeight: 'bold', fontSize: 12 }}>TOTAL</Text>
@@ -477,54 +501,35 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({
               </View>
             </View>
           </View>
-        </View>
 
-        {/* Payment Information Section */}
-        <View style={[styles.section, { marginTop: 20 }]}>
-          <View style={{ width: '100%' }}>
-            <Text style={styles.sectionTitle}>Payment Information</Text>
-            <Text>Please make checks payable to: {companyInfo.name}</Text>
-            <Text style={{ marginTop: 5 }}>{companyInfo.address}</Text>
-            <Text>{companyInfo.city}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+            <View style={{
+              flex: 1,
+              marginRight: 12,
+              padding: 8,
+              backgroundColor: '#f8fafc',
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: '#E2E8F0',
+            }}>
+              <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1e40af', marginBottom: 4 }}>Payment Information</Text>
+              <Text style={{ fontSize: 10 }}>Please make checks payable to: {companyInfo.name}</Text>
+              <Text style={{ fontSize: 10, marginTop: 2 }}>{companyInfo.address}, {companyInfo.city}</Text>
+              <Text style={{ fontSize: 10, marginTop: 2 }}>Questions: {companyInfo.email} · {companyInfo.phone}</Text>
+              <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1e40af', marginTop: 8, marginBottom: 3 }}>Payment Terms</Text>
+              <Text style={{ fontSize: 10 }}>{invoiceInfo.paymentTerms}</Text>
+            </View>
+            <View style={{
+              backgroundColor: '#f0f0f0',
+              padding: 8,
+              width: 180,
+              borderRadius: 5,
+              border: '1px solid #d0d0d0'
+            }}>
+              <Text style={{ fontSize: 12, fontWeight: 'bold' }}>Balance Due:</Text>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 4 }}>{formatCurrency(finalTotal)}</Text>
+            </View>
           </View>
-        </View>
-
-        {/* Contact Information */}
-        <View style={[styles.section, { marginTop: 10 }]}>
-          <Text style={{ marginTop: 10 }}>For questions regarding this invoice:</Text>
-          <Text>{companyInfo.email}</Text>
-          <Text>{companyInfo.phone}</Text>
-        </View>
-
-        {/* Balance Due Box */}
-        <View style={{
-          position: 'absolute',
-          bottom: 40,
-          right: 0,
-          backgroundColor: '#f0f0f0',
-          padding: 10,
-          width: 200,
-          borderRadius: 5,
-          border: '1px solid #d0d0d0'
-        }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Balance Due:</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 5 }}>{formatCurrency(finalTotal)}</Text>
-        </View>
-
-        {/* Payment Terms */}
-        <View style={{
-          position: 'absolute',
-          bottom: 100,
-          left: 30,
-          right: 30,
-          padding: 10,
-          backgroundColor: '#f8fafc',
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: '#E2E8F0',
-        }}>
-          <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1e40af', marginBottom: 5 }}>Payment Terms</Text>
-          <Text style={{ fontSize: 10 }}>{invoiceInfo.paymentTerms}</Text>
         </View>
 
         {/* Footer */}

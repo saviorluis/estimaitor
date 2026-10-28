@@ -18,6 +18,7 @@ import {
   PRESSURE_WASHING,
   PRESSURE_WASHING_RATES,
   WINDOW_CLEANING,
+  WINDOW_CLEANING_MINIMUM_CHARGE,
   DISPLAY_CASE,
   PAINTING_RATES,
   ASSISTED_LIVING_PRICING,
@@ -547,7 +548,10 @@ export function calculateEstimate(formData: FormData, salesTaxRate: number = SAL
 
   // Calculate mobilization fee
   let mobilizationFee = 0;
-  if (formData.mobilizationType === 'auto') {
+  if (cleaningType === 'window_cleaning_only') {
+    // Window-only jobs have no meaningful building size or project type to scale mobilization by.
+    mobilizationFee = Math.max(0, WINDOW_CLEANING_MINIMUM_CHARGE - windowCleaningCost * urgencyMultiplier);
+  } else if (formData.mobilizationType === 'auto') {
     mobilizationFee = calculateMobilizationFee(mobilizationSqFt, projectType);
   } else if (formData.mobilizationType === 'small') {
     mobilizationFee = MOBILIZATION_FEES.small;

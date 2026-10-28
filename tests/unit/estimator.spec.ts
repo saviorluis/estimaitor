@@ -146,12 +146,13 @@ test.describe('Final cleaning calculator (src/lib/estimator.ts)', () => {
       NC_TAX
     );
     const windows = 30 * 18 + 10 * 18 * 1.6 + 5 * 18 * 2.2;
-    const t = totals(windows + 100 + 99 + 99 + 150);
+    // $1,026 of window labor clears the $150 window minimum, so there is no minimum charge.
+    const t = totals(windows + 100 + 99 + 99);
     expectMoney(e.basePrice, 0);
     expectMoney(e.windowCleaningCost, 1026);
-    expect(e.mobilizationFee).toBe(150);
+    expect(e.mobilizationFee).toBe(0);
     expectMoney(e.totalPrice, t.totalPrice);
-    expectMoney(e.totalPrice, 1892.616);
+    expectMoney(e.totalPrice, 1700.016);
     expect(e.estimatedHours).toBe(11); // (30 + 10x1.5 + 5x2) / 5 per hour
   });
 
