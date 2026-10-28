@@ -171,7 +171,7 @@ const ManualProspectDetail = forwardRef<HTMLHeadingElement, ManualProspectDetail
           className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
         >
           <Calculator className="h-4 w-4" aria-hidden="true" />
-          Create Draft Estimate
+          Make Quote
         </button>
         <button type="button" onClick={onEdit} disabled={!editable} className={BUTTON}>
           <Pencil className="h-4 w-4" aria-hidden="true" />
@@ -185,7 +185,7 @@ const ManualProspectDetail = forwardRef<HTMLHeadingElement, ManualProspectDetail
         )}
       </div>
       <p className="text-xs text-slate-600 dark:text-slate-300">
-        A draft estimate copies the address, name and notes into the estimator. Nothing is priced, saved as a quote, or sent.
+        Make Quote opens a Window Cleaning draft with known prospect details. The prospect record stays as saved.
       </p>
 
       {confirmDelete && (

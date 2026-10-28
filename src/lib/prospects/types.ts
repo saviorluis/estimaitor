@@ -1,4 +1,4 @@
-import type { ProjectType } from '@/lib/types';
+import type { ProjectType, WindowServiceSides } from '@/lib/types';
 
 /** How sure we are about a single fact shown on a prospect. */
 export type FactKind = 'verified' | 'reported' | 'estimated';
@@ -152,9 +152,18 @@ export interface ManualProspect {
   propertyType: ManualPropertyType;
   address: Required<ProspectAddress>;
   coordinates?: { lat: number; lng: number };
-  /** Optional; when present it always has a confidence. */
+  /** Optional; when present it always has a confidence. Research total only — not a priced split. */
   windowCount?: number;
   countConfidence?: CountConfidence;
+  /** Explicit quote-ready split. Absent unless saved; never inferred from windowCount. */
+  standardWindows?: number;
+  largeWindows?: number;
+  highAccessWindows?: number;
+  windowServiceSides?: WindowServiceSides;
+  distanceFromOffice?: number;
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
   source: { type: ManualSourceType; url?: string; note?: string };
   /** ISO date (YYYY-MM-DD) */
   researchedAt: string;

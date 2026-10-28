@@ -101,9 +101,14 @@ export interface FormData {
   
   // Client Information (Optional)
   clientName?: string;
+  clientPhone?: string;
+  clientEmail?: string;
   projectName?: string;
   /** Seeded onto the quote editor; never a contract or approval. */
   quoteNotes?: string;
+  /** True when this estimate was opened from a saved prospect. */
+  isProspectDraft?: boolean;
+  prospectId?: string;
 
   // Project address (final-cleaning estimator; optional)
   projectStreet?: string;

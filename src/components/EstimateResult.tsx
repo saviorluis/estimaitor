@@ -124,8 +124,15 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
       {/* Main Estimate Display */}
       <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
-          Estimate Results
+          {formData.isProspectDraft ? 'Draft proposal' : 'Estimate Results'}
         </h2>
+        {formData.isProspectDraft && (
+          <p className="mb-4 text-sm text-sky-900 dark:text-sky-100" data-testid="draft-proposal-note">
+            Editable draft from a saved prospect. Totals and scope can change until you generate documents.
+            This is not a signed, approved, or final contract.
+          </p>
+        )}
+
         {/* Test validation feedback */}
         {TEST_MODE && getTestValidation()}
 

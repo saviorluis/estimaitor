@@ -303,24 +303,27 @@ test.describe('Real prospect entry (/prospects)', () => {
     await expect(page.getByRole('heading', { name: 'Sample data · 25' })).toBeVisible();
   });
 
-  test('Create Draft Estimate prefills only the address, name and notes, and prices nothing', async ({ page }) => {
+  test('Make Quote opens a Window Cleaning draft and does not invent counts or mileage', async ({ page }) => {
     await seed(page, [makeRecord({ priceLow: '4100', priceHigh: '6900', accessNotes: 'Needs a 40 ft lift' })], '?id=mp-seed-1');
     await page.evaluate(() => window.localStorage.setItem('estimaitor_app_mode', 'pressure_washing'));
-    await detail(page).getByRole('button', { name: 'Create Draft Estimate' }).click();
+    await detail(page).getByRole('button', { name: 'Make Quote' }).click();
 
     await expect(page).toHaveURL(/\/$/);
     const banner = page.getByTestId('prospect-draft-banner');
-    await expect(banner).toContainText('Draft from prospect: Elm Street Lofts');
-    await expect(banner).toContainText('Nothing has been priced, saved as a quote, or sent');
-    await expect(banner).toContainText('Window count from your research (reference only, not applied): 84 · Medium confidence');
+    await expect(banner).toContainText('Draft proposal from prospect: Elm Street Lofts');
+    await expect(banner).toContainText('not a signed, approved, or final contract');
+    await expect(page.getByTestId('window-count-reference')).toContainText('84 · Medium confidence');
     await expect(banner).toContainText('Manager prefers email.');
+    await expect(banner).toContainText('Needs a 40 ft lift');
+    await expect(page.locator('#cleaningType')).toHaveValue('window_cleaning_only');
     await expect(page.locator('#projectName')).toHaveValue('Elm Street Lofts');
     await expect(page.locator('#projectStreet')).toHaveValue('120 N Elm St');
     await expect(page.locator('#projectCity')).toHaveValue('Greensboro');
     await expect(page.locator('#projectState')).toHaveValue('NC');
     await expect(page.locator('#projectZip')).toHaveValue('27401');
-    await expect(page.locator('#needsWindowCleaning')).not.toBeChecked();
-    await expect(page.locator('#squareFootage')).toHaveValue('5000');
+    await expect(page.locator('#numberOfWindows')).toHaveValue('');
+    await expect(page.locator('#distanceFromOffice')).toHaveValue('');
+    await expect(page.getByTestId('proposal-total')).toHaveCount(0);
     await expect(page.getByText(/4,100|6,900/)).toHaveCount(0);
 
     const state = await page.evaluate((key) => ({
@@ -354,7 +357,7 @@ test.describe('Real prospect entry (/prospects)', () => {
     await page.getByRole('button', { name: 'Save prospect' }).click();
     await expect(detail(page).getByRole('heading', { level: 2 })).toHaveText('455 Market Street');
     await expect(page.getByRole('heading', { level: 1, name: 'Prospects' })).toHaveCount(0);
-    await expect(detail(page).getByRole('button', { name: 'Create Draft Estimate' })).toBeVisible();
+    await expect(detail(page).getByRole('button', { name: 'Make Quote' })).toBeVisible();
     await detail(page).getByRole('button', { name: 'Back' }).click();
     await expect(page.getByRole('heading', { name: 'Your prospects · 1' })).toBeVisible();
   });

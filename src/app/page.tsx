@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Settings } from 'lucide-react';
 import EstimatorForm from '@/components/EstimatorForm';
 import PressureWashingCalculator from '@/components/PressureWashingCalculator';
@@ -199,6 +199,18 @@ export default function Home() {
       console.error('Error updating estimate tax:', error);
     }
   }, [isLoaded, settings.state, formData]);
+
+  const handleProspectDraftApplied = useCallback((missingInputs: string[]) => {
+    if (missingInputs.length === 0) return;
+    setEstimateData(null);
+    setFormData(null);
+    try {
+      localStorage.removeItem(ESTIMATE_STORAGE_KEY);
+      localStorage.removeItem(FORM_STORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing leftover estimate for prospect draft:', error);
+    }
+  }, []);
 
   const handleEstimateCalculated = (data: EstimateData, submitted: FormData) => {
     const formValues = submitted;
@@ -409,7 +421,10 @@ export default function Home() {
             ) : currentMode === 'pressure_washing' ? (
               <PressureWashingCalculator onEstimateCalculated={handleEstimateCalculated} />
             ) : (
-              <EstimatorForm onEstimateCalculated={handleEstimateCalculated} />
+              <EstimatorForm
+                onEstimateCalculated={handleEstimateCalculated}
+                onProspectDraftApplied={handleProspectDraftApplied}
+              />
             )}
           </div>
           

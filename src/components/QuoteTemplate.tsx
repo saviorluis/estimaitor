@@ -119,6 +119,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
   // Client information state - initialize from localStorage if available
   const [clientInfo, setClientInfo] = useState(() => {
     const emptyClient = { name: '', company: '', address: '', email: '', phone: '' };
+    if (formData.isProspectDraft) {
+      return {
+        name: (formData.clientName || '').trim(),
+        company: '',
+        address: formatProjectAddress(formData),
+        email: (formData.clientEmail || '').trim(),
+        phone: (formData.clientPhone || '').trim(),
+      };
+    }
     let saved = emptyClient;
     if (typeof window !== 'undefined') {
       const savedClientInfo = localStorage.getItem('quoteClientInfo');

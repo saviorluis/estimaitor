@@ -2,11 +2,18 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { FormData, EstimateData, ProjectType, CleaningType } from '@/lib/types';
+import { FormData, EstimateData } from '@/lib/types';
 import { calculateEstimate } from '@/lib/estimator';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { US_STATES } from '@/lib/salesTax';
-import { takeDraftEstimateHandoff, type DraftEstimateHandoff } from '@/lib/prospects/estimateHandoff';
+import {
+  ESTIMATE_HANDOFF_STORAGE_KEY,
+  draftFormResetFromHandoff,
+  missingWindowQuoteInputs,
+  missingWindowQuoteInputsFromForm,
+  takeDraftEstimateHandoff,
+  type DraftEstimateHandoff,
+} from '@/lib/prospects/estimateHandoff';
 import { COUNT_CONFIDENCE_LABELS } from '@/lib/prospects/types';
 import { getWindowCounts, normalizeWindowCounts } from '@/lib/proposals';
 import {
@@ -21,16 +28,51 @@ import {
 
 interface EstimatorFormProps {
   onEstimateCalculated: (data: EstimateData, formValues: FormData) => void;
+  /** Called after a prospect handoff is applied, so a stale estimate is not shown as this draft. */
+  onProspectDraftApplied?: (missingInputs: string[]) => void;
 }
 
 // Storage key for saving form data
 const STORAGE_KEY = 'estimaitor_form_data';
 
-export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormProps) {
+const ESTIMATOR_DEFAULTS: FormData = {
+  projectType: 'office',
+  cleaningType: 'final',
+  squareFootage: 5000,
+  hasVCT: false,
+  vctSquareFootage: 0,
+  distanceFromOffice: 20,
+  gasPrice: 3.50,
+  applyMarkup: true,
+  stayingOvernight: false,
+  numberOfNights: 1,
+  numberOfCleaners: 3,
+  urgencyLevel: 1,
+  needsPressureWashing: false,
+  pressureWashingServices: [],
+  pressureWashingArea: 0,
+  pressureWashingType: 'soft_wash',
+  needsWindowCleaning: false,
+  numberOfWindows: 0,
+  numberOfLargeWindows: 0,
+  numberOfHighAccessWindows: 0,
+  numberOfDisplayCases: 0,
+  truckStopIncludesFastFood: false,
+  truckStopFastFoodSquareFootage: 0,
+  needsPainting: false,
+  paintingSquareFootage: 0,
+  paintingType: 'interior',
+  paintingRooms: 0,
+  paintingCoats: 1,
+  paintingCeilingHeight: 0,
+};
+
+export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApplied }: EstimatorFormProps) {
   const { salesTaxRate } = useCompanySettings();
   const [isLoaded, setIsLoaded] = useState(false);
   const [prospectDraft, setProspectDraft] = useState<DraftEstimateHandoff | null>(null);
-  const draftHandoff = useRef<DraftEstimateHandoff | null | undefined>(undefined);
+  const draftHandoff = useRef<DraftEstimateHandoff | null>(null);
+  const formInitialized = useRef(false);
 
   // Get saved form data from localStorage (memoized) - excludes client-specific info
   const getSavedFormData = useCallback((): Partial<FormData> => {
@@ -41,7 +83,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
       if (savedData) {
         const parsedData = JSON.parse(savedData);
         // Exclude client-specific information from loaded data
-        const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, ...technicalData } = parsedData;
+        const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, isProspectDraft, prospectId, quoteNotes, clientPhone, clientEmail, ...technicalData } = parsedData;
         return technicalData;
       }
       return {};
@@ -51,42 +93,18 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     }
   }, []);
 
-  // Memoized default values
-  const defaultValues = useMemo(() => ({
-    projectType: 'office' as ProjectType,
-    cleaningType: 'final' as CleaningType,
-    squareFootage: 5000,
-    hasVCT: false,
-    vctSquareFootage: 0,
-    distanceFromOffice: 20,
-    gasPrice: 3.50,
-    applyMarkup: true, // Always apply 20% professional markup
-    stayingOvernight: false,
-    numberOfNights: 1,
-    numberOfCleaners: 3,
-    urgencyLevel: 1,
-    needsPressureWashing: false,
-    pressureWashingServices: [],
-    pressureWashingArea: 0,
-    pressureWashingType: 'soft_wash' as 'soft_wash' | 'roof_wash' | 'driveway' | 'deck' | 'daily_rate',
-    needsWindowCleaning: false,
-    numberOfWindows: 0,
-    numberOfLargeWindows: 0,
-    numberOfHighAccessWindows: 0,
-    numberOfDisplayCases: 0,
-    truckStopIncludesFastFood: false,
-    truckStopFastFoodSquareFootage: 0,
-    needsPainting: false,
-    paintingSquareFootage: 0,
-    paintingType: 'interior' as 'interior' | 'exterior' | 'both',
-    paintingRooms: 0,
-    paintingCoats: 1 as 1 | 2,
-    paintingCeilingHeight: 0,
-    ...getSavedFormData()
-  }), [getSavedFormData]);
+  // Memoized default values. A pending Make Quote handoff must not pick up the last job.
+  const defaultValues = useMemo(() => {
+    const pendingHandoff =
+      typeof window !== 'undefined' && Boolean(window.localStorage.getItem(ESTIMATE_HANDOFF_STORAGE_KEY));
+    return {
+      ...ESTIMATOR_DEFAULTS,
+      ...(pendingHandoff ? {} : getSavedFormData()),
+    };
+  }, [getSavedFormData]);
 
   // Initialize form
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, reset, getValues, formState: { errors } } = useForm<FormData>({
     defaultValues
   });
 
@@ -106,26 +124,39 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
   const requiredForWindowJob = (message: string) => (value: unknown, data: FormData) =>
     data.cleaningType !== 'window_cleaning_only' || Boolean(value) || message;
 
-  // Load saved form data on component mount
+  // Hydrate once. A later effect run must not reset from localStorage over a new prospect draft.
   useEffect(() => {
-    const savedData = getSavedFormData();
-    if (Object.keys(savedData).length > 0) {
-      reset(savedData as FormData);
+    if (formInitialized.current) {
+      if (draftHandoff.current) setProspectDraft(draftHandoff.current);
+      return;
     }
-    // A draft started from a saved prospect fills in identity fields only; pricing inputs are left alone.
-    // The handoff is removed on first read, so keep it for the remount React does in development.
-    if (draftHandoff.current === undefined) draftHandoff.current = takeDraftEstimateHandoff(window.localStorage);
-    const draft = draftHandoff.current;
+    formInitialized.current = true;
+
+    const draft = takeDraftEstimateHandoff(window.localStorage);
+    draftHandoff.current = draft;
     if (draft) {
-      if (draft.projectName) setValue('projectName', draft.projectName);
-      setValue('projectStreet', draft.projectStreet);
-      setValue('projectCity', draft.projectCity);
-      setValue('projectState', draft.projectState);
-      setValue('projectZip', draft.projectZip);
+      const nextValues = {
+        ...ESTIMATOR_DEFAULTS,
+        ...draftFormResetFromHandoff(draft, getSavedFormData()),
+      } as FormData;
+      reset(nextValues);
       setProspectDraft(draft);
+      const missing = missingWindowQuoteInputs(draft);
+      onProspectDraftApplied?.(missing);
+      if (missing.length === 0) {
+        const formData = normalizeWindowCounts(nextValues);
+        queueMicrotask(() => {
+          onEstimateCalculated(calculateEstimate(formData, salesTaxRate), formData);
+        });
+      }
+    } else {
+      const savedData = getSavedFormData();
+      if (Object.keys(savedData).length > 0) {
+        reset({ ...ESTIMATOR_DEFAULTS, ...savedData });
+      }
     }
     setIsLoaded(true);
-  }, [getSavedFormData, reset, setValue]);
+  }, [getSavedFormData, onEstimateCalculated, onProspectDraftApplied, reset, salesTaxRate]);
 
   // Combined effect for form updates and localStorage saving
   useEffect(() => {
@@ -139,7 +170,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
     
     // Save form data to localStorage (excluding client-specific information)
     try {
-      const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, ...technicalData } = formValues;
+      const { clientName, projectName, projectStreet, projectCity, projectState, projectZip, isProspectDraft, prospectId, quoteNotes, clientPhone, clientEmail, ...technicalData } = formValues;
       const formDataToSave = {
         ...technicalData,
         gasPrice: typeof formValues.gasPrice === 'string' 
@@ -156,8 +187,13 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
   const onSubmit: SubmitHandler<FormData> = useCallback((data) => {
     const formData = normalizeWindowCounts({
       ...data,
+      isProspectDraft: Boolean(data.isProspectDraft || draftHandoff.current),
+      prospectId: data.prospectId || draftHandoff.current?.prospectId,
       gasPrice: typeof data.gasPrice === 'string' ? parseFloat(data.gasPrice) : data.gasPrice
     });
+    if (formData.cleaningType === 'window_cleaning_only' && missingWindowQuoteInputsFromForm(data).length > 0) {
+      return;
+    }
 
     const estimate = calculateEstimate(formData, salesTaxRate);
     onEstimateCalculated(estimate, formData);
@@ -207,7 +243,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
         >
           <div className="flex items-start justify-between gap-3">
             <h3 id="prospect-draft-heading" className="font-semibold">
-              Draft from prospect: {prospectDraft.prospectLabel}
+              Draft proposal from prospect: {prospectDraft.prospectLabel}
             </h3>
             <button
               type="button"
@@ -218,20 +254,42 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             </button>
           </div>
           <p className="mt-1">
-            The project name and address below were copied from your prospect record and can be edited. Nothing has been priced,
-            saved as a quote, or sent. Enter the job details and calculate as usual; this estimator sets the price.
+            This is an editable Window Cleaning draft, not a signed, approved, or final contract. Known prospect
+            details are filled in. The original prospect record is unchanged. Missing estimate fields are left
+            blank — nothing is invented.
           </p>
-          {prospectDraft.windowCountReference && (
-            <p className="mt-2">
-              <span className="font-medium">Window count from your research (reference only, not applied):</span>{' '}
+          {prospectDraft.windowCountReference && !prospectDraft.windowCounts && (
+            <p className="mt-2" data-testid="window-count-reference">
+              <span className="font-medium">Research window total (not applied as a split):</span>{' '}
               {prospectDraft.windowCountReference.count.toLocaleString('en-US')} ·{' '}
               {COUNT_CONFIDENCE_LABELS[prospectDraft.windowCountReference.confidence] || 'Unverified'}
+            </p>
+          )}
+          {(prospectDraft.sourceLabel || prospectDraft.sourceNote || prospectDraft.sourceUrl) && (
+            <p className="mt-2">
+              <span className="font-medium">Source:</span>{' '}
+              {[prospectDraft.sourceLabel, prospectDraft.sourceNote, prospectDraft.sourceUrl].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {prospectDraft.accessNotes && (
+            <p className="mt-2 whitespace-pre-line">
+              <span className="font-medium">Access:</span> {prospectDraft.accessNotes}
             </p>
           )}
           {prospectDraft.notes && (
             <p className="mt-2 whitespace-pre-line">
               <span className="font-medium">Prospect notes:</span> {prospectDraft.notes}
             </p>
+          )}
+          {missingWindowQuoteInputsFromForm(formValues).length > 0 && (
+            <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100" role="alert" data-testid="draft-missing-inputs">
+              <p className="font-medium">Add these to calculate the draft:</p>
+              <ul className="mt-1 list-disc pl-5">
+                {missingWindowQuoteInputsFromForm(formValues).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </section>
       )}
@@ -363,7 +421,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
             <option value="rough_final">Rough & Final Clean (120% rate)</option>
             <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
             <option value="vct_only">VCT Stripping/Waxing Only</option>
-            <option value="window_cleaning_only">Window Cleaning Only</option>
+            <option value="window_cleaning_only">Window Cleaning</option>
           </select>
           {formValues.cleaningType && (
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -552,6 +610,12 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 min: { value: 0, message: 'Distance cannot be negative' },
                 max: { value: 500, message: 'Maximum 500 miles' }
               })}
+              data-needs-input={
+                prospectDraft &&
+                (formValues.distanceFromOffice === undefined || Number.isNaN(Number(formValues.distanceFromOffice)))
+                  ? true
+                  : undefined
+              }
               className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
               placeholder="Distance in miles"
             />
@@ -806,7 +870,17 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                 </p>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                data-needs-input={
+                  prospectDraft &&
+                  !formValues.numberOfWindows &&
+                  !formValues.numberOfLargeWindows &&
+                  !formValues.numberOfHighAccessWindows
+                    ? true
+                    : undefined
+                }
+              >
                 <div>
                   <label htmlFor="numberOfWindows" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     Standard Windows
@@ -820,7 +894,7 @@ export default function EstimatorForm({ onEstimateCalculated }: EstimatorFormPro
                       validate: (_value, data) =>
                         data.cleaningType !== 'window_cleaning_only' ||
                         getWindowCounts(data).total > 0 ||
-                        'Enter the standard, large, and high-access counts.',
+                        'Enter the standard, large, and high-access counts. A research total is not used as a split.',
                     })}
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
                     placeholder="0"

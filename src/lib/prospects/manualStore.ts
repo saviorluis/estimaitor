@@ -45,6 +45,14 @@ export function isManualProspect(value: unknown): value is ManualProspect {
     isOptionalNumber(p.windowCount) &&
     (p.countConfidence === undefined || includes(COUNT_CONFIDENCES, p.countConfidence)) &&
     (p.windowCount === undefined || p.countConfidence !== undefined) &&
+    isOptionalNumber(p.standardWindows) &&
+    isOptionalNumber(p.largeWindows) &&
+    isOptionalNumber(p.highAccessWindows) &&
+    (p.windowServiceSides === undefined || includes(['exterior', 'interior', 'interior_exterior'], p.windowServiceSides)) &&
+    isOptionalNumber(p.distanceFromOffice) &&
+    isOptionalString(p.contactName) &&
+    isOptionalString(p.contactPhone) &&
+    isOptionalString(p.contactEmail) &&
     !!source &&
     includes(MANUAL_SOURCE_TYPES, source.type) &&
     isOptionalString(source.url) &&

@@ -18,8 +18,14 @@ import {
   writeProspectSettings,
 } from '../../src/lib/prospects/manualStore';
 import {
+  BLANK_QUOTE_NUMBER,
   ESTIMATE_HANDOFF_STORAGE_KEY,
+  WINDOW_QUOTE_INPUTS,
   buildDraftEstimateHandoff,
+  draftFormResetFromHandoff,
+  formValuesFromHandoff,
+  missingWindowQuoteInputs,
+  missingWindowQuoteInputsFromForm,
   takeDraftEstimateHandoff,
   writeDraftEstimateHandoff,
 } from '../../src/lib/prospects/estimateHandoff';
@@ -237,21 +243,38 @@ test.describe('Draft estimate handoff', () => {
   const now = new Date('2026-10-15T15:00:00.000Z');
   const p = record({ name: 'Elm Street Lofts', priceLow: '4000', priceHigh: '6000', accessNotes: 'Lift needed' });
 
-  test('carries only the address, name, notes and a reference window count, never prices', () => {
+  test('carries known prospect details and never prices or invents a window split', () => {
     const handoff = buildDraftEstimateHandoff(p, now);
-    expect(Object.keys(handoff).sort()).toEqual(
-      ['version', 'createdAt', 'prospectId', 'prospectLabel', 'projectName', 'projectStreet', 'projectCity', 'projectState', 'projectZip', 'notes', 'windowCountReference'].sort()
-    );
     expect(handoff).toMatchObject({
+      version: 2,
       projectName: 'Elm Street Lofts',
       projectStreet: '120 N Elm St',
       projectCity: 'Greensboro',
       projectState: 'NC',
       projectZip: '27401',
       notes: p.internalNotes,
+      accessNotes: 'Lift needed',
+      windowCustomerType: 'commercial',
       windowCountReference: { count: 84, confidence: 'medium' },
+      clientName: 'Elm Street Lofts',
     });
+    expect(handoff).not.toHaveProperty('windowCounts');
+    expect(handoff).not.toHaveProperty('windowServiceSides');
+    expect(handoff).not.toHaveProperty('distanceFromOffice');
     expect(JSON.stringify(handoff)).not.toMatch(/4000|6000|price/i);
+    expect(missingWindowQuoteInputs(handoff)).toEqual([
+      WINDOW_QUOTE_INPUTS.sides,
+      WINDOW_QUOTE_INPUTS.windowSplit,
+      WINDOW_QUOTE_INPUTS.distance,
+    ]);
+    expect(formValuesFromHandoff(handoff).numberOfWindows).toBe(BLANK_QUOTE_NUMBER);
+    expect(formValuesFromHandoff(handoff).distanceFromOffice).toBe(BLANK_QUOTE_NUMBER);
+    expect(formValuesFromHandoff(handoff).windowServiceSides).toBeUndefined();
+    expect(missingWindowQuoteInputsFromForm(formValuesFromHandoff(handoff))).toEqual([
+      WINDOW_QUOTE_INPUTS.sides,
+      WINDOW_QUOTE_INPUTS.windowSplit,
+      WINDOW_QUOTE_INPUTS.distance,
+    ]);
 
     const noCount = buildDraftEstimateHandoff(record({ windowCount: '', countConfidence: '', internalNotes: '' }), now);
     expect(noCount).not.toHaveProperty('windowCountReference');
@@ -259,6 +282,70 @@ test.describe('Draft estimate handoff', () => {
     const storage = new MemoryStorage();
     writeDraftEstimateHandoff(storage, noCount);
     expect(takeDraftEstimateHandoff(storage, now)?.projectStreet).toBe('120 N Elm St');
+  });
+
+  test('a complete quote-ready prospect has no missing estimate inputs and uses the saved split', () => {
+    const stored: ManualProspect = {
+      ...p,
+      propertyType: 'residential',
+      windowServiceSides: 'interior_exterior',
+      standardWindows: 18,
+      largeWindows: 2,
+      highAccessWindows: 0,
+      distanceFromOffice: 15,
+      contactName: 'Dana Oak',
+      contactPhone: '336-555-0100',
+    };
+    const handoff = buildDraftEstimateHandoff(stored, now);
+    expect(missingWindowQuoteInputs(handoff)).toEqual([]);
+    expect(formValuesFromHandoff(handoff)).toMatchObject({
+      cleaningType: 'window_cleaning_only',
+      windowCustomerType: 'residential',
+      windowServiceSides: 'interior_exterior',
+      numberOfWindows: 18,
+      numberOfLargeWindows: 2,
+      numberOfHighAccessWindows: 0,
+      distanceFromOffice: 15,
+      clientName: 'Dana Oak',
+      clientPhone: '336-555-0100',
+      isProspectDraft: true,
+    });
+    expect(missingWindowQuoteInputsFromForm(formValuesFromHandoff(handoff))).toEqual([]);
+  });
+
+  test('a new draft reset drops leftover quote fields from a previous estimator session', () => {
+    const leftover = {
+      cleaningType: 'window_cleaning_only' as const,
+      windowCustomerType: 'residential' as const,
+      windowServiceSides: 'interior_exterior' as const,
+      numberOfWindows: 18,
+      numberOfLargeWindows: 2,
+      numberOfHighAccessWindows: 0,
+      distanceFromOffice: 15,
+      gasPrice: 3.5,
+      numberOfCleaners: 4,
+      projectName: 'Oak Lane Residence',
+    };
+    const reset = draftFormResetFromHandoff(buildDraftEstimateHandoff(p, now), leftover);
+    expect(reset).toMatchObject({
+      cleaningType: 'window_cleaning_only',
+      windowCustomerType: 'commercial',
+      projectName: 'Elm Street Lofts',
+      gasPrice: 3.5,
+      numberOfCleaners: 4,
+      applyMarkup: true,
+    });
+    expect(reset.windowServiceSides).toBeUndefined();
+    expect(reset.numberOfWindows).toBe(BLANK_QUOTE_NUMBER);
+    expect(reset.numberOfLargeWindows).toBe(BLANK_QUOTE_NUMBER);
+    expect(reset.numberOfHighAccessWindows).toBe(BLANK_QUOTE_NUMBER);
+    expect(reset.distanceFromOffice).toBe(BLANK_QUOTE_NUMBER);
+    expect(reset.numberOfWindows).not.toBe(84);
+    expect(missingWindowQuoteInputsFromForm(reset)).toEqual([
+      WINDOW_QUOTE_INPUTS.sides,
+      WINDOW_QUOTE_INPUTS.windowSplit,
+      WINDOW_QUOTE_INPUTS.distance,
+    ]);
   });
 
   test('is read once, then removed; stale or malformed handoffs are ignored', () => {
