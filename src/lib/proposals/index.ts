@@ -16,6 +16,7 @@ import type {
 
 export * from './types';
 export { resolveServiceType, normalizeWindowCounts, getWindowCounts, toCount } from './job';
+export { buildWindowChangeOrder, parseChangeAmount, CHANGE_ORDER_STATUS, CHANGE_ORDER_AUTHORIZATION, CHANGE_ORDER_KIND_LABELS } from './changeOrder';
 
 const TEMPLATES: Partial<Record<ServiceType, ServiceProposalTemplate>> = {
   window_cleaning: windowCleaningTemplate,

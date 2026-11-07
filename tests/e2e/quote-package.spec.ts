@@ -18,6 +18,8 @@ test.describe('Final Cleaning mode: estimate -> quote -> ZIP package', () => {
 
     await page.getByRole('button', { name: 'Generate Quote' }).click();
     await expect(page.getByRole('button', { name: 'Download Package' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Preview Change Order' })).toHaveCount(0);
+    await expect(page.getByTestId('change-order-editor')).toHaveCount(0);
 
     const download = await downloadPackage(page, 'Download Package');
     const quoteNumberInName = /^Sample Office Fitout (\d+) Location\.zip$/.exec(download.suggestedFilename());
@@ -64,6 +66,10 @@ test.describe('Final Cleaning mode: estimate -> quote -> ZIP package', () => {
     expect(byName('Purchase Order.pdf').text).toContain('Purchase Order');
     expect(byName('Change Order.pdf').text).toContain('CHANGE ORDER');
     expect(byName('Change Order.pdf').text).toContain(quoteNumber);
+    expect(byName('Change Order.pdf').text).toContain('Change Order Description');
+    expect(byName('Change Order.pdf').text).not.toContain('Proposed Change');
+    expect(byName('Change Order.pdf').text).not.toContain('Sides cleaned');
+    expect(byName('Change Order.pdf').text).not.toContain('Revised total');
   });
 
   test('downloading a package advances the quote counter', async ({ page }) => {
@@ -90,6 +96,8 @@ test.describe('Pressure Washing mode: estimate -> four-document wash package', (
     await expect(page.getByText('$1,037.47').first()).toBeVisible();
 
     await page.getByRole('button', { name: 'Generate Quote' }).click();
+    await expect(page.getByRole('button', { name: 'Preview Change Order' })).toHaveCount(0);
+    await expect(page.getByTestId('change-order-editor')).toHaveCount(0);
     const download = await downloadPackage(page, 'Download Package (Quote, WO, PO, Invoice)');
     const entries = await readZipDownload(download);
     const names = entries.map((e) => e.name);

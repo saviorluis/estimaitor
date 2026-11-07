@@ -36,11 +36,14 @@ import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { getLogoSrc } from '@/lib/companySettings';
 import {
   buildProposal,
+  buildWindowChangeOrder,
   formatProposalTerms,
   resolveServiceType,
+  type ChangeOrderLineInput,
   type DocumentKind,
 } from '@/lib/proposals';
 import ProposalSummary from './proposal/ProposalSummary';
+import ChangeOrderEditor from './proposal/ChangeOrderEditor';
 
 const CompanyLogo = ({ src, className = "" }: { src: string; className?: string }) => {
   return (
@@ -115,6 +118,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
 
   // State to track if company info is being edited
   const [editingCompanyInfo, setEditingCompanyInfo] = useState(false);
+  const [changeLines, setChangeLines] = useState<ChangeOrderLineInput[]>([]);
 
   // Client information state - initialize from localStorage if available
   const [clientInfo, setClientInfo] = useState(() => {
@@ -271,6 +275,39 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     : isPressureWashingJob(formData)
     ? PRESSURE_WASHING_PACKAGE_DOCUMENTS
     : LEGACY_PACKAGE_DOCUMENTS;
+  const changeOrder = useMemo(
+    () =>
+      proposal
+        ? buildWindowChangeOrder({
+            proposal,
+            quoteNumber: quoteInfo.quoteNumber,
+            date: quoteInfo.date,
+            clientName: clientInfo.name,
+            clientCompany: clientInfo.company,
+            clientPhone: clientInfo.phone,
+            clientEmail: clientInfo.email,
+            projectName: quoteInfo.projectName,
+            projectAddress: quoteInfo.projectAddress,
+            lines: changeLines,
+          })
+        : null,
+    [proposal, quoteInfo.quoteNumber, quoteInfo.date, quoteInfo.projectName, quoteInfo.projectAddress, clientInfo, changeLines]
+  );
+
+  const renderChangeOrderPdf = () => (
+    <ChangeOrderPDF
+      formData={formData}
+      companyInfo={pdfCompanyInfo}
+      clientInfo={clientInfo}
+      changeOrderInfo={{
+        orderNumber: quoteInfo.quoteNumber,
+        date: changeOrder ? quoteInfo.date : formatDate(new Date()),
+        projectName: quoteInfo.projectName,
+        projectAddress: quoteInfo.projectAddress,
+      }}
+      changeOrder={changeOrder}
+    />
+  );
 
   // Get cleaning type display name
   const getCleaningTypeDisplay = (type: string): string => {
@@ -342,6 +379,19 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
     } catch (error) {
       console.error('Error generating PDF preview:', error);
       alert('There was an error generating the PDF preview. Please try again.');
+    }
+  };
+
+  const handlePreviewChangeOrder = async () => {
+    if (!changeOrder) return;
+    try {
+      const blob = await pdf(renderChangeOrderPdf()).toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (error) {
+      console.error('Error generating change order preview:', error);
+      alert('There was an error generating the change order preview. Please try again.');
     }
   };
 
@@ -496,21 +546,7 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
       }
 
       if (includes('change_order')) {
-        const changeOrderInfo = {
-          orderNumber: quoteInfo.quoteNumber,
-          date: formatDate(new Date()),
-          projectName: quoteInfo.projectName,
-          projectAddress: quoteInfo.projectAddress,
-        };
-
-        const changeOrderBlob = await pdf(
-          <ChangeOrderPDF
-            formData={formData}
-            companyInfo={pdfCompanyInfo}
-            clientInfo={clientInfo}
-            changeOrderInfo={changeOrderInfo}
-          />
-        ).toBlob();
+        const changeOrderBlob = await pdf(renderChangeOrderPdf()).toBlob();
         zip.file(`${quoteInfo.projectName || 'Project'} Change Order.pdf`, changeOrderBlob);
       }
 
@@ -572,6 +608,15 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
           >
             Preview Quote
           </button>
+          {changeOrder && (
+            <button
+              type="button"
+              onClick={handlePreviewChangeOrder}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm"
+            >
+              Preview Change Order
+            </button>
+          )}
           <button
             onClick={handlePDFDownload}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
@@ -833,6 +878,16 @@ const QuoteTemplate: React.FC<QuoteTemplateProps> = ({ estimateData, formData })
             </h4>
             <ProposalSummary proposal={proposal} showSections />
           </section>
+        )}
+
+        {changeOrder && (
+          <ChangeOrderEditor
+            lines={changeLines}
+            onChange={setChangeLines}
+            originalTotal={changeOrder.originalTotal}
+            adjustment={changeOrder.adjustment}
+            revisedTotal={changeOrder.revisedTotal}
+          />
         )}
 
         {/* Quote Counter Input */}

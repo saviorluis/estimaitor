@@ -1,8 +1,9 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
-import { EstimateData, FormData } from '@/lib/types';
+import { FormData } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
+import type { ChangeOrderDocument } from '@/lib/proposals';
 
 // Register fonts
 Font.register({
@@ -158,6 +159,42 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: 'flex-start'
   },
+  pendingStatus: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#9A3412',
+    marginTop: 8,
+    textAlign: 'right',
+  },
+  authorizationBox: {
+    marginTop: 18,
+    borderWidth: 1.5,
+    borderColor: '#9A3412',
+    backgroundColor: '#FFF7ED',
+    padding: 12,
+  },
+  authorizationHeading: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#9A3412',
+    marginBottom: 6,
+  },
+  authorizationText: {
+    fontSize: 12,
+    lineHeight: 1.4,
+    marginBottom: 4,
+  },
+  windowSignatureLabel: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  windowSignatureLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#000000',
+    marginTop: 26,
+    marginBottom: 8,
+    width: '100%',
+  },
 });
 
 interface ChangeOrderPDFProps {
@@ -184,14 +221,107 @@ interface ChangeOrderPDFProps {
     projectName: string;
     projectAddress: string;
   };
+  /** Window Cleaning proposal change. Omitted for the legacy blank form. */
+  changeOrder?: ChangeOrderDocument | null;
+}
+
+function moneyOrBlank(label: string, amount: number | null): string {
+  return amount === null ? `${label}:` : `${label}: ${formatCurrency(amount)}`;
+}
+
+function WindowChangeOrderPDF({
+  companyInfo,
+  changeOrder,
+}: {
+  companyInfo: ChangeOrderPDFProps['companyInfo'];
+  changeOrder: ChangeOrderDocument;
+}) {
+  const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
+  const detail = (label: string, value: string) => (value ? `${label}: ${value}` : `${label}:`);
+
+  return (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <View style={styles.header}>
+          <View style={styles.companyInfo}>
+            <Image src={logoSrc} style={{ width: 64, height: 64, objectFit: 'contain' }} />
+            <Text style={styles.companyName}>{companyInfo.name}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.address}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.city}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.phone} | {companyInfo.email}</Text>
+          </View>
+          <View style={styles.changeOrderInfo}>
+            <Text style={styles.changeOrderTitle}>CHANGE ORDER</Text>
+            <Text style={styles.pendingStatus}>{changeOrder.statusLabel}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.subtitle}>Original proposal</Text>
+        <Text style={styles.infoValue}>{detail('Proposal', changeOrder.quoteNumber)}</Text>
+        <Text style={styles.infoValue}>{detail('Date', changeOrder.date)}</Text>
+        <Text style={styles.infoValue}>{detail('Client', changeOrder.clientName)}</Text>
+        <Text style={styles.infoValue}>{detail('Company', changeOrder.clientCompany)}</Text>
+        <Text style={styles.infoValue}>{detail('Phone', changeOrder.clientPhone)}</Text>
+        <Text style={styles.infoValue}>{detail('Email', changeOrder.clientEmail)}</Text>
+        <Text style={styles.infoValue}>{detail('Property', changeOrder.projectName)}</Text>
+        <Text style={styles.infoValue}>{detail('Property address', changeOrder.projectAddress)}</Text>
+        <Text style={styles.infoValue}>{detail('Sides cleaned', changeOrder.sides)}</Text>
+        <Text style={styles.infoValue}>{detail('Windows', changeOrder.windowCount)}</Text>
+        <Text style={styles.infoValue}>{`Original proposal total: ${formatCurrency(changeOrder.originalTotal)}`}</Text>
+
+        <Text style={[styles.subtitle, { marginTop: 16 }]}>Proposed changes</Text>
+        <Text style={styles.infoValue}>Addition, Removal, and Scope change are listed separately.</Text>
+        {changeOrder.lines.length === 0 ? (
+          <Text style={[styles.infoValue, { marginTop: 6 }]}>No changes entered.</Text>
+        ) : (
+          changeOrder.lines.map((line) => (
+            <View key={line.id} style={{ marginTop: 8 }} wrap={false}>
+              <Text style={styles.descriptionTitle}>{line.label}</Text>
+              <Text style={styles.infoValue}>{detail('Description', line.description)}</Text>
+              <Text style={styles.infoValue}>{detail('Reason', line.reason)}</Text>
+              <Text style={styles.infoValue}>{moneyOrBlank('Amount', line.amount)}</Text>
+            </View>
+          ))
+        )}
+
+        <View style={{ marginTop: 16 }} wrap={false}>
+          <Text style={styles.infoValue}>{moneyOrBlank('Price adjustment', changeOrder.adjustment)}</Text>
+          <Text style={styles.infoValue}>{moneyOrBlank('Revised total', changeOrder.revisedTotal)}</Text>
+        </View>
+
+        <View style={styles.authorizationBox} wrap={false}>
+          <Text style={styles.authorizationHeading}>Customer authorization</Text>
+          <Text style={styles.authorizationText}>{changeOrder.authorization}</Text>
+          <View style={styles.signatureSection}>
+            <View style={styles.signatureColumn}>
+              <Text style={styles.windowSignatureLabel}>Customer signature</Text>
+              <View style={styles.windowSignatureLine} />
+              <Text style={styles.windowSignatureLabel}>Date</Text>
+              <View style={styles.windowSignatureLine} />
+            </View>
+            <View style={styles.signatureColumn}>
+              <Text style={styles.windowSignatureLabel}>Company representative</Text>
+              <View style={styles.windowSignatureLine} />
+              <Text style={styles.windowSignatureLabel}>Date</Text>
+              <View style={styles.windowSignatureLine} />
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
 }
 
 const ChangeOrderPDF: React.FC<ChangeOrderPDFProps> = ({
-  formData,
   companyInfo,
   clientInfo,
   changeOrderInfo,
+  changeOrder,
 }) => {
+  if (changeOrder) {
+    return <WindowChangeOrderPDF companyInfo={companyInfo} changeOrder={changeOrder} />;
+  }
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
