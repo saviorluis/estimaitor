@@ -156,6 +156,63 @@ test.describe('Final cleaning calculator (src/lib/estimator.ts)', () => {
     expect(e.estimatedHours).toBe(11); // (30 + 10x1.5 + 5x2) / 5 per hour
   });
 
+  test('one side halves window labor and leaves production hours unchanged', () => {
+    const counts = { numberOfWindows: 30, numberOfLargeWindows: 10, numberOfHighAccessWindows: 5 };
+    const both = calculateEstimate(form({ cleaningType: 'window_cleaning_only', ...counts, windowServiceSides: 'interior_exterior' }), NC_TAX);
+    const exterior = calculateEstimate(form({ cleaningType: 'window_cleaning_only', ...counts, windowServiceSides: 'exterior' }), NC_TAX);
+    const interior = calculateEstimate(form({ cleaningType: 'window_cleaning_only', ...counts, windowServiceSides: 'interior' }), NC_TAX);
+    expect(both.windowCleaningCost).toBe(1026);
+    expect(exterior.windowCleaningCost).toBe(513);
+    expect(interior.windowCleaningCost).toBe(513);
+    expect(exterior.estimatedHours).toBe(both.estimatedHours);
+    expect(interior.estimatedHours).toBe(11);
+    expect(exterior.travelCost).toBe(both.travelCost);
+    expect(exterior.schedulingFee).toBe(99);
+    expect(exterior.invoicingFee).toBe(99);
+  });
+
+  test('poor condition is 15% of window labor after the side factor and before the floor', () => {
+    const bothPoor = calculateEstimate(form({
+      cleaningType: 'window_cleaning_only',
+      windowServiceSides: 'interior_exterior',
+      windowCondition: 'poor',
+      numberOfWindows: 30,
+      numberOfLargeWindows: 10,
+      numberOfHighAccessWindows: 5,
+    }), NC_TAX);
+    expectMoney(bothPoor.windowCleaningCost, 1026 * 1.15);
+    expect(bothPoor.mobilizationFee).toBe(0);
+
+    const oneSidePoor = calculateEstimate(form({
+      cleaningType: 'window_cleaning_only',
+      windowServiceSides: 'exterior',
+      windowCondition: 'poor',
+      numberOfWindows: 5,
+    }), NC_TAX);
+    expectMoney(oneSidePoor.windowCleaningCost, 5 * 18 * 0.5 * 1.15);
+    expectMoney(oneSidePoor.mobilizationFee, 150 - 5 * 18 * 0.5 * 1.15);
+    expect(oneSidePoor.travelCost).toBe(100);
+  });
+
+  test('final cleaning window add-on ignores side and condition fields', () => {
+    const windows = { needsWindowCleaning: true, numberOfWindows: 10, numberOfLargeWindows: 4, numberOfHighAccessWindows: 2 };
+    const plain = calculateEstimate(form(windows), NC_TAX);
+    const tagged = calculateEstimate(form({ ...windows, windowServiceSides: 'exterior', windowCondition: 'poor' }), NC_TAX);
+    expectMoney(plain.windowCleaningCost, 10 * 18 + 4 * 18 * 1.6 + 2 * 18 * 2.2);
+    expect(tagged.windowCleaningCost).toBe(plain.windowCleaningCost);
+    expect(tagged.totalPrice).toBe(plain.totalPrice);
+    expect(tagged.estimatedHours).toBe(plain.estimatedHours);
+  });
+
+  test('pressure washing ignores window side and condition fields', () => {
+    const wash = { cleaningType: 'pressure_washing' as const, squareFootage: 0, pressureWashingArea: 1200, pressureWashingType: 'driveway' as const };
+    const plain = calculateEstimate(form(wash), NC_TAX);
+    const tagged = calculateEstimate(form({ ...wash, windowServiceSides: 'interior', windowCondition: 'poor', numberOfWindows: 20 }), NC_TAX);
+    expect(tagged.totalPrice).toBe(plain.totalPrice);
+    expect(tagged.windowCleaningCost).toBe(0);
+    expect(tagged.pressureWashingCost).toBe(plain.pressureWashingCost);
+  });
+
   test('home-state tax comes from Settings: OR (no sales tax) vs NC', () => {
     expect(getSalesTaxRate('NC')).toBe(0.07);
     expect(getSalesTaxRate('OR')).toBe(0);

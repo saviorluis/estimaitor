@@ -212,7 +212,7 @@ test.describe('Prospect Make Quote draft', () => {
     await expect(page.locator('#numberOfLargeWindows')).toHaveValue('8');
     await expect(page.locator('#numberOfHighAccessWindows')).toHaveValue('0');
     await expect(page.locator('#distanceFromOffice')).toHaveValue('12');
-    await expect(page.getByTestId('proposal-total').first()).toHaveText('$955.81');
+    await expect(page.getByTestId('proposal-total').first()).toHaveText('$669.22');
     await expect(page.getByText('Needs Pricing Approval')).toHaveCount(0);
   });
 
@@ -235,8 +235,8 @@ test.describe('Prospect Make Quote draft', () => {
 
   test('all three side selections issue a draft without a pricing-approval step', async ({ page }) => {
     for (const [prospect, sides, standard, total] of [
-      [EXTERIOR, 'Exterior Only', '12', '$955.81'],
-      [INTERIOR, 'Interior Only', '10', '$826.38'],
+      [EXTERIOR, 'Exterior Only', '12', '$669.22'],
+      [INTERIOR, 'Interior Only', '10', '$604.51'],
       [COMPLETE, 'Interior + Exterior', '18', '$872.61'],
     ] as const) {
       await seed(page, [prospect], prospect.id);

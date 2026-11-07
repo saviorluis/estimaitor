@@ -1,4 +1,4 @@
-import { FormData, EstimateData, CleaningType, ProjectType, PricingMethod } from './types';
+import { FormData, EstimateData, CleaningType, ProjectType, PricingMethod, WindowCondition, WindowServiceSides } from './types';
 import { 
   BASE_RATE_PER_SQFT, 
   BUILDING_SHELL_RATE_PER_SQFT,
@@ -159,6 +159,20 @@ function calculatePressureWashingCost(
 function calculateChimneyWashCost(needsChimneyWash: boolean, chimneyCount: number): number {
   if (!needsChimneyWash || !chimneyCount || chimneyCount <= 0) return 0;
   return chimneyCount * PRESSURE_WASHING_RATES.CHIMNEY_WASH;
+}
+
+/**
+ * Side and condition adjustments for standalone window cleaning.
+ * A missing side selection is both sides. A missing condition is Standard Condition.
+ * Final Cleaning and other callers keep the full rate from calculateWindowCleaningCost.
+ */
+export function standaloneWindowCleaningFactor(formData: {
+  windowServiceSides?: WindowServiceSides;
+  windowCondition?: WindowCondition;
+}): number {
+  const oneSide = formData.windowServiceSides === 'exterior' || formData.windowServiceSides === 'interior';
+  const poor = formData.windowCondition === 'poor';
+  return (oneSide ? 0.5 : 1) * (poor ? 1.15 : 1);
 }
 
 function calculateWindowCleaningCost(
@@ -438,7 +452,7 @@ export function calculateEstimate(formData: FormData, salesTaxRate: number = SAL
       numberOfWindows,
       numberOfLargeWindows,
       numberOfHighAccessWindows
-    );
+    ) * standaloneWindowCleaningFactor(formData);
   } else if (cleaningType === 'pressure_washing') {
     // For pressure washing only, use pressure washing area and no base price
     actualSquareFootage = pressureWashingArea || 0;

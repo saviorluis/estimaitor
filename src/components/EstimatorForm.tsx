@@ -56,6 +56,7 @@ const ESTIMATOR_DEFAULTS: FormData = {
   numberOfWindows: 0,
   numberOfLargeWindows: 0,
   numberOfHighAccessWindows: 0,
+  windowCondition: 'standard',
   numberOfDisplayCases: 0,
   truckStopIncludesFastFood: false,
   truckStopFastFoodSquareFootage: 0,
@@ -848,13 +849,35 @@ export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApp
                   ))}
                 </div>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Printed on the proposal. Pricing is per window and does not change with this choice yet.
+                  Interior + Exterior is the regular rate. Interior only or exterior only is half that rate. This choice is printed on the proposal.
                 </p>
                 {errors.windowServiceSides && (
                   <p id="windowServiceSides-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                     {errors.windowServiceSides.message}
                   </p>
                 )}
+              </fieldset>
+              <fieldset>
+                <legend className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Window Condition</legend>
+                <div className="space-y-2">
+                  {([
+                    ['standard', 'Standard Condition'],
+                    ['poor', 'Poor Condition'],
+                  ] as const).map(([value, label]) => (
+                    <label key={value} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="radio"
+                        value={value}
+                        {...register('windowCondition')}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Estimating only. The customer proposal shows the finished price and does not list this selection.
+                </p>
               </fieldset>
             </div>
           )}

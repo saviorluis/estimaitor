@@ -35,6 +35,9 @@ export type WindowServiceSides = 'exterior' | 'interior' | 'interior_exterior';
 
 export type WindowCustomerType = 'residential' | 'commercial';
 
+/** Internal window-cleaning estimate input. Absent means Standard Condition. */
+export type WindowCondition = 'standard' | 'poor';
+
 export type RoomType = 
   | 'bedroom'
   | 'bathroom'
@@ -90,6 +93,8 @@ export interface FormData {
   windowServiceSides?: WindowServiceSides;
   /** Window-cleaning jobs: drives scope wording and access assumptions. Absent on older saved estimates. */
   windowCustomerType?: WindowCustomerType;
+  /** Standalone window-cleaning jobs only. Absent means Standard Condition. Not printed on customer documents. */
+  windowCondition?: WindowCondition;
   
   // Project-Specific
   numberOfDisplayCases: number;

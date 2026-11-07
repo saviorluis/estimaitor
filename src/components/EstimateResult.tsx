@@ -143,14 +143,19 @@ export default function EstimateResult({ estimateData, formData, onNewEstimate }
             <div className="border-t mt-6 pt-4">
               <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-300">Internal Details</h3>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm" data-testid="internal-estimate-details">
-                {([
-                  ['Estimated Hours', `${formatHours(estimateData.estimatedHours)} hours`],
-                  ['Time to Complete', `${estimateData.timeToCompleteInDays} day(s)`],
-                  ['Distance', `${formData.distanceFromOffice} miles`],
-                  ['Urgency Level', `${formData.urgencyLevel}/10`],
-                  ['Cost Before Markup', formatCurrency(displayTotals.subtotal)],
-                  ['Business Overhead (20%)', formatCurrency(displayTotals.markup)],
-                ] as const).map(([label, value]) => (
+                {(
+                  [
+                    ['Estimated Hours', `${formatHours(estimateData.estimatedHours)} hours`],
+                    ['Time to Complete', `${estimateData.timeToCompleteInDays} day(s)`],
+                    ['Distance', `${formData.distanceFromOffice} miles`],
+                    ['Urgency Level', `${formData.urgencyLevel}/10`],
+                    ...(formData.cleaningType === 'window_cleaning_only'
+                      ? [['Window Condition', formData.windowCondition === 'poor' ? 'Poor Condition' : 'Standard Condition']]
+                      : []),
+                    ['Cost Before Markup', formatCurrency(displayTotals.subtotal)],
+                    ['Business Overhead (20%)', formatCurrency(displayTotals.markup)],
+                  ] as Array<[string, string]>
+                ).map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-3">
                     <dt className="text-gray-600 dark:text-gray-400">{label}</dt>
                     <dd className="font-medium text-gray-800 dark:text-gray-200">{value}</dd>

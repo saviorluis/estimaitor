@@ -1,4 +1,5 @@
 import { WINDOW_CLEANING } from '../../constants';
+import { standaloneWindowCleaningFactor } from '../../estimator';
 import type { WindowCustomerType, WindowServiceSides } from '../../types';
 import type { LineItemRule, ProposalJob, ProposalTokens, ServiceProposalTemplate, TemplateText } from '../types';
 
@@ -96,7 +97,7 @@ function tokens(job: ProposalJob): ProposalTokens {
 }
 
 const perWindowCost = (multiplier: number) => (n: number, job: ProposalJob) =>
-  n * WINDOW_CLEANING.COST_PER_WINDOW * multiplier * urgency(job);
+  n * WINDOW_CLEANING.COST_PER_WINDOW * multiplier * standaloneWindowCleaningFactor(job.formData) * urgency(job);
 
 const standardCost = perWindowCost(1);
 const largeCost = perWindowCost(WINDOW_CLEANING.LARGE_WINDOW_MULTIPLIER);
@@ -171,6 +172,7 @@ const lineItems: LineItemRule[] = [
 const scopeOfWork: TemplateText[] = [
   'Clean the glass of {windowTotal} ({breakdown}).',
   when('{sidesScope}', (job) => sides(job) !== null),
+  'Remove typical paint specks, adhesive, stickers, and construction residue from the glass being cleaned.',
   'Wipe down window sills that can be reached safely.',
   when('Use ladders or extension poles to reach the {highAccessPhrase} listed.', hasHighAccess),
   when('Place towels or drop cloths under each interior window to protect sills and floors.', includesInterior),
@@ -180,8 +182,7 @@ const scopeOfWork: TemplateText[] = [
 const excluded: TemplateText[] = [
   'Window screens and window tracks.',
   'Hard-water stain and mineral-deposit removal.',
-  'Paint, adhesive, sticker, and construction-debris removal.',
-  'Post-construction detailing.',
+  'Severe contamination, or residue that could damage the glass. Those conditions need a separate review before any work.',
   'Ladder, pole, or lift access for any window not listed as high-access.',
   'Repairs to glass, seals, frames, screens, or caulking.',
   when('Interior glass.', (job) => job.formData.windowServiceSides === 'exterior'),
@@ -191,6 +192,7 @@ const excluded: TemplateText[] = [
 const scopeOfWorkEs: TemplateText[] = [
   'Limpiar el vidrio de {windowTotalEs} ({breakdownEs}).',
   when('{sidesScopeEs}', (job) => sides(job) !== null),
+  'Retirar motas de pintura, adhesivo, calcomanías y residuos de construcción normales del vidrio que se limpia.',
   'Limpiar los alféizares que se puedan alcanzar de forma segura.',
   when('Usar escaleras o pértigas extensibles para las {highAccessPhraseEs} indicadas.', hasHighAccess),
   when('Colocar toallas o lonas debajo de cada ventana interior para proteger alféizares y pisos.', includesInterior),
@@ -200,8 +202,7 @@ const scopeOfWorkEs: TemplateText[] = [
 const excludedEs: TemplateText[] = [
   'Mosquiteros y rieles de ventanas.',
   'Eliminación de manchas de agua dura y depósitos minerales.',
-  'Eliminación de pintura, adhesivos, calcomanías y residuos de construcción.',
-  'Detallado de limpieza post-construcción.',
+  'Contaminación severa, o residuos que puedan dañar el vidrio. Esas condiciones requieren una revisión aparte antes de realizar el trabajo.',
   'Acceso con escalera, pértiga o elevador para ventanas que no estén indicadas como de difícil acceso.',
   'Reparaciones de vidrios, sellos, marcos, mosquiteros o masilla.',
   when('Vidrio interior.', (job) => job.formData.windowServiceSides === 'exterior'),

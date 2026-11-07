@@ -13,8 +13,10 @@ import type { FormData, WindowCustomerType, WindowServiceSides } from '../../src
 
 /**
  * Window-cleaning proposals. Expected dollar amounts are worked out by hand:
- * $18 standard, x1.6 large, x2.2 high-access, $100 travel (first-hour bucket), $99 scheduling,
- * $99 invoicing, $150 window-labor minimum (only the shortfall is charged), 20% markup, 7% NC tax.
+ * $18 standard, x1.6 large, x2.2 high-access for both sides. Interior only or exterior only
+ * is half that window labor. Poor condition then multiplies window labor by 1.15.
+ * $100 travel (first-hour bucket), $99 scheduling, $99 invoicing, $150 window-labor minimum
+ * (only the shortfall is charged, after side, condition, and urgency), 20% markup, 7% NC tax.
  */
 
 const NC_TAX = 0.07;
@@ -125,7 +127,7 @@ test.describe('Window-only pricing (src/lib/estimator.ts)', () => {
   });
 
   test('the $150 minimum charges only the shortfall in window labor', () => {
-    // 5 x $18 = $90 -> $60 minimum charge; 8 -> $144 -> $6; 9 -> $162 -> none
+    // No side selection is both sides: 5 x $18 = $90 -> $60; 8 -> $144 -> $6; 9 -> $162 -> none
     expect(calculateEstimate(form({ numberOfWindows: 5 }), NC_TAX).mobilizationFee).toBe(60);
     expect(calculateEstimate(form({ numberOfWindows: 8 }), NC_TAX).mobilizationFee).toBe(6);
     expect(calculateEstimate(form({ numberOfWindows: 9 }), NC_TAX).mobilizationFee).toBe(0);
@@ -159,9 +161,9 @@ test.describe('Window-only pricing (src/lib/estimator.ts)', () => {
 test.describe('Exterior Only jobs use the calculated price', () => {
   test('storefront: 12 standard + 8 large, no minimum charge', () => {
     const p = pricedProposal(STOREFRONT);
-    // T = 216 + 230.40 + 100 + 198 = 744.40; x1.2 = 893.28
-    expect(amountsById(p)).toEqual({ standard_windows: 259.2, large_windows: 276.48, travel_scheduling: 357.6 });
-    expect(p.amounts).toEqual({ subtotal: 893.28, taxRate: 0.07, salesTax: 62.53, total: 955.81 });
+    // Exterior labor is half: 108 + 115.20 + 100 + 198 = 521.20; x1.2 = 625.44
+    expect(amountsById(p)).toEqual({ standard_windows: 129.6, large_windows: 138.24, travel_scheduling: 357.6 });
+    expect(p.amounts).toEqual({ subtotal: 625.44, taxRate: 0.07, salesTax: 43.78, total: 669.22 });
     expect(p.projectFacts).toEqual([
       { label: 'Service', value: 'Window Cleaning' },
       { label: 'Customer Type', value: 'Commercial / Storefront' },
@@ -171,6 +173,7 @@ test.describe('Exterior Only jobs use the calculated price', () => {
     expect(p.scopeOfWork).toEqual([
       'Clean the glass of 20 windows (12 standard and 8 large).',
       'Clean the exterior side of each window only.',
+      'Remove typical paint specks, adhesive, stickers, and construction residue from the glass being cleaned.',
       'Wipe down window sills that can be reached safely.',
     ]);
     expect(p.excluded).toContain('Interior glass.');
@@ -178,14 +181,14 @@ test.describe('Exterior Only jobs use the calculated price', () => {
 
   test('mixed standard, large, and high-access windows', () => {
     const p = pricedProposal(MIXED_EXTERIOR);
-    // T = 396 + 115.20 + 237.60 + 100 + 198 = 1,046.80; x1.2 = 1,256.16
+    // Exterior labor is half: 198 + 57.60 + 118.80 + 100 + 198 = 672.40; x1.2 = 806.88
     expect(amountsById(p)).toEqual({
-      standard_windows: 475.2,
-      large_windows: 138.24,
-      high_access_windows: 285.12,
+      standard_windows: 237.6,
+      large_windows: 69.12,
+      high_access_windows: 142.56,
       travel_scheduling: 357.6,
     });
-    expect(p.amounts).toEqual({ subtotal: 1256.16, taxRate: 0.07, salesTax: 87.93, total: 1344.09 });
+    expect(p.amounts).toEqual({ subtotal: 806.88, taxRate: 0.07, salesTax: 56.48, total: 863.36 });
     expect(p.lineItems.find((i) => i.id === 'high_access_windows')).toMatchObject({
       quantity: 6,
       unit: 'windows',
@@ -196,10 +199,10 @@ test.describe('Exterior Only jobs use the calculated price', () => {
 
   test('a small job shows the minimum charge as its own line', () => {
     const p = pricedProposal(SMALL_JOB);
-    // T = 90 + 60 + 100 + 198 = 448; x1.2 = 537.60
+    // Exterior labor is $45, so the minimum shortfall is $105. The customer total stays $575.23.
     expect(p.lineItems.map((i) => [i.id, i.amount])).toEqual([
-      ['standard_windows', 108],
-      ['minimum_charge', 72],
+      ['standard_windows', 54],
+      ['minimum_charge', 126],
       ['travel_scheduling', 357.6],
     ]);
     expect(p.lineItems[1].description).toBe('Minimum service charge');
@@ -272,8 +275,14 @@ test.describe('Service sides and customer type: all six combinations', () => {
         expect(assumptions.includes('pets')).toBe(customer === 'residential');
         expect(assumptions.includes('business hours')).toBe(customer === 'commercial');
 
-        // Sides change the stated scope only. Per-window rates stay the same until a rate is approved.
-        expect(p.amounts.total).toBe(pricedProposal(form({ numberOfWindows: 10, numberOfHighAccessWindows: 2 })).amounts.total);
+        const fullRate = pricedProposal(form({ numberOfWindows: 10, numberOfHighAccessWindows: 2 }));
+        if (sides === 'interior_exterior') {
+          expect(p.amounts.total).toBe(fullRate.amounts.total);
+        } else {
+          expect(amountsById(p).standard_windows).toBe(amountsById(fullRate).standard_windows / 2);
+          expect(amountsById(p).high_access_windows).toBe(amountsById(fullRate).high_access_windows / 2);
+          expect(amountsById(p).travel_scheduling).toBe(amountsById(fullRate).travel_scheduling);
+        }
         expect(p.lineItems.filter((i) => i.quantity).map((i) => [i.id, i.quantity])).toEqual([
           ['standard_windows', 10],
           ['high_access_windows', 2],
@@ -320,7 +329,7 @@ test.describe('Window-cleaning proposal text', () => {
 
   test('priority urgency is stated and its cost stays inside the window and travel lines', () => {
     const p = proposalFor({ ...STOREFRONT, urgencyLevel: 7 });
-    expect(amountsById(p).standard_windows).toBeCloseTo(216 * 1.24 * 1.2, 2);
+    expect(amountsById(p).standard_windows).toBeCloseTo(108 * 1.24 * 1.2, 2);
     expect(p.scopeOfWork).toContain('Priority scheduling (urgency level 7/10) is included in this price.');
     expect(p.projectFacts).toContainEqual({ label: 'Scheduling', value: 'Priority (level 7/10)' });
   });
@@ -334,6 +343,9 @@ test.describe('Window-cleaning proposal text', () => {
     expect(p.crew.es.serviceLabel).toBe('Limpieza de Ventanas');
     expect(p.crew.es.scopeOfWork[0]).toBe('Limpiar el vidrio de 32 ventanas (22 estándar, 4 grandes y 6 de difícil acceso).');
     expect(p.crew.es.facts).toContainEqual({ label: 'Lados', value: 'Solo exterior' });
+    expect(p.crew.es.scopeOfWork).toContain('Retirar motas de pintura, adhesivo, calcomanías y residuos de construcción normales del vidrio que se limpia.');
+    expect(p.crew.es.excluded).toContain('Contaminación severa, o residuos que puedan dañar el vidrio. Esas condiciones requieren una revisión aparte antes de realizar el trabajo.');
+    expect(p.excluded).not.toContain('Paint, adhesive, sticker, and construction-debris removal.');
     expect(p.crew.es.sections.map((s) => s.title)).toEqual(['Revisión de Calidad']);
   });
 
@@ -345,6 +357,78 @@ test.describe('Window-cleaning proposal text', () => {
     expect(formatProposalTerms(p.terms).split('\n')[0]).toMatch(/^1\. Payment: Payment is due on completion\./);
     expect(p.invoicePaymentTerms).toContain('within 15 days of the invoice date');
     expect(p.missingInputs).toEqual([]);
+  });
+});
+
+test.describe('One side and poor condition', () => {
+  test('one side is half the window labor and leaves travel and fees unchanged', () => {
+    const both = pricedProposal(form({
+      windowServiceSides: 'interior_exterior',
+      numberOfWindows: 12,
+      numberOfLargeWindows: 8,
+      numberOfHighAccessWindows: 3,
+    }));
+    for (const sides of ['exterior', 'interior'] as const) {
+      const one = pricedProposal(form({
+        windowServiceSides: sides,
+        numberOfWindows: 12,
+        numberOfLargeWindows: 8,
+        numberOfHighAccessWindows: 3,
+      }));
+      expect(amountsById(one).standard_windows).toBe(amountsById(both).standard_windows / 2);
+      expect(amountsById(one).large_windows).toBe(amountsById(both).large_windows / 2);
+      expect(amountsById(one).high_access_windows).toBe(amountsById(both).high_access_windows / 2);
+      expect(amountsById(one).travel_scheduling).toBe(amountsById(both).travel_scheduling);
+      expect(one.amounts.total).not.toBe(both.amounts.total);
+    }
+  });
+
+  test('poor condition adds 15% to window labor only, after the side factor', () => {
+    const standard = pricedProposal(STOREFRONT);
+    const poor = pricedProposal({ ...STOREFRONT, windowCondition: 'poor' });
+    // Exterior labor 223.20 x 1.15 = 256.68; + 298 fees = 554.68; x1.2 = 665.62
+    expect(amountsById(poor)).toEqual({ standard_windows: 149.04, large_windows: 158.98, travel_scheduling: 357.6 });
+    expect(poor.amounts).toEqual({ subtotal: 665.62, taxRate: 0.07, salesTax: 46.59, total: 712.21 });
+    expect(amountsById(poor).travel_scheduling).toBe(amountsById(standard).travel_scheduling);
+    expect(calculateEstimate({ ...STOREFRONT, windowCondition: 'poor' }, NC_TAX).mobilizationFee).toBe(0);
+  });
+
+  test('the $150 floor hides poor condition until adjusted labor passes $150', () => {
+    const five = form({ windowServiceSides: 'interior_exterior', numberOfWindows: 5 });
+    const standard = pricedProposal(five);
+    const poor = pricedProposal({ ...five, windowCondition: 'poor' });
+    expect(calculateEstimate({ ...five, windowCondition: 'poor' }, NC_TAX).mobilizationFee).toBeCloseTo(46.5, 6);
+    expect(poor.amounts.total).toBe(standard.amounts.total);
+    expect(poor.amounts.total).toBe(575.23);
+
+    const eight = form({ windowServiceSides: 'interior_exterior', numberOfWindows: 8 });
+    const released = pricedProposal({ ...eight, windowCondition: 'poor' });
+    // 8 x $18 x 1.15 = $165.60, so the floor no longer applies.
+    expect(calculateEstimate({ ...eight, windowCondition: 'poor' }, NC_TAX).mobilizationFee).toBe(0);
+    expect(amountsById(released)).toEqual({ standard_windows: 198.72, travel_scheduling: 357.6 });
+    expect(released.amounts).toEqual({ subtotal: 556.32, taxRate: 0.07, salesTax: 38.94, total: 595.26 });
+  });
+
+  test('urgency still multiplies the adjusted window labor before the floor', () => {
+    const poorSmall = form({ windowServiceSides: 'exterior', windowCondition: 'poor', numberOfWindows: 5, urgencyLevel: 7 });
+    // 5 x $9 x 1.15 x 1.24 = $64.17; shortfall $85.83
+    expect(calculateEstimate(poorSmall, NC_TAX).windowCleaningCost).toBeCloseTo(51.75, 6);
+    expect(calculateEstimate(poorSmall, NC_TAX).mobilizationFee).toBeCloseTo(85.83, 6);
+    const priced = pricedProposal(poorSmall);
+    expect(priced.lineItems.map((item) => item.id)).not.toContain('additional_services');
+    expect(priced.amounts.total).toBe(getQuoteDocumentAmounts(poorSmall, calculateEstimate(poorSmall, NC_TAX)).finalTotal);
+  });
+
+  test('the customer proposal shows the adjusted price without the internal condition', () => {
+    const poor = proposalFor({ ...STOREFRONT, windowCondition: 'poor' });
+    const text = allText(poor);
+    expect(poor.scopeOfWork).toContain('Remove typical paint specks, adhesive, stickers, and construction residue from the glass being cleaned.');
+    expect(poor.excluded).toContain('Severe contamination, or residue that could damage the glass. Those conditions need a separate review before any work.');
+    expect(text).not.toMatch(/Poor Condition|Standard Condition|Window Condition|surcharge/i);
+    expect(text).not.toMatch(/15%/);
+    expect(poor.lineItems.map((item) => item.description).join(' ')).not.toMatch(/condition|surcharge/i);
+    expect(poor.projectFacts.map((fact) => fact.label)).not.toContain('Window Condition');
+    expect(poor.amounts.total).toBe(712.21);
   });
 });
 
@@ -368,6 +452,7 @@ test.describe('Saved estimates from before the window template', () => {
       ['high_access_windows', 5],
     ]);
     expect(p.amounts.total).toBeGreaterThan(0);
+    expect(calculateEstimate(legacy, NC_TAX).windowCleaningCost).toBe(1026);
     expect(p.missingInputs).toEqual([
       'Service sides (Exterior Only, Interior Only, or Interior + Exterior)',
       'Customer type (Residential or Commercial / Storefront)',

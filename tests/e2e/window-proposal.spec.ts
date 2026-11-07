@@ -13,9 +13,9 @@ import { extractPdfText } from '../helpers/pdfText';
 /**
  * Window-cleaning jobs drive every document from the Window Cleaning proposal template.
  * Expected amounts are hand-computed from the pricing constants (NC 7% tax, 20% markup):
- * per window $18 / $28.80 / $39.60 before markup, $150 window-labor minimum (shortfall only),
- * $100 hourly travel + $99 scheduling + $99 invoicing.
- * Service sides change the stated scope. Per-window rates do not change with this choice yet.
+ * both sides $18 / $28.80 / $39.60 before markup. Interior only or exterior only is half that
+ * window labor. $150 window-labor minimum (shortfall only), $100 hourly travel + $99 scheduling
+ * + $99 invoicing. Window condition is internal and is not printed on these documents.
  */
 
 type Sides = 'Exterior Only' | 'Interior Only' | 'Interior + Exterior';
@@ -52,13 +52,13 @@ const STOREFRONT_EXTERIOR: PricedJob = {
   highAccess: 0,
   miles: 12,
   lines: [
-    ['Standard windows', '$259.20'],
-    ['Large windows', '$276.48'],
+    ['Standard windows', '$129.60'],
+    ['Large windows', '$138.24'],
     ['Travel and scheduling', '$357.60'],
   ],
-  subtotal: '$893.28',
-  tax: '$62.53',
-  total: '$955.81',
+  subtotal: '$625.44',
+  tax: '$43.78',
+  total: '$669.22',
 };
 
 const MIXED_HIGH_ACCESS: PricedJob = {
@@ -70,14 +70,14 @@ const MIXED_HIGH_ACCESS: PricedJob = {
   highAccess: 6,
   miles: 25,
   lines: [
-    ['Standard windows', '$475.20'],
-    ['Large windows', '$138.24'],
-    ['High-access windows', '$285.12'],
+    ['Standard windows', '$237.60'],
+    ['Large windows', '$69.12'],
+    ['High-access windows', '$142.56'],
     ['Travel and scheduling', '$357.60'],
   ],
-  subtotal: '$1,256.16',
-  tax: '$87.93',
-  total: '$1,344.09',
+  subtotal: '$806.88',
+  tax: '$56.48',
+  total: '$863.36',
 };
 
 const SMALL_JOB: PricedJob = {
@@ -89,8 +89,8 @@ const SMALL_JOB: PricedJob = {
   highAccess: 0,
   miles: 10,
   lines: [
-    ['Standard windows', '$108.00'],
-    ['Minimum service charge', '$72.00'],
+    ['Standard windows', '$54.00'],
+    ['Minimum service charge', '$126.00'],
     ['Travel and scheduling', '$357.60'],
   ],
   subtotal: '$537.60',
@@ -125,14 +125,14 @@ const INTERIOR_ONLY_STOREFRONT: PricedJob = {
   highAccess: 2,
   miles: 8,
   lines: [
-    ['Standard windows', '$216.00'],
-    ['Large windows', '$103.68'],
-    ['High-access windows', '$95.04'],
+    ['Standard windows', '$108.00'],
+    ['Large windows', '$51.84'],
+    ['High-access windows', '$47.52'],
     ['Travel and scheduling', '$357.60'],
   ],
-  subtotal: '$772.32',
-  tax: '$54.06',
-  total: '$826.38',
+  subtotal: '$564.96',
+  tax: '$39.55',
+  total: '$604.51',
 };
 
 async function fillWindowJob(page: Page, job: WindowJob) {
@@ -189,6 +189,7 @@ function expectNoLeakedContent(entry: ZipEntry) {
   expect(text, entry.name).not.toContain('window_cleaning_only');
   expect(text, entry.name).not.toMatch(/sq\.? ?ft|square f(oo|ee)t|pies cuadrados|Área Total/i);
   expect(text, entry.name).not.toMatch(/POST CONSTRUCTION|post-construction clean/i);
+  expect(text, entry.name).not.toMatch(/Poor Condition|Standard Condition|Window Condition|surcharge/i);
   expect(text, entry.name).not.toMatch(/Detail clean conference rooms|workstations|restroom/i);
   expect(text, entry.name).not.toMatch(/punch[- ]list|lista de pendientes/i);
   expect(text, entry.name).not.toMatch(/Project Type|Tipo de Proyecto/);
@@ -202,6 +203,8 @@ async function expectPricedSummary(page: Page, job: PricedJob) {
     await expect(summary.getByRole('row', { name: new RegExp(label) })).toContainText(amount);
   }
   await expect(page.getByTestId('proposal-total').first()).toContainText(job.total);
+  await expect(summary).not.toContainText(/Poor Condition|Standard Condition|Window Condition|surcharge/i);
+  await expect(page.getByTestId('internal-estimate-details')).toContainText('Standard Condition');
   await expect(summary).not.toContainText(/sq ft|square f(oo|ee)t/i);
   await expect(page.getByTestId('internal-estimate-details')).not.toContainText(/sq ft|square f(oo|ee)t|Project Type/i);
 }
@@ -230,6 +233,8 @@ async function issuePackage(page: Page, job: PricedJob, outputPath: (name: strin
   expect(flat(quote)).toContain(`Sides Cleaned: ${job.sides}`);
   expect(flat(quote)).toContain('Not Included Unless Separately Selected and Priced');
   expect(flat(quote)).toContain('Window screens and window tracks.');
+  expect(flat(quote)).toContain('typical paint specks, adhesive, stickers, and construction residue');
+  expect(flat(quote)).toContain('Severe contamination');
   for (const doc of [quote, invoice]) {
     for (const [label, amount] of job.lines) {
       expect(flat(doc), `${doc.name} ${label}`).toContain(label);
@@ -260,6 +265,8 @@ async function issuePackage(page: Page, job: PricedJob, outputPath: (name: strin
   expect(spanish).toContain('Limpieza de Ventanas');
   expect(spanish).toContain('Revisión de Calidad');
   expect(spanish).toContain(SIDES_ES[job.sides]);
+  expect(spanish).toContain('residuos de construcción normales');
+  expect(spanish).toContain('Contaminación severa');
   expect(spanish).toContain(`(${job.standard + job.large + job.highAccess} en total)`);
 
   const changeOrder = flat(byName('Change Order.pdf'));
@@ -304,7 +311,7 @@ test.describe('Window Cleaning: Exterior Only uses the calculated price', () => 
 });
 
 test.describe('Window Cleaning: Interior and Interior + Exterior use the calculated price', () => {
-  test('standard residential job: both sides stated, same per-window rates', async ({ page }, testInfo) => {
+  test('standard residential job: both sides keep the regular rate', async ({ page }, testInfo) => {
     await calculate(page, STANDARD_RESIDENTIAL);
     await expectPricedSummary(page, STANDARD_RESIDENTIAL);
     const entries = await issuePackage(page, STANDARD_RESIDENTIAL, (n) => testInfo.outputPath(n));
@@ -375,6 +382,35 @@ test.describe('Window Cleaning: form and saved entries', () => {
     expect(quote).toContain('High-access windows');
     expect(quote).not.toMatch(/Exterior Only|Interior Only|Interior \+ Exterior|Sides Cleaned/);
     entries.forEach(expectNoLeakedContent);
+  });
+});
+
+test.describe('Window condition stays off the customer proposal', () => {
+  test('poor condition changes the window price and appears only in internal details', async ({ page }) => {
+    await openEstimator(page);
+    await fillWindowJob(page, STOREFRONT_EXTERIOR);
+    await page.getByRole('radio', { name: 'Poor Condition' }).check();
+    await page.getByRole('button', { name: 'Calculate Estimate' }).click();
+
+    const summary = page.getByTestId('proposal-summary').first();
+    await expect(summary.getByRole('row', { name: /Standard windows/ })).toContainText('$149.04');
+    await expect(summary.getByRole('row', { name: /Large windows/ })).toContainText('$158.98');
+    await expect(summary.getByRole('row', { name: /Travel and scheduling/ })).toContainText('$357.60');
+    await expect(page.getByTestId('proposal-total').first()).toContainText('$712.21');
+    await expect(summary).toContainText('Exterior Only');
+    await expect(summary).not.toContainText(/Poor Condition|Standard Condition|Window Condition|surcharge|15%/i);
+    await expect(page.getByTestId('internal-estimate-details')).toContainText('Poor Condition');
+
+    await page.getByRole('button', { name: 'Generate Quote' }).click();
+    const entries = await readZipDownload(await downloadPackage(page, 'Download Package'));
+    entries.forEach(expectNoLeakedContent);
+    const quote = flat(entries.find((entry) => entry.name === 'quote.pdf')!);
+    expect(quote).toContain('$712.21');
+    expect(quote).toContain('$149.04');
+    expect(quote).toContain('Exterior Only');
+    expect(quote).toContain('typical paint specks, adhesive, stickers, and construction residue');
+    expect(quote).toContain('Severe contamination');
+    expect(quote).not.toMatch(/Poor Condition|Standard Condition|Window Condition|surcharge/i);
   });
 });
 
