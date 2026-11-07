@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import {
   readZipDownload,
+  readPdfDownload,
   expectValidPdf,
   openEstimator,
   switchMode,
@@ -262,14 +263,15 @@ async function issuePackage(page: Page, job: PricedJob, outputPath: (name: strin
   expect(spanish).toContain(`(${job.standard + job.large + job.highAccess} en total)`);
 
   const changeOrder = flat(byName('Change Order.pdf'));
-  expect(changeOrder).toContain('Proposed Change — Pending Customer Authorization');
-  expect(changeOrder).toContain(`Sides cleaned: ${job.sides}`);
-  expect(changeOrder).toContain(windowsFact!);
-  expect(changeOrder).toContain(`Original proposal total: ${job.total}`);
-  expect(changeOrder).toContain('No changes entered.');
-  expect(changeOrder).toContain('not authorized until the customer signs');
-  expect(changeOrder).not.toMatch(/Price adjustment:\s*\$/);
-  expect(changeOrder).not.toMatch(/Revised total:\s*\$/);
+  expect(changeOrder).toContain('CHANGE ORDER');
+  expect(changeOrder).toContain('Description of additional work or reason for change');
+  expect(changeOrder).toContain('Additional cost');
+  expect(changeOrder).toContain('Revised contract total');
+  expect(changeOrder).toContain('Customer approval');
+  expect(changeOrder).toContain('Date of approval');
+  expect(changeOrder).not.toContain(job.total);
+  expect(changeOrder).not.toContain('Price adjustment');
+  expect(changeOrder).not.toContain('Proposed Change');
 
   return entries;
 }
@@ -377,124 +379,50 @@ test.describe('Window Cleaning: form and saved entries', () => {
 });
 
 test.describe('Window Cleaning change order', () => {
-  test('typed changes revise only the change order and leave the quote total alone', async ({ page }) => {
+  test('preview and the package share one blank form and leave the quote total alone', async ({ page }) => {
     await calculate(page, STOREFRONT_EXTERIOR);
     await expectPricedSummary(page, STOREFRONT_EXTERIOR);
     await page.getByRole('button', { name: 'Generate Quote' }).click();
     await expect(page.getByTestId('adjusted-quote-total')).toContainText(STOREFRONT_EXTERIOR.total);
+    await expect(page.getByTestId('change-order-editor')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Add change' })).toHaveCount(0);
 
     await page.locator('input[name="name"]').fill('Dana Oak');
     await page.locator('input[name="projectAddress"]').fill('100 Main St, High Point, NC 27260');
     const quoteNumber = await page.locator('input[name="quoteNumber"]').inputValue();
 
-    const editor = page.getByTestId('change-order-editor');
-    await page.getByRole('button', { name: 'Add change' }).click();
-    await page.getByRole('button', { name: 'Add change' }).click();
-    await editor.getByLabel('Description').nth(0).fill('Extra pane above the door');
-    await editor.getByLabel('Reason').nth(0).fill('Customer asked for it');
-    await editor.getByLabel('Amount').nth(0).fill('100');
-    await editor.getByLabel('Change type').nth(1).selectOption('removal');
-    await editor.getByLabel('Description').nth(1).fill('Skip the tracks');
-    await editor.getByLabel('Reason').nth(1).fill('Tracks are not part of this visit');
-    await editor.getByLabel('Amount').nth(1).fill('40');
-
-    await expect(page.getByTestId('change-order-totals')).toContainText('Price adjustment $60.00');
-    await expect(page.getByTestId('change-order-totals')).toContainText('Revised total $1,015.81');
-    await expect(page.getByTestId('adjusted-quote-total')).toContainText(STOREFRONT_EXTERIOR.total);
-    await expect(page.getByTestId('adjusted-quote-total')).not.toContainText('$1,015.81');
-    await expect(page.getByTestId('change-order-authorization')).toContainText('Proposed Change — Pending Customer Authorization');
-    await expect(page.getByTestId('change-order-authorization')).toContainText('Additional work is not authorized until the customer signs below.');
-
-    const pricedPhrases = [
-      'Proposed Change — Pending Customer Authorization',
-      `Proposal: ${quoteNumber}`,
-      'Client: Dana Oak',
-      'Property address: 100 Main St, High Point, NC 27260',
-      'Sides cleaned: Exterior Only',
-      'Description: Extra pane above the door',
-      'Reason: Customer asked for it',
-      'Removal',
-      'Description: Skip the tracks',
-      'Amount: $100.00',
-      'Amount: -$40.00',
-      'Price adjustment: $60.00',
-      'Revised total: $1,015.81',
-      `Original proposal total: ${STOREFRONT_EXTERIOR.total}`,
-      'Customer authorization',
-      'Customer signature',
-      'Company representative',
+    const phrases = [
+      'CHANGE ORDER',
+      `Original proposal: ${quoteNumber}`,
+      'Dana Oak',
+      '100 Main St, High Point, NC 27260',
+      'Description of additional work or reason for change',
+      'Additional cost',
+      'Revised contract total',
+      'Customer approval',
+      'Date of approval',
       'not authorized until the customer signs',
     ];
-    const pricedPreview = await previewChangeOrderText(page);
-    const priced = await readZipDownload(await downloadPackage(page, 'Download Package'));
-    const pricedChange = flat(priced.find((entry) => entry.name.endsWith('Change Order.pdf'))!);
-    for (const phrase of pricedPhrases) {
-      expect(pricedPreview, phrase).toContain(phrase);
-      expect(pricedChange, phrase).toContain(phrase);
+    const preview = await previewChangeOrderText(page);
+    const individualPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Download Change Order' }).click();
+    const individual = await readPdfDownload(await individualPromise);
+    const individualText = flat(individual);
+    const packed = await readZipDownload(await downloadPackage(page, 'Download Package'));
+    const packedChange = flat(packed.find((entry) => entry.name.endsWith('Change Order.pdf'))!);
+    expect(individual.name).toBe(packed.find((entry) => entry.name.endsWith('Change Order.pdf'))!.name);
+    for (const phrase of phrases) {
+      expect(preview, phrase).toContain(phrase);
+      expect(individualText, phrase).toContain(phrase);
+      expect(packedChange, phrase).toContain(phrase);
     }
-    expect(flat(priced.find((entry) => entry.name === 'quote.pdf')!)).toContain(STOREFRONT_EXTERIOR.total);
-    expect(flat(priced.find((entry) => entry.name === 'quote.pdf')!)).not.toContain('$1,015.81');
-
-    await page.getByRole('button', { name: 'Add change' }).click();
-    await editor.getByLabel('Change type').nth(2).selectOption('scope_change');
-    await editor.getByLabel('Description').nth(2).fill('Confirm the side door');
-    await editor.getByLabel('Reason').nth(2).fill('Added on site');
-    await expect(page.getByTestId('change-order-totals')).toContainText('stay blank');
-    await expect(page.getByTestId('adjusted-quote-total')).toContainText(STOREFRONT_EXTERIOR.total);
-
-    const incomplete = await readZipDownload(await downloadPackage(page, 'Download Package'));
-    const incompleteChange = flat(incomplete.find((entry) => entry.name.endsWith('Change Order.pdf'))!);
-    expect(incompleteChange).toContain('Scope change');
-    expect(incompleteChange).toContain('Description: Confirm the side door');
-    expect(incompleteChange).not.toMatch(/Price adjustment:\s*\$/);
-    expect(incompleteChange).not.toMatch(/Revised total:\s*\$/);
-    expect(flat(incomplete.find((entry) => entry.name === 'quote.pdf')!)).toContain(STOREFRONT_EXTERIOR.total);
-    expect(flat(incomplete.find((entry) => entry.name === 'quote.pdf')!)).not.toContain('$1,015.81');
-
-    await editor.getByRole('button', { name: 'Remove change 3' }).click();
-    await expect(editor.getByRole('group', { name: 'Change 3' })).toHaveCount(0);
-    await editor.getByLabel('Amount').nth(0).fill('80');
-    await expect(page.getByTestId('change-order-totals')).toContainText('Price adjustment $40.00');
-    await expect(page.getByTestId('change-order-totals')).toContainText('Revised total $995.81');
-    await expect(page.getByTestId('adjusted-quote-total')).toContainText(STOREFRONT_EXTERIOR.total);
-    await expect(page.getByTestId('adjusted-quote-total')).not.toContainText('$995.81');
-
-    const editedPhrases = [
-      'Description: Extra pane above the door',
-      'Description: Skip the tracks',
-      'Amount: $80.00',
-      'Amount: -$40.00',
-      'Price adjustment: $40.00',
-      'Revised total: $995.81',
-      `Original proposal total: ${STOREFRONT_EXTERIOR.total}`,
-    ];
-    const editedPreview = await previewChangeOrderText(page);
-    const edited = await readZipDownload(await downloadPackage(page, 'Download Package'));
-    const editedChange = flat(edited.find((entry) => entry.name.endsWith('Change Order.pdf'))!);
-    for (const phrase of editedPhrases) {
-      expect(editedPreview, phrase).toContain(phrase);
-      expect(editedChange, phrase).toContain(phrase);
-    }
-    expect(editedPreview).not.toContain('Confirm the side door');
-    expect(editedChange).not.toContain('Confirm the side door');
-    expect(editedPreview).not.toContain('$1,015.81');
-    expect(editedChange).not.toContain('$1,015.81');
-    expect(flat(edited.find((entry) => entry.name === 'quote.pdf')!)).toContain(STOREFRONT_EXTERIOR.total);
-    expect(flat(edited.find((entry) => entry.name === 'quote.pdf')!)).not.toContain('$995.81');
-
-    await editor.getByRole('button', { name: 'Remove change 2' }).click();
-    await expect(page.getByTestId('change-order-totals')).toContainText('Price adjustment $80.00');
-    await expect(page.getByTestId('change-order-totals')).toContainText('Revised total $1,035.81');
-    const removed = await readZipDownload(await downloadPackage(page, 'Download Package'));
-    const removedChange = flat(removed.find((entry) => entry.name.endsWith('Change Order.pdf'))!);
-    expect(removedChange).toContain('Description: Extra pane above the door');
-    expect(removedChange).toContain('Amount: $80.00');
-    expect(removedChange).toContain('Price adjustment: $80.00');
-    expect(removedChange).toContain('Revised total: $1,035.81');
-    expect(removedChange).not.toContain('Skip the tracks');
-    expect(removedChange).not.toContain('-$40.00');
-    expect(flat(removed.find((entry) => entry.name === 'quote.pdf')!)).toContain(STOREFRONT_EXTERIOR.total);
-    expect(flat(removed.find((entry) => entry.name === 'quote.pdf')!)).not.toContain('$1,035.81');
+    expect(preview).not.toContain(STOREFRONT_EXTERIOR.total);
+    expect(individualText).not.toContain(STOREFRONT_EXTERIOR.total);
+    expect(packedChange).not.toContain(STOREFRONT_EXTERIOR.total);
+    expect(preview).not.toMatch(/\$\d/);
+    expect(individualText).not.toMatch(/\$\d/);
+    expect(packedChange).not.toMatch(/\$\d/);
+    expect(flat(packed.find((entry) => entry.name === 'quote.pdf')!)).toContain(STOREFRONT_EXTERIOR.total);
   });
 });
 

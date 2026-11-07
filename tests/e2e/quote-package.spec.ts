@@ -19,6 +19,7 @@ test.describe('Final Cleaning mode: estimate -> quote -> ZIP package', () => {
     await page.getByRole('button', { name: 'Generate Quote' }).click();
     await expect(page.getByRole('button', { name: 'Download Package' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Preview Change Order' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Download Change Order' })).toHaveCount(0);
     await expect(page.getByTestId('change-order-editor')).toHaveCount(0);
 
     const download = await downloadPackage(page, 'Download Package');
@@ -97,6 +98,7 @@ test.describe('Pressure Washing mode: estimate -> four-document wash package', (
 
     await page.getByRole('button', { name: 'Generate Quote' }).click();
     await expect(page.getByRole('button', { name: 'Preview Change Order' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Download Change Order' })).toHaveCount(0);
     await expect(page.getByTestId('change-order-editor')).toHaveCount(0);
     const download = await downloadPackage(page, 'Download Package (Quote, WO, PO, Invoice)');
     const entries = await readZipDownload(download);

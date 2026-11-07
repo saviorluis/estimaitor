@@ -1,9 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { FormData } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
 import { isUsableImageSrc } from '@/lib/companySettings';
-import type { ChangeOrderDocument } from '@/lib/proposals';
 
 // Register fonts
 Font.register({
@@ -159,41 +157,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: 'flex-start'
   },
-  pendingStatus: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#9A3412',
-    marginTop: 8,
-    textAlign: 'right',
+  writingArea: {
+    minHeight: 120,
   },
-  authorizationBox: {
-    marginTop: 18,
-    borderWidth: 1.5,
-    borderColor: '#9A3412',
-    backgroundColor: '#FFF7ED',
-    padding: 12,
+  blankAmountRow: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
   },
-  authorizationHeading: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#9A3412',
-    marginBottom: 6,
-  },
-  authorizationText: {
-    fontSize: 12,
-    lineHeight: 1.4,
-    marginBottom: 4,
-  },
-  windowSignatureLabel: {
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  windowSignatureLine: {
+  blankAmountLine: {
     borderBottomWidth: 1,
     borderBottomColor: '#000000',
-    marginTop: 26,
-    marginBottom: 8,
-    width: '100%',
+    width: 160,
+    marginLeft: 12,
   },
 });
 
@@ -221,91 +198,96 @@ interface ChangeOrderPDFProps {
     projectName: string;
     projectAddress: string;
   };
-  /** Window Cleaning proposal change. Omitted for the legacy blank form. */
-  changeOrder?: ChangeOrderDocument | null;
 }
 
-function moneyOrBlank(label: string, amount: number | null): string {
-  return amount === null ? `${label}:` : `${label}: ${formatCurrency(amount)}`;
+function written(value: string): string {
+  return value.trim() || ' ';
 }
 
-function WindowChangeOrderPDF({
+/** Blank Window Cleaning form. Identity is printed; the owner writes the change and the price. */
+function WindowBlankChangeOrder({
   companyInfo,
-  changeOrder,
-}: {
-  companyInfo: ChangeOrderPDFProps['companyInfo'];
-  changeOrder: ChangeOrderDocument;
-}) {
-  const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png';
-  const detail = (label: string, value: string) => (value ? `${label}: ${value}` : `${label}:`);
-
+  clientInfo,
+  changeOrderInfo,
+}: Omit<ChangeOrderPDFProps, 'formData'>) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.companyInfo}>
-            <Image src={logoSrc} style={{ width: 64, height: 64, objectFit: 'contain' }} />
+            <View style={styles.companyHeader}>
+              <View style={styles.logoContainer}>
+                <Image src={isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : '/assets/logo.png'} style={styles.logo} />
+              </View>
+            </View>
             <Text style={styles.companyName}>{companyInfo.name}</Text>
             <Text style={styles.companyDetails}>{companyInfo.address}</Text>
             <Text style={styles.companyDetails}>{companyInfo.city}</Text>
-            <Text style={styles.companyDetails}>{companyInfo.phone} | {companyInfo.email}</Text>
+            <Text style={styles.companyDetails}>Phone: {companyInfo.phone}</Text>
+            <Text style={styles.companyDetails}>Email: {companyInfo.email}</Text>
+            <Text style={styles.companyDetails}>{companyInfo.website}</Text>
           </View>
           <View style={styles.changeOrderInfo}>
             <Text style={styles.changeOrderTitle}>CHANGE ORDER</Text>
-            <Text style={styles.pendingStatus}>{changeOrder.statusLabel}</Text>
+            <Text style={styles.changeOrderDetails}>Original proposal: {changeOrderInfo.orderNumber}</Text>
+            <Text style={styles.changeOrderDetails}>Date: {changeOrderInfo.date}</Text>
           </View>
         </View>
 
-        <Text style={styles.subtitle}>Original proposal</Text>
-        <Text style={styles.infoValue}>{detail('Proposal', changeOrder.quoteNumber)}</Text>
-        <Text style={styles.infoValue}>{detail('Date', changeOrder.date)}</Text>
-        <Text style={styles.infoValue}>{detail('Client', changeOrder.clientName)}</Text>
-        <Text style={styles.infoValue}>{detail('Company', changeOrder.clientCompany)}</Text>
-        <Text style={styles.infoValue}>{detail('Phone', changeOrder.clientPhone)}</Text>
-        <Text style={styles.infoValue}>{detail('Email', changeOrder.clientEmail)}</Text>
-        <Text style={styles.infoValue}>{detail('Property', changeOrder.projectName)}</Text>
-        <Text style={styles.infoValue}>{detail('Property address', changeOrder.projectAddress)}</Text>
-        <Text style={styles.infoValue}>{detail('Sides cleaned', changeOrder.sides)}</Text>
-        <Text style={styles.infoValue}>{detail('Windows', changeOrder.windowCount)}</Text>
-        <Text style={styles.infoValue}>{`Original proposal total: ${formatCurrency(changeOrder.originalTotal)}`}</Text>
-
-        <Text style={[styles.subtitle, { marginTop: 16 }]}>Proposed changes</Text>
-        <Text style={styles.infoValue}>Addition, Removal, and Scope change are listed separately.</Text>
-        {changeOrder.lines.length === 0 ? (
-          <Text style={[styles.infoValue, { marginTop: 6 }]}>No changes entered.</Text>
-        ) : (
-          changeOrder.lines.map((line) => (
-            <View key={line.id} style={{ marginTop: 8 }} wrap={false}>
-              <Text style={styles.descriptionTitle}>{line.label}</Text>
-              <Text style={styles.infoValue}>{detail('Description', line.description)}</Text>
-              <Text style={styles.infoValue}>{detail('Reason', line.reason)}</Text>
-              <Text style={styles.infoValue}>{moneyOrBlank('Amount', line.amount)}</Text>
-            </View>
-          ))
-        )}
-
-        <View style={{ marginTop: 16 }} wrap={false}>
-          <Text style={styles.infoValue}>{moneyOrBlank('Price adjustment', changeOrder.adjustment)}</Text>
-          <Text style={styles.infoValue}>{moneyOrBlank('Revised total', changeOrder.revisedTotal)}</Text>
+        <View style={styles.infoGrid}>
+          <View style={styles.infoColumn}>
+            <Text style={styles.subtitle}>Client Information</Text>
+            <Text style={styles.infoLabel}>Name:</Text>
+            <Text style={styles.infoValue}>{written(clientInfo.name)}</Text>
+            <Text style={styles.infoLabel}>Company:</Text>
+            <Text style={styles.infoValue}>{written(clientInfo.company)}</Text>
+            <Text style={styles.infoLabel}>Address:</Text>
+            <Text style={styles.infoValue}>{written(clientInfo.address)}</Text>
+            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoValue}>{written(clientInfo.email)}</Text>
+            <Text style={styles.infoLabel}>Phone:</Text>
+            <Text style={styles.infoValue}>{written(clientInfo.phone)}</Text>
+          </View>
+          <View style={styles.infoColumn}>
+            <Text style={styles.subtitle}>Project Information</Text>
+            <Text style={styles.infoLabel}>Project Name:</Text>
+            <Text style={styles.infoValue}>{written(changeOrderInfo.projectName)}</Text>
+            <Text style={styles.infoLabel}>Project Address:</Text>
+            <Text style={styles.infoValue}>{written(changeOrderInfo.projectAddress)}</Text>
+          </View>
         </View>
 
-        <View style={styles.authorizationBox} wrap={false}>
-          <Text style={styles.authorizationHeading}>Customer authorization</Text>
-          <Text style={styles.authorizationText}>{changeOrder.authorization}</Text>
-          <View style={styles.signatureSection}>
-            <View style={styles.signatureColumn}>
-              <Text style={styles.windowSignatureLabel}>Customer signature</Text>
-              <View style={styles.windowSignatureLine} />
-              <Text style={styles.windowSignatureLabel}>Date</Text>
-              <View style={styles.windowSignatureLine} />
-            </View>
-            <View style={styles.signatureColumn}>
-              <Text style={styles.windowSignatureLabel}>Company representative</Text>
-              <View style={styles.windowSignatureLine} />
-              <Text style={styles.windowSignatureLabel}>Date</Text>
-              <View style={styles.windowSignatureLine} />
-            </View>
+        <View style={styles.descriptionSection}>
+          <Text style={styles.descriptionTitle}>Description of additional work or reason for change.</Text>
+          <View style={styles.writingArea} />
+        </View>
+
+        <View style={styles.blankAmountRow}>
+          <Text style={styles.priceLabel}>Additional cost</Text>
+          <View style={styles.blankAmountLine}><Text> </Text></View>
+        </View>
+        <View style={styles.blankAmountRow}>
+          <Text style={styles.priceLabel}>Revised contract total</Text>
+          <View style={styles.blankAmountLine}><Text> </Text></View>
+        </View>
+
+        <View style={styles.signatureSection}>
+          <View style={styles.signatureColumn}>
+            <Text style={styles.signatureLabel}>Customer approval</Text>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Date of approval</Text>
+            <View style={styles.signatureLine} />
           </View>
+          <View style={styles.signatureColumn}>
+            <Text style={styles.signatureLabel}>Company Representative</Text>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Date</Text>
+            <View style={styles.signatureLine} />
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={{ fontWeight: 'bold' }}>Additional work is not authorized until the customer signs. This change order becomes part of the original agreement only after it is signed.</Text>
         </View>
       </Page>
     </Document>
@@ -313,13 +295,19 @@ function WindowChangeOrderPDF({
 }
 
 const ChangeOrderPDF: React.FC<ChangeOrderPDFProps> = ({
+  formData,
   companyInfo,
   clientInfo,
   changeOrderInfo,
-  changeOrder,
 }) => {
-  if (changeOrder) {
-    return <WindowChangeOrderPDF companyInfo={companyInfo} changeOrder={changeOrder} />;
+  if (formData.cleaningType === 'window_cleaning_only') {
+    return (
+      <WindowBlankChangeOrder
+        companyInfo={companyInfo}
+        clientInfo={clientInfo}
+        changeOrderInfo={changeOrderInfo}
+      />
+    );
   }
 
   return (
