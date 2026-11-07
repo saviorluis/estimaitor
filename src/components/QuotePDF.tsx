@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   signatureSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 40,
+    marginTop: 16,
   },
   signatureColumn: {
     width: '45%',
@@ -961,47 +961,47 @@ const QuotePDF: React.FC<QuotePDFProps> = ({
           </View>
         ) : null}
 
-        {/* Terms and Conditions */}
-        <View style={[styles.section, { marginTop: 16 }]}>
-          <Text style={styles.sectionTitle}>Terms & Conditions</Text>
-          {(quoteInfo.terms || '')
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean)
-            .map((line, index) => (
-              <Text key={index} style={[styles.termsText, { fontSize: 8, lineHeight: 1.35, marginTop: 2 }]}>
-                {line}
-              </Text>
-            ))}
-        </View>
-
-        {/* Signature Section */}
-        <View style={styles.signatureSection} wrap={false}>
-          <View style={styles.signatureBox}>
-            <Text style={styles.signatureTitle}>Acceptance</Text>
-            <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureLabel}>Client Signature</Text>
-            <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureLabel}>Date</Text>
+        {/* Terms, acceptance, and the closing line move together so none of them is left on a page by itself. */}
+        <View wrap={false}>
+          <View style={[styles.section, { marginTop: 16 }]}>
+            <Text style={styles.sectionTitle}>Terms & Conditions</Text>
+            {(quoteInfo.terms || '')
+              .split('\n')
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line, index) => (
+                <Text key={index} style={[styles.termsText, { fontSize: 8, lineHeight: 1.35, marginTop: 2 }]}>
+                  {line}
+                </Text>
+              ))}
           </View>
-          
-          <View style={styles.signatureBox}>
-            <Text style={styles.signatureTitle}>Provider</Text>
-            <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureLabel}>Authorized Signature</Text>
-            <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureLabel}>Date</Text>
-          </View>
-        </View>
 
-        {/* Footer */}
-        <View style={{ marginTop: 50, alignItems: 'center' }}>
-          <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 5 }}>
-            Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}
-          </Text>
-          <Text style={{ fontSize: 9, textAlign: 'center', fontStyle: 'italic', color: '#666666' }}>
-            All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
-          </Text>
+          <View style={styles.signatureSection}>
+            <View style={styles.signatureBox}>
+              <Text style={styles.signatureTitle}>Acceptance</Text>
+              <View style={styles.signatureLine}></View>
+              <Text style={styles.signatureLabel}>Client Signature</Text>
+              <View style={styles.signatureLine}></View>
+              <Text style={styles.signatureLabel}>Date</Text>
+            </View>
+
+            <View style={styles.signatureBox}>
+              <Text style={styles.signatureTitle}>Provider</Text>
+              <View style={styles.signatureLine}></View>
+              <Text style={styles.signatureLabel}>Authorized Signature</Text>
+              <View style={styles.signatureLine}></View>
+              <Text style={styles.signatureLabel}>Date</Text>
+            </View>
+          </View>
+
+          <View style={{ marginTop: 16, alignItems: 'center' }}>
+            <Text style={{ fontSize: 10, textAlign: 'center', marginBottom: 5 }}>
+              Thank you for your business! | {companyInfo.name} | {companyInfo.phone} | {companyInfo.email}
+            </Text>
+            <Text style={{ fontSize: 9, textAlign: 'center', fontStyle: 'italic', color: '#666666' }}>
+              All prices include our standard supplies, equipment, labor, and service fees for professional-grade cleaning.
+            </Text>
+          </View>
         </View>
       </Page>
     </Document>
