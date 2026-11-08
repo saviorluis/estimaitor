@@ -51,7 +51,7 @@ export function splitPrincipalAndVctSqFt(
 
 export { SALES_TAX_RATE, getSalesTaxRate, formatSalesTaxPercent } from './salesTax';
 
-// Markup percentage (50% markup = 0.5)
+// Markup percentage (20% markup = 0.2)
 export const MARKUP_PERCENTAGE = 0.2; // 20% professional markup
 
 // ===================== BUSINESS FEES =====================
