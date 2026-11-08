@@ -7,7 +7,7 @@ This revised document provides a comprehensive overview and guidance for impleme
 The Estimaitor project is designed to help cleaning companies generate accurate estimates for commercial post-construction cleanup. Its key features include:
 
 *   **Project Type Selection:** Different rates for various commercial facilities (restaurants, medical, offices, retail, industrial, educational, hotels, jewelry stores).
-*   **Cleaning Type Options:** Rough Clean, Final Clean, Powder Puff Clean, Complete Package, each with different multipliers.
+*   **Cleaning Type Options:** Rough Clean (0.80×), Final Clean (1.20×), Rough & Final Clean (1.40×), and Rough, Final & Touchup (1.60×).
 *   **Area-based Calculation:** Core estimation based on square footage.
 *   **Additional Costs:** VCT Flooring, Urgency Surcharge, Profit Markup, Overnight Stay, Pressure Washing, Window Cleaning, Display Case Cleaning.
 *   **Staffing & Time Estimation:** Suggests optimal cleaners and estimated completion time.

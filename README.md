@@ -5,14 +5,14 @@ An AI-powered web application for estimating commercial post-construction cleanu
 ## Features
 
 - **Project Type Selection**: Different rates for restaurants, medical facilities, offices, retail spaces, industrial spaces, educational facilities, hotels, and jewelry stores
-- **Cleaning Type Options**: Choose between Rough Clean (basic), Final Clean (standard), Powder Puff Clean (detailed), or Complete Package (all three stages)
+- **Cleaning Type Options**: Rough Clean (80% of the base rate), Final Clean (120%), Rough & Final Clean (140%), or Rough, Final & Touchup (160%)
 - **VCT Flooring Calculation**: Additional costs for vinyl composition tile flooring
-- **Travel Cost Estimation**: Calculates round-trip travel costs based on distance and current gas prices
+- **Travel Cost Estimation**: Charges a $100 travel fee for the first hour. One-way trips of 40 miles or less stay in that first-hour bucket
 - **Staffing Recommendations**: Suggests the optimal number of cleaners based on project size
 - **Time Estimation**: Calculates estimated completion time based on project parameters
 - **Adjustable Staffing**: Allows adjustment of cleaner count to see impact on project duration
-- **Urgency Pricing**: Scale from 1-10 with surcharges up to 30% for urgent projects
-- **Profit Markup**: Option to apply a 1.5x markup (50% profit margin) to the total cost
+- **Urgency Pricing**: Scale from 1-10. Level 1 is the normal price. Level 10 adds 40%
+- **Profit Markup**: Optional 20% markup on the pre-tax subtotal
 - **Overnight Stay Calculation**: Includes per diem and hotel costs for multi-day projects
 - **Pressure Washing**: Calculate costs for pressure washing concrete, driveways, and exterior surfaces
 - **Window Cleaning**: Estimate costs for standard, large, and high-access windows
@@ -26,37 +26,36 @@ An AI-powered web application for estimating commercial post-construction cleanu
 
 ## Pricing Information
 
-The estimator uses average commercial cleaning rates for the East Coast region (VA, NC, SC, GA) with different rates per square foot based on the type of facility:
+Final Cleaning starts from a base rate of $0.18 per square foot. A project-type multiplier is applied to that base, then the cleaning-type multiplier below. These are the multipliers the estimator charges.
 
-- Restaurants: $0.45/sq ft
-- Medical Facilities: $0.50/sq ft
-- Office Spaces: $0.35/sq ft
-- Retail Spaces: $0.40/sq ft
-- Industrial Spaces: $0.30/sq ft
-- Educational Facilities: $0.38/sq ft
-- Hotels: $0.42/sq ft
-- Jewelry Stores: $0.48/sq ft
+Project-type multipliers include office and retail at 1.0, fast food at 1.2, industrial and grocery at 1.3, hotel at 1.35, restaurant at 1.5, and medical at 1.6. The full table is `PROJECT_TYPE_MULTIPLIERS` in `src/lib/constants.ts`.
 
 ### Cleaning Type Multipliers
 
-- Rough Clean: 80% of standard rate (basic cleaning)
-- Final Clean: Standard rate (thorough cleaning)
-- Powder Puff Clean: 130% of standard rate (detailed, premium cleaning)
-- Complete Package: 200% of standard rate (all three stages)
+- Rough Clean: 0.80× the base rate
+- Final Clean: 1.20× the base rate, including touchup
+- Rough & Final Clean: 1.40× the base rate
+- Rough, Final & Touchup: 1.60× the base rate
+
+An office Final Clean is $0.18 × 1.0 × 1.20 per square foot before travel, fees, markup, and tax.
 
 ### Additional Costs
 
-- **VCT Flooring**: Adds $0.15/sq ft to the base rate
-- **Urgency Surcharge**: Up to 30% based on urgency level (1-10 scale)
-- **Markup**: Optional 50% markup (1.5x multiplier) on the total cost
-- **Per Diem**: $75 per person per day for overnight stays
-- **Hotel**: $150 per room per night (assumes 2 people per room) with a 50% markup
-- **Pressure Washing**: $0.35/sq ft plus equipment rental
+- **VCT Flooring**: Priced on its own area, from $2.20 per square foot under 1,000 sq ft down to $1.50 per square foot above 5,000 sq ft. That area is removed from the building clean instead of being added on top.
+- **Travel**: $100 for the first hour. One-way trips of 40 miles or less use that flat fee.
+- **Scheduling and invoicing**: $99 each.
+- **Mobilization**: $150 up to 2,500 sq ft, $250 through 10,000 sq ft, and $400 above that. Listed complex project types use $500.
+- **Urgency**: Level 1 is 1.00×. Level 10 is 1.40×.
+- **Markup**: Optional 20% on the pre-tax subtotal.
+- **Sales tax**: The company tax state. The default is North Carolina at 7%.
+- **Overnight stay**: $90 per diem per person per day, and $180 per hotel room per night, with two people per room.
+- **Pressure Washing**: Soft wash $0.18/sq ft with a $235 minimum, roof wash $0.50/sq ft, driveway $0.20/sq ft, deck $1.00/sq ft, and a $1,800 daily rate. An exterior chimney wash is $95.
 - **Window Cleaning**:
-  - Standard windows: $15 each
-  - Large windows: $22.50 each
-  - High-access windows: $30 each
-- **Display Case Cleaning**: $25 per display case (includes interior and exterior cleaning)
+  - Standard windows: $18 each
+  - Large windows: 1.6× the standard rate
+  - High-access windows: 2.2× the standard rate
+  - Standalone window jobs bill one side at half the window labor, and Poor condition adds 15% to that window labor. The window-labor minimum is $150.
+- **Display Case Cleaning**: $30 per display case
 
 ## Getting Started
 

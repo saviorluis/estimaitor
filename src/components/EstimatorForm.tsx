@@ -418,9 +418,9 @@ export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApp
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
           >
             <option value="rough">Rough Clean (80% rate)</option>
-            <option value="final">Final Clean (Standard rate)</option>
-            <option value="rough_final">Rough & Final Clean (120% rate)</option>
-            <option value="rough_final_touchup">Rough, Final & Touchup (145% rate)</option>
+            <option value="final">Final Clean (120% rate)</option>
+            <option value="rough_final">Rough & Final Clean (140% rate)</option>
+            <option value="rough_final_touchup">Rough, Final & Touchup (160% rate)</option>
             <option value="vct_only">VCT Stripping/Waxing Only</option>
             <option value="window_cleaning_only">Window Cleaning</option>
           </select>
