@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'fs';
 import { openEstimator, switchMode } from '../helpers/quote';
 import { extractPdfText } from '../helpers/pdfText';
+import { pdfContainsRgbPixel, pdfHasImage, pdfImageCount, rgbPng } from '../helpers/pdfImage';
 
 async function fillContractForm(page: import('@playwright/test').Page) {
   await openEstimator(page);
@@ -39,7 +40,32 @@ test.describe('Janitorial Contract mode', () => {
     expect(pdf.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     const text = extractPdfText(pdf);
     expect(text).toContain('Sample Office Park');
+    expect(text).toContain('Big Brother Property Solutions');
+    expect(text).not.toContain('Big Bro Pros');
     expect(text).toMatch(/4,340/);
+    expect(pdfHasImage(pdf)).toBe(true);
+    expect(pdfContainsRgbPixel(pdf, [0x11, 0xe4, 0x7a])).toBe(false);
+  });
+
+  test('contract PDF embeds the logo saved in company settings', async ({ page }) => {
+    const selected: [number, number, number] = [0x11, 0xe4, 0x7a];
+    const logo = `data:image/png;base64,${rgbPng(...selected).toString('base64')}`;
+    await page.addInitScript((src) => {
+      localStorage.setItem('estimaitor_company_settings', JSON.stringify({ name: 'North Glass Clean' }));
+      localStorage.setItem('estimaitor_company_logo', src);
+    }, logo);
+
+    await fillContractForm(page);
+    await page.getByRole('button', { name: 'Generate Janitorial Contract' }).click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 60_000 }),
+      page.getByRole('button', { name: /Download Contract PDF/ }).click(),
+    ]);
+    const pdf = readFileSync((await download.path())!);
+    const text = extractPdfText(pdf);
+    expect(text).toContain('North Glass Clean');
+    expect(pdfImageCount(pdf)).toBe(1);
+    expect(pdfContainsRgbPixel(pdf, selected)).toBe(true);
   });
 
   test('Email Contract posts a contract payload with the PDF attached to /api/email', async ({ page }) => {
@@ -63,6 +89,9 @@ test.describe('Janitorial Contract mode', () => {
     expect(body.data.facilityName).toBe('Sample Office Park');
     expect(body.data.monthlyRate).toBe(4340);
     expect(body.data.contractTerm).toBe(12);
+    expect(body.data.companyName).toBe('Big Brother Property Solutions');
+    expect(body.data.companyPhone).toBe('(336) 624-7442');
+    expect(body.data.companyEmail).toBe('bids@bigbroprops.com');
     expect(body.data.pdfAttachment.filename).toBe('Sample_Office_Park_Contract.pdf');
     expect(Buffer.from(body.data.pdfAttachment.content, 'base64').subarray(0, 5).toString('latin1')).toBe('%PDF-');
   });

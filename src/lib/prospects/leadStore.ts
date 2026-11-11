@@ -15,7 +15,7 @@ export type LeadReadResult = { ok: true; leads: SavedLead[] } | { ok: false; err
 
 const isIsoDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
-function isSavedLead(value: unknown): value is SavedLead {
+export function isSavedLead(value: unknown): value is SavedLead {
   if (!value || typeof value !== 'object') return false;
   const lead = value as Record<string, unknown>;
   return (

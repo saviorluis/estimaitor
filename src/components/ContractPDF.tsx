@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { ProjectType } from '@/lib/types';
+import { DEFAULT_LOGO_SRC, isUsableImageSrc } from '@/lib/companySettings';
 
 // Register fonts
 const styles = StyleSheet.create({
@@ -275,6 +276,7 @@ interface ContractPDFProps {
     phone: string;
     email: string;
     website: string;
+    logoSrc?: string;
   };
   contractNumber?: string;
 }
@@ -285,6 +287,7 @@ const ContractPDF: React.FC<ContractPDFProps> = ({
   companyInfo,
   contractNumber
 }) => {
+  const logoSrc = isUsableImageSrc(companyInfo.logoSrc) ? companyInfo.logoSrc : DEFAULT_LOGO_SRC;
   const contractDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const endDate = new Date(formData.startDate);
   endDate.setMonth(endDate.getMonth() + contractData.contractTerms.length);
@@ -295,7 +298,7 @@ const ContractPDF: React.FC<ContractPDFProps> = ({
       {/* Cover Page */}
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
-          <Image src="/assets/logo.png" style={styles.logo} />
+          <Image src={logoSrc} style={styles.logo} />
           <Text style={styles.title}>JANITORIAL SERVICE CONTRACT</Text>
           <Text style={styles.subtitle}>Professional Cleaning Services Agreement</Text>
         </View>

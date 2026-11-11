@@ -79,6 +79,15 @@ function validateContract(data: unknown): { value: ContractEmailData } | { error
   const contractTerm = Number(d.contractTerm);
   if (!CONTRACT_TERMS.has(contractTerm)) return { error: 'Invalid contract term' };
 
+  const companyName = text(d.companyName, 150);
+  if (!companyName) return { error: 'Invalid company name' };
+
+  const companyPhone = text(d.companyPhone, 40);
+  if (!companyPhone) return { error: 'Invalid company phone' };
+
+  const companyEmail = text(d.companyEmail, 254);
+  if (!companyEmail || !EMAIL_RE.test(companyEmail)) return { error: 'Invalid company email' };
+
   const attachment = d.pdfAttachment as Record<string, unknown> | undefined;
   if (!attachment || typeof attachment !== 'object') return { error: 'Missing contract PDF' };
   const filename = typeof attachment.filename === 'string' ? attachment.filename : '';
@@ -92,7 +101,17 @@ function validateContract(data: unknown): { value: ContractEmailData } | { error
   if (pdf.subarray(0, 5).toString('latin1') !== '%PDF-') return { error: 'Attachment must be a PDF' };
 
   return {
-    value: { clientName, clientEmail, facilityName, monthlyRate, contractTerm, pdfAttachment: { filename, content } },
+    value: {
+      clientName,
+      clientEmail,
+      facilityName,
+      monthlyRate,
+      contractTerm,
+      companyName,
+      companyPhone,
+      companyEmail,
+      pdfAttachment: { filename, content },
+    },
   };
 }
 

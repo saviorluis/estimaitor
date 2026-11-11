@@ -11,6 +11,16 @@ import {
 } from '@/lib/companySettings';
 import { US_STATES, formatSalesTaxPercent, getSalesTaxRate } from '@/lib/salesTax';
 import { getQuoteCounter } from '@/lib/utils';
+import {
+  applyBackup,
+  backupFilename,
+  BACKUP_KEY_LABELS,
+  collectBackup,
+  readBackupText,
+  RESTORE_NOTICE_KEY,
+  type BackupFile,
+  type BackupSummary,
+} from '@/lib/backup';
 
 type SettingsTab = 'company' | 'documents' | 'appearance' | 'preferences';
 
@@ -35,8 +45,60 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
   const [tab, setTab] = useState<SettingsTab>('company');
   const [uploadError, setUploadError] = useState('');
   const [quoteNumberDraft, setQuoteNumberDraft] = useState(() => String(getQuoteCounter()));
+  const [backupMessage, setBackupMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+  const [restorePreview, setRestorePreview] = useState<{ backup: BackupFile; summary: BackupSummary } | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const capInputRef = useRef<HTMLInputElement>(null);
+  const backupInputRef = useRef<HTMLInputElement>(null);
+
+  const downloadBackup = () => {
+    try {
+      const backup = collectBackup(window.localStorage);
+      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = backupFilename(backup.createdAt);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      setRestorePreview(null);
+      setBackupMessage({ tone: 'ok', text: 'Backup downloaded.' });
+    } catch (error) {
+      console.error(error);
+      setBackupMessage({ tone: 'error', text: 'Could not create a backup.' });
+    }
+  };
+
+  const chooseBackup = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const result = readBackupText(await file.text());
+      if (!result.ok) {
+        setRestorePreview(null);
+        setBackupMessage({ tone: 'error', text: result.error });
+        return;
+      }
+      setBackupMessage(null);
+      setRestorePreview({ backup: result.backup, summary: result.summary });
+    } catch (error) {
+      console.error(error);
+      setRestorePreview(null);
+      setBackupMessage({ tone: 'error', text: 'Could not read that backup file.' });
+    }
+  };
+
+  const confirmRestore = () => {
+    if (!restorePreview) return;
+    const result = applyBackup(window.localStorage, restorePreview.backup);
+    if (!result.ok) {
+      setBackupMessage({ tone: 'error', text: result.error });
+      return;
+    }
+    sessionStorage.setItem(RESTORE_NOTICE_KEY, 'Backup restored.');
+    window.location.reload();
+  };
 
   if (!isOpen) return null;
 
@@ -368,6 +430,106 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <p className="text-xs text-gray-500">
                 Quote numbers look like {settings.quotePrefix || 'Q'}-{new Date().getFullYear()}-{quoteNumberDraft || '121'}.
               </p>
+
+              <section className="rounded-lg border border-gray-200 dark:border-slate-700 p-4 space-y-3" aria-labelledby="backup-heading">
+                <div>
+                  <h3 id="backup-heading" className="font-semibold text-gray-900 dark:text-white">Backup</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    Keep a backup of your business data somewhere safe.
+                    You can use it to restore your information if you change browsers or clear this browser&apos;s storage.
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    Unsaved quote-screen edits and other temporary information are not included.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={downloadBackup}
+                    className="px-4 py-2 rounded-md text-sm font-medium text-white"
+                    style={{ backgroundColor: settings.brandColor }}
+                  >
+                    Download Backup
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => backupInputRef.current?.click()}
+                    className="px-4 py-2 rounded-md border border-gray-300 dark:border-slate-600 text-sm font-medium text-gray-800 dark:text-gray-100"
+                  >
+                    Restore Backup
+                  </button>
+                  <input
+                    ref={backupInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    aria-label="Backup file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      void chooseBackup(file);
+                    }}
+                  />
+                </div>
+                {backupMessage && (
+                  <p
+                    role={backupMessage.tone === 'error' ? 'alert' : 'status'}
+                    className={backupMessage.tone === 'error' ? 'text-sm text-red-700 dark:text-red-300' : 'text-sm text-green-800 dark:text-green-200'}
+                  >
+                    {backupMessage.text}
+                  </p>
+                )}
+                {restorePreview && (
+                  <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 space-y-2 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100" role="region" aria-label="Confirm backup restore">
+                    <p className="font-medium">This will replace the items listed below. Empty items in the file will not remove data already in this browser.</p>
+                    <p>Backup date: {new Date(restorePreview.summary.createdAt).toLocaleString()}</p>
+                    <p>Company: {restorePreview.summary.companyName ?? 'Not included'}</p>
+                    <p>Past estimates: {restorePreview.summary.pastEstimates === null ? 'Not included' : restorePreview.summary.pastEstimates}</p>
+                    <p>Prospects: {restorePreview.summary.prospects === null ? 'Not included' : restorePreview.summary.prospects}</p>
+                    <p>Saved leads: {restorePreview.summary.leads === null ? 'Not included' : restorePreview.summary.leads}</p>
+                    <p>Company logo: {restorePreview.summary.logoIncluded ? 'Included' : 'Not included'}</p>
+                    <div>
+                      <p className="font-medium">Will be replaced</p>
+                      <ul className="list-disc pl-5">
+                        {restorePreview.summary.replacedKeys.map((key) => (
+                          <li key={key}>{BACKUP_KEY_LABELS[key]}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    {restorePreview.summary.keptKeys.length > 0 && (
+                      <div>
+                        <p className="font-medium">Left unchanged</p>
+                        <ul className="list-disc pl-5">
+                          {restorePreview.summary.keptKeys.map((key) => (
+                            <li key={key}>{BACKUP_KEY_LABELS[key]}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-3 pt-1">
+                      <button
+                        type="button"
+                        onClick={confirmRestore}
+                        className="px-4 py-2 rounded-md text-sm font-medium text-white"
+                        style={{ backgroundColor: settings.brandColor }}
+                      >
+                        Confirm restore
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRestorePreview(null);
+                          setBackupMessage({ tone: 'ok', text: 'Restore cancelled. Nothing was changed.' });
+                        }}
+                        className="px-4 py-2 rounded-md border border-gray-300 dark:border-slate-600 text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+
               <button
                 type="button"
                 className="text-sm text-red-600 hover:underline"

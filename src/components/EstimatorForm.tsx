@@ -664,10 +664,15 @@ export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApp
               step="0.01"
               min="1"
               max="10"
-              {...register('gasPrice', { 
-                required: 'Gas price is required',
-                min: { value: 1, message: 'Minimum $1.00' },
-                max: { value: 10, message: 'Maximum $10.00' }
+              {...register('gasPrice', {
+                validate: (value) => {
+                  const raw = value as unknown;
+                  if (raw === '' || raw === undefined || raw === null) return true;
+                  const price = typeof raw === 'number' ? raw : parseFloat(String(raw));
+                  if (!Number.isFinite(price) || price < 1) return 'Minimum $1.00';
+                  if (price > 10) return 'Maximum $10.00';
+                  return true;
+                },
               })}
               className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
               placeholder="3.50"
@@ -675,6 +680,7 @@ export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApp
             {errors.gasPrice && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.gasPrice.message}</p>
             )}
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">The travel fee does not use this price.</p>
           </div>
         </div>
 
@@ -699,6 +705,9 @@ export default function EstimatorForm({ onEstimateCalculated, onProspectDraftApp
             {errors.numberOfCleaners && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.numberOfCleaners.message}</p>
             )}
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Changes the price only when the crew stays overnight. A day job keeps the same price.
+            </p>
           </div>
           <div>
             <label htmlFor="urgencyLevel" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">

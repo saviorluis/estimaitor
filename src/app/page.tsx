@@ -23,6 +23,7 @@ import {
 import { pdf } from '@react-pdf/renderer';
 import { useCompanySettings } from '@/contexts/CompanySettingsContext';
 import { darkenHex, DEFAULT_BRAND_COLOR, isValidBrandColor } from '@/lib/companySettings';
+import { RESTORE_NOTICE_KEY } from '@/lib/backup';
 
 // Storage keys for saved data
 const ESTIMATE_STORAGE_KEY = 'estimaitor_estimate_data';
@@ -136,7 +137,7 @@ const MODE_CONFIGS: Record<AppMode, ModeConfig> = {
 import Image from 'next/image';
 
 export default function Home() {
-  const { settings } = useCompanySettings();
+  const { settings, documentCompanyInfo } = useCompanySettings();
   const [estimateData, setEstimateData] = useState<EstimateData | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
   const [contractData, setContractData] = useState<ContractData | null>(null);
@@ -147,6 +148,7 @@ export default function Home() {
   const [currentMode, setCurrentMode] = useState<AppMode>('cleaning');
   const [showAdminThemeMenu, setShowAdminThemeMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [restoreNotice, setRestoreNotice] = useState<string | null>(null);
 
   // Load saved data on initial render
   useEffect(() => {
@@ -154,6 +156,11 @@ export default function Home() {
     if (typeof window === 'undefined') return;
 
     try {
+      const notice = sessionStorage.getItem(RESTORE_NOTICE_KEY);
+      if (notice) {
+        sessionStorage.removeItem(RESTORE_NOTICE_KEY);
+        setRestoreNotice(notice);
+      }
       const savedEstimate = localStorage.getItem(ESTIMATE_STORAGE_KEY);
       const savedForm = localStorage.getItem(FORM_STORAGE_KEY);
       const savedEntries = localStorage.getItem(PAST_ENTRIES_KEY);
@@ -283,6 +290,15 @@ export default function Home() {
   };
 
   const currentConfig = MODE_CONFIGS[currentMode];
+  const contractCompanyInfo = {
+    name: documentCompanyInfo.name,
+    address: documentCompanyInfo.address,
+    city: documentCompanyInfo.city,
+    phone: documentCompanyInfo.phone,
+    email: documentCompanyInfo.email,
+    website: documentCompanyInfo.website,
+    logoSrc: documentCompanyInfo.logoSrc,
+  };
 
   // Add a loading state to prevent rendering until data is loaded
   if (!isLoaded) {
@@ -355,6 +371,11 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto px-4 mb-12">
+        {restoreNotice && (
+          <p role="status" className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-100">
+            {restoreNotice}
+          </p>
+        )}
         {/* Past Entries Section - Only show in Cleaning mode */}
         {showPastEntries && currentMode === 'cleaning' && (
           <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -552,21 +573,13 @@ export default function Home() {
                     <button
                       onClick={async () => {
                         try {
-                          const companyInfo = {
-                            name: 'Big Bro Pros',
-                            address: '123 Main Street',
-                            city: 'High Point, NC',
-                            phone: '(336) 123-4567',
-                            email: 'bids@bigbropros.com',
-                            website: 'www.bigbropros.com'
-                          };
                           const contractNumber = `CONTRACT-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
                           
                           const blob = await pdf(
                             <ContractPDF
                               contractData={contractData}
                               formData={janitorialFormData}
-                              companyInfo={companyInfo}
+                              companyInfo={contractCompanyInfo}
                               contractNumber={contractNumber}
                             />
                           ).toBlob();
@@ -594,21 +607,13 @@ export default function Home() {
                     <button
                       onClick={async () => {
                         try {
-                          const companyInfo = {
-                            name: 'Big Bro Pros',
-                            address: '123 Main Street',
-                            city: 'High Point, NC',
-                            phone: '(336) 123-4567',
-                            email: 'bids@bigbropros.com',
-                            website: 'www.bigbropros.com'
-                          };
                           const contractNumber = `CONTRACT-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
                           
                           const blob = await pdf(
                             <ContractPDF
                               contractData={contractData}
                               formData={janitorialFormData}
-                              companyInfo={companyInfo}
+                              companyInfo={contractCompanyInfo}
                               contractNumber={contractNumber}
                             />
                           ).toBlob();
@@ -631,6 +636,9 @@ export default function Home() {
                                   facilityName: janitorialFormData.facilityName,
                                   monthlyRate: contractData.monthlyRate,
                                   contractTerm: contractData.contractTerms.length,
+                                  companyName: contractCompanyInfo.name,
+                                  companyPhone: contractCompanyInfo.phone,
+                                  companyEmail: contractCompanyInfo.email,
                                   pdfAttachment: {
                                     filename: `${janitorialFormData.facilityName.replace(/[^a-z0-9]/gi, '_')}_Contract.pdf`,
                                     content: base64Content

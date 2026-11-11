@@ -1,6 +1,7 @@
 /**
  * Email service (Resend). Server-only: imported by /api/email.
- * Only the janitorial contract email is supported; content comes from a fixed template.
+ * Only the janitorial contract email is supported. The message uses the
+ * company identity supplied from Settings with the contract.
  */
 
 import { Resend } from 'resend';
@@ -11,6 +12,9 @@ export interface ContractEmailData {
   facilityName: string;
   monthlyRate: number;
   contractTerm: number;
+  companyName: string;
+  companyPhone: string;
+  companyEmail: string;
   pdfAttachment: {
     filename: string;
     content: string; // base64-encoded PDF
@@ -19,7 +23,35 @@ export interface ContractEmailData {
 
 export type SendResult = { success: boolean; messageId?: string; error?: string };
 
-const FROM_EMAIL = 'Big Bro Pros <noreply@bigbropros.com>';
+/**
+ * The only sending mailbox this app is set up to use. Resend accepts a From
+ * address only after that domain is verified on the API key's account.
+ * Company Settings can name any business, so the customer domain is not a
+ * safe From address. It is used as the display name and Reply-To instead.
+ */
+const FROM_MAILBOX = 'noreply@bigbropros.com';
+const REPLY_EMAIL_RE = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+
+function fromHeader(companyName: string): string {
+  const display = companyName.replace(/[\r\n<>"]/g, '').trim() || 'EstimAItor';
+  const quoted = /[",]/.test(display) ? `"${display}"` : display;
+  return `${quoted} <${FROM_MAILBOX}>`;
+}
+
+function replyAddress(email: string): string | undefined {
+  const value = email.replace(/[\r\n]/g, '').trim();
+  if (!value || value.length > 254 || /[\s<>"]/.test(value) || !REPLY_EMAIL_RE.test(value)) return undefined;
+  return value;
+}
+
+/** From stays on the verified mailbox. Reply-To is the company email from Settings. */
+export function contractEmailDelivery(data: Pick<ContractEmailData, 'companyName' | 'companyEmail'>): {
+  from: string;
+  replyTo?: string;
+} {
+  const replyTo = replyAddress(data.companyEmail);
+  return replyTo ? { from: fromHeader(data.companyName), replyTo } : { from: fromHeader(data.companyName) };
+}
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
@@ -40,8 +72,10 @@ export async function sendContractEmail(data: ContractEmailData): Promise<SendRe
   }
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
+    const delivery = contractEmailDelivery(data);
     const { data: result, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: delivery.from,
+      ...(delivery.replyTo ? { replyTo: delivery.replyTo } : {}),
       to: [data.clientEmail],
       subject: `Janitorial Service Contract - ${data.facilityName}`,
       html: generateContractEmailHTML(data),
@@ -59,11 +93,14 @@ export async function sendContractEmail(data: ContractEmailData): Promise<SendRe
   }
 }
 
-function generateContractEmailHTML(data: ContractEmailData): string {
+export function generateContractEmailHTML(data: ContractEmailData): string {
   const facilityName = escapeHtml(data.facilityName);
   const clientName = escapeHtml(data.clientName);
   const monthlyRate = escapeHtml(data.monthlyRate.toLocaleString('en-US'));
   const contractTerm = escapeHtml(String(data.contractTerm));
+  const companyName = escapeHtml(data.companyName);
+  const companyPhone = escapeHtml(data.companyPhone);
+  const companyEmail = escapeHtml(data.companyEmail);
   return `
       <!DOCTYPE html>
       <html>
@@ -111,17 +148,17 @@ function generateContractEmailHTML(data: ContractEmailData): string {
             
             <p>To proceed with this contract, please sign and return it to us at your earliest convenience.</p>
             
-            <p>If you have any questions or need to make changes, please contact us at (336) 123-4567 or bids@bigbropros.com.</p>
+            <p>If you have any questions or need to make changes, please contact us at ${companyPhone} or ${companyEmail}.</p>
             
             <p>We look forward to providing you with excellent janitorial services!</p>
             
             <p>Best regards,<br>
-            The Big Bro Pros Team</p>
+            ${companyName}</p>
           </div>
           
           <div class="footer">
-            <p>Big Bro Pros | Professional Cleaning Services<br>
-            Phone: (336) 123-4567 | Email: bids@bigbropros.com</p>
+            <p>${companyName}<br>
+            Phone: ${companyPhone} | Email: ${companyEmail}</p>
           </div>
         </div>
       </body>
